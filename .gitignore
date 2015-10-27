@@ -1,0 +1,11 @@
+cme_venv
+settings.json
+__pycache__
+*.pyc
+
+# Mac/Windows OS Junk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
