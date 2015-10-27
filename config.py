@@ -6,6 +6,7 @@
 # values to defaults, simply delete settings.json.
 
 import os
+import errno
 import platform
 
 DEBUG = True
@@ -15,6 +16,15 @@ RUNNING_ON_PI = SYSTEM == 'Linux' # prevent commands from exec on dev machine
 
 DOCROOT = os.path.abspath(os.path.join(os.getcwd(), 'cme'))
 UPLOADS = os.path.join(os.getcwd(), 'tmp')
+
+# create UPLOADS if it's not there yet
+# from http://stackoverflow.com/a/5032238
+try:
+	os.makedirs(UPLOADS)
+except OSError as exception:
+	if exception.errno != errno.EEXIST:
+		raise
+
 ALLOWED_EXTENSIONS = ['txt', 'pdf', 'png', 'jpg']
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16 MB
 
