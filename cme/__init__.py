@@ -18,6 +18,7 @@ print("\tSERVER_HOST: {0}".format(app.config['SERVER_HOST']))
 print("\tSERVER_PORT: {0}".format(app.config['SERVER_PORT']))
 print("\tDEBUG: {0}".format(app.config['DEBUG']))
 print("\tDOCROOT: {0}".format(app.config['DOCROOT']))
+print("\tPUBLIC: {0}".format(app.static_folder))
 print("\tUPLOADS: {0}".format(app.config['UPLOADS']))
 print()
 
