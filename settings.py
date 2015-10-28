@@ -21,23 +21,23 @@ settings['device'] = {
 	'updateTrigger': False
 }
 
-settings['general'] = {
-	'name': settings['general'].get('name', app.config['GENERAL_NAME']),
-	'description': settings['general'].get('description', app.config['GENERAL_DESCRIPTION']),
-	'location':settings['general'].get('location', app.config['GENERAL_LOCATION'])
-}
+settings['general'] = settings.get('general', {
+	'name': app.config['GENERAL_NAME'],
+	'description': app.config['GENERAL_DESCRIPTION'],
+	'location': app.config['GENERAL_LOCATION']
+})
 
-settings['support'] = {
+settings['support'] = settings.get('support', {
 	'contact': app.config['SUPPORT_CONTACT'],
 	'email': app.config['SUPPORT_EMAIL'],
 	'phone': app.config['SUPPORT_PHONE']
-}
+})
 
-settings['http'] = {
+settings['http'] = settings.get('http', {
 	'corsWhitelist': [ "192.168.*" ]
-}
+})
 
-settings['network'] = {
+settings['network'] = settings.get('network', {
 	'MAC': '00:04:A6:72:9F:8E',
 	'useDHCP': False,
 	'ipAddress': '192.168.1.30',
@@ -45,16 +45,16 @@ settings['network'] = {
 	'gateway': '192.168.1.1',
 	'primaryDNS': '8.8.4.4',
 	'secondaryDNS': '8.8.8.8'
-}
+})
 
-settings['time'] = {
+settings['time'] = settings.get('time', {
 	'current': '', # updated on init and reads
-	'zone': settings['time'].get('zone', app.config['TIME_ZONE_OFFSET']),
-	'useNTP': settings['time'].get('useNTP', app.config['TIME_USE_NTP']),
-	'NTPServers': [], # from /etc/ntp.conf
-	'NTPStatus': []
-}
+	'zone': app.config['TIME_ZONE_OFFSET'],
+	'useNTP': app.config['TIME_USE_NTP'],
+	'NTPServers': [], # updated from /etc/ntp.conf
+	'NTPStatus': [] # updated on reads
+})
 
-settings['snmp'] = {
+settings['snmp'] = settings.get('snmp', {
 	'mib': None
-}
+})
