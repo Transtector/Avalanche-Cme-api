@@ -176,6 +176,8 @@ def __read_ntp_servers():
 		# server abc.def.123.100 iburst
 		servers.append(line.split()[1])
 
+	fileinput.close()
+
 	return servers
 
 
@@ -205,3 +207,5 @@ def write_ntp_servers(servers):
 		# remove existing servers
 		if not line.strip().startswith('server'):
 			print(line)
+
+	fileinput.close()
