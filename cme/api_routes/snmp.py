@@ -2,8 +2,8 @@
 
 from . import app, router, settings, send_from_directory
 
-@router.route('/config/snmp')
-def snmp():
+@router.route('/config/snmp/mib')
+def snmp_mib():
 	''' Returns the CME-MIB.txt file.
 
 		No authorization required.  Client programs use this
