@@ -16,6 +16,7 @@ RUNNING_ON_PI = SYSTEM == 'Linux' # prevent commands from exec on dev machine
 
 DOCROOT = os.path.abspath(os.path.join(os.getcwd(), 'cme'))
 UPLOADS = os.path.join(os.getcwd(), 'tmp')
+SNMPDIR = os.path.abspath('/home/pi/Cme-snmp/')
 
 # create UPLOADS if it's not there yet
 # from http://stackoverflow.com/a/5032238

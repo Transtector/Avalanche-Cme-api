@@ -1,15 +1,14 @@
 # CME SNMPv3 configuration routes
 
-from . import router, settings, request
+from . import app, router, settings, send_from_directory
 
-from .auth import require_auth
-from .util import json_response, json_error
-
-@router.route('/config/snmp', methods=['GET', 'POST'])
-@require_auth
+@router.route('/config/snmp')
 def snmp():
-	if request.method == 'GET':
-		return json_response(settings['snmp'])
+	''' Returns the CME-MIB.txt file.
 
-	return json_error([ 'Not implemented' ])
+		No authorization required.  Client programs use this
+		file to translate SNMP OID's into human readable strings.'''
+
+	return send_from_directory(app.config['SNMPDIR'], 'CME-MIB.txt',
+							   as_attachment=True)
 
