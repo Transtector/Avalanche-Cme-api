@@ -56,5 +56,5 @@ settings['time'] = settings.get('time', {
 })
 
 settings['snmp'] = settings.get('snmp', {
-	'mib': None
+	'mib': None # GET request CME-MIB.txt download
 })
