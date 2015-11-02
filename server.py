@@ -1,5 +1,4 @@
-# Serve cme from CherryPy (basically the "production" way to do it)
-# > sudo python server.py
+#!/home/pi/Cme/cme_venv/bin/python
 
 import config
 from cme import app
