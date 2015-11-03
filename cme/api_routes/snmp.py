@@ -7,10 +7,7 @@ from .util import json_response, json_error
 
 @router.route('/config/snmp')
 @require_auth
-def snmp_mib():
-	''' The API and SNMP layers share credentials.  We can get/set
-		them here (as well as via SNMP calls).'''
-
+def snmp():
 	return json_response({'snmp': { 'mib': None }})
 
 @router.route('/config/snmp/mib')
