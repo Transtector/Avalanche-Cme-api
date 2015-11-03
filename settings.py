@@ -7,7 +7,7 @@ from cme import app
 
 # simple dictionary to json file persistence
 from cme.util.DictPersistJSON import DictPersistJSON
-settings = DictPersistJSON(app.config[SETTINGS_FILE])
+settings = DictPersistJSON(app.config['SETTINGS'])
 
 # username and passhash - prepend double underscore to prevent
 # them from displaying through the /api/config route

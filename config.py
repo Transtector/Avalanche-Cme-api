@@ -19,14 +19,14 @@ DOCROOT = os.path.abspath(os.path.join(os.getcwd(), 'cme'))
 UPLOADS = os.path.join(os.getcwd(), 'tmp')
 SNMPDIR = os.path.abspath('/home/pi/Cme-snmp/')
 
-RESET_FILE = 'cme-reset'
-SETTINGS_FILE = 'settings.json'
+RESET = 'cme-reset'
+SETTINGS = 'settings.json'
 
 # If RESET_FILE exists delete it and the SETTINGS_FILE
 # so that the default values in config.py are used.
-if os.path.isfile(RESET_FILE):
-	os.remove(SETTINGS_FILE)
-	os.remove(RESET_FILE)
+if os.path.isfile(RESET):
+	os.remove(SETTINGS)
+	os.remove(RESET)
 
 # create UPLOADS if it's not there yet
 # from http://stackoverflow.com/a/5032238
