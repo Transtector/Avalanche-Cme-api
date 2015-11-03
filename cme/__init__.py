@@ -24,6 +24,7 @@ print("\t--------")
 print("\tNTP: {0}".format(settings['time']['useNTP']))
 print("\t--------")
 print("\tMAC: {0}".format(settings['network']['MAC']))
+print()
 
 # NTP init
 # Note that ntp should NOT be setup in init.d to start automatically:
@@ -35,9 +36,6 @@ else:
 		os.system('sudo service ntp stop')
 
 # Network init
-print()
-
-
 
 
 # import ui, api routes
