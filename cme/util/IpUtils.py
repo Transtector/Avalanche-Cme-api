@@ -1,6 +1,8 @@
 import subprocess
 import uuid
 import socket
+import fcntl
+import struct
 
 # return network interface MAC address
 # note - only works if single interface
@@ -18,9 +20,9 @@ def dhcp():
 def address():
 	return socket.gethostbyname(socket.gethostname())
 
-
 def netmask():
-	return 'netmask'
+	iface = b'eth0'
+	return socket.inet_ntoa(fcntl.ioctl(socket.socket(socket.AF_INET, socket.SOCK_DGRAM), 35099, struct.pack('256s', iface))[20:24])
 
 def gateway():
 	return 'gateway'
