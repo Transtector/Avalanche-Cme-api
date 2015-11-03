@@ -9,6 +9,8 @@ import os
 import errno
 import platform
 
+from cme.util import IpUtils
+
 DEBUG = True
 
 HOSTNAME = platform.node()
@@ -46,7 +48,6 @@ SECRET_KEY = '99a83105bf3264465f2cd9c559d3c573' # md5('Kaelus0x0x0')
 SERVER_HOST = '0.0.0.0' # listen all interfaces
 SERVER_PORT = 80 # ports < 1024 require sudo to start
 
-
 USERNAME = 'admin'
 PASSHASH = 'b56e0b4ea4962283bee762525c2d490f' # md5('Welcome1')
 
@@ -65,3 +66,10 @@ SUPPORT_PHONE = ""
 TIME_USE_NTP = True
 TIME_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
 TIME_ZONE_OFFSET = "+00:00"
+
+DHCP = False
+MAC = IpUtils.mac()
+ADDRESS = '192.168.1.30'
+NETMASK = '255.255.255.0'
+GATEWAY = '192.158.1.1'
+
