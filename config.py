@@ -66,8 +66,8 @@ TIME_USE_NTP = True
 TIME_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
 TIME_ZONE_OFFSET = "+00:00"
 
-DHCP = False
 MAC = str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
+DHCP = False
 ADDRESS = '192.168.1.30'
 NETMASK = '255.255.255.0'
 GATEWAY = '192.158.1.1'

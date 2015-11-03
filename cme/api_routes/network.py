@@ -15,16 +15,16 @@ def network():
 	return json_response(settings['network'])
 
 
-@router.route('/config/network/MAC')
+@router.route('/config/network/mac')
 @require_auth
 def mac():
-	return json_response({'MAC': settings['network']['MAC']})
+	return json_response({'mac': settings['network']['mac']})
 
 
-@router.route('/config/network/useDHCP', methods=['GET', 'POST'])
+@router.route('/config/network/dhcp', methods=['GET', 'POST'])
 @require_auth
 def useDHCP():
 	if request.method == 'POST':
 		return json_error([ 'Not implemented' ])
 
-	return json_response({'useDHCP': settings['network']['useDHCP']})
+	return json_response({'dhcp': settings['network']['dhcp']})
