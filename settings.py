@@ -34,6 +34,18 @@ settings['support'] = settings.get('support', {
 	'phone': app.config['SUPPORT_PHONE']
 })
 
+settings['time'] = settings.get('time', {
+	'current': '', # updated on init and reads
+	'zone': app.config['TIME_ZONE_OFFSET'],
+	'useNTP': app.config['TIME_USE_NTP'],
+	'NTPServers': [], # updated from /etc/ntp.conf
+	'NTPStatus': [] # updated on reads
+})
+
+settings['snmp'] = settings.get('snmp', {
+	'mib': None # GET request CME-MIB.txt download
+})
+
 settings['http'] = settings.get('http', {
 	'corsWhitelist': [ "192.168.*" ]
 })
@@ -46,16 +58,4 @@ settings['network'] = settings.get('network', {
 	'gateway': '192.168.1.1',
 	'primaryDNS': '8.8.4.4',
 	'secondaryDNS': '8.8.8.8'
-})
-
-settings['time'] = settings.get('time', {
-	'current': '', # updated on init and reads
-	'zone': app.config['TIME_ZONE_OFFSET'],
-	'useNTP': app.config['TIME_USE_NTP'],
-	'NTPServers': [], # updated from /etc/ntp.conf
-	'NTPStatus': [] # updated on reads
-})
-
-settings['snmp'] = settings.get('snmp', {
-	'mib': None # GET request CME-MIB.txt download
 })

@@ -2,7 +2,19 @@
 
 from . import app, router, settings, send_from_directory
 
+from .auth import require_auth
+from .util import json_response, json_error
+
+@router.route('/config/snmp')
+@require_auth
+def snmp_mib():
+	''' The API and SNMP layers share credentials.  We can get/set
+		them here (as well as via SNMP calls).'''
+
+	return json_response('snmp': { 'mib': None })
+
 @router.route('/config/snmp/mib')
+@require_auth
 def snmp_mib():
 	''' Returns the CME-MIB.txt file.
 
@@ -11,4 +23,6 @@ def snmp_mib():
 
 	return send_from_directory(app.config['SNMPDIR'], 'CME-MIB.txt',
 							   as_attachment=True)
+
+
 
