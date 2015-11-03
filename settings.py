@@ -52,7 +52,7 @@ settings['http'] = settings.get('http', {
 })
 
 settings['network'] = settings.get('network', {
-	'MAC': IpUtils.mac(),
+	'MAC': '', # set below
 	'useDHCP': False, #
 	'ipAddress': '192.168.1.30',
 	'subnetMask': '255.255.255.0',
@@ -60,3 +60,5 @@ settings['network'] = settings.get('network', {
 	'primaryDNS': '8.8.4.4',
 	'secondaryDNS': '8.8.8.8'
 })
+
+settings['network']['MAC'] = IpUtils.mac()
