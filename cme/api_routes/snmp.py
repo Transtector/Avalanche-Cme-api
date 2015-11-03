@@ -11,7 +11,7 @@ def snmp_mib():
 	''' The API and SNMP layers share credentials.  We can get/set
 		them here (as well as via SNMP calls).'''
 
-	return json_response('snmp': { 'mib': None })
+	return json_response({'snmp': { 'mib': None }})
 
 @router.route('/config/snmp/mib')
 @require_auth
