@@ -40,10 +40,14 @@ if settings['time']['useNTP'] and app.config['IS_CME']:
 # TODO: set up a backup static address in /etc/dhcp/dhclient.conf
 # Check if current net settings match settings and write/reset network stack if not
 print("\n\t======== NETWORK INIT ==========\n")
+print("\t\t Current \t\t\t\t Settings ")
+print("\t\t---------\t\t\t\t----------")
+print("\tDHCP:\t{0} \t\t\t\t\t{1}".format(dhcp(), settings['network']['dhcp']))
+print("\tIP:\t{0} \t\t\t\t\t{1}".format(address(), settings['network']['address']))
 
 if dhcp() != settings['network']['dhcp'] or \
    address() != settings['network']['address']:
-   print("\tNetwork MISMATCH!")
+   print("\n\tNetwork MISMATCH!\n\n")
 
 
 # import ui, api routes
