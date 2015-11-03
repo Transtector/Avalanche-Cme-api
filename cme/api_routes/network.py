@@ -27,4 +27,4 @@ def useDHCP():
 	if request.method == 'POST':
 		return json_error([ 'Not implemented' ])
 
-	return json_response(settings['network']['useDHCP'])
+	return json_response({'useDHCP': settings['network']['useDHCP']})
