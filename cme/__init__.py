@@ -20,28 +20,24 @@ print("\tDEBUG: {0}".format(app.config['DEBUG']))
 print("\tDOCROOT: {0}".format(app.config['DOCROOT']))
 print("\tPUBLIC: {0}".format(app.static_folder))
 print("\tUPLOADS: {0}".format(app.config['UPLOADS']))
-print()
+print("\t--------")
+print("\tNTP: {0}".format(settings['time']['useNTP']))
+print("\t--------")
+print("\tMAC: {0}".format(settings['network']['MAC']))
 
-# If settings['time']['useNTP'] then fire off ntpd.
+# NTP init
 # Note that ntp should NOT be setup in init.d to start automatically:
 # > sudo update-rc.d -f ntp remove
 if settings['time']['useNTP'] and app.config['IS_CME']:
-	print("CME configured to use NTP - starting ntpd...")
 	os.system('sudo service ntp start')
+else:
+	if app.config['IS_CME']:
+		os.system('sudo service ntp stop')
 
-# Network setup
+# Network init
+print()
 
-# load MAC at startup
-import fcntl, socket, struct
 
-def getHwAddr(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', ifname[:15]))
-    return ':'.join(['%02x' % ord(char) for char in info[18:24]])
-
-settings['network']['MAC'] = getHwAddr('eth0')
-print("Network")
-print("\tMAC: {0}".format(getHwAddr('eth0')))
 
 
 # import ui, api routes

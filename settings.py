@@ -4,6 +4,7 @@
 # simply delete the settings.json file.
 
 from cme import app
+from cme.util import GetMAC
 
 # simple dictionary to json file persistence
 from cme.util.DictPersistJSON import DictPersistJSON
@@ -51,7 +52,7 @@ settings['http'] = settings.get('http', {
 })
 
 settings['network'] = settings.get('network', {
-	'MAC': '', # filled at init w/actual MAC
+	'MAC': GetMAC.get_MAC(),
 	'useDHCP': False, #
 	'ipAddress': '192.168.1.30',
 	'subnetMask': '255.255.255.0',
