@@ -26,8 +26,8 @@ print("\tUPLOADS: {0}".format(app.config['UPLOADS']))
 print("\t--------")
 print("\tNTP: {0}".format(settings['time']['useNTP']))
 print("\t--------")
-print("\tMAC: {0}".format(settings['network']['MAC']))
-print("\tDHCP: {0}".format(settings['network']['useDHCP']))
+print("\tMAC: {0}".format(settings['network']['mac']))
+print("\tDHCP: {0}".format(settings['network']['dhcp']))
 print()
 
 # NTP init
