@@ -25,7 +25,7 @@ print()
 # If settings['time']['useNTP'] then fire off ntpd.
 # Note that ntp should NOT be setup in init.d to start automatically:
 # > sudo update-rc.d -f ntp remove
-if settings['time']['useNTP'] and app.config['RUNNING_ON_PI']:
+if settings['time']['useNTP'] and app.config['IS_CME']:
 	print("CME configured to use NTP - starting ntpd...")
 	os.system('sudo service ntp start')
 
