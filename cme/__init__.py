@@ -24,6 +24,7 @@ print("\t--------")
 print("\tNTP: {0}".format(settings['time']['useNTP']))
 print("\t--------")
 print("\tMAC: {0}".format(settings['network']['MAC']))
+print("\tDHCP: {0}".format(settings['network']['useDHCP']))
 print()
 
 # NTP init
@@ -31,11 +32,12 @@ print()
 # > sudo update-rc.d -f ntp remove
 if settings['time']['useNTP'] and app.config['IS_CME']:
 	os.system('sudo service ntp start')
-else:
-	if app.config['IS_CME']:
-		os.system('sudo service ntp stop')
 
 # Network init
+# TODO: set up a backup static address in /etc/dhcp/dhclient.conf
+# Check if current net settings match settings and write/reset network stack if not
+print("\n\n\t======== NETWORK INIT GOES HERE ==========\n\n")
+
 
 
 # import ui, api routes
