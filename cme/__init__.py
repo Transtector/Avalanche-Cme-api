@@ -22,10 +22,26 @@ print("\tPUBLIC: {0}".format(app.static_folder))
 print("\tUPLOADS: {0}".format(app.config['UPLOADS']))
 print()
 
-# If settings['time']['useNTP'] then fire off ntpd
+# If settings['time']['useNTP'] then fire off ntpd.
+# Note that ntp should NOT be setup in init.d to start automatically:
+# > sudo update-rc.d -f ntp remove
 if settings['time']['useNTP'] and app.config['RUNNING_ON_PI']:
 	print("CME configured to use NTP - starting ntpd...")
 	os.system('sudo service ntp start')
+
+# Network setup
+
+# load MAC at startup
+import fcntl, socket, struct
+
+def getHwAddr(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', ifname[:15]))
+    return ':'.join(['%02x' % ord(char) for char in info[18:24]])
+
+settings['network']['MAC'] = getHwAddr('eth0')
+print("Network")
+print("\tMAC: {0}".format(getHwAddr('eth0')))
 
 
 # import ui, api routes

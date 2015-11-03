@@ -7,7 +7,7 @@ from cme import app
 
 # simple dictionary to json file persistence
 from cme.util.DictPersistJSON import DictPersistJSON
-settings = DictPersistJSON("settings.json")
+settings = DictPersistJSON(app.config[SETTINGS_FILE])
 
 # username and passhash - prepend double underscore to prevent
 # them from displaying through the /api/config route
@@ -51,8 +51,8 @@ settings['http'] = settings.get('http', {
 })
 
 settings['network'] = settings.get('network', {
-	'MAC': '00:04:A6:72:9F:8E',
-	'useDHCP': False,
+	'MAC': '', # filled at init w/actual MAC
+	'useDHCP': False, #
 	'ipAddress': '192.168.1.30',
 	'subnetMask': '255.255.255.0',
 	'gateway': '192.168.1.1',

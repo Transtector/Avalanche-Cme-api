@@ -11,12 +11,22 @@ import platform
 
 DEBUG = True
 
+HOSTNAME = platform.node()
 SYSTEM = platform.system()
-RUNNING_ON_PI = SYSTEM == 'Linux' # prevent commands from exec on dev machine
+IS_CME = HOSTNAME == 'cme'
 
 DOCROOT = os.path.abspath(os.path.join(os.getcwd(), 'cme'))
 UPLOADS = os.path.join(os.getcwd(), 'tmp')
 SNMPDIR = os.path.abspath('/home/pi/Cme-snmp/')
+
+RESET_FILE = 'cme-reset'
+SETTINGS_FILE = 'settings.json'
+
+# If RESET_FILE exists delete it and the SETTINGS_FILE
+# so that the default values in config.py are used.
+if os.path.isfile(RESET_FILE):
+	os.remove(SETTINGS_FILE)
+	os.remove(RESET_FILE)
 
 # create UPLOADS if it's not there yet
 # from http://stackoverflow.com/a/5032238
