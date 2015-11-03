@@ -9,9 +9,10 @@ from cme import app
 from cme.util.DictPersistJSON import DictPersistJSON
 settings = DictPersistJSON("settings.json")
 
-settings['username'] = settings.get('username', app.config['USERNAME'])
-
-settings['passhash'] = settings.get('passhash', app.config['PASSHASH'])
+# username and passhash - prepend double underscore to prevent
+# them from displaying through the /api/config route
+settings['__username'] = settings.get('__username', app.config['USERNAME'])
+settings['__passhash'] = settings.get('__passhash', app.config['PASSHASH'])
 
 settings['device'] = {
 	'modelNumber': app.config['DEVICE_MODEL_NUMBER'],

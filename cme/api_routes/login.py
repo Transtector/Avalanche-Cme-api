@@ -12,10 +12,10 @@ def login():
 	u = request.args.get('u')
 	p = request.args.get('p')
 
-	if u != settings['username']:
+	if u != settings['__username']:
 		return json_response([ 'Login failed.  Unknown user.' ])
 
-	if p != settings['passhash']:
+	if p != settings['__passhash']:
 		return json_response([ 'Login failed.  Invalid password.' ]),
 
 	# else we've got valid login

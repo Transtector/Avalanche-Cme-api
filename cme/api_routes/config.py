@@ -15,7 +15,11 @@ def config():
 
 	refresh_device()
 	refresh_time()
-	return json_response({ 'config': settings })
+
+	# filter double underscore items
+	filtered_settings = {k:v for (k,v) in settings.items() if not k.startswith('__')}
+
+	return json_response({ 'config': filtered_settings })
 
 
 
