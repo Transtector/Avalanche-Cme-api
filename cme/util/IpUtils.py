@@ -1,5 +1,6 @@
 import subprocess
 import uuid
+import socket
 
 # return network interface MAC address
 # note - only works if single interface
@@ -12,3 +13,7 @@ def mac():
 def dhcp():
 	cmd = subprocess.run(["cat", "/etc/network/interfaces"], stdout=subprocess.PIPE)
 	return cmd.stdout.decode().find('dhcp') > -1
+
+# Return the current eth0 interface ip address
+def address():
+	return socket.gethostbyname(socket.gethostname())

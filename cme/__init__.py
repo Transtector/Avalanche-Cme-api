@@ -3,6 +3,8 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
+from .util.IpUtils import mac, dhcp, address
+
 # load application configuration from module
 app.config.from_object('config')
 
@@ -13,6 +15,7 @@ from settings import settings
 print()
 print("Avalanche ({0}) is rumbling...".format(app_name))
 print()
+print("\tHOSTNAME: {0}".format(app.config['HOSTNAME']))
 print("\tPLATFORM: {0}".format(app.config['SYSTEM']))
 print("\tSERVER_HOST: {0}".format(app.config['SERVER_HOST']))
 print("\tSERVER_PORT: {0}".format(app.config['SERVER_PORT']))
@@ -36,8 +39,11 @@ if settings['time']['useNTP'] and app.config['IS_CME']:
 # Network init
 # TODO: set up a backup static address in /etc/dhcp/dhclient.conf
 # Check if current net settings match settings and write/reset network stack if not
-print("\n\n\t======== NETWORK INIT GOES HERE ==========\n\n")
+print("\n\t======== NETWORK INIT ==========\n")
 
+if dhcp() != settings['network']['dhcp'] or \
+   address() != settings['network']['address']:
+   print("\tNetwork MISMATCH!")
 
 
 # import ui, api routes
