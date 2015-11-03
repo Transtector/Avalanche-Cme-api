@@ -17,3 +17,10 @@ def dhcp():
 # Return the current eth0 interface ip address
 def address():
 	return socket.gethostbyname(socket.gethostname())
+
+
+def netmask():
+	return 'netmask'
+
+def gateway():
+	return 'gateway'

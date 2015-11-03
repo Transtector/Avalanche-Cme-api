@@ -3,7 +3,7 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
-from .util.IpUtils import mac, dhcp, address
+from .util.IpUtils import mac, dhcp, address, netmask, gateway
 
 # load application configuration from module
 app.config.from_object('config')
@@ -40,13 +40,17 @@ if settings['time']['useNTP'] and app.config['IS_CME']:
 # TODO: set up a backup static address in /etc/dhcp/dhclient.conf
 # Check if current net settings match settings and write/reset network stack if not
 print("\n\t======== NETWORK INIT ==========\n")
-print("\t\t Current \t\t\t\t Settings ")
-print("\t\t---------\t\t\t\t----------")
-print("\tDHCP:\t{0} \t\t\t\t\t{1}".format(dhcp(), settings['network']['dhcp']))
-print("\tIP:\t{0} \t\t\t\t\t{1}".format(address(), settings['network']['address']))
+print("\t\t Current \t\t\t Settings ")
+print("\t\t---------\t\t\t----------")
+print("\tDHCP:\t{0} \t\t\t\t{1}".format(dhcp(), settings['network']['dhcp']))
+print("\tIP:\t{0} \t\t\t{1}".format(address(), settings['network']['address']))
+print("\tMASK:\t{0} \t\t\t\t{1}".format(netmask(), settings['network']['netmask']))
+print("\tGATE:\t{0} \t\t\t{1}".format(gateway(), settings['network']['gateway']))
 
 if dhcp() != settings['network']['dhcp'] or \
-   address() != settings['network']['address']:
+   address() != settings['network']['address'] or \
+   netmask() != settings['network']['netmask'] or \
+   gateway() != settings['network']['gateway']:
    print("\n\tNetwork MISMATCH!\n\n")
 
 
