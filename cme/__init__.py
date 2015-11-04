@@ -3,7 +3,7 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
-from .util.IpUtils import mac, dhcp, address, netmask, gateway
+from .util.IpUtils import manage_network
 
 # load application configuration from module
 app.config.from_object('config')
@@ -40,20 +40,7 @@ if settings['time']['useNTP'] and app.config['IS_CME']:
 	os.system('sudo service ntp start')
 
 # Network init
-# TODO: set up a backup static address in /etc/dhcp/dhclient.conf
-# Check if current net settings match settings and write/reset network stack if not
-print("\t---------------------------------------------")
-print("\tCURRENT NETWORK:")
-print("\tDHCP:\t\t{0}".format(dhcp()))
-print("\tIP:\t\t{0}".format(address()))
-print("\tMASK:\t\t{0}".format(netmask()))
-print("\tGATE:\t\t{0}".format(gateway()))
-
-if dhcp() != settings['network']['dhcp'] or \
-   address() != settings['network']['address'] or \
-   netmask() != settings['network']['netmask'] or \
-   gateway() != settings['network']['gateway']:
-   print("\n\tNetwork MISMATCH!\n\n")
+manage_network(settings['network'])
 
 
 # import ui, api routes
