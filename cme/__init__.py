@@ -15,19 +15,22 @@ from settings import settings
 print()
 print("Avalanche ({0}) is rumbling...".format(app_name))
 print()
-print("\tHOSTNAME:\t\t{0}".format(app.config['HOSTNAME']))
-print("\tPLATFORM:\t\t{0}".format(app.config['SYSTEM']))
-print("\tSERVER_HOST:\t\t{0}".format(app.config['SERVER_HOST']))
-print("\tSERVER_PORT:\t\t{0}".format(app.config['SERVER_PORT']))
+print("\tHOSTNAME:\t{0}".format(app.config['HOSTNAME']))
+print("\tPLATFORM:\t{0}".format(app.config['SYSTEM']))
+print("\tSERVER_HOST:\t{0}".format(app.config['SERVER_HOST']))
+print("\tSERVER_PORT:\t{0}".format(app.config['SERVER_PORT']))
 print("\tDEBUG:\t\t{0}".format(app.config['DEBUG']))
-print("\tDOCROOT:\t\t{0}".format(app.config['DOCROOT']))
+print("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
 print("\tPUBLIC:\t\t{0}".format(app.static_folder))
-print("\tUPLOADS:\t\t{0}".format(app.config['UPLOADS']))
+print("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
 print("\t---------------------------------------------")
 print("\tNTP:\t\t{0}".format(settings['time']['useNTP']))
 print("\t---------------------------------------------")
 print("\tMAC:\t\t{0}".format(settings['network']['mac']))
 print("\tDHCP:\t\t{0}".format(settings['network']['dhcp']))
+print("\tIP:\t\t{0}".format(settings['network']['address']))
+print("\tMASK:\t\t{0}".format(settings['network']['netmask']))
+print("\tGATE:\t\t{0}".format(settings['network']['gateway']))
 print()
 
 # NTP init
@@ -39,13 +42,12 @@ if settings['time']['useNTP'] and app.config['IS_CME']:
 # Network init
 # TODO: set up a backup static address in /etc/dhcp/dhclient.conf
 # Check if current net settings match settings and write/reset network stack if not
-print("\n\t======== NETWORK INIT ==========\n")
-print("\t\t Current \t\t\t Settings ")
-print("\t\t---------\t\t\t----------")
-print("\tDHCP:\t{0} \t\t\t\t{1}".format(dhcp(), settings['network']['dhcp']))
-print("\tIP:\t{0} \t\t\t{1}".format(address(), settings['network']['address']))
-print("\tMASK:\t{0} \t\t\t\t{1}".format(netmask(), settings['network']['netmask']))
-print("\tGATE:\t{0} \t\t\t{1}".format(gateway(), settings['network']['gateway']))
+print("\t---------------------------------------------")
+print("\tCURRENT NETWORK:")
+print("\tDHCP:\t\t{0}".format(dhcp()))
+print("\tIP:\t\t{0}".format(address()))
+print("\tMASK:\t\t{0}".format(netmask()))
+print("\tGATE:\t\t{0}".format(gateway()))
 
 if dhcp() != settings['network']['dhcp'] or \
    address() != settings['network']['address'] or \
