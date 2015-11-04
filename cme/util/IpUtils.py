@@ -1,8 +1,10 @@
+import os
 import subprocess
 import uuid
 import socket
 import fcntl
 import struct
+import fileinput
 
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
@@ -46,3 +48,95 @@ def gateway():
 
 			return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
 
+
+# looks at network settings compared with current network
+# and reconfigures and reloads the network if different
+def manage_network(network_settings):
+
+	reload_network = False
+	currently_dhcp = dhcp()
+
+	use_dhcp = network_settings['dhcp']
+
+	# Network init
+	# TODO: set up a backup static address in /etc/dhcp/dhclient.conf
+	# Check if current net settings match settings and write/reset network stack if not
+	'''
+	print("\t---------------------------------------------")
+	print("\tCURRENT NETWORK:")
+	print("\tDHCP:\t\t{0}".format(dhcp()))
+	print("\tIP:\t\t{0}".format(address()))
+	print("\tMASK:\t\t{0}".format(netmask()))
+	print("\tGATE:\t\t{0}".format(gateway()))
+	'''
+
+	# if settings say use DHCP and we're not
+	if use_dhcp != currently_dhcp:
+		reload_network = True
+
+		# reset for dhcp
+		if use_dhcp:
+			print("Setting network to DHCP configuration.")
+			os.system('sudo ln -s -f /etc/network/interfaces_dhcp interfaces')
+			os.system('sudo service networking reload')
+
+		# reset for static
+		else:
+			print("Setting network to static configuration.")
+			os.system('sudo ln -s -f /etc/network/interfaces_static interfaces')
+
+	# else dhcp settings match current state -
+	# check and update addresses if we're static
+	elif not use_dhcp and (address() != network_settings['address'] or \
+		 netmask() != network_settings['netmask'] or \
+		 gateway() != network_settings['gateway']):
+
+		reload_network = True
+		print("Updating network static addresses.")
+
+	# Trigger network restart
+	if reload_network:
+		# update net addresses if not dhcp
+		if not use_dhcp:
+			write_network_addresses(network_settings)
+
+		# restarts/reloads the network
+		os.system('sudo service networking reload')
+
+
+# write new addresses to /etc/network/interfaces_static
+def write_network_addresses(net_settings):
+
+	network_conf = '/etc/network/interfaces_static'
+	marker = "iface eth0 inet static"
+	found = False
+	added = False
+
+	# pluck addresses from settings
+	addresses = {
+		'address': net_settings['address'],
+		'netmask': net_settings['netmask'],
+		'gateway': net_settings['gateway']
+	}
+
+	for line in fileinput.input(network_conf, inplace=True):
+		line = line.rstrip()
+		found = found or line.startswith(marker)
+
+		# dup lines until marker
+		if not found or line.startswith(marker):
+			print(line)
+			continue
+
+		if not added:
+			added = True
+
+			# insert our updated addresses
+			for n, a in addresses.items():
+				print("\t{0} {1}".format(n, a))
+
+			# add DNS nameservers
+			print("\tdns-nameservers {0} {1}".format(net_settings['primaryDNS'], net_settings['secondaryDNS']))
+			print()
+
+	fileinput.close()
