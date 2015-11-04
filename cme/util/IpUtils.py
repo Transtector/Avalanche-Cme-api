@@ -25,4 +25,12 @@ def netmask():
 	return socket.inet_ntoa(fcntl.ioctl(socket.socket(socket.AF_INET, socket.SOCK_DGRAM), 35099, struct.pack('256s', iface))[20:24])
 
 def gateway():
-	return 'gateway'
+    """Read the default gateway directly from /proc."""
+    with open("/proc/net/route") as fh:
+        for line in fh:
+            fields = line.strip().split()
+            if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+                continue
+
+    		return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
+
