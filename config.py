@@ -62,13 +62,18 @@ SUPPORT_CONTACT = ""
 SUPPORT_EMAIL = ""
 SUPPORT_PHONE = ""
 
+# default NTP settings
 TIME_USE_NTP = True
 TIME_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
 TIME_ZONE_OFFSET = "+00:00"
 
+# default network settings - mirror changes in the deployed interfaces files
+# (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
 MAC = str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
 DHCP = False
 ADDRESS = '192.168.1.30'
 NETMASK = '255.255.255.0'
 GATEWAY = '192.158.1.1'
+PRIMARY = '8.8.4.4'
+SECONDARY = '8.8.8.8'
 

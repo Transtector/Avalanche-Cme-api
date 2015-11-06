@@ -39,9 +39,10 @@ print()
 if settings['time']['useNTP'] and app.config['IS_CME']:
 	os.system('sudo service ntp start')
 
+print()
+
 # Network init
 manage_network(settings['network'])
-
 
 # import ui, api routes
 from .ui_routes import index

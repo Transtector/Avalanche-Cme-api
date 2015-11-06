@@ -51,13 +51,13 @@ settings['http'] = settings.get('http', {
 })
 
 settings['network'] = settings.get('network', {
-	'mac': '', # force set below
+	'mac': '', # forced from config, see below
 	'dhcp': app.config['DHCP'],
 	'address': app.config['ADDRESS'],
 	'netmask': app.config['NETMASK'],
 	'gateway': app.config['GATEWAY'],
-	'primaryDNS': '8.8.4.4',
-	'secondaryDNS': '8.8.8.8'
+	'primary': app.config['PRIMARY'],
+	'secondary': app.config['SECONDARY']
 })
 settings['network']['mac'] = app.config['MAC']
 
