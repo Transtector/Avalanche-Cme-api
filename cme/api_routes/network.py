@@ -1,10 +1,13 @@
 # CME network interface configuration routes
 
-from . import router, settings, request
+from . import router, settings, request, UriParse
 
 from .auth import require_auth
 from .util import json_response, json_error
+from .util.IpUtils import manage_network
 
+import time
+import threading
 
 @router.route('/config/network', methods=['GET', 'POST'])
 @require_auth
@@ -22,9 +25,30 @@ def mac():
 
 
 @router.route('/config/network/dhcp', methods=['GET', 'POST'])
+@router.route('/config/network/address', methods=['GET', 'POST'])
+@router.route('/config/network/netmask', methods=['GET', 'POST'])
+@router.route('/config/network/gateway', methods=['GET', 'POST'])
+@router.route('/config/network/primary', methods=['GET', 'POST'])
+@router.route('/config/network/secondary', methods=['GET', 'POST'])
 @require_auth
-def useDHCP():
-	if request.method == 'POST':
-		return json_error([ 'Not implemented' ])
+def network_general():
+	# parse out the setting item (last element of request path)
+	segments = UriParse.path_parse(request.path)
+	item = segments[-1]
 
-	return json_response({'dhcp': settings['network']['dhcp']})
+	if request.method == 'POST':
+		settings['network'][item] = request.get_json()[item]
+
+		# Network settings updated.  Reload the network after some delay
+		# to give a response.  Note that manage_network() will only reload
+		# the network if the settings have actually changed from current.
+		t = threading.Thread(target=delay_manage_network, args=(5,))
+		t.setDaemon(True)
+	    t.start()
+
+	return json_response({ item: setting })
+
+def delay_manage_network(delay=5):
+	print("Network restarting in {0} seconds...".format(delay))
+	time.sleep(delay)
+	manage_network(settings['network'])
