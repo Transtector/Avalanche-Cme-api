@@ -44,7 +44,7 @@ def network_general():
 		# the network if the settings have actually changed from current.
 		t = threading.Thread(target=delay_manage_network, args=(5,))
 		t.setDaemon(True)
-	    t.start()
+		t.start()
 
 	return json_response({ item: setting })
 

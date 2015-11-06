@@ -103,7 +103,7 @@ def manage_network(network_settings):
 			write_network_addresses(network_settings)
 
 		# restarts/reloads the network
-		os.system('sudo service networking reload')
+		os.system('sudo service networking restart')
 
 
 # write new addresses to /etc/network/interfaces_static

@@ -73,7 +73,7 @@ MAC = str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range
 DHCP = False
 ADDRESS = '192.168.1.30'
 NETMASK = '255.255.255.0'
-GATEWAY = '192.158.1.1'
+GATEWAY = '192.168.1.1'
 PRIMARY = '8.8.4.4'
 SECONDARY = '8.8.8.8'
 
