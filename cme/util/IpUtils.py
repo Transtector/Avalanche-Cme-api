@@ -6,6 +6,8 @@ import fcntl
 import struct
 import fileinput
 
+from cme import app
+
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
 
@@ -75,15 +77,15 @@ def manage_network(network_settings):
 		reload_network = True
 
 		# reset for dhcp
-		if use_dhcp:
+		if use_dhcp and app.config['IS_CME']:
 			print("Setting network to DHCP configuration.")
-			os.system('sudo ln -s -f /etc/network/interfaces_dhcp interfaces')
+			os.system('sudo ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
 			os.system('sudo service networking reload')
 
 		# reset for static
-		else:
+		elif app.config['IS_CME']:
 			print("Setting network to static configuration.")
-			os.system('sudo ln -s -f /etc/network/interfaces_static interfaces')
+			os.system('sudo ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
 
 	# else dhcp settings match current state -
 	# check and update addresses if we're static
@@ -95,7 +97,7 @@ def manage_network(network_settings):
 		print("Updating network static addresses.")
 
 	# Trigger network restart
-	if reload_network:
+	if reload_network and app.config['IS_CME']:
 		# update net addresses if not dhcp
 		if not use_dhcp:
 			write_network_addresses(network_settings)
@@ -136,7 +138,7 @@ def write_network_addresses(net_settings):
 				print("\t{0} {1}".format(n, a))
 
 			# add DNS nameservers
-			print("\tdns-nameservers {0} {1}".format(net_settings['primaryDNS'], net_settings['secondaryDNS']))
+			print("\tdns-nameservers {0} {1}".format(net_settings['primary'], net_settings['secondary']))
 			print()
 
 	fileinput.close()
