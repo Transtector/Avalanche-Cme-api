@@ -37,8 +37,10 @@ def address():
 	ip = struct.unpack('16sH2x4s8x', res)[2]
 	return socket.inet_ntoa(ip)
 
+
 def netmask():
 	return socket.inet_ntoa(fcntl.ioctl(socket.socket(socket.AF_INET, socket.SOCK_DGRAM), 35099, struct.pack('256s', iface))[20:24])
+
 
 def gateway():
 	'''Read the default gateway directly from /proc.'''
@@ -89,7 +91,8 @@ def manage_network(network_settings):
 
 	# else dhcp settings match current state -
 	# check and update addresses if we're static
-	elif not use_dhcp and (address() != network_settings['address'] or \
+	elif not use_dhcp and \
+		(address() != network_settings['address'] or \
 		 netmask() != network_settings['netmask'] or \
 		 gateway() != network_settings['gateway']):
 
