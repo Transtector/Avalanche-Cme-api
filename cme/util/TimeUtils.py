@@ -52,11 +52,7 @@ def refresh_time(ntp_settings):
 	# if useNTP, we'll update the NTP status
 	if ntp_settings['ntp']:
 		cmd = subprocess.run(["ntpq", "-pn"], stdout=subprocess.PIPE)
-
-		#print("Refreshing NTP status:\n{0}".format(cmd.stdout.decode()))
-
 		last_request, last_success = __parse_ntpq(cmd.stdout.decode())
-
 		ntp_settings['status'] = [ last_request, last_success ]
 	else:
 		ntp_settings['status'] = [ '-', '-' ]

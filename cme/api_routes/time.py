@@ -25,7 +25,7 @@ def current():
 		newtime = request.get_json()['current']
 
 		# use the system 'date' command to set it
-		# "%Y-%m-%dT%H:%M:%SZ"
+		# "%Y-%m-%dT%H:%M:%S.SSSSSS"
 		# TODO: parse/validate the format
 		os.system('sudo date -s "{0}"'.format(newtime))
 
