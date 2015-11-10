@@ -4,7 +4,8 @@ import os.path as path
 from . import router, app, settings, request, UriParse, secure_filename
 
 from .auth import require_auth
-from .util import json_response, json_error, refresh_device, refresh_time
+from .util import json_response, json_error
+from ..util.FileUtils import refresh_device
 
 # api/config/device
 # read-only device settings
@@ -88,5 +89,4 @@ def upload_file():
 def __allowed_file(filename):
 	return '.' in filename and \
 			filename.rsplit('.', 1)[1].lower() in [x.lower() for x in app.config['ALLOWED_EXTENSIONS']]
-
 

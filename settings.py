@@ -37,9 +37,9 @@ settings['support'] = settings.get('support', {
 settings['time'] = settings.get('time', {
 	'current': '', # updated on init and reads
 	'zone': app.config['TIME_ZONE_OFFSET'],
-	'useNTP': app.config['TIME_USE_NTP'],
-	'NTPServers': [], # updated from /etc/ntp.conf
-	'NTPStatus': [] # updated on reads
+	'ntp': app.config['TIME_USE_NTP'],
+	'servers': app.config['TIME_NTP_SERVERS'],
+	'status': [] # updated on reads
 })
 
 settings['snmp'] = settings.get('snmp', {

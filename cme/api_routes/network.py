@@ -4,7 +4,7 @@ from . import router, settings, request, UriParse
 
 from .auth import require_auth
 from .util import json_response, json_error
-from .util.IpUtils import manage_network
+from ..util.IpUtils import manage_network
 
 import time
 import threading
@@ -37,7 +37,9 @@ def network_general():
 	item = segments[-1]
 
 	if request.method == 'POST':
-		settings['network'][item] = request.get_json()[item]
+		settings_group = settings['network']
+		settings_group[item] = request.get_json()[item]
+		settings['network'] = settings_group
 
 		# Network settings updated.  Reload the network after some delay
 		# to give a response.  Note that manage_network() will only reload
@@ -46,9 +48,9 @@ def network_general():
 		t.setDaemon(True)
 		t.start()
 
-	return json_response({ item: setting })
+	return json_response({ item: settings['network'][item] })
 
 def delay_manage_network(delay=5):
-	print("Network restarting in {0} seconds...".format(delay))
+	print("Network management in {0} seconds...".format(delay))
 	time.sleep(delay)
 	manage_network(settings['network'])

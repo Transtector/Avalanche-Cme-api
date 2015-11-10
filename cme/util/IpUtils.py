@@ -6,8 +6,6 @@ import fcntl
 import struct
 import fileinput
 
-from cme import app
-
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
 
@@ -29,12 +27,9 @@ def address():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	ifreq = struct.pack('16sH14s', iface, socket.AF_INET, b'\x00'*14)
 
-	try:
-		res = fcntl.ioctl(desock.fileno(), 0x8915, ifreq)
-	except:
-		return None
-
+	res = fcntl.ioctl(sock.fileno(), 0x8915, ifreq)
 	ip = struct.unpack('16sH2x4s8x', res)[2]
+
 	return socket.inet_ntoa(ip)
 
 
@@ -62,17 +57,13 @@ def manage_network(network_settings):
 
 	use_dhcp = network_settings['dhcp']
 
-	# Network init
-	# TODO: set up a backup static address in /etc/dhcp/dhclient.conf
-	# Check if current net settings match settings and write/reset network stack if not
-	'''
+	print("\n\tNETWORKING\t\t\t(current)")
 	print("\t---------------------------------------------")
-	print("\tCURRENT NETWORK:")
-	print("\tDHCP:\t\t{0}".format(dhcp()))
-	print("\tIP:\t\t{0}".format(address()))
-	print("\tMASK:\t\t{0}".format(netmask()))
-	print("\tGATE:\t\t{0}".format(gateway()))
-	'''
+	print("\tMAC:\t\t{0}".format(network_settings['mac']))
+	print("\tDHCP:\t\t{0}\t\t({1})".format(network_settings['dhcp'], currently_dhcp))
+	print("\tIP:\t\t{0}\t({1})".format(network_settings['address'], address()))
+	print("\tMASK:\t\t{0}\t({1})".format(network_settings['netmask'], netmask()))
+	print("\tGATE:\t\t{0}\t({1})".format(network_settings['gateway'], gateway()))
 
 	# if settings say use DHCP and we're not
 	if use_dhcp != currently_dhcp:
@@ -100,7 +91,7 @@ def manage_network(network_settings):
 		print("Updating network static addresses.")
 
 	# Trigger network restart
-	if reload_network and app.config['IS_CME']:
+	if reload_network:
 		# update net addresses if not dhcp
 		if not use_dhcp:
 			write_network_addresses(network_settings)

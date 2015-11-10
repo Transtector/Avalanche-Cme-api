@@ -3,6 +3,7 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
+from .util.TimeUtils import manage_time
 from .util.IpUtils import manage_network
 
 # load application configuration from module
@@ -23,26 +24,15 @@ print("\tDEBUG:\t\t{0}".format(app.config['DEBUG']))
 print("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
 print("\tPUBLIC:\t\t{0}".format(app.static_folder))
 print("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
-print("\t---------------------------------------------")
-print("\tNTP:\t\t{0}".format(settings['time']['useNTP']))
-print("\t---------------------------------------------")
-print("\tMAC:\t\t{0}".format(settings['network']['mac']))
-print("\tDHCP:\t\t{0}".format(settings['network']['dhcp']))
-print("\tIP:\t\t{0}".format(settings['network']['address']))
-print("\tMASK:\t\t{0}".format(settings['network']['netmask']))
-print("\tGATE:\t\t{0}".format(settings['network']['gateway']))
-print()
 
-# NTP init
-# Note that ntp should NOT be setup in init.d to start automatically:
-# > sudo update-rc.d -f ntp remove
-if settings['time']['useNTP'] and app.config['IS_CME']:
-	os.system('sudo service ntp start')
-
-print()
+if app.config['IS_CME']:
+	manage_time(settings['time'])
 
 # Network init
-manage_network(settings['network'])
+if app.config['IS_CME']:
+	manage_network(settings['network'])
+
+print()
 
 # import ui, api routes
 from .ui_routes import index
