@@ -2,6 +2,7 @@ cme_venv
 settings.json
 __pycache__
 *.pyc
+._*
 
 # Mac/Windows OS Junk
 Thumbs.db
