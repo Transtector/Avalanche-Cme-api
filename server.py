@@ -1,4 +1,4 @@
-#!/home/pi/Cme/cme_venv/bin/python
+#!~/Cme/cme_venv/bin/python
 
 import config
 from cme import app

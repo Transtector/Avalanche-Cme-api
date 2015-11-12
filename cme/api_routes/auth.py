@@ -3,7 +3,7 @@ from . import app, Response, request, json, Serializer
 
 # access denied
 def access_denied(message='Access denied'):
-	return Response(json.dumps({ 'message': message }),
+	return Response(json.dumps([ message ]),
 					status=403,
 					mimetype='application/json')
 
