@@ -5,7 +5,7 @@ from . import app, router, settings, send_from_directory
 from .auth import require_auth
 from .util import json_response, json_error
 
-@router.route('/config/snmp')
+@router.route('/config/snmp/')
 @require_auth
 def snmp():
 	return json_response({'snmp': settings['snmp']})

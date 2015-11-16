@@ -10,8 +10,14 @@ class APIError(object):
 		self.stack = ''
 
 @router.route('/')
+@router.route('/index')
 def index():
 	return render_template('index.html', title='Avalanche')
+
+@router.route('/hello')
+def hello():
+	return render_template('hello.html', title='Flask + ReactJS')
+
 
 @router.route('/err')
 def errors():

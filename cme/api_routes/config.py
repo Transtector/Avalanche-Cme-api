@@ -9,7 +9,7 @@ from ..util.TimeUtils import refresh_time
 
 
 # top-level configuration
-@router.route('/config', methods=['GET', 'POST'])
+@router.route('/config/', methods=['GET', 'POST'])
 @require_auth
 def config():
 	if request.method == 'POST':

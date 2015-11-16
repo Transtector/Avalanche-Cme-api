@@ -9,7 +9,7 @@ from ..util.FileUtils import refresh_device
 
 # api/config/device
 # read-only device settings
-@router.route('/config/device')
+@router.route('/config/device/')
 @router.route('/config/device/modelNumber')
 @router.route('/config/device/serialNumber')
 @router.route('/config/device/firmware')

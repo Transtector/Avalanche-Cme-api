@@ -6,11 +6,11 @@ from .auth import require_auth
 from .util import json_response, json_error
 
 # These routes handle reading and updating the general and support fields
-@router.route('/config/general', methods=['GET', 'POST'])
+@router.route('/config/general/', methods=['GET', 'POST'])
 @router.route('/config/general/name', methods=['GET', 'POST'])
 @router.route('/config/general/description', methods=['GET', 'POST'])
 @router.route('/config/general/location', methods=['GET', 'POST'])
-@router.route('/config/support', methods=['GET', 'POST'])
+@router.route('/config/support/', methods=['GET', 'POST'])
 @router.route('/config/support/contact', methods=['GET', 'POST'])
 @router.route('/config/support/email', methods=['GET', 'POST'])
 @router.route('/config/support/phone', methods=['GET', 'POST'])

@@ -9,7 +9,7 @@ from ..util.IpUtils import manage_network
 import time
 import threading
 
-@router.route('/config/network', methods=['GET', 'POST'])
+@router.route('/config/network/', methods=['GET', 'POST'])
 @require_auth
 def network():
 	if request.method == 'POST':
