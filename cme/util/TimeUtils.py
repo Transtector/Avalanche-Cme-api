@@ -1,11 +1,14 @@
 
 import os
+import logging
 import fileinput
 import subprocess
 import re
 
 from datetime import datetime, timedelta
 from .Switch import switch
+
+logger = logging.getLogger(__name__)
 
 def check_ntp():
 	cmd = subprocess.run(["sudo", "service", "ntp", "status"], stdout=subprocess.PIPE)
@@ -24,9 +27,9 @@ def manage_time(ntp_settings):
 	# NTP init
 	# Note that ntp should NOT be setup in init.d to start automatically:
 	# > sudo update-rc.d -f ntp remove
-	print("\n\tNTP\t\t\t(current)")
-	print("\t---------------------------------------------")
-	print("\tUSE NTP:\t{0}\t({1})".format(use_ntp, currently_ntp))
+	logger.debug("\n\tNTP\t\t\t(current)")
+	logger.debug("\t---------------------------------------------")
+	logger.debug("\tUSE NTP:\t{0}\t({1})".format(use_ntp, currently_ntp))
 	print("\tNTP SERVERS:\t{0}\t({1})".format(ntp_servers, current_servers))
 
 	if ntp_servers != current_servers:
@@ -36,11 +39,11 @@ def manage_time(ntp_settings):
 	if update_ntp or (use_ntp != currently_ntp):
 
 		if use_ntp:
-			print("Starting NTP service.")
+			logger.info("Starting NTP service.")
 			os.system('sudo service ntp restart')
 
 		else:
-			print("Stopping NTP service.")
+			logger.info("Stopping NTP service.")
 			os.system('sudo service ntp stop')
 
 

@@ -16,12 +16,23 @@ HOSTNAME = platform.node()
 SYSTEM = platform.system()
 IS_CME = HOSTNAME == 'cme'
 
-DOCROOT = os.path.abspath(os.path.join(os.getcwd(), 'cme'))
-UPLOADS = os.path.join(os.getcwd(), 'tmp')
-SNMPDIR = os.path.abspath('/home/pi/Cme-snmp/')
+APPROOT = os.path.abspath(os.getcwd()) # /home/pi/Cme
+DOCROOT = os.path.join(APPROOT, 'cme') # /home/pi/Cme/cme
+UPLOADS = os.path.join(APPROOT, 'tmp') # /home/pi/tmp
 
-RESET = 'cme-reset'
-SETTINGS = 'settings.json'
+# logging to files
+LOGDIR = os.path.join('log') # /home/pi/log
+LOGBYTES = 1024 * 10
+LOGCOUNT = 5
+
+APPLOG = os.path.join(LOGDIR, 'cme.log')
+SERVERLOG = os.path.join(LOGDIR, 'server.log')
+ACCESSLOG = os.path.join(LOGDIR, 'access.log')
+
+SNMPDIR = os.path.join(APPROOT, 'Cme-snmp')
+
+RESET = os.path.join(APPROOT, 'cme-reset')
+SETTINGS = os.path.join(APPROOT, 'settings.json')
 
 # If RESET_FILE exists delete it and the SETTINGS_FILE
 # so that the default values in config.py are used.
@@ -29,13 +40,18 @@ if os.path.isfile(RESET):
 	os.remove(SETTINGS)
 	os.remove(RESET)
 
-# create UPLOADS if it's not there yet
-# from http://stackoverflow.com/a/5032238
-try:
-	os.makedirs(UPLOADS)
-except OSError as exception:
-	if exception.errno != errno.EEXIST:
-		raise
+def create_dir_if_not_exist(dir):
+	''' try to create directory if it does not exist
+		from http://stackoverflow.com/a/5032238 '''
+	try:
+		os.makedirs(dir)
+	except OSError as e:
+		if e.errno != errno.EEXIST:
+			raise
+
+# make sure we have uploads and log folders
+create_dir_if_not_exist(UPLOADS)
+create_dir_if_not_exist(LOGDIR)
 
 ALLOWED_EXTENSIONS = ['txt', 'pdf', 'png', 'jpg']
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16 MB

@@ -1,10 +1,13 @@
 import os
+import logging
 import subprocess
 import uuid
 import socket
 import fcntl
 import struct
 import fileinput
+
+logger = logging.getLogger(__name__)
 
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
@@ -57,13 +60,13 @@ def manage_network(network_settings):
 
 	use_dhcp = network_settings['dhcp']
 
-	print("\n\tNETWORKING\t\t\t(current)")
-	print("\t---------------------------------------------")
-	print("\tMAC:\t\t{0}".format(network_settings['mac']))
-	print("\tDHCP:\t\t{0}\t\t({1})".format(network_settings['dhcp'], currently_dhcp))
-	print("\tIP:\t\t{0}\t({1})".format(network_settings['address'], address()))
-	print("\tMASK:\t\t{0}\t({1})".format(network_settings['netmask'], netmask()))
-	print("\tGATE:\t\t{0}\t({1})".format(network_settings['gateway'], gateway()))
+	logger.debug("\n\tNETWORKING\t\t\t(current)")
+	logger.debug("\t---------------------------------------------")
+	logger.debug("\tMAC:\t\t{0}".format(network_settings['mac']))
+	logger.debug("\tDHCP:\t\t{0}\t\t({1})".format(network_settings['dhcp'], currently_dhcp))
+	logger.debug("\tIP:\t\t{0}\t({1})".format(network_settings['address'], address()))
+	logger.debug("\tMASK:\t\t{0}\t({1})".format(network_settings['netmask'], netmask()))
+	logger.debug("\tGATE:\t\t{0}\t({1})".format(network_settings['gateway'], gateway()))
 
 	# if settings say use DHCP and we're not
 	if use_dhcp != currently_dhcp:
@@ -71,12 +74,12 @@ def manage_network(network_settings):
 
 		# reset for dhcp
 		if use_dhcp and app.config['IS_CME']:
-			print("Setting network to DHCP configuration.")
+			logger.info("Setting network to DHCP configuration.")
 			os.system('sudo ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
 
 		# reset for static
 		elif app.config['IS_CME']:
-			print("Setting network to static configuration.")
+			logger.info("Setting network to static configuration.")
 			os.system('sudo ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
 
 	# else dhcp settings match current state -
@@ -87,7 +90,7 @@ def manage_network(network_settings):
 		 gateway() != network_settings['gateway']):
 
 		reload_network = True
-		print("Updating network static addresses.")
+		logger.info("Updating network static addresses.")
 
 	# Trigger network restart
 	if reload_network:

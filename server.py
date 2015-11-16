@@ -1,55 +1,43 @@
-#!~/Cme/cme_venv/bin/python
-
-import config
+#!./cme_venv/bin/python
 from cme import app
 
+import logging
+from logging import handlers
+
 import cherrypy
-import time
 from paste.translogger import TransLogger
 
-# wrap TransLogger for more log format control
-class WrapTransLogger(TransLogger):
-    def write_log(self, environ, method, req_uri, start, status, bytes):
-        if bytes is None:
-            bytes = '-'
-        remote_addr = '-'
-        if environ.get('HTTP_X_FORWARDED_FOR'):
-            remote_addr = environ['HTTP_X_FORWARDED_FOR']
-        elif environ.get('REMOTE_ADDR'):
-            remote_addr = environ['REMOTE_ADDR']
-
-        d = {
-            'REMOTE_ADDR': remote_addr,
-            'REMOTE_USER': environ.get('REMOTE_USER') or '-',
-            'REQUEST_METHOD': method,
-            'REQUEST_URI': req_uri,
-            'HTTP_VERSION': environ.get('SERVER_PROTOCOL'),
-            'time': time.strftime('%d/%b/%Y:%H:%M:%S', start),
-            'status': status.split(None, 1)[0],
-            'bytes': bytes,
-            'HTTP_REFERER': environ.get('HTTP_REFERER', '-'),
-            'HTTP_USER_AGENT': environ.get('HTTP_USER_AGENT', '-'),
-        }
-        message = self.format % d
-        self.logger.log(self.logging_level, message)
-
-
 if __name__ == "__main__":
-	# format the log similar to the Flask (werkzeug) built-in server
-	log_format = (
-		'%(REMOTE_ADDR)s - - [%(time)s] "%(REQUEST_METHOD)s %(REQUEST_URI)s %(HTTP_VERSION)s" %(status)s %(bytes)s'
-	)
 
-	# wrap Flask wsgi application w/paste logging
-	cherrypy.tree.graft(WrapTransLogger(app, format=log_format), "/")
+	# Make a new RotatingFileHandler for the CherryPy error (server) log.
+	h = handlers.RotatingFileHandler(app.config['SERVERLOG'], 'a',
+									 app.config['LOGBYTES'],
+									 app.config['LOGCOUNT'])
+	h.setLevel(logging.DEBUG)
+	h.setFormatter(cherrypy._cplogging.logfmt)
 
-	# Set the configuration of the web server
-	cherrypy.config.update({
-		'engine.autoreload.on': True,
-		'log.screen': True,
-		'log.error_file': None,
-		'log.access_file': None
-	})
+	cherrypy.log.error_log.addHandler(h)
+	cherrypy.log.screen = app.config['DEBUG']
+
+	# Add an access logger for the Paste.TransLogger to use
+	access_logger = logging.getLogger('access')
+	h = handlers.RotatingFileHandler(app.config['ACCESSLOG'], 'a',
+									 app.config['LOGBYTES'],
+									 app.config['LOGCOUNT'])
+	access_logger.setLevel(logging.INFO)
+	access_logger.addHandler(h)
+
+	# Put access requests on the screen too if DEBUG set, but use
+	# a simpler format (the default access file format is the so
+	# called Apache "combined log format" from Paste.TransLogger)
+	# see: http://httpd.apache.org/docs/1.3/logs.html#combined
+	if app.config['DEBUG']:
+		h = logging.StreamHandler()
+		h.setFormatter(logging.Formatter('%(message)s'))
+		access_logger.addHandler(h)
+
+	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
+	cherrypy.tree.graft(TransLogger(app, logger=access_logger), "/")
 
 	# unsubscribe default server
 	cherrypy.server.unsubscribe()
@@ -58,8 +46,8 @@ if __name__ == "__main__":
 	http_server = cherrypy._cpserver.Server()
 
 	# configure
-	http_server.socket_host = config.SERVER_HOST
-	http_server.socket_port = config.SERVER_PORT
+	http_server.socket_host = app.config['SERVER_HOST']
+	http_server.socket_port = app.config['SERVER_PORT']
 	http_server.thread_pool = 30
 
 	# subscribe to http
