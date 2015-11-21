@@ -8,13 +8,11 @@ from .util import json_response, json_error
 from ..util.FileUtils import refresh_device
 
 # api/config/device
-# read-only device settings
+# read-only device settings - NOT password protected
 @router.route('/config/device/')
 @router.route('/config/device/modelNumber')
 @router.route('/config/device/serialNumber')
 @router.route('/config/device/firmware')
-@router.route('/config/device/update')
-@require_auth
 def device_read_only_settings():
 	# parse out the setting name (last element of request path)
 	segments = UriParse.path_parse(request.path)
@@ -31,19 +29,22 @@ def device_read_only_settings():
 	return json_response({ item: setting })
 
 # update firmware (POST file or path to /config/device/update)
-@router.route('/config/device/update', methods=['POST'])
+@router.route('/config/device/update', methods=['GET', 'POST'])
 @require_auth
 def device_update():
-	# handle upload new firmware
-	file = request.files['file']
+	filename = settings['device']['update']
 
-	if file and __allowed_file(file.filename):
-		filename = secure_filename(file.filename)
+	if request.method == 'POST':
+		# handle upload new firmware
+		file = request.files['file']
 
-		path = path.join(app.config['UPLOADS'], filename)
-		print("saving uploads to {", p, "}")
+		if file and __allowed_file(file.filename):
+			filename = secure_filename(file.filename)
 
-		file.save(p)
+			path = path.join(app.config['UPLOADS'], filename)
+			print("saving uploads to {", p, "}")
+
+			file.save(p)
 
 	refresh_device()
 
