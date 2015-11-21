@@ -1,0 +1,85 @@
+
+tab-border-color = #999
+tab-radius = 20px
+
+header // 100px height, vertically center logo w/24px padding
+	position relative
+	margin 0
+	padding 0
+	background-linear-gradient(top, #7AB9E3, 0%, #006EC5, 100%)
+	#branding
+		padding 24px 0 23px 86px // accommmodate 1px bottom border
+		color #fff
+		border 0 solid tab-border-color
+		border-bottom-width 1px
+		font-weight bold
+		line-height 1 // v-align text to top
+		background-repeat no-repeat
+		background-position 18px center
+		background-size 48px 48px
+		background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3Cmask id='mask'%3E%3Ccircle cx='50%' cy='50%' r='64' fill='white'/%3E%3Cpath fill='black' d='M0,84 L 33.5,84 L 88,30 L 68,84 L 128, 84 L 128, 92 L 55, 92 L 66,66 L 39, 92 L 0, 92z' /%3E%3C/mask%3E%3C/defs%3E%3Ccircle cx='50%' cy='50%' r='64' fill='white' mask='url(%23mask)'/%3E%3C/svg%3E")
+
+	#title
+		font-size 36px
+	#model
+		font-size 16px
+	#tab
+		position absolute
+		top -3px
+		left 236px
+		width 1024px // keeps the slope from changing on window width changes
+		bottom 0
+		border 0 solid tab-border-color
+		border-width 1px 0 0 1px
+		border-radius tab-radius 0 0 0
+		background main-bg-color
+		transform-origin bottom right
+		transform perspective(40px) rotateX(2deg)
+		&::before, &::after
+			content ''
+			position absolute
+			bottom 0
+			height tab-radius
+			left (0 - tab-radius)px
+			width tab-radius
+			background main-bg-color
+		&::after
+			left - (tab-radius + 1)
+			border 0 solid tab-border-color
+			border-bottom-width 1px
+			border-right-width 1px
+			border-radius 0 0 tab-radius 0
+			background-size auto 100px
+			background-position 0 -80px
+			background-linear-gradient(top, #7AB9E3, 0%, #006EC5, 100%)
+	#info
+		position absolute
+		white-space nowrap
+		top 5px
+		left 320px
+		bottom 0
+
+	// label-value indicators (inside the info-tab)
+	.lvi
+		margin 0 12px
+		line-height 30px
+		.sep
+			margin 0 1em 0 0.2em
+		> span
+			font-weight bold
+	.lvi:first-child
+		margin-top 20px
+
+	#buttons
+		position absolute
+		padding 24px 0
+		background main-bg-color
+		border-top 1px solid tab-border-color
+		padding-right 64px
+		white-space nowrap
+		top 5px
+		left 344px
+		right 0
+		text-align right
+		button
+			margin-left 32px

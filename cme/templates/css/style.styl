@@ -1,0 +1,39 @@
+// CME styles
+
+main-bg-color = hsla(120, 0, 90%, 1)
+
+@import mixins
+@import icons
+
+body
+	font 14px 'Helvetica Neue', Helvetica, Arial, sans-serif
+	line-height 1.4em
+	background main-bg-color
+	color #4D4D4D
+	margin 0
+	padding 0
+	overflow-x hidden
+	font-smoothing antialiased
+
+a
+	color #00B7FF
+
+button
+	background #428BCA
+	background-repeat no-repeat
+	background-position center center
+	background-size 32px 32px
+	color #fff
+	font-size 20px
+	height 48px
+	width 64px
+	line-height 48px
+	text-align center
+	border 0
+	opacity
+	transition all 0.3s ease 0s
+button:hover
+	opacity 0.75
+
+@import header
+@import login
