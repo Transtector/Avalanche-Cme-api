@@ -14,6 +14,7 @@ var stylus = require('gulp-stylus');
 
 var path = {
 	HTML: './cme/templates/index.html',
+	CSS_GLOB: './cme/templates/css/*.styl',
 	CSS: './cme/templates/css/style.styl',
 	CSS_OUT: './cme/static/css',
 	OUT: 'cme.js',
@@ -38,7 +39,7 @@ gulp.task('css', function () {
 
 gulp.task('watch', ['html', 'css'], function () {
 	gulp.watch(path.HTML, ['html']);
-	gulp.watch(path.CSS, ['css']);
+	gulp.watch(path.CSS_GLOB, ['css']);
 
 	var b = browserify({
 		entries: [path.ENTRY_POINT], // top-level app entry

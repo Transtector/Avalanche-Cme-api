@@ -1,5 +1,6 @@
 
 #login
+	position relative
 	width 480px
 	margin 64px auto
 	padding 32px 64px
@@ -12,12 +13,20 @@
 	#instructions
 		margin 2em 0 4em 0
 		font-size 12px
+		.login-error
+			margin-top 1em
+			font-weight 700
+			color #F22
+			opacity 0
+			transition all 0.3s ease 0s
+		.login-error.isVisible
+			opacity 1
 
 	.icontextinput,
 	button
 		width 260px
 		margin 10px auto
-	button
+	button:not(:disabled)
 		background-color #006EC5
 	.icontextinput
 		background-repeat no-repeat
@@ -28,10 +37,9 @@
 		text-align right
 		border-bottom 1px solid #CCC
 	.icontextinput input
-		outline none
 		width 212px
 		font-size 20px
 		line-height 40px
 		border none
 		background transparent
-
+		outline none

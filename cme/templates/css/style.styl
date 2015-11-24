@@ -18,8 +18,10 @@ body
 a
 	color #00B7FF
 
+default-button-color = #428BCA
+
 button
-	background #428BCA
+	background default-button-color
 	background-repeat no-repeat
 	background-position center center
 	background-size 32px 32px
@@ -30,10 +32,15 @@ button
 	line-height 48px
 	text-align center
 	border 0
-	opacity
+	outline 0
+	opacity 1
 	transition all 0.3s ease 0s
 button:hover
 	opacity 0.75
+button:disabled
+	opacity 1
+	background-color grayscale(default-button-color)
+	cursor default
 
 @import header
 @import login

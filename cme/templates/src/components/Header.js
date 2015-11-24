@@ -6,9 +6,23 @@
  *
  */
 
+var React = require('react');
 var CmeActions = require('../actions/CmeActions');
 
-var Lvi = require('./LabelValueIndicator');
+var Indicator = React.createClass({
+
+	render: function () {
+		return (
+			<div className="indicator">
+				<label>
+					<span>{this.props.item.name}</span>
+					<span className='separator'>:</span>
+				</label>
+				<span>{this.props.item.value}</span>
+			</div>
+		);
+	}
+});
 
 var Header = React.createClass({
 
@@ -23,35 +37,35 @@ var Header = React.createClass({
 			<header>
 				<div id="branding">
 					<div id="title">CME</div>
-					<div id="model">{this.props.device.model}</div>
+					<div id="model">{this.props.device.modelNumber}</div>
 				</div>
 
 				<div id="tab">&nbsp;</div>
 
 				<div id="buttons">
-					{this.props.isLoggedIn ? <button id="home" className="icon-home" onChange={this._onShowHome} /> : null}
-					{this.props.isLoggedIn ? <button id="settings" className="icon-settings" onChange={this._onShowSettings} /> : null}
-					{this.props.isLoggedIn ? <button id="logout" className="icon-logout" onClick={this._onLogout} />: null}
+					{this.props.isLoggedIn ? <button id="home" className="icon-home" onChange={this._showHome} /> : null}
+					{this.props.isLoggedIn ? <button id="settings" className="icon-settings" onChange={this._showSettings} /> : null}
+					{this.props.isLoggedIn ? <button id="logout" className="icon-logout" onClick={this._logout} />: null}
 				</div>
 
 				<div id="info">
-					<Lvi item={{name: 'Serial number', value: this.props.device.serial}} />
-					<Lvi item={{name: 'Firmware version', value: this.props.device.firmware}} />
+					<Indicator item={{name: 'Serial number', value: this.props.device.serialNumber}} />
+					<Indicator item={{name: 'Firmware version', value: this.props.device.firmware}} />
 				</div>
 
 			</header>
 		);
 	},
 
-	_onShowHome: function() {
+	_showHome: function() {
 
 	},
 
-	_onShowSettings: function() {
+	_showSettings: function() {
 
 	},
 
-	_onLogout: function () {
+	_logout: function () {
 		console.log('firing logout action...');
 		CmeActions.logout();
 	}

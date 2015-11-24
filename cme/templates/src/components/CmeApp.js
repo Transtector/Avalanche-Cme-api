@@ -6,6 +6,7 @@
  * This component operates as a "Controller-View".  It listens for changes
  * in the CmeStore and passes the new data to its children.
  */
+var React = require('react');
 
 var Header = require('./Header');
 var Login = require('./Login');
@@ -14,9 +15,23 @@ var Login = require('./Login');
 
 var CmeStore = require('../stores/CmeStore');
 
+function displayLogin(errors, isSubmitting) {
+	return (
+		<Login errors={errors} isSubmitting={isSubmitting} />
+	);
+}
+
+function displayConsole() {
+	return (
+		<div className="error-panel">
+			ERRORS HERE!
+		</div>
+	);
+}
+
 var CmeApp = React.createClass({
 
-	getInitialState: function() {
+	getInitialState: function () {
 		return CmeStore.getState();
 	},
 
@@ -31,19 +46,19 @@ var CmeApp = React.createClass({
 	render: function() {
 		return (
 			<div>
-				<Header	device={this.state.config.device}
-					isLoggedIn={this.state.loggedIn} />
+				<Header	device={this.state.cme.device}
+					isLoggedIn={this.state.isLoggedIn} />
 
-				{!this.state.loggedIn ? <Login /> : null}
+				{!this.state.isLoggedIn
+					? displayLogin(this.state.errors, this.state.isSubmitting)
+					: displayConsole()
+				}
 			</div>
 		);
 	},
 
 	_onChange: function() {
-		var cme = CmeStore.getState();
-		console.log('CmeApp view-controller heard a change!');
-		console.log('cme.loggedIn = ' + cme.loggedIn);
-		this.setState(cme);
+		this.setState(CmeStore.getState());
 	}
 });
 
