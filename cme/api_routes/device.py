@@ -1,18 +1,18 @@
-# api/config/device routes
+# api/device routes
 
 import os.path as path
 from . import router, app, settings, request, UriParse, secure_filename
 
 from .auth import require_auth
-from .util import json_response, json_error
+from .util import json_response, json_error, json_filter
 from ..util.FileUtils import refresh_device
 
-# api/config/device
-# read-only device settings - NOT password protected
-@router.route('/config/device/')
-@router.route('/config/device/modelNumber')
-@router.route('/config/device/serialNumber')
-@router.route('/config/device/firmware')
+# Read-only device settings - NOT password protected
+# These are saved in settings, but under the "__device" key
+@router.route('/device/')
+@router.route('/device/modelNumber')
+@router.route('/device/serialNumber')
+@router.route('/device/firmware')
 def device_read_only_settings():
 	# parse out the setting name (last element of request path)
 	segments = UriParse.path_parse(request.path)
@@ -22,17 +22,15 @@ def device_read_only_settings():
 	refresh_device()
 
 	if item == 'device':
-		setting = settings[item]
+		return json_response({ 'device': json_filter(settings['__device'].items()) })
 	else:
-		setting = settings['device'][item]
-
-	return json_response({ item: setting })
+		return json_response({ item: settings['__device'][item] })
 
 # update firmware (POST file or path to /config/device/update)
-@router.route('/config/device/update', methods=['GET', 'POST'])
+@router.route('/device/update', methods=['GET', 'POST'])
 @require_auth
 def device_update():
-	filename = settings['device']['update']
+	filename = settings['__device']['__update']
 
 	if request.method == 'POST':
 		# handle upload new firmware
@@ -51,7 +49,7 @@ def device_update():
 	return json_response({ 'update': filename })
 
 # trigger a firmware update
-@router.route('/config/device/updateTrigger', methods=['POST'])
+@router.route('/device/updateTrigger', methods=['POST'])
 @require_auth
 def device_trigger_update():
 	return json_error([ 'Not implemented' ])
@@ -59,7 +57,7 @@ def device_trigger_update():
 
 # DEBUGGING
 # Use this method to debug file uploads
-@router.route('/config/device/up', methods=['GET', 'POST'])
+@router.route('/device/up', methods=['GET', 'POST'])
 @require_auth
 def upload_file():
     if request.method == 'POST':

@@ -19,3 +19,7 @@ def json_error(js, code=500):
 
 	return res
 
+# Filter out items named with double underscore "__" prefix
+def json_filter(items):
+	return {k:v for (k,v) in items if not k.startswith('__')}
+
