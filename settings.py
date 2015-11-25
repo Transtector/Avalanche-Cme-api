@@ -14,12 +14,14 @@ settings = DictPersistJSON(app.config['SETTINGS'])
 settings['__username'] = settings.get('__username', app.config['USERNAME'])
 settings['__passhash'] = settings.get('__passhash', app.config['PASSHASH'])
 
-settings['device'] = {
+# hide device from regular /config requests, but keep a copy
+# in settings for easy access
+settings['__device'] = {
 	'modelNumber': app.config['DEVICE_MODEL_NUMBER'],
 	'serialNumber': app.config['DEVICE_SERIAL_NUMBER'],
 	'firmware': app.config['DEVICE_FIRMWARE'],
-	'update': None, # refreshed at init and whenever /device read
-	'updateTrigger': False
+	'__update': None, # refreshed at init and whenever /device read
+	'__updateTrigger': False
 }
 
 settings['general'] = settings.get('general', {
