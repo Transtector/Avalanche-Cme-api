@@ -37,7 +37,7 @@ gulp.task('css', function () {
 		.pipe(gulp.dest(path.CSS_OUT))
 });
 
-gulp.task('watch', ['html', 'css'], function () {
+gulp.task('watch', function () {
 	gulp.watch(path.HTML, ['html']);
 	gulp.watch(path.CSS_GLOB, ['css']);
 
@@ -57,7 +57,7 @@ gulp.task('watch', ['html', 'css'], function () {
 			.on('error', gutil.log.bind(gutil, gutil.colors.red('Browserify Error')))
 			.pipe(source(path.OUT))
 			.pipe(gulp.dest(path.DEST_SRC))
-			.on('end', gutil.log.bind(gutil, "Finishing '" + name + "'"));
+			.on('end', gutil.log.bind(gutil, "Finished '" + name + "'"));
 	}
 
 	return bundle();

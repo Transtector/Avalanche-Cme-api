@@ -11,6 +11,6 @@ def refresh_device():
 			if any(fn.endswith(ext) for ext in app.config['ALLOWED_EXTENSIONS'])]
 
 	# choose the first one, if any
-	settings['device']['update'] = '' if len(files) == 0 else files[0]
+	settings['__device']['__update'] = '' if len(files) == 0 else files[0]
 
 
