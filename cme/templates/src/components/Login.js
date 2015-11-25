@@ -9,7 +9,7 @@
 
 var React = require('react');
 
-var CmeActions = require('../actions/CmeActions');
+var Actions = require('../Actions');
 
 var classNames = require('classnames');
 
@@ -24,7 +24,7 @@ var ErrorPanel = React.createClass({
 	render: function () {
 
 		if (this.props.errors.length > 0)
-			setTimeout(CmeActions.clearErrors, 2500);
+			setTimeout(Actions.clearErrors, 2500);
 
 		var panelClass = classNames({
 			'login-error': true,
@@ -115,8 +115,8 @@ var Login = React.createClass({
 	},
 
 	_onLogin: function() {
-		CmeActions.clearErrors();
-		CmeActions.login(this.state.u, this.state.p);
+		Actions.clearErrors();
+		Actions.login(this.state.u, this.state.p);
 	}
 });
 

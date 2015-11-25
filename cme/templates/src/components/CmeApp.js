@@ -13,7 +13,7 @@ var Login = require('./Login');
 // var MainSection = require('./MainSection');
 // var Config = require('./Config');
 
-var CmeStore = require('../stores/CmeStore');
+var Store = require('../Store');
 
 function displayLogin(errors, isSubmitting) {
 	return (
@@ -23,8 +23,13 @@ function displayLogin(errors, isSubmitting) {
 
 function displayConsole() {
 	return (
-		<div className="error-panel">
-			ERRORS HERE!
+		<div id="console">
+
+
+
+			<div className="error-panel">
+				ERRORS HERE!
+			</div>
 		</div>
 	);
 }
@@ -32,15 +37,15 @@ function displayConsole() {
 var CmeApp = React.createClass({
 
 	getInitialState: function () {
-		return CmeStore.getState();
+		return Store.getState();
 	},
 
 	componentDidMount: function() {
-		CmeStore.addChangeListener(this._onChange);
+		Store.addChangeListener(this._onChange);
 	},
 
 	componentWillUnmount: function() {
-		CmeStore.removeChangeListener(this._onChange);
+		Store.removeChangeListener(this._onChange);
 	},
 
 	render: function() {
@@ -58,7 +63,7 @@ var CmeApp = React.createClass({
 	},
 
 	_onChange: function() {
-		this.setState(CmeStore.getState());
+		this.setState(Store.getState());
 	}
 });
 

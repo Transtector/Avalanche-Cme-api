@@ -7,7 +7,7 @@
  */
 
 var React = require('react');
-var CmeActions = require('../actions/CmeActions');
+var Actions = require('../Actions');
 
 var Indicator = React.createClass({
 
@@ -67,7 +67,7 @@ var Header = React.createClass({
 
 	_logout: function () {
 		console.log('firing logout action...');
-		CmeActions.logout();
+		Actions.logout();
 	}
 });
 
