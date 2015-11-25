@@ -1,13 +1,13 @@
 /*
- * CmeStore.js
+ * Store.js
  * james.brunner@kaelus.com
  *
  * Repository for the Cme application model.
 */
 'use strict';
 
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var CmeConstants = require('../constants/CmeConstants');
+var AppDispatcher = require('./AppDispatcher');
+var Constants = require('./Constants');
 var EventEmitter = require('events').EventEmitter;
 
 var assign = require('object-assign'); // ES6 polyfill
@@ -19,7 +19,7 @@ var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
 
-var CmeStore = assign({}, EventEmitter.prototype, {
+var Store = assign({}, EventEmitter.prototype, {
 
 	getState: function() {
 		return {
@@ -46,31 +46,37 @@ var CmeStore = assign({}, EventEmitter.prototype, {
 
 		switch(action.actionType) {
 
-			case CmeConstants.REQUEST:
+			case Constants.REQUEST:
+				console.log('submitting a request...');
 				_isSubmitting = true;
 				break;
 
-			case CmeConstants.ERROR:
-				console.log('handling dispatched error action: \n', action.data);
-				action.data.forEach(function (msg) { _errors.push(msg); });
+			case Constants.SESSION:
+				console.log('handling dispatched session action, data = ', action.data);
+				_isLoggedIn = action.data;
 				break;
 
-			case CmeConstants.CLEAR_ERRORS:
+			case Constants.DEVICE:
+				console.log('handling dispatched device action, data = ', action.data);
+				_cme['device'] = action.data;
+				break;
+
+			case Constants.ERROR:
+				console.log('handling dispatched error action: ', action.data);
+				_errors = Array.isArray(action.data) ? action.data : [action.data];
+				break;
+
+			case Constants.CLEAR_ERRORS:
 				console.log('handling clear errors');
 				_errors = [];
 				break;
 
-			case CmeConstants.INITIALIZE:
-				console.log('handling dispatched initialize action, data = \n', action.data);
-				_cme['device'] = action.data;
-				break;
-
-			case CmeConstants.LOGIN:
+			case Constants.LOGIN:
 				console.log('handling dispatched login action');
 				_isLoggedIn = true;
 				break;
 
-			case CmeConstants.LOGOUT:
+			case Constants.LOGOUT:
 				console.log('handling dispatched logout action');
 				_isLoggedIn = false;
 				break;
@@ -81,13 +87,13 @@ var CmeStore = assign({}, EventEmitter.prototype, {
 
 		// explicitely check here for REQUEST action
 		// to reset the _isSubmitting bool
-		if (action.actionType !== CmeConstants.REQUEST)
+		if (action.actionType !== Constants.REQUEST)
 			_isSubmitting = false;
 
-		CmeStore.emitChange(); // notify store changes
+		Store.emitChange(); // notify store changes
 
 		return true; // No errors. Needed by promise in Dispatcher.
 	})
 });
 
-module.exports = CmeStore;
+module.exports = Store;

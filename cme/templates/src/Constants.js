@@ -1,5 +1,5 @@
 /**
- * CmeConstants.js
+ * Constants.js
  * james.brunner@kaelus.com
  *
  * The CME action enumerations.
@@ -11,10 +11,12 @@ var keyMirror = require('keymirror');
 module.exports = keyMirror({
 	REQUEST: null,
 
+	SESSION: null,
+	DEVICE: null,
+
 	ERROR: null, // somebody said "errors!" - array of string
 	CLEAR_ERRORS: null,
 
-	INITIALIZE: null, // get the CME initial state in data
 	LOGIN: null, // successful login to CME api
 	LOGOUT: null // logout of CME api
 });

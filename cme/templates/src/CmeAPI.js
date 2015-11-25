@@ -3,16 +3,44 @@
 var $ = require('jquery');
 $.md5 = require('js-md5');
 
+var DEBUG = true; // turn API console logging on/off
+
+var API_ROOT = '/api/';
+
+// use enumeration for API routes
+var API = {
+	device: API_ROOT + 'device',
+	login: API_ROOT + 'login',
+	logout: API_ROOT + 'logout',
+	config: API_ROOT + 'config'
+}
+
+function debug(/* arguments */) {
+	if (!DEBUG) return;
+	console.log.apply(console, arguments);
+}
+
 var CmeAPI = {
 
-	// Try to retrieve the device info.  This does not require
-	// authorized access, so no need to be logged into a session.
-	initialize: function(success, failure) {
+	session: function(callback) {
+		var validSession = false;
+
 		return $.ajax({
-			url: '/api/config/device',
+			url: API_ROOT,
 			dataType: 'json',
 			success: function(data) {
-				console.log('[CmeAPI] initialize success:\n', data);
+				validSession = !!data._timestamp;
+			},
+			complete: function() { callback(validSession); }
+		});
+	},
+
+	device: function(success, failure) {
+		return $.ajax({
+			url: API.device,
+			dataType: 'json',
+			success: function(data) {
+				debug('Device success:\n', data);
 
 				// we got something back - check to see if it's
 				// the CME device data else call the failure callback.
@@ -22,7 +50,7 @@ var CmeAPI = {
 					success(data.device);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-				console.log('[CmeAPI] initialize error:\n', textStatus);
+				debug('Device error:\n', textStatus);
 				failure([ textStatus ]);
 			}
 		});
@@ -34,21 +62,21 @@ var CmeAPI = {
 			p = $.md5(credentials.p);
 
 		$.ajax({
-			url: '/api/login',
+			url: API.login,
 			data: { u: u, p: p },
 			dataType: 'json',
 			success: function(data) {
 
 				if (!data._timestamp) {
-					console.log('[CmeAPI] login failure:\n', data);
+					debug('Login failure: ', data);
 					failure(data);
 				} else {
-					console.log('[CmeAPI] login success:\n', data);
+					debug('Login success: ', data);
 					success(data);
 				}
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-				console.log('[CmeAPI] login error:\n', textStatus);
+				debug('Login error: ', textStatus);
 				failure([ textStatus ]);
 			}
 		});
@@ -57,7 +85,7 @@ var CmeAPI = {
 	// just remove the session - ignore return value
 	logout: function() {
 		$.ajax({
-			url: '/api/logout'
+			url: API.logout
 		});
 	}
 };

@@ -8,7 +8,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-var CmeActions = require('./actions/CmeActions');
+var Actions = require('./Actions');
 var CmeApp = require('./components/CmeApp');
 
 // Initialize the CmeStore.  This is written to more easily support
@@ -16,8 +16,8 @@ var CmeApp = require('./components/CmeApp');
 // Cme API requests take success and failure callbacks.  These end up
 // being CmeActions that get dispatched and handled by the CmeStore.
 
-CmeActions.initialize(/* pass cme host info, */).then(function () {
-
+// Wait for these requests to complete - they initialize the Store.
+Actions.session().always(Actions.device().always(function () {
+	console.log("rendering the app...");
 	ReactDOM.render(<CmeApp />, document.getElementById('cmeapp'));
-
-});
+}));
