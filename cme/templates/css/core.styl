@@ -1,0 +1,35 @@
+body
+	font 14px 'Helvetica Neue', Helvetica, Arial, sans-serif
+	line-height 1.4em
+	background bg-color
+	color fg-color
+	margin 0
+	padding 0
+	overflow-x hidden
+	font-smoothing antialiased
+
+a
+	color link-color
+
+button
+	background button-bg-color
+	background-repeat no-repeat
+	background-position center center
+	background-size 32px 32px
+	color #fff
+	font-size 20px
+	height 48px
+	width 64px
+	line-height 48px
+	text-align center
+	border 0
+	outline 0
+	opacity 1
+	transition all 0.3s ease 0s
+button:hover
+	opacity 0.75
+	cursor pointer
+button:disabled
+	opacity 1
+	background-color grayscale(button-bg-color)
+	cursor default

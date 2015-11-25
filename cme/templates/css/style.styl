@@ -1,46 +1,17 @@
 // CME styles
 
-main-bg-color = hsla(120, 0, 90%, 1)
+// app-wide colors
+bg-color = hsla(120, 0, 90%, 1)
+fg-color = #4D4D4D
+link-color = #00B7FF
+
+button-bg-color = #428BCA
+
+error-color = #FF2222
 
 @import mixins
 @import icons
-
-body
-	font 14px 'Helvetica Neue', Helvetica, Arial, sans-serif
-	line-height 1.4em
-	background main-bg-color
-	color #4D4D4D
-	margin 0
-	padding 0
-	overflow-x hidden
-	font-smoothing antialiased
-
-a
-	color #00B7FF
-
-default-button-color = #428BCA
-
-button
-	background default-button-color
-	background-repeat no-repeat
-	background-position center center
-	background-size 32px 32px
-	color #fff
-	font-size 20px
-	height 48px
-	width 64px
-	line-height 48px
-	text-align center
-	border 0
-	outline 0
-	opacity 1
-	transition all 0.3s ease 0s
-button:hover
-	opacity 0.75
-button:disabled
-	opacity 1
-	background-color grayscale(default-button-color)
-	cursor default
-
+@import core
 @import header
 @import login
+@import console
