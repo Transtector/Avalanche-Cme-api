@@ -12,7 +12,7 @@ def login():
 	u = request.args.get('u')
 	p = request.args.get('p')
 
-	if u != settings['__username']:
+	if u.lower() != settings['__username'].lower():
 		return json_response([ 'Login failed - unknown user.' ])
 
 	if p != settings['__passhash']:
