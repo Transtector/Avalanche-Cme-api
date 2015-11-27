@@ -25,6 +25,7 @@ function configPanel(config) {
 	console.log("config panel: ", config);
 	return (
 		<div className="panel" id="config">
+			<div className="title">Configuration</div>
 
 			<div className="input-group" id="general">
 				<div className="input-group-name">General</div>
@@ -148,6 +149,9 @@ function configPanel(config) {
 function homePanel() {
 	return (
 		<div className="panel" id="home">
+			<div className="title">Status</div>
+
+			<span>Sensors will show here...</span>
 
 		</div>
 	);
@@ -163,8 +167,10 @@ function displayConsole(configState) {
 				: homePanel()
 			}
 
-			<div className="errors">
-				ERRORS HERE!
+			<div className="panel" id="error">
+				<div className="message">
+					ERRORS SHOWN HERE
+				</div>
 			</div>
 		</div>
 	);

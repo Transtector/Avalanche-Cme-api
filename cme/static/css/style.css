@@ -248,13 +248,21 @@ header #buttons button {
   border-radius: 4px;
   min-height: 100px;
 }
+.panel .title {
+  margin: 10px 10px 0 10px;
+  font-size: 120%;
+  font-weight: bold;
+}
 .panel::after {
   content: '';
   display: block;
   clear: both;
 }
 .panel#home {
-  background: lightYellow;
+  background: #fff;
+}
+.panel#home span {
+  margin: 10px;
 }
 .panel#config {
   background: #fff;
@@ -266,6 +274,37 @@ header #buttons button {
   border-radius: 4px;
   min-height: 100px;
 }
+.panel#error {
+  display: none;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.3);
+}
+.panel#error .message {
+  background: #fff;
+  color: #f22;
+  position: absolute;
+  width: 260px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  height: 300px;
+  top: 50%;
+  left: 50%;
+  margin-top: -150px;
+  margin-left: -130px;
+  -webkit-box-shadow: 4px 4px 10px #666;
+  -moz-box-shadow: 4px 4px 10px #666;
+  -ms-box-shadow: 4px 4px 10px #666;
+  -o-box-shadow: 4px 4px 10px #666;
+  box-shadow: 4px 4px 10px #666;
+}
 .input-group {
   margin: 10px;
   padding: 0 10px 10px 10px;
@@ -273,14 +312,14 @@ header #buttons button {
   float: left;
   text-align: left;
   border: 1px solid #e6e6e6;
-  -webkit-box-shadow: 1px 1px 3px #ccc;
-  -moz-box-shadow: 1px 1px 3px #ccc;
-  -ms-box-shadow: 1px 1px 3px #ccc;
-  -o-box-shadow: 1px 1px 3px #ccc;
-  box-shadow: 1px 1px 3px #ccc;
+  -webkit-box-shadow: 1px 1px 3px #ddd;
+  -moz-box-shadow: 1px 1px 3px #ddd;
+  -ms-box-shadow: 1px 1px 3px #ddd;
+  -o-box-shadow: 1px 1px 3px #ddd;
+  box-shadow: 1px 1px 3px #ddd;
 }
 .input-group .input-group-name {
-  color: #fff;
+  color: #006ec5;
   background: #e6e6e6;
   margin: 0 -10px;
   text-align: center;
@@ -294,6 +333,7 @@ header #buttons button {
 }
 .input-group .textinput label {
   display: block;
+  color: #006ec5;
   font-size: 90%;
   font-weight: bold;
 }

@@ -75,11 +75,13 @@ var Store = assign({}, EventEmitter.prototype, {
 
 			case Constants.LOGIN:
 				console.log('handling dispatched login action');
+				_isConfigVisible = false;
 				_isLoggedIn = true;
 				break;
 
 			case Constants.LOGOUT:
 				console.log('handling dispatched logout action');
+				_isConfigVisible = false;
 				_isLoggedIn = false;
 				break;
 
