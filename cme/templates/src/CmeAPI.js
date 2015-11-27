@@ -56,6 +56,27 @@ var CmeAPI = {
 		});
 	},
 
+	config: function(success, failure) {
+		return $.ajax({
+			url: API.config,
+			dataType: 'json',
+			success: function(data) {
+				debug('Config success:\n', data);
+
+				// we got something back - check to see if it's
+				// the CME device data else call the failure callback.
+				if (!data.config)
+					failure([ "Device config not readable." ]);
+				else
+					success(data.config);
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				debug('Config error:\n', textStatus);
+				failure([ textStatus ]);
+			}
+		});
+	},
+
 	// login with CME username, password credentials
 	login: function(credentials, success, failure) {
 		var u = credentials.u,

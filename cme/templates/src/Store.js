@@ -18,6 +18,7 @@ var _cme = {};
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
+var _isConfigVisible = false;
 
 var Store = assign({}, EventEmitter.prototype, {
 
@@ -26,7 +27,8 @@ var Store = assign({}, EventEmitter.prototype, {
 			cme: _cme,
 			errors: _errors,
 			isLoggedIn: _isLoggedIn,
-			isSubmitting: _isSubmitting
+			isSubmitting: _isSubmitting,
+			isConfigVisible: _isConfigVisible
 		}
 	},
 
@@ -79,6 +81,15 @@ var Store = assign({}, EventEmitter.prototype, {
 			case Constants.LOGOUT:
 				console.log('handling dispatched logout action');
 				_isLoggedIn = false;
+				break;
+
+			case Constants.HOME:
+				_isConfigVisible = false;
+				break;
+
+			case Constants.CONFIG:
+				_cme['config'] = action.data;
+				_isConfigVisible = true;
 				break;
 
 			default: // not an action we're looking for - ignore

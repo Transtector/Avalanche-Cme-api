@@ -43,8 +43,8 @@ var Header = React.createClass({
 				<div id="tab">&nbsp;</div>
 
 				<div id="buttons">
-					{this.props.isLoggedIn ? <button id="home" className="icon-home" onChange={this._showHome} /> : null}
-					{this.props.isLoggedIn ? <button id="settings" className="icon-settings" onChange={this._showSettings} /> : null}
+					{this.props.isLoggedIn ? <button id="home" className="icon-home" onClick={this._showHome} /> : null}
+					{this.props.isLoggedIn ? <button id="settings" className="icon-settings" onClick={this._showSettings} /> : null}
 					{this.props.isLoggedIn ? <button id="logout" className="icon-logout" onClick={this._logout} />: null}
 				</div>
 
@@ -58,15 +58,14 @@ var Header = React.createClass({
 	},
 
 	_showHome: function() {
-
+		Actions.home();
 	},
 
 	_showSettings: function() {
-
+		Actions.config();
 	},
 
 	_logout: function () {
-		console.log('firing logout action...');
 		Actions.logout();
 	}
 });

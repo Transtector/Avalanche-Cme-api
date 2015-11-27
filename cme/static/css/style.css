@@ -59,6 +59,9 @@ button:disabled {
   background-color: #868686;
   cursor: default;
 }
+input[type="text"] {
+  outline: 0;
+}
 header {
   position: relative;
   margin: 0;
@@ -232,5 +235,74 @@ header #buttons button {
   outline: none;
 }
 #console {
+  position: relative;
+  margin: 10px;
+}
+.panel {
+  background: #fff;
+  border: 1px solid #ccc;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  min-height: 100px;
+}
+.panel::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+.panel#home {
+  background: lightYellow;
+}
+.panel#config {
+  background: #fff;
+  border: 1px solid #ccc;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  min-height: 100px;
+}
+.input-group {
+  margin: 10px;
+  padding: 0 10px 10px 10px;
+  display: inline-block;
+  float: left;
+  text-align: left;
+  border: 1px solid #e6e6e6;
+  -webkit-box-shadow: 1px 1px 3px #ccc;
+  -moz-box-shadow: 1px 1px 3px #ccc;
+  -ms-box-shadow: 1px 1px 3px #ccc;
+  -o-box-shadow: 1px 1px 3px #ccc;
+  box-shadow: 1px 1px 3px #ccc;
+}
+.input-group .input-group-name {
+  color: #fff;
+  background: #e6e6e6;
+  margin: 0 -10px;
   text-align: center;
+  font-size: 90%;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.input-group .textinput {
+  margin: 10px auto;
+  border-bottom: 1px solid #ccc;
+}
+.input-group .textinput label {
+  display: block;
+  font-size: 90%;
+  font-weight: bold;
+}
+.input-group .textinput input {
+  margin-left: 8px;
+  width: 242px;
+  font-size: 20px;
+  line-height: 40px;
+  border: none;
+  background: transparent;
+  outline: none;
 }
