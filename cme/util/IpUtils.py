@@ -73,12 +73,12 @@ def manage_network(network_settings):
 		reload_network = True
 
 		# reset for dhcp
-		if use_dhcp and app.config['IS_CME']:
+		if use_dhcp:
 			logger.info("Setting network to DHCP configuration.")
 			os.system('sudo ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
 
 		# reset for static
-		elif app.config['IS_CME']:
+		else:
 			logger.info("Setting network to static configuration.")
 			os.system('sudo ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
 
