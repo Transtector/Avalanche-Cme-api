@@ -5,6 +5,11 @@
  * Repository for the Cme application model.
 */
 'use strict';
+var DEBUG = true;
+function debug(/* arguments */) {
+	if (!DEBUG) return;
+	console.log.apply(console, arguments);
+}
 
 var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
@@ -48,39 +53,37 @@ var Store = assign({}, EventEmitter.prototype, {
 
 		switch(action.actionType) {
 
-			case Constants.REQUEST:
-				console.log('submitting a request...');
+			case Constants.REQUEST: // a request has been submitted to server
 				_isSubmitting = true;
 				break;
 
-			case Constants.SESSION:
-				console.log('handling dispatched session action, data = ', action.data);
+			case Constants.TIME: // cme time responds
+				_cme.config.time.current = action.data['current'];
+				break;
+
+			case Constants.SESSION: // a session object has been replied
 				_isLoggedIn = action.data;
 				break;
 
-			case Constants.DEVICE:
-				console.log('handling dispatched device action, data = ', action.data);
+			case Constants.DEVICE: // a device object has been replied
 				_cme['device'] = action.data;
 				break;
 
 			case Constants.ERROR:
-				console.log('handling dispatched error action: ', action.data);
+				debug('handling dispatched error action: ', action.data);
 				_errors = Array.isArray(action.data) ? action.data : [action.data];
 				break;
 
 			case Constants.CLEAR_ERRORS:
-				console.log('handling clear errors');
 				_errors = [];
 				break;
 
-			case Constants.LOGIN:
-				console.log('handling dispatched login action');
+			case Constants.LOGIN: // a valid login has been obtained
 				_isConfigVisible = false;
 				_isLoggedIn = true;
 				break;
 
-			case Constants.LOGOUT:
-				console.log('handling dispatched logout action');
+			case Constants.LOGOUT: // session has been logged out
 				_isConfigVisible = false;
 				_isLoggedIn = false;
 				break;
@@ -90,8 +93,23 @@ var Store = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.CONFIG:
-				_cme['config'] = action.data;
 				_isConfigVisible = true;
+
+				// item key name:
+				var item = Object.keys(action.data)[0];
+
+				if (item === 'config') {
+					_cme['config'] = action.data[item];
+				} else if (_cme['config'][item] !== undefined) {
+					_cme['config'][item] = action.data[item];
+				} else {
+					for (var group in _cme['config']) {
+						if (_cme['config'][group][item]) {
+							_cme['config'][group][item] = action.data[item];
+							break;
+						}
+					}
+				}
 				break;
 
 			default: // not an action we're looking for - ignore
