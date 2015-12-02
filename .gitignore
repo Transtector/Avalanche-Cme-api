@@ -4,6 +4,11 @@ __pycache__
 *.pyc
 ._*
 
+# Client code that gets built
+cme/static/css
+cme/static/src
+
+
 # Mac/Windows OS Junk
 Thumbs.db
 ehthumbs.db
