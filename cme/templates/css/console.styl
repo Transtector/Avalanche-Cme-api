@@ -49,34 +49,86 @@
 		box-shadow 4px 4px 10px #666
 
 .input-group
-	margin 10px
-	padding 0 10px 10px 10px
+	position relative
 	display inline-block
+	margin 10px
 	float left
 	text-align left
+	overflow hidden
 	border 1px solid bg-color
+	border-radius 5px
 	box-shadow 1px 1px 3px #ddd
-	.input-group-name
+	.input-group-title
+		position relative
 		color #006EC5
 		background bg-color
-		margin 0 -10px
 		text-align center
 		font-size 90%
 		font-weight bold
 		text-transform uppercase
-	.textinput
+		button
+			position absolute
+			left 0
+			width 100%
+			height 100%
+			background transparent
+		&::before
+			content ''
+			position absolute
+			width 20px
+			height 100%
+			left 5px
+			top 50%
+			margin-top -10px
+			background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23006EC5' d='m10,15l-8,-8l16,0l-8,8z' /%3E%3C/svg%3E")
+			transition all 0.3s ease 0s
+	&.collapsed
+		.input-group-title::before
+			transform rotate(-90deg)
+		.input-group-content
+			position relative
+			padding 0 10px
+			height 0
+
+	.input-group-content
+		padding 10px
+		overflow hidden
+		transition all 0.3s ease 0s
+	.input-group-buttons
+		margin -10px // changes with .input-group margin above
+		margin-top 0
+		border-top 1px solid bg-color
+		button
+			background transparent
+			color #006EC5
+			width 50%
+		button:first-child
+			border-right 1px solid bg-color
+	label
+		display block
+		color #006EC5
+		font-size 90%
+		font-weight bold
+	.textinput, .checkboxinput, .linkinput
 		margin 10px auto
 		border-bottom 1px solid #ccc
-		label
-			display block
-			color #006EC5
-			font-size 90%
-			font-weight bold
-		input
-			margin-left 8px
-			width 242px
-			font-size 20px
-			line-height 40px
-			border none
-			background transparent
-			outline none
+	.checkboxinput input
+		margin 5px 20px
+		zoom 2
+	.textinput input,
+	.linkinput a
+		font-size 20px
+		line-height 40px
+	.textinput input
+		margin-left 8px
+		width 324px
+		border none
+		background transparent
+		outline none
+	.textinput input[readonly]
+		color #999
+	.linkinput a
+		display inline-block
+		padding 1px
+		width 332px
+		text-align center
