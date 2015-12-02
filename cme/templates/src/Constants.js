@@ -11,6 +11,10 @@ var keyMirror = require('keymirror');
 module.exports = keyMirror({
 	REQUEST: null,
 
+	START: null,
+	STOP: null,
+	TIME: null,
+
 	SESSION: null,
 	DEVICE: null,
 

@@ -7,6 +7,12 @@
  */
 'use strict';
 
+var DEBUG = true;
+function debug(/* arguments */) {
+	if (!DEBUG) return;
+	console.log.apply(console, arguments);
+}
+
 var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
@@ -18,16 +24,18 @@ function onErrors(errors) {
 	});
 }
 
+var TIME_POLL_INTERVAL = null;
+
 // alert that server request is going out
-function dispatchRequest() {
+function dispatchRequest(action) {
+	debug("Server request: " + action);
 	AppDispatcher.dispatch({ actionType: Constants.REQUEST });
 }
 
 var Actions = {
 
 	session: function () {
-		console.log('dispatching session action...');
-		dispatchRequest();
+		dispatchRequest('session');
 		return CmeAPI.session(function(validSession) {
 			AppDispatcher.dispatch({
 				actionType: Constants.SESSION,
@@ -37,8 +45,7 @@ var Actions = {
 	},
 
 	device: function() {
-		console.log('dispatching device action...');
-		dispatchRequest();
+		dispatchRequest('device');
 		return CmeAPI.device(function(deviceData) {
 			AppDispatcher.dispatch({
 				actionType: Constants.DEVICE,
@@ -52,19 +59,14 @@ var Actions = {
 	},
 
 	login: function(u, p) {
-		console.log('dispatching login action...');
-
-		function onLoggedIn() {
+		dispatchRequest('login');
+		CmeAPI.login({ u: u, p: p }, function() {
 			AppDispatcher.dispatch({ actionType: Constants.LOGIN });
-		}
-
-		dispatchRequest();
-		CmeAPI.login({ u: u, p: p }, onLoggedIn, onErrors);
+		}, onErrors);
 	},
 
 	logout: function() {
-		console.log('dispatching logout action...');
-		CmeAPI.logout(); // don't wait - just dispatch logout
+		CmeAPI.logout('logout'); // don't wait - just dispatch logout
 		AppDispatcher.dispatch({ actionType: Constants.LOGOUT });
 	},
 
@@ -72,10 +74,36 @@ var Actions = {
 		AppDispatcher.dispatch({ actionType: Constants.HOME });
 	},
 
-	config: function() {
-		dispatchRequest();
-		CmeAPI.config(function(configData) {
-			AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: configData });
+	pollTime: function(action, interval) {
+		var interval = interval || 1000;
+
+		switch(action) {
+			case Constants.START:
+				if (!TIME_POLL_INTERVAL) {
+					TIME_POLL_INTERVAL = setInterval(function() {
+						dispatchRequest('polling time');
+						CmeAPI.poll('config/time/current', function(data) {
+							AppDispatcher.dispatch({ actionType: Constants.TIME, data: data });
+						}, onErrors);
+					}, interval);
+				}
+				break;
+
+			case Constants.STOP:
+				clearInterval(TIME_POLL_INTERVAL);
+				TIME_POLL_INTERVAL = null;
+				break;
+
+			default:
+				return;
+		}
+	},
+
+	config: function(obj) {
+		// obj is _cme['config'] or an object on _cme['config']
+		dispatchRequest('config');
+		CmeAPI.config(obj, function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
 		}, onErrors);
 	}
 };
