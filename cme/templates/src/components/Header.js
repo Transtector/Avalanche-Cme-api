@@ -13,7 +13,7 @@ var Indicator = React.createClass({
 
 	render: function () {
 		return (
-			<div className="indicator">
+			<div>
 				<label>
 					<span>{this.props.item.name}</span>
 					<span className='separator'>:</span>
@@ -29,7 +29,7 @@ var Header = React.createClass({
 	propTypes: {
 		device: React.PropTypes.object.isRequired,
 		isLoggedIn: React.PropTypes.bool.isRequired
-	  },
+	},
 
 	render: function () {
 
