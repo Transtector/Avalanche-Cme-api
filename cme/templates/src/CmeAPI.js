@@ -1,9 +1,14 @@
 'use strict';
+var DEBUG = true; // turn API console logging on/off
+function debug(/* arguments */) {
+	if (!DEBUG) return;
+	console.log.apply(console, arguments);
+}
 
 var $ = require('jquery');
 $.md5 = require('js-md5');
 
-var DEBUG = true; // turn API console logging on/off
+var Store = require('./Store'); // to get the CME config object
 
 var API_ROOT = '/api/';
 
@@ -15,9 +20,31 @@ var API = {
 	config: API_ROOT + 'config'
 }
 
-function debug(/* arguments */) {
-	if (!DEBUG) return;
-	console.log.apply(console, arguments);
+function configItemToUrl(item) {
+	var config = Store.getState().cme['config'],
+		itemUrl = '';
+
+	if (item === 'config') // top-level config object
+		return '';
+
+	if (config[item] !== undefined) // first level config group
+		return '/' + item;
+
+	var itemUrl = '';
+
+	// else we have to search for the item in the config groups
+	// (note: this needs to change if we want to support deeper config object)
+	for (var group in config) {
+		if (config[group][item] !== undefined) {
+			itemUrl = '/' + group + '/' + item;
+			break;
+		}
+	}
+
+	if (itemUrl === '')
+		debug("Developer error (should never get here).  Converting config url for ", item);
+
+	return itemUrl;
 }
 
 var CmeAPI = {
@@ -40,8 +67,6 @@ var CmeAPI = {
 			url: API.device,
 			dataType: 'json',
 			success: function(data) {
-				debug('Device success:\n', data);
-
 				// we got something back - check to see if it's
 				// the CME device data else call the failure callback.
 				if (!data.device)
@@ -56,22 +81,50 @@ var CmeAPI = {
 		});
 	},
 
-	config: function(success, failure) {
-		return $.ajax({
-			url: API.config,
+	poll: function(url, success, failure) {
+		$.ajax({
+			url: API_ROOT + url,
+			contentType: 'application/json; charset=UTF-8',
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				debug('Poll error: ', textStatus);
+				failure([ textStatus ]);
+			}
+		});
+	},
+
+	config: function(obj, success, failure) {
+		var item, url, payload, method;
+
+		if (!obj) { // just GET config
+			url = API.config;
+			item = 'config';
+			method = 'GET';
+			payload = null;
+		} else { // called w/ (obj, success, failure)...POST update
+			item = Object.keys(obj)[0];
+			url = API.config + configItemToUrl(item);
+			payload = JSON.stringify(obj);
+			method = 'POST';
+		}
+
+		$.ajax({
+			type: method,
+			url: url,
+			contentType: 'application/json; charset=UTF-8',
+			data: payload,
 			dataType: 'json',
 			success: function(data) {
-				debug('Config success:\n', data);
+				debug('Config success: ', data);
 
-				// we got something back - check to see if it's
-				// the CME device data else call the failure callback.
-				if (!data.config)
-					failure([ "Device config not readable." ]);
+				if (Object.keys(data)[0] === item) // did we get back what we requested?
+					success(data);
 				else
-					success(data.config);
+					failure([ "Config error with: " + item ]);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Config error:\n', textStatus);
+				debug('Config update error: ', textStatus);
 				failure([ textStatus ]);
 			}
 		});
