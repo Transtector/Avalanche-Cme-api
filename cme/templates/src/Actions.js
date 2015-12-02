@@ -17,14 +17,14 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
+var INTERVALS = {}; // polling interval refs
+
 function onErrors(errors) {
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
 		data: errors
 	});
 }
-
-var TIME_POLL_INTERVAL = null;
 
 // alert that server request is going out
 function dispatchRequest(action) {
@@ -74,24 +74,35 @@ var Actions = {
 		AppDispatcher.dispatch({ actionType: Constants.HOME });
 	},
 
-	pollTime: function(action, interval) {
+	poll: function(type, action, interval) {
 		var interval = interval || 1000;
+
+		function pollTime() {
+			dispatchRequest('polling time');
+			CmeAPI.poll('config/time/current', function(data) {
+				AppDispatcher.dispatch({ actionType: Constants.TIME, data: data });
+			}, onErrors);
+		}
+
+		var pollFunction;
+		switch(type) {
+			case Constants.TIME:
+				pollFunction = pollTime;
+				break;
+
+			default:
+				return;
+		}
 
 		switch(action) {
 			case Constants.START:
-				if (!TIME_POLL_INTERVAL) {
-					TIME_POLL_INTERVAL = setInterval(function() {
-						dispatchRequest('polling time');
-						CmeAPI.poll('config/time/current', function(data) {
-							AppDispatcher.dispatch({ actionType: Constants.TIME, data: data });
-						}, onErrors);
-					}, interval);
-				}
+				if (!INTERVALS[type])
+					INTERVALS[type] = setInterval(pollFunction, interval);
 				break;
 
 			case Constants.STOP:
-				clearInterval(TIME_POLL_INTERVAL);
-				TIME_POLL_INTERVAL = null;
+				clearInterval(INTERVALS[type]);
+				INTERVALS[type] = null;
 				break;
 
 			default:

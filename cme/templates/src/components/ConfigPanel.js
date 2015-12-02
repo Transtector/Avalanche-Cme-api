@@ -62,12 +62,12 @@ var ConfigPanel = React.createClass({
 
 	componentDidMount: function() {
 		Store.addChangeListener(this._onChange);
-		Actions.pollTime(Constants.START);
+		Actions.poll(Constants.TIME, Constants.START);
 	},
 
 	componentWillUnmount: function() {
 		Store.removeChangeListener(this._onChange);
-		Actions.pollTime(Constants.STOP);
+		Actions.poll(Constants.TIME, Constants.STOP);
 	},
 
 	render: function () {

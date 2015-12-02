@@ -11,8 +11,10 @@ var keyMirror = require('keymirror');
 module.exports = keyMirror({
 	REQUEST: null,
 
+	// start, stop poll action
 	START: null,
 	STOP: null,
+
 	TIME: null,
 
 	SESSION: null,
