@@ -1,12 +1,15 @@
 
 tab-border-color = #999
 tab-radius = 20px
+gradient-top-color = #7AB9E3
+gradient-bottom-color = button-bg-color
+gradient-bottom-stop = 45%
 
 header // 100px height, vertically center logo w/24px padding
 	position relative
 	margin 0
 	padding 0
-	background-linear-gradient(top, #7AB9E3, 0%, #006EC5, 100%)
+	background-linear-gradient(top, gradient-top-color, 0%, gradient-bottom-color, gradient-bottom-stop)
 	#branding
 		padding 24px 0 23px 86px // accommmodate 1px bottom border
 		color #fff
@@ -51,35 +54,56 @@ header // 100px height, vertically center logo w/24px padding
 			border-radius 0 0 tab-radius 0
 			background-size auto 100px
 			background-position 0 -80px
-			background-linear-gradient(top, #7AB9E3, 0%, #006EC5, 100%)
+			background-linear-gradient(top, gradient-top-color, 0%, gradient-bottom-color, gradient-bottom-stop)
 	#info
 		position absolute
 		white-space nowrap
 		top 5px
-		left 320px
-		bottom 0
-
-	// label-value indicators (inside the info-tab)
-	.indicator
-		margin 0 12px
-		line-height 30px
-		.separator
-			margin 0 1em 0 0.2em
-		> span
-			font-weight bold
-	.indicator:first-child
-		margin-top 20px
-
+		right 0
+		text-align right
+		> div
+			display inline-block
+			margin 0 12px
+			line-height 30px
+			.separator
+				margin 0 16px 0 2px
+			> span
+				font-weight bold
 	#buttons
 		position absolute
-		padding 24px 0
+		padding 35px 0 10px
 		background bg-color
 		border-top 1px solid tab-border-color
 		padding-right 64px
 		white-space nowrap
 		top 5px
-		left 344px
 		right 0
 		text-align right
 		button
 			margin-left 32px
+
+@media only screen and (max-width: width-breakpoint)
+	header
+		#branding
+			border none
+		#tab
+			display none
+		#buttons
+			position static
+			border none
+			padding 0
+			text-align center
+			button
+				margin 0
+				width 34%
+		#info
+			position static
+			background-color bg-color
+			> div
+				margin 0
+				width 50%
+				text-align center
+		#info::after
+			content ''
+			display block
+			clear both
