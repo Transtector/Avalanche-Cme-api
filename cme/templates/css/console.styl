@@ -56,7 +56,7 @@
 	text-align left
 	overflow hidden
 	border 1px solid bg-color
-	border-radius 5px
+	border-radius 3px
 	box-shadow 1px 1px 3px #ddd
 	.input-group-title
 		position relative
@@ -94,6 +94,51 @@
 		padding 10px
 		overflow hidden
 		transition all 0.3s ease 0s
+
+	.input-group-cluster
+		margin 10px auto
+		white-space nowrap
+		border-bottom 1px solid #ccc
+		> label
+			display block
+			color #006EC5
+			font-size 90%
+			font-weight bold
+		input, a, .led-text, .rdt input[type="text"]
+			font-size 20px
+			line-height 40px
+			border 0
+			background transparent
+			outline none
+		input[type="checkbox"]
+			margin 5px 20px
+			zoom 2
+		input[type="text"]
+			margin-left 8px
+			width 324px
+		input[readonly]
+			color #999
+		.rdt
+			display inline-block
+		.rdt input[type="text"]
+			margin-left 0
+			width 164px
+			text-align center
+		a
+			display inline-block
+			padding 1px
+			width 332px
+			text-align center
+		textarea
+			width 328px
+			height 40px
+			outline none
+			resize vertical
+		.radio-group
+			padding 10px
+			label
+				margin 10px
+
 	.input-group-buttons
 		margin -10px // changes with .input-group margin above
 		margin-top 0
@@ -104,31 +149,63 @@
 			width 50%
 		button:first-child
 			border-right 1px solid bg-color
-	label
-		display block
-		color #006EC5
-		font-size 90%
-		font-weight bold
-	.textinput, .checkboxinput, .linkinput
-		margin 10px auto
-		border-bottom 1px solid #ccc
-	.checkboxinput input
-		margin 5px 20px
-		zoom 2
-	.textinput input,
-	.linkinput a
-		font-size 20px
-		line-height 40px
-	.textinput input
-		margin-left 8px
-		width 324px
-		border none
+
+	.rdt .rdtPicker
+		border-color #e6e6e6
+	.rdt.shifted .rdtPicker
+		right 0
+	.rdtPicker button
+		width auto
+		color button-bg-color
 		background transparent
-		outline none
-	.textinput input[readonly]
-		color #999
-	.linkinput a
-		display inline-block
-		padding 1px
-		width 332px
-		text-align center
+		opacity 0.25
+		&:hover
+			opacity 1
+			background transparent
+
+.zc
+	display inline-block
+	text-align center
+	font-size 20px
+	margin-bottom 5px
+	> div
+		float left
+	.zcBtn
+		color button-bg-color
+		line-height 40px
+		background transparent
+	.zcCounter .zcBtn
+		height 40px
+		opacity 0.25
+	.zcCounter .zcBtn:hover
+		opacity 1
+	.zcSeparator
+		margin 40px 0
+		font-size 20px
+	&::after
+		content ''
+		display block
+		height 0
+		clear both
+
+.led-wrapper
+	position relative
+	height 40px
+	color #999
+	.led
+		position absolute
+		width 20px
+		height 20px
+		top 50%
+		margin-top -10px
+		left 10px
+		background #999
+		border-radius 100%
+	.led.red
+		background #900
+	.led.green
+		background #090
+	.led.yellow
+		background #990
+	.led-text
+		padding-left 40px
