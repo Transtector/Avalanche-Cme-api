@@ -1,5 +1,5 @@
 /**
- * Actions.js
+ * Actions.jsx
  * james.brunner@kaelus.com
  *
  * This class contains helper functions to wrap up requested

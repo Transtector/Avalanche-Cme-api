@@ -1,5 +1,5 @@
 /**
- * Constants.js
+ * Constants.jsx
  * james.brunner@kaelus.com
  *
  * The CME action enumerations.

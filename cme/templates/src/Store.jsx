@@ -1,5 +1,5 @@
 /*
- * Store.js
+ * Store.jsx
  * james.brunner@kaelus.com
  *
  * Repository for the Cme application model.

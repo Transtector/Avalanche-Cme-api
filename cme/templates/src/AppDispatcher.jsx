@@ -1,5 +1,5 @@
 /*
- * AppDispatcher.js
+ * AppDispatcher.jsx
  * james.brunner@kaelus.com
  *
  * Action dispatcher for Cme web application.  Operates as the central

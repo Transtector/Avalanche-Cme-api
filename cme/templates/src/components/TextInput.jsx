@@ -1,5 +1,5 @@
 /**
- * TextInput.js
+ * TextInput.jsx
  * james.brunner@kaelus.com
  *
  * Generic text input field wrapper.
@@ -8,7 +8,7 @@ var React = require('react');
 
 var classNames = require('classnames');
 
-var CheckboxInput = React.createClass({
+var TextInput = React.createClass({
 
 	propTypes: {
 		id: React.PropTypes.string.isRequired
@@ -16,25 +16,30 @@ var CheckboxInput = React.createClass({
 
 	render: function() {
 		var id = this.props.id,
-			checked = this.props.checked,
+			value = this.props.value,
 			placeholder = this.props.placeholder || id.charAt(0).toUpperCase() + id.slice(1),
 			onChange = this.props.onChange,
-			cn = classNames('checkboxinput', this.props.className);
+			onBlur = this.props.onBlur,
+			readonly = !(onChange || onBlur),
+			cn = classNames('input-group-cluster', this.props.className);
 
 		return (
 			<div className={cn}>
 				<label htmlFor={id}>{placeholder}</label>
 				<input
-					type="checkbox"
+					type="text"
 					name={id}
 					id={id}
 					placeholder={placeholder}
-					checked={checked}
+					value={value}
+					disabled={this.props.disabled}
 					onChange={onChange}
+					onBlur={onBlur}
+					readOnly={readonly}
 				/>
 			</div>
 		);
 	}
 });
 
-module.exports = CheckboxInput;
+module.exports = TextInput;

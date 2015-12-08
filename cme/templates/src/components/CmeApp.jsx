@@ -1,5 +1,5 @@
 /**
- * CmeApp.js
+ * CmeApp.jsx
  * james.brunner@kaelus.com
  *
  * Core monitoring engine top-level component.

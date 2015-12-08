@@ -1,5 +1,5 @@
 /**
- * app.js
+ * app.jsx
  * james.brunner@kaelus.com
  *
  * Entry point for the CME (core monitoring engine) web application.

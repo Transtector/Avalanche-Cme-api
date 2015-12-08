@@ -1,5 +1,5 @@
 /*
- * Login.js
+ * Login.jsx
  * james.brunner@kaelus.com
  *
  * Cme web application login component.

@@ -1,5 +1,5 @@
 /**
- * Console.js
+ * Console.jsx
  * james.brunner@kaelus.com
  *
  * A small wrapper component for the primary interactive console 'panels'

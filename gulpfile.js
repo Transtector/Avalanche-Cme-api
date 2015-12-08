@@ -22,7 +22,7 @@ var path = {
 	DEST: './cme/static/src',
 	DEST_SRC: './cme/static/src',
 	DEST_BUILD: './cme/static/src',
-	ENTRY_POINT: './cme/templates/src/app.js'
+	ENTRY_POINT: './cme/templates/src/app.jsx'
 };
 
 gulp.task('html', function () {
@@ -43,6 +43,7 @@ gulp.task('watch', function () {
 
 	var b = browserify({
 		entries: [path.ENTRY_POINT], // top-level app entry
+		extensions: ['.jsx'],
 		transform: [babelify], // jsx to js
 		debug: true, // source maps
 		plugin: [watchify],

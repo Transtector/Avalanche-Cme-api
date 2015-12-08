@@ -1,3 +1,10 @@
+/**
+ * CmeAPI.js
+ * james.brunner@kaelus.com
+ *
+ * Client side AJAX wrapper library for Cme API.
+ */
+
 'use strict';
 var DEBUG = true; // turn API console logging on/off
 function debug(/* arguments */) {

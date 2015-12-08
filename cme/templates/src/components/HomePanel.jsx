@@ -1,5 +1,5 @@
 /**
- * HomePanel.js
+ * HomePanel.jsx
  * james.brunner@kaelus.com
  *
  * CME status indicators site in the Home panel.
