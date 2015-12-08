@@ -37,8 +37,6 @@ def current():
 def zone():
 	if request.method == 'POST':
 
-		# TODO: parse and validate the format
-		# "%H:%M" with optional +/- sign
 		settings_group = settings['time']
 		settings_group['zone'] = request.get_json()['zone']
 		settings['time'] = settings_group

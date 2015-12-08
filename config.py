@@ -81,7 +81,7 @@ SUPPORT_PHONE = ""
 # default NTP settings
 TIME_USE_NTP = True
 TIME_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
-TIME_ZONE_OFFSET = "+00:00"
+TIME_ZONE_OFFSET = 0
 
 # default network settings - mirror changes in the deployed interfaces files
 # (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
