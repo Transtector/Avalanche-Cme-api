@@ -99,16 +99,24 @@ var Store = assign({}, EventEmitter.prototype, {
 				var item = Object.keys(action.data)[0];
 
 				if (item === 'config') {
+
 					_cme['config'] = action.data[item];
+
 				} else if (_cme['config'][item] !== undefined) {
-					_cme['config'][item] = action.data[item];
+
+					_cme['config'][item] = action.data[item] || {};
+
 				} else {
+
 					for (var group in _cme['config']) {
-						if (_cme['config'][group][item]) {
-							_cme['config'][group][item] = action.data[item];
+
+						if (_cme['config'][group][item] !== undefined) {
+							_cme['config'][group][item] = action.data[item] || '';
 							break;
 						}
+
 					}
+
 				}
 				break;
 
