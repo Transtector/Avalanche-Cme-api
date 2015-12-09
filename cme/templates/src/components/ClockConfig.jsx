@@ -85,7 +85,7 @@ function getStateFromConfig() {
 		}
 	);
 
-	obj.current = moment(obj.current).utc();
+	obj.current = moment.utc(obj.current);
 
 	return obj;
 }
@@ -112,11 +112,11 @@ var ClockConfig = React.createClass({
 		switch(this.state.displayAs) {
 
 			case TIME_DISPLAY.CME_LOCAL:
-				//time.utcOffset(this.state.zone * 60);
+				time.utcOffset(this.state.zone * 60);
 				break;
 
 			case TIME_DISPLAY.LOCAL:
-				time.utcOffset(0);
+				time.local();
 				break;
 		}
 
@@ -327,7 +327,10 @@ var ClockConfig = React.createClass({
 			return;
 
 		var obj = Store.getState().cme.config.time;
-		obj.current = moment(obj.current).utc();
+		obj.current = moment.utc(obj.current);
+		for (var t in obj.status) {
+			obj.status[t] = moment.utc(obj.status[t]);
+		}
 
 		if (_updateRequested) {
 
