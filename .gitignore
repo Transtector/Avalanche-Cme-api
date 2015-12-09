@@ -5,8 +5,8 @@ __pycache__
 ._*
 
 # Client code that gets built
-cme/static/css
-cme/static/src
+#cme/static/css
+#cme/static/src
 
 
 # Mac/Windows OS Junk
