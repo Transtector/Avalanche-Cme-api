@@ -38,7 +38,7 @@ var NetConfig = React.createClass({
 						id="dhcp"
 						placeholder="DHCP"
 						checked={this.state.dhcp}
-						onChange={this._onDhcpChange}
+						onChange={this._requestChange}
 					/>
 				</div>
 
@@ -70,25 +70,24 @@ var NetConfig = React.createClass({
 	},
 
 	_requestChange: function(event) {
-		console.log("Request network change...`" + event.target.name + "`");
+		var obj = {},
+			key = event.target.name,
+			value = (key === 'dhcp') 
+				? event.target.checked 
+				: event.target.value;
 
-		var obj = {};
-		if (event.target.type == 'checkbox') {
-			// setting DHCP
-			obj[event.target.name] = event.target.checked;
+		obj[key] = value;
 
-			// reset the network addresses if use DHCP - editing
-			// will be disabled
-			if (event.target.checked) {
-				obj['address'] = this.state.address;
-				obj['netmask'] = this.state.netmask;
-				obj['gateway'] = this.state.gateway;
-				obj['primary'] = this.state.primary;
-				obj['secondary'] = this.state.secondary;
-			}
-		} else {
-			obj[event.target.name] = event.target.value;
-		}
+		// reset net addresses if DHCP checked
+		if (key === 'dhcp' && obj[key]) {
+			var netState = Store.getState().cme.config.network;
+
+			obj.address = netState.address;
+			obj.netmask = netState.netmask;
+			obj.gateway = netState.gateway;
+			obj.primary = netState.primary;
+			obj.secondary = netState.secondary;
+		} 
 
 		this.setState(obj);
 	},
