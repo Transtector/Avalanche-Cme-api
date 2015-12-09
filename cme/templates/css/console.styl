@@ -1,6 +1,7 @@
 #console
 	position relative
 	margin 10px
+	
 .panel
 	background #fff
 	border 1px solid #ccc
@@ -58,110 +59,124 @@
 	border 1px solid bg-color
 	border-radius 3px
 	box-shadow 1px 1px 3px #ddd
-	.input-group-title
+
+.input-group-title
+	position relative
+	color #006EC5
+	background bg-color
+	text-align center
+	font-size 90%
+	font-weight bold
+	text-transform uppercase
+	button
+		position absolute
+		left 0
+		width 100%
+		height 100%
+		background transparent
+	&::before
+		content ''
+		position absolute
+		width 20px
+		height 100%
+		left 5px
+		top 50%
+		margin-top -10px
+		background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23006EC5' d='m10,15l-8,-8l16,0l-8,8z' /%3E%3C/svg%3E")
+		transition all 0.3s ease 0s
+		
+.input-group.collapsed
+	.input-group-title::before
+		transform rotate(-90deg)
+	.input-group-content
 		position relative
+		padding 0 10px
+		height 0
+
+.input-group-content
+	padding 10px
+	overflow hidden
+	transition all 0.3s ease 0s
+
+.input-group-cluster
+	margin 10px auto
+	white-space nowrap
+	border-bottom 1px solid #ccc
+	> label
+		display block
 		color #006EC5
-		background bg-color
-		text-align center
 		font-size 90%
 		font-weight bold
-		text-transform uppercase
-		button
-			position absolute
-			left 0
-			width 100%
-			height 100%
-			background transparent
-		&::before
-			content ''
-			position absolute
-			width 20px
-			height 100%
-			left 5px
-			top 50%
-			margin-top -10px
-			background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23006EC5' d='m10,15l-8,-8l16,0l-8,8z' /%3E%3C/svg%3E")
-			transition all 0.3s ease 0s
-	&.collapsed
-		.input-group-title::before
-			transform rotate(-90deg)
-		.input-group-content
-			position relative
-			padding 0 10px
-			height 0
-
-	.input-group-content
-		padding 10px
-		overflow hidden
-		transition all 0.3s ease 0s
-
-	.input-group-cluster
-		margin 10px auto
-		white-space nowrap
-		border-bottom 1px solid #ccc
-		> label
-			display block
-			color #006EC5
-			font-size 90%
-			font-weight bold
-		input, a, .led-text, .rdt input[type="text"]
-			font-size 20px
-			line-height 40px
-			border 0
-			background transparent
-			outline none
-		input[type="checkbox"]
-			margin 5px 20px
-			zoom 2
-		input[type="text"]
-			margin-left 8px
-			width 324px
-		input[readonly]
-			color #999
-		.rdt
-			display inline-block
-		.rdt input[type="text"]
-			margin-left 0
-			width 164px
-			text-align center
-		a
-			display inline-block
-			padding 1px
-			width 332px
-			text-align center
-		textarea
-			width 328px
-			height 40px
-			outline none
-			resize vertical
-		.radio-group
-			padding 10px
-			label
-				margin 10px
-
-	.input-group-buttons
-		margin -10px // changes with .input-group margin above
-		margin-top 0
-		border-top 1px solid bg-color
-		button
-			background transparent
-			color #006EC5
-			width 50%
-		button:first-child
-			border-right 1px solid bg-color
-
-	.rdt .rdtPicker
-		border-color #e6e6e6
-	.rdt.shifted .rdtPicker
-		right 0
-	.rdtPicker button
-		width auto
-		color button-bg-color
+	input, a, .led-text, .rdt input[type="text"]
+		font-size 20px
+		line-height 40px
+		border 0
 		background transparent
-		opacity 0.25
-		&:hover
-			opacity 1
-			background transparent
+		outline none
+	input[type="checkbox"], input[type="radio"]
+		zoom 2
+		vertical-align middle
+	input[type="text"]
+		margin-left 8px
+		width 324px
+	input[readonly]
+		color #999
+	.rdt
+		display inline-block
+	.rdt input[type="text"]
+		margin-left 0
+		width 164px
+		text-align center
+	a
+		display inline-block
+		padding 1px
+		width 332px
+		text-align center
+	textarea
+		width 308px
+		height 40px
+		outline none
+		resize vertical
+	.radio-group
+		padding 10px
+		> div
+			margin-top 10px
+	#ntpGroup
+		padding 10px
+		position relative
+		#status
+			border 0
+			margin 0
+			position absolute
+			top -10px
+			right 10px
+		#ta-wrapper label
+			margin-top 10px
+			display block
+
+.input-group-buttons
+	margin -10px // changes with .input-group margin above
+	margin-top 0
+	border-top 1px solid bg-color
+	button
+		background transparent
+		color #006EC5
+		width 50%
+	button:first-child
+		border-right 1px solid bg-color
+
+.rdt .rdtPicker
+	border-color #e6e6e6
+.rdt.shifted .rdtPicker
+	right 0
+.rdtPicker button
+	width auto
+	color button-bg-color
+	background transparent
+	opacity 0.25
+	&:hover
+		opacity 1
+		background transparent
 
 .zc
 	display inline-block
@@ -208,4 +223,5 @@
 	.led.yellow
 		background #990
 	.led-text
+		width 110px
 		padding-left 40px
