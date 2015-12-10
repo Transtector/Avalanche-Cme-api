@@ -225,7 +225,6 @@ header #buttons button:last-child {
   position: relative;
   width: 400px;
   margin: 64px auto;
-  padding: 32px 0;
   text-align: center;
 }
 #login #welcome {
