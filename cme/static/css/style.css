@@ -166,17 +166,24 @@ header #info > div > span {
 }
 header #buttons {
   position: absolute;
-  padding: 35px 0 10px;
-  background: #e6e6e6;
-  border-top: 1px solid #999;
-  padding-right: 64px;
-  white-space: nowrap;
-  top: 5px;
+  top: 7px;
   right: 0;
+  height: 100%;
+  min-width: 350px;
+  background: #e6e6e6;
+  -webkit-box-shadow: 1px -1px 2px #ccc;
+  -moz-box-shadow: 1px -1px 2px #ccc;
+  -ms-box-shadow: 1px -1px 2px #ccc;
+  -o-box-shadow: 1px -1px 2px #ccc;
+  box-shadow: 1px -1px 2px #ccc;
+  white-space: nowrap;
   text-align: right;
 }
 header #buttons button {
-  margin-left: 32px;
+  margin: 26px 16px;
+}
+header #buttons button:last-child {
+  margin-right: 32px;
 }
 @media only screen and (max-width: 700px) {
   header #branding {
@@ -187,7 +194,11 @@ header #buttons button {
   }
   header #buttons {
     position: static;
-    border: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    -ms-box-shadow: none;
+    -o-box-shadow: none;
+    box-shadow: none;
     padding: 0;
     text-align: center;
   }
@@ -212,9 +223,9 @@ header #buttons button {
 }
 #login {
   position: relative;
-  width: 480px;
+  width: 400px;
   margin: 64px auto;
-  padding: 32px 64px;
+  padding: 32px 0;
   text-align: center;
 }
 #login #welcome {

@@ -71,16 +71,18 @@ header // 100px height, vertically center logo w/24px padding
 				font-weight bold
 	#buttons
 		position absolute
-		padding 35px 0 10px
-		background bg-color
-		border-top 1px solid tab-border-color
-		padding-right 64px
-		white-space nowrap
-		top 5px
+		top 7px
 		right 0
+		height 100%
+		min-width 350px
+		background bg-color
+		box-shadow 1px -1px 2px #ccc
+		white-space nowrap
 		text-align right
 		button
-			margin-left 32px
+			margin 26px 16px
+			&:last-child
+				margin-right 32px
 
 @media only screen and (max-width: width-breakpoint)
 	header
@@ -90,7 +92,7 @@ header // 100px height, vertically center logo w/24px padding
 			display none
 		#buttons
 			position static
-			border none
+			box-shadow none
 			padding 0
 			text-align center
 			button
