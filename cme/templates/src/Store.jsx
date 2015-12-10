@@ -19,7 +19,9 @@ var assign = require('object-assign'); // ES6 polyfill
 
 var CHANGE_EVENT = 'change';
 
-var _cme = {};
+var _status = {};
+var _device = {};
+var _config = {};
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
@@ -29,7 +31,9 @@ var Store = assign({}, EventEmitter.prototype, {
 
 	getState: function() {
 		return {
-			cme: _cme,
+			status: _status,
+			device: _device,
+			config: _config,
 			errors: _errors,
 			isLoggedIn: _isLoggedIn,
 			isSubmitting: _isSubmitting,
@@ -58,7 +62,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.TIME: // cme time responds
-				_cme.config.time.current = action.data['current'];
+				_config.time.current = action.data['current'];
 				break;
 
 			case Constants.SESSION: // a session object has been replied
@@ -66,7 +70,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.DEVICE: // a device object has been replied
-				_cme['device'] = action.data;
+				_device = action.data;
 				break;
 
 			case Constants.ERROR:
@@ -92,6 +96,10 @@ var Store = assign({}, EventEmitter.prototype, {
 				_isConfigVisible = false;
 				break;
 
+			case Constants.STATUS:
+				_status = action.data;
+				break;
+
 			case Constants.CONFIG:
 				_isConfigVisible = true;
 
@@ -100,18 +108,18 @@ var Store = assign({}, EventEmitter.prototype, {
 
 				if (item === 'config') {
 
-					_cme['config'] = action.data[item];
+					_config = action.data[item];
 
-				} else if (_cme['config'][item] !== undefined) {
+				} else if (_config[item] !== undefined) {
 
-					_cme['config'][item] = action.data[item] || {};
+					_config[item] = action.data[item] || {};
 
 				} else {
 
-					for (var group in _cme['config']) {
+					for (var group in _config) {
 
-						if (_cme['config'][group][item] !== undefined) {
-							_cme['config'][group][item] = action.data[item] || '';
+						if (_config[group][item] !== undefined) {
+							_config[group][item] = action.data[item] || '';
 							break;
 						}
 
