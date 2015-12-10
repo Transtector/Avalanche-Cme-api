@@ -63,7 +63,7 @@ var CmeAPI = {
 			url: API_ROOT,
 			dataType: 'json',
 			success: function(data) {
-				validSession = !!data._timestamp;
+				validSession = !!data.timestamp;
 			},
 			complete: function() { callback(validSession); }
 		});
@@ -148,7 +148,7 @@ var CmeAPI = {
 			dataType: 'json',
 			success: function(data) {
 
-				if (!data._timestamp) {
+				if (!data.timestamp) {
 					debug('Login failure: ', data);
 					failure(data);
 				} else {
