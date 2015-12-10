@@ -61,8 +61,8 @@ var Store = assign({}, EventEmitter.prototype, {
 				_isSubmitting = true;
 				break;
 
-			case Constants.TIME: // cme time responds
-				_config.time.current = action.data['current'];
+			case Constants.CLOCK: // cme time responds
+				_config.clock = action.data.clock;
 				break;
 
 			case Constants.SESSION: // a session object has been replied
@@ -101,6 +101,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.CONFIG:
+
 				_isConfigVisible = true;
 
 				// item key name:

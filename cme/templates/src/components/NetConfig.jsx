@@ -14,15 +14,7 @@ var TextInput = require('./TextInput');
 var NetConfig = React.createClass({
 
 	getInitialState: function() {
-		return Store.getState().cme.config.network;
-	},
-
-	componentDidMount: function() {
-		Store.addChangeListener(this._onChange);
-	},
-
-	componentWillUnmount: function() {
-		Store.removeChangeListener(this._onChange);
+		return this.props.config;
 	},
 
 	render: function() {
@@ -54,15 +46,15 @@ var NetConfig = React.createClass({
 					value={this.state.secondary} onChange={this._requestChange} disabled={this.state.dhcp} />
 
 				<div className="input-group-buttons">
-					<button onClick={this._onReset}>Reset</button>
-					<button onClick={this._onApply}>Apply</button>
+					<button className='btn' onClick={this._onReset}>Reset</button>
+					<button className='btn' onClick={this._onApply}>Apply</button>
 				</div>
 			</InputGroup>
 		);
 	},
 
 	_onReset: function() {
-		this.setState(Store.getState().cme.config.network);
+		this.setState(this.props.config);
 	},
 
 	_onApply: function() {
@@ -80,7 +72,7 @@ var NetConfig = React.createClass({
 
 		// reset net addresses if DHCP checked
 		if (key === 'dhcp' && obj[key]) {
-			var netState = Store.getState().cme.config.network;
+			var netState = this.props.config;
 
 			obj.address = netState.address;
 			obj.netmask = netState.netmask;
@@ -90,10 +82,6 @@ var NetConfig = React.createClass({
 		} 
 
 		this.setState(obj);
-	},
-
-	_onChange: function() {
-		this.setState(Store.getState().cme.config.network);
 	}
 });
 

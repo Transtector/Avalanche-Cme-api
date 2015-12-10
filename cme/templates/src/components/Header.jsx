@@ -43,9 +43,9 @@ var Header = React.createClass({
 				<div id="tab">&nbsp;</div>
 
 				<div id="buttons">
-					{this.props.isLoggedIn ? <button id="home" className="icon-home" onClick={this._showHome} /> : null}
-					{this.props.isLoggedIn ? <button id="settings" className="icon-settings" onClick={this._showSettings} /> : null}
-					{this.props.isLoggedIn ? <button id="logout" className="icon-logout" onClick={this._logout} />: null}
+					{this.props.isLoggedIn ? <button className="btn icon-home" onClick={this._showHome} /> : null}
+					{this.props.isLoggedIn ? <button className="btn icon-settings" onClick={this._showSettings} /> : null}
+					{this.props.isLoggedIn ? <button className="btn icon-logout" onClick={this._logout} />: null}
 				</div>
 
 				<div id="info">

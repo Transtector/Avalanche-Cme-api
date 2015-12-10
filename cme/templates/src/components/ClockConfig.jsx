@@ -8,7 +8,6 @@ var React = require('react');
 
 var Constants = require('../Constants');
 var Actions = require('../Actions');
-var Store = require('../Store');
 
 var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
@@ -29,7 +28,7 @@ var TIME_DISPLAY = {
 	LOCAL: 2
 }
 
-var _updateRequested = false;
+var _pendingClockUpdate = false;
 
 var NtpStatus = React.createClass({
 	propTypes: {
@@ -76,33 +75,52 @@ var NtpStatus = React.createClass({
 	}
 });
 
-function getStateFromConfig() {
-	var obj = assign({}, 
-		Store.getState().cme.config.time,
-		{ 
-			displayAs: TIME_DISPLAY.UTC,
-			display12Hour: false 
-		}
-	);
-
+function wrapTimeFields(obj) {
 	obj.current = moment.utc(obj.current);
-
+	obj.status.forEach(function (s){
+		s = moment.utc(s);
+	});
 	return obj;
 }
 
 var ClockConfig = React.createClass({
 
 	getInitialState: function () {
-		return getStateFromConfig();
+
+		return assign(wrapTimeFields(this.props.config), 
+		{
+			displayAs: TIME_DISPLAY.UTC,
+			display12Hour: false
+		});
 	},
 
-	componentDidMount: function() {
-		Store.addChangeListener(this._onChange);
+	componentWillReceiveProps: function(nextProps) {
+
+		// We receive updated clock every time the clock poll ticks.
+		// However, we only want to set our component state to new
+		// values if we've requested an update and are waiting for
+		// the new clock configuration.  If we haven't requested
+		// to update the clock configuration only the current and
+		// status fields will update from the nextProps refresh.
+
+		var cfg = {};
+		if (!_pendingClockUpdate) {
+
+			cfg = wrapTimeFields({
+				current: nextProps.config.current,
+				status: nextProps.config.status
+			});
+
+		} else {
+			_pendingClockUpdate = true;
+			cfg = wrapTimeFields(nextProps.config);			
+		}
+
+		this.setState(cfg);
 	},
 
 	componentWillUnmount: function() {
-		Store.removeChangeListener(this._onChange);
-		Actions.poll(Constants.TIME, Constants.STOP);
+		Actions.poll(Constants.CLOCK, Constants.STOP);
 	},
 
 	render: function() {
@@ -121,7 +139,7 @@ var ClockConfig = React.createClass({
 		}
 
 		return (
-			<InputGroup id="clock" onExpand={this._startTimePoll} onCollapse={this._stopTimePoll}>
+			<InputGroup id="clock" onExpand={this._startClockPoll} onCollapse={this._stopClockPoll}>
 				<div className="input-group-cluster">
 					<label htmlFor="current">Current</label>
 					<div id="current">
@@ -226,29 +244,28 @@ var ClockConfig = React.createClass({
 				</div>
 
 				<div className="input-group-buttons">
-					<button onClick={this._onReset}>Reset</button>
-					<button onClick={this._onApply}>Apply</button>
+					<button className='btn' onClick={this._onReset}>Reset</button>
+					<button className='btn' onClick={this._onApply}>Apply</button>
 				</div>
 			</InputGroup>
 		);
 	},
 
-	_startTimePoll: function() {
+	_startClockPoll: function() {
 		if (this.state.ntp)
-			Actions.poll(Constants.TIME, Constants.START);
+			Actions.poll(Constants.CLOCK, Constants.START);
 	},
 
-	_stopTimePoll: function() {
-		Actions.poll(Constants.TIME, Constants.STOP);
+	_stopClockPoll: function() {
+		Actions.poll(Constants.CLOCK, Constants.STOP);
 	},
 
 	_onApply: function() {
-		_updateRequested = true;
 		console.log("[ClockConfig]._onApply");
 	},
 
 	_onReset: function() {
-		this.setState(getStateFromConfig());
+		this.setState(this.props.config);
 	},
 
 	_requestServersChange: function(e) {
@@ -286,7 +303,7 @@ var ClockConfig = React.createClass({
 	},
 
 	_requestDisplay12HourChange: function(e) {
-		// touch current state as well to 
+		// clone current state as well to 
 		// force Datetime to update
 		this.setState({ 
 			display12Hour: e.target.checked,
@@ -303,7 +320,7 @@ var ClockConfig = React.createClass({
 			Actions.poll(Constants.TIME, Constants.START);
 			this.setState({
 				ntp: true,
-				status: Store.getState().cme.config.time.status
+				status: this.props.config.status
 			});
 		} else {
 			// stop polling for Cme time and
@@ -312,36 +329,10 @@ var ClockConfig = React.createClass({
 			this.setState({
 				ntp: false,
 				status: [],
-				current: moment()
+				current: moment.utc()
 			})
-		}
-	},
-
-	// Update the local clock config
-	// only if we've applied a new config
-	// Otherwise, just update the current
-	// time (if using NTP).
-	_onChange: function() {
-
-		if (!(this.state.ntp || _updateRequested))
-			return;
-
-		var obj = Store.getState().cme.config.time;
-		obj.current = moment.utc(obj.current);
-		for (var t in obj.status) {
-			obj.status[t] = moment.utc(obj.status[t]);
-		}
-
-		if (_updateRequested) {
-
-			this.setState(obj, function() { _updateRequested = false; });
-
-		} else {
-
-			this.setState({ current: obj.current });
 		}
 	}
 });
 
-window.moment = moment;
 module.exports = ClockConfig;

@@ -6,33 +6,44 @@
  */
 var React = require('react');
 
-var Store = require('../Store');
+var Constants = require('../Constants');
+var Actions = require('../Actions');
 
 var HomePanel = React.createClass({
 
 	getInitialState: function () {
-		return { cme: Store.getState().cme.status };
+		return {}
 	},
 
 	componentDidMount: function() {
-		Store.addChangeListener(this._onChange);
+		Actions.poll(Constants.STATUS, Constants.START);
 	},
 
 	componentWillUnmount: function() {
-		Store.removeChangeListener(this._onChange);
+		Actions.poll(Constants.STATUS, Constants.STOP);
 	},
 
 	render: function () {
+
+		var sensorControlBlocks,
+			status = this.props.status;
+
+		if (status.scb) {
+			sensorControlBlocks = status.scb.map(function(s){
+				return (
+					<li key={s.id}>{s.id}</li>
+				);
+			});
+		}
+
 		return (
 			<div className="panel" id="home">
 				<div className="title">Status</div>
-				<span>Sensors will show here...</span>
+				<ul>
+					{sensorControlBlocks}
+				</ul>
 			</div>
 		);
-	},
-
-	_onChange: function() {
-		this.setState({ cme: Store.getState().cme.status });
 	}
 });
 

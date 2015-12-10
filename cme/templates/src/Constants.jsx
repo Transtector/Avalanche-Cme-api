@@ -15,7 +15,7 @@ module.exports = keyMirror({
 	START: null,
 	STOP: null,
 
-	TIME: null,
+	CLOCK: null,
 	STATUS: null,
 
 	SESSION: null,

@@ -71,6 +71,7 @@ var Login = React.createClass({
 				</div>
 
 				<button
+					className='btn'
 					disabled={!this.state.isValid}
 					onClick={this._onLogin}>
 					Sign In

@@ -12,8 +12,8 @@ body
 a
 	color link-color
 
-button
-	background button-bg-color
+button.btn
+	background-color button-bg-color
 	background-repeat no-repeat
 	background-position center center
 	background-size 32px 32px
@@ -21,16 +21,13 @@ button
 	font-size 20px
 	height 48px
 	width 64px
-	line-height 48px
-	text-align center
 	border 0
 	outline 0
-	opacity 1
 	transition all 0.3s ease 0s
-button:hover
+button.btn:hover
 	opacity 0.75
 	cursor pointer
-button:disabled
+button.btn:disabled
 	opacity 1
 	background-color grayscale(button-bg-color)
 	cursor default

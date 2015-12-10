@@ -43,17 +43,17 @@ var ZoneInput = React.createClass({
 		return (
 			<div id={this.props.id} className="zc">
 				<div className="zcCounter">
-					<button className="zcBtn" onClick={this._onHourUp}>▲</button>
+					<button className="btn" onClick={this._onHourUp}>▲</button>
 					<div className="zcCount">{format(time.hours, (time.hours >= 0 ? '+' : '-'))}</div>
-					<button className="zcBtn" onClick={this._onHourDown}>▼</button>
+					<button className="btn" onClick={this._onHourDown}>▼</button>
 				</div>
 
 				<div className="zcSeparator">:</div>
 
 				<div className="zcCounter">
-					<button className="zcBtn" onClick={this._onMinUp}>▲</button>
+					<button className="btn" onClick={this._onMinUp}>▲</button>
 					<div className="zcCount">{format(time.minutes)}</div>
-					<button className="zcBtn" onClick={this._onMinDown}>▼</button>
+					<button className="btn" onClick={this._onMinDown}>▼</button>
 				</div>
 			</div>
 		);

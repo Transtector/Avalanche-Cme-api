@@ -59,7 +59,16 @@ var Actions = {
 	},
 
 	clearErrors: function() {
+		// restart polling when errors cleared
+		for (var intervalType in INTERVALS) {
+			var I = INTERVALS[intervalType];
+			I.r = setInterval(I.f, I.i);
+		}
 		AppDispatcher.dispatch({ actionType: Constants.CLEAR_ERRORS });
+	},
+
+	injectError: function(err) {
+		onErrors([ err ]);
 	},
 
 	login: function(u, p) {
@@ -81,10 +90,10 @@ var Actions = {
 	poll: function(type, action, interval) {
 		var interval = interval || 1000;
 
-		function pollTime() {
-			dispatchRequest('polling time');
-			CmeAPI.poll('config/time/current', function(data) {
-				AppDispatcher.dispatch({ actionType: Constants.TIME, data: data });
+		function pollClock() {
+			dispatchRequest('polling clock');
+			CmeAPI.poll('config/clock', function(data) {
+				AppDispatcher.dispatch({ actionType: Constants.CLOCK, data: data });
 			}, onErrors);
 		}
 
@@ -97,8 +106,8 @@ var Actions = {
 
 		var pollFunction;
 		switch(type) {
-			case Constants.TIME:
-				pollFunction = pollTime;
+			case Constants.CLOCK:
+				pollFunction = pollClock;
 				break;
 
 			case Constants.STATUS:
@@ -114,13 +123,16 @@ var Actions = {
 				if (!INTERVALS[type])
 					INTERVALS[type] = {
 						r: setInterval(pollFunction, interval),
+						f: pollFunction,
 						i: interval
 					};
 				break;
 
 			case Constants.STOP:
-				clearInterval(INTERVALS[type].r);
-				delete INTERVALS[type];
+				if (INTERVALS[type]) {
+					clearInterval(INTERVALS[type].r);
+					delete INTERVALS[type];
+				}
 				break;
 
 			default:

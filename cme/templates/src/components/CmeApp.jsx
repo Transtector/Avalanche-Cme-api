@@ -10,8 +10,11 @@ var React = require('react');
 
 var Header = require('./Header');
 var Login = require('./Login');
-var Console = require('./Console');
+var ConfigPanel = require('./ConfigPanel');
+var HomePanel = require('./HomePanel');
+var ErrorPanel = require('./ErrorPanel');
 
+var Actions = require('../Actions');
 var Store = require('../Store');
 
 var CmeApp = React.createClass({
@@ -29,21 +32,43 @@ var CmeApp = React.createClass({
 	},
 
 	render: function() {
+
 		return (
 			<div>
-				<Header	device={this.state.cme.device}
-					isLoggedIn={this.state.isLoggedIn} />
+				<Header device={this.state.device}
+						isLoggedIn={this.state.isLoggedIn} />
 
 				{!this.state.isLoggedIn
+
 					? <Login errors={this.state.errors} isSubmitting={this.state.isSubmitting} />
-					: <Console />
+					
+					: <div id="console">
+
+						{this.state.isConfigVisible
+							? <ConfigPanel config={this.state.config} />
+							: <HomePanel status={this.state.status} />
+						}
+
+						<ErrorPanel errors={this.state.errors} />
+
+					</div>
 				}
+
+				<div id="test-buttons">
+					<button onClick={this._testError}
+							disabled={this.state.errors.length > 0}>Test Error</button>
+				</div>
+				
 			</div>
 		);
 	},
 
 	_onChange: function() {
 		this.setState(Store.getState());
+	},
+
+	_testError: function() {
+		Actions.injectError('This is a test');
 	}
 });
 

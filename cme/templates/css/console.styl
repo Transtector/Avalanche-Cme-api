@@ -17,37 +17,29 @@
 		clear both
 
 .panel#home
-	background #fff
-	span
-		margin 10px
 
 .panel#config
-	background #fff
 	border 1px solid #ccc
 	border-radius 4px
 	min-height 100px
 
 .panel#error
-	display none
 	text-align center
 	position absolute
-	top 0
-	bottom 0
 	left 0
+	top 0
 	right 0
+	bottom 0	
 	background rgba(0,0,0,0.3)
-	.message
+	.popup
 		background #fff
+		width 400px
+		margin 0 auto
+	.message
 		color error-color
-		position absolute
-		width 260px
-		border-radius 3px
-		height 300px
-		top 50%
-		left 50%
-		margin-top -150px
-		margin-left -130px
-		box-shadow 4px 4px 10px #666
+	.buttons
+		background pink
+
 
 .input-group
 	position relative
@@ -169,14 +161,14 @@
 	border-color #e6e6e6
 .rdt.shifted .rdtPicker
 	right 0
-.rdtPicker button
+.rdtBtn
 	width auto
 	color button-bg-color
 	background transparent
 	opacity 0.25
-	&:hover
-		opacity 1
-		background transparent
+.rdtBtn:hover
+	opacity 1
+	background transparent
 
 .zc
 	display inline-block
@@ -185,14 +177,14 @@
 	margin-bottom 5px
 	> div
 		float left
-	.zcBtn
+	.btn
 		color button-bg-color
 		line-height 40px
 		background transparent
-	.zcCounter .zcBtn
+	.zcCounter .btn
 		height 40px
 		opacity 0.25
-	.zcCounter .zcBtn:hover
+	.zcCounter .btn:hover
 		opacity 1
 	.zcSeparator
 		margin 40px 0
