@@ -5,7 +5,7 @@ from . import router, request, settings
 from .auth import require_auth
 from .util import json_response, json_error, json_filter
 from ..util.FileUtils import refresh_device
-from ..util.TimeUtils import refresh_time
+from ..util.ClockUtils import refresh_time
 
 
 # top-level configuration
@@ -16,6 +16,6 @@ def config():
 		return json_error([ 'Not implemented' ])
 
 	refresh_device()
-	refresh_time(settings['time'])
+	refresh_time(settings['clock'])
 
 	return json_response({ 'config': json_filter(settings.items()) })

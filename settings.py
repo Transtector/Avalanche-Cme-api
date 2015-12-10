@@ -36,7 +36,7 @@ settings['support'] = settings.get('support', {
 	'phone': app.config['SUPPORT_PHONE']
 })
 
-settings['time'] = settings.get('time', {
+settings['clock'] = settings.get('clock', {
 	'current': '', # updated on init and reads
 	'zone': app.config['TIME_ZONE_OFFSET'],
 	'ntp': app.config['TIME_USE_NTP'],

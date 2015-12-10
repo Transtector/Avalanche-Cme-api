@@ -6,7 +6,7 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
-from .util.TimeUtils import manage_time
+from .util.ClockUtils import manage_time
 from .util.IpUtils import manage_network
 
 # load application configuration from module

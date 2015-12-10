@@ -15,4 +15,4 @@ router = Blueprint('apiroutes', __name__)
 
 # make routes available
 from . import (login, logout, status, config, device,
-			   general, time, http, network, snmp)
+			   general, clock, http, network, snmp)
