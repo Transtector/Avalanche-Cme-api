@@ -20,6 +20,10 @@ var CmeAPI = require('./CmeAPI');
 var INTERVALS = {}; // polling interval refs
 
 function onErrors(errors) {
+	for (var intervalType in INTERVALS) {
+		clearInterval(INTERVALS[intervalType].r);
+	}
+
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
 		data: errors
@@ -84,10 +88,21 @@ var Actions = {
 			}, onErrors);
 		}
 
+		function pollStatus() {
+			dispatchRequest('polling status');
+			CmeAPI.poll('', function(data) {
+				AppDispatcher.dispatch({ actionType: Constants.STATUS, data: data });
+			}, onErrors);
+		}
+
 		var pollFunction;
 		switch(type) {
 			case Constants.TIME:
 				pollFunction = pollTime;
+				break;
+
+			case Constants.STATUS:
+				pollFunction = pollStatus;
 				break;
 
 			default:
@@ -97,12 +112,15 @@ var Actions = {
 		switch(action) {
 			case Constants.START:
 				if (!INTERVALS[type])
-					INTERVALS[type] = setInterval(pollFunction, interval);
+					INTERVALS[type] = {
+						r: setInterval(pollFunction, interval),
+						i: interval
+					};
 				break;
 
 			case Constants.STOP:
-				clearInterval(INTERVALS[type]);
-				INTERVALS[type] = null;
+				clearInterval(INTERVALS[type].r);
+				delete INTERVALS[type];
 				break;
 
 			default:
