@@ -240,13 +240,13 @@ header #buttons button:last-child {
   font-weight: 700;
   color: #f22;
   opacity: 0;
-  -webkit-transition: all 0.3s ease 0s;
-  -moz-transition: all 0.3s ease 0s;
-  -ms-transition: all 0.3s ease 0s;
-  -o-transition: all 0.3s ease 0s;
-  transition: all 0.3s ease 0s;
+  -webkit-transition: opacity 0.3s ease 0s;
+  -moz-transition: opacity 0.3s ease 0s;
+  -ms-transition: opacity 0.3s ease 0s;
+  -o-transition: opacity 0.3s ease 0s;
+  transition: opacity 0.3s ease 0s;
 }
-#login #instructions .login-error.isVisible {
+#login #instructions .isVisible {
   opacity: 1;
 }
 #login .icontextinput,
