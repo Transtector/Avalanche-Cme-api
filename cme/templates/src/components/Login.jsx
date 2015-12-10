@@ -15,30 +15,6 @@ var classNames = require('classnames');
 
 var ENTER_KEY_CODE = 13;
 
-var ErrorPanel = React.createClass({
-
-	propTypes: {
-		errors: React.PropTypes.array.isRequired
-	},
-
-	render: function () {
-
-		if (this.props.errors.length > 0)
-			setTimeout(Actions.clearErrors, 2500);
-
-		var panelClass = classNames({
-			'login-error': true,
-			'isVisible': this.props.errors.length > 0
-		});
-
-		return (
-			<div className={panelClass}>
-				{this.props.errors}&nbsp;
-			</div>
-		);
-	}
-});
-
 var Login = React.createClass({
 
 	propTypes: {
@@ -55,6 +31,10 @@ var Login = React.createClass({
 	},
 
 	render: function () {
+		if (this.props.errors.length > 0)
+			setTimeout(Actions.clearErrors, 3000);
+		
+		var cn = classNames('login-error', {'isVisible': this.props.errors.length > 0});
 
 		return (
 			<div id="login">
@@ -62,7 +42,10 @@ var Login = React.createClass({
 
 				<div id="instructions">
 					Please sign in with the CME username and password.
-					<ErrorPanel errors={this.props.errors} />
+
+					<div className={cn}>
+						{this.props.errors}&nbsp;
+					</div>
 				</div>
 
 				<div className="icontextinput icon-user">
