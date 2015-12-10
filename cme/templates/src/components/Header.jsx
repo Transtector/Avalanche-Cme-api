@@ -50,7 +50,7 @@ var Header = React.createClass({
 
 				<div id="info">
 					<Indicator item={{name: 'Serial number', value: this.props.device.serialNumber}} />
-					<Indicator item={{name: 'Firmware version', value: this.props.device.firmware}} />
+					<Indicator item={{name: 'Firmware', value: this.props.device.firmware}} />
 				</div>
 
 			</header>
