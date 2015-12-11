@@ -5,21 +5,53 @@ bg-color = #E6E6E6
 fg-color = #4D4D4D
 link-color = #00B7FF
 
-button-bg-color = #006EC5
+button-bg-color = #3EA4E1
 
 error-color = #FF2222
 
 width-breakpoint = 700px
+
+header-bg-color = #EEE
+header-tab-border-color = #999
+header-tab-radius = 20px
+header-gradient-top-color = #7AB9E3
+header-gradient-bottom-color = button-bg-color
+header-gradient-bottom-stop = 45%
 
 @import mixins
 @import icons
 @import core
 @import header
 @import login
-@import react-datetime
-@import console
+
+/* Main console styles */
+#console
+	position relative
+		
+.panel-header
+	padding 12px
+	line-height 1.6em
+	background-color header-bg-color
+	border-bottom 1px solid #ccc
+	.title
+		font-size 150%
+	.subtitle
+		margin-top 0.5em
+		font-style italic
+
+.panel-content
+	background-color bg-color
+.panel-content::after
+	content ''
+	display block
+	clear both
+
+@import errorPanel
+@import configPanel
+@import homePanel
 
 div#test-buttons
+	display none
 	margin 10px
 	padding 10px
 	border-top 1px solid #ccc

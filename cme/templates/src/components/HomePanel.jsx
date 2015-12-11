@@ -9,6 +9,14 @@ var React = require('react');
 var Constants = require('../Constants');
 var Actions = require('../Actions');
 
+var Scb = React.createClass({
+	render: function() {
+		return (
+			<div className="scb">{this.props.data.name + ": " + this.props.data.description}</div>
+		);
+	}
+})
+
 var HomePanel = React.createClass({
 
 	getInitialState: function () {
@@ -25,23 +33,28 @@ var HomePanel = React.createClass({
 
 	render: function () {
 
-		var sensorControlBlocks,
-			status = this.props.status;
+		var status = this.props.status,
+			scbs;
 
-		if (status.scb) {
-			sensorControlBlocks = status.scb.map(function(s){
-				return (
-					<li key={s.id}>{s.id}</li>
-				);
+		if (status.scbs) {
+			scbs = status.scbs.map(function(scb){
+				return <Scb key={scb.id} data={scb} />;
 			});
 		}
 
 		return (
 			<div className="panel" id="home">
-				<div className="title">Status</div>
-				<ul>
-					{sensorControlBlocks}
-				</ul>
+				<div className="panel-header">
+					<div className="title">
+						Status
+					</div>
+					<div className="subtitle">
+						CME device sensor control blocks
+					</div>
+				</div>
+				<div className="panel-content scbs">
+					{scbs}
+				</div>
 			</div>
 		);
 	}

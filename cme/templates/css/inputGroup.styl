@@ -1,0 +1,101 @@
+
+
+
+/* input-groups used in the config panel */
+.input-group
+	position relative
+	display inline-block
+	margin 10px
+	float left
+	text-align left
+	overflow hidden
+	box-shadow 1px 1px 3px #ccc
+
+.input-group-title button
+	width 100%
+	height 32px
+.input-group-title::after
+	content ''
+	position absolute
+	width 20px
+	height 32px
+	left 6px
+	background-repeat no-repeat
+	background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23FFFFFF' d='m10,15l-8,-8l16,0l-8,8z' /%3E%3C/svg%3E")
+	transition all 0.3s ease 0s
+		
+.input-group.collapsed
+	.input-group-title::after
+		transform rotate(-90deg)
+	.input-group-content
+		position relative
+		padding 0 10px
+		height 0
+
+.input-group-content
+	padding 10px
+	overflow hidden
+	background #fff
+	transition all 0.3s ease 0s
+
+.input-group-cluster
+	margin 10px auto
+	white-space nowrap
+	border-bottom 1px solid #ccc
+	> label
+		display block
+		color #006EC5
+		font-size 90%
+		font-weight bold
+	> input[type="text"]
+		margin-left 8px
+		width 350px
+	input, a, .led-text
+		font-size 20px
+		line-height 40px
+		border 0
+		background transparent
+		outline none
+	input[type="checkbox"], 
+	input[type="radio"]
+		zoom 2
+		vertical-align middle
+	input[readonly]
+		color #999
+	a
+		display block
+		width 360px
+		text-align center
+	textarea
+		width 334px
+		height 40px
+		outline none
+		resize vertical
+	.radio-group
+		padding 10px
+		> div
+			margin-top 10px
+	#ntpGroup
+		padding 10px
+		position relative
+		#status
+			border 0
+			margin 0
+			position absolute
+			top -10px
+			right 10px
+		#ta-wrapper label
+			margin-top 10px
+			display block
+
+.input-group-buttons
+	margin -10px // changes with .input-group margin above
+	margin-top 0
+	border-top 1px solid bg-color
+	.btn
+		background transparent
+		color #006EC5
+		width 50%
+	.btn:first-child
+		border-right 1px solid bg-color
+

@@ -38,8 +38,9 @@ var InputGroup = React.createClass({
 		return (
 			<div className={cn} id={this.props.id}>
 				<div className="input-group-title">
-					<button className='btn' onClick={this._onClick} />
-					{capitalizedId}
+					<button className='btn' onClick={this._onClick}>
+						{capitalizedId}
+					</button>
 				</div>
 				<div className="input-group-content">
 					{this.props.children}

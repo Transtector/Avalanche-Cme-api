@@ -1,19 +1,12 @@
-
-tab-border-color = #999
-tab-radius = 20px
-gradient-top-color = #7AB9E3
-gradient-bottom-color = button-bg-color
-gradient-bottom-stop = 45%
-
 header // 100px height, vertically center logo w/24px padding
 	position relative
 	margin 0
 	padding 0
-	background-linear-gradient(top, gradient-top-color, 0%, gradient-bottom-color, gradient-bottom-stop)
+	background-linear-gradient(top, header-gradient-top-color, 0%, header-gradient-bottom-color, header-gradient-bottom-stop)
 	#branding
 		padding 24px 0 23px 86px // accommmodate 1px bottom border
 		color #fff
-		border 0 solid tab-border-color
+		border 0 solid header-tab-border-color
 		border-bottom-width 1px
 		font-weight bold
 		line-height 1 // v-align text to top
@@ -32,29 +25,29 @@ header // 100px height, vertically center logo w/24px padding
 		left 236px
 		width 1024px // keeps the slope from changing on window width changes
 		bottom 0
-		border 0 solid tab-border-color
+		border 0 solid header-tab-border-color
 		border-width 1px 0 0 1px
-		border-radius tab-radius 0 0 0
-		background bg-color
+		border-radius header-tab-radius 0 0 0
+		background header-bg-color
 		transform-origin bottom right
 		transform perspective(40px) rotateX(2deg)
 		&::before, &::after
 			content ''
 			position absolute
 			bottom 0
-			height tab-radius
-			left (0 - tab-radius)px
-			width tab-radius
-			background bg-color
+			height header-tab-radius
+			left (0 - header-tab-radius)px
+			width header-tab-radius
+			background header-bg-color
 		&::after
-			left - (tab-radius + 1)
-			border 0 solid tab-border-color
+			left - (header-tab-radius + 1)
+			border 0 solid header-tab-border-color
 			border-bottom-width 1px
 			border-right-width 1px
-			border-radius 0 0 tab-radius 0
+			border-radius 0 0 header-tab-radius 0
 			background-size auto 100px
 			background-position 0 -80px
-			background-linear-gradient(top, gradient-top-color, 0%, gradient-bottom-color, gradient-bottom-stop)
+			background-linear-gradient(top, header-gradient-top-color, 0%, header-gradient-bottom-color, header-gradient-bottom-stop)
 	#info
 		position absolute
 		white-space nowrap
@@ -75,7 +68,7 @@ header // 100px height, vertically center logo w/24px padding
 		right 0
 		height 100%
 		min-width 350px
-		background bg-color
+		background header-bg-color
 		box-shadow 1px -1px 2px #ccc
 		white-space nowrap
 		text-align right
@@ -100,7 +93,7 @@ header // 100px height, vertically center logo w/24px padding
 				width 34%
 		#info
 			position static
-			background-color bg-color
+			background-color header-bg-color
 			> div
 				margin 0
 				width 50%

@@ -28,7 +28,7 @@ var TIME_DISPLAY = {
 	LOCAL: 2
 }
 
-var _pendingClockUpdate = false;
+var _pendingUpdate = false;
 
 var NtpStatus = React.createClass({
 	propTypes: {
@@ -77,7 +77,7 @@ var NtpStatus = React.createClass({
 
 function wrapTimeFields(obj) {
 	obj.current = moment.utc(obj.current);
-	obj.status.forEach(function (s){
+	obj.status.forEach(function(s) {
 		s = moment.utc(s);
 	});
 	return obj;
@@ -104,16 +104,22 @@ var ClockConfig = React.createClass({
 		// status fields will update from the nextProps refresh.
 
 		var cfg = {};
-		if (!_pendingClockUpdate) {
 
-			cfg = wrapTimeFields({
-				current: nextProps.config.current,
-				status: nextProps.config.status
-			});
+		if (_pendingUpdate) {
+
+			_pendingUpdate = false;
+			cfg = wrapTimeFields(nextProps.config);			
 
 		} else {
-			_pendingClockUpdate = true;
-			cfg = wrapTimeFields(nextProps.config);			
+
+			// no pending clock config update - update the 
+			// current time and status fields if not NTP
+			if (this.state.ntp) {
+				cfg = wrapTimeFields({
+					current: nextProps.config.current,
+					status: nextProps.config.status
+				});
+			}
 		}
 
 		this.setState(cfg);
@@ -148,7 +154,7 @@ var ClockConfig = React.createClass({
 							dateFormat={DATE_FORMAT} 
 							inputProps={{ disabled: this.state.ntp }} 
 							onChange={this._requestDateChange} 
-							value={this.state.current} />
+							value={time} />
 						<Datetime 
 							dateFormat={false} 
 							timeFormat={this.state.display12Hour ? TIME_FORMAT_12HOUR : TIME_FORMAT} 

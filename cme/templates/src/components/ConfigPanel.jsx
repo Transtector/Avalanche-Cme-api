@@ -24,36 +24,43 @@ var ConfigPanel = React.createClass({
 
 		return (
 			<div className="panel" id="config">
-				<div className="title">Configuration</div>
+				<div className="panel-header">
+					<div className="title">Configuration</div>
+					<div className="subtitle">CME device settings</div>
+				</div>
 
-				<InputGroup id="general">
-					<TextInput id="name" value={config.general.name} onChange={this._requestChange} />
-					<TextInput id="description" value={config.general.description} onChange={this._requestChange} />
-					<TextInput id="location" value={config.general.location} onChange={this._requestChange} />
-				</InputGroup>
-
-				<InputGroup id="support">
-					<TextInput id="contact" value={config.support.contact} onChange={this._requestChange} />
-					<TextInput id="email" value={config.support.email} onChange={this._requestChange} />
-					<TextInput id="phone"  value={config.support.phone} onChange={this._requestChange} />
-				</InputGroup>
-
-				<NetConfig config={config.network} />
+				<div className="panel-content">
 				
-				<ClockConfig config={config.clock} />
+					<InputGroup id="general">
+						<TextInput id="name" value={config.general.name} onChange={this._requestChange} />
+						<TextInput id="description" value={config.general.description} onChange={this._requestChange} />
+						<TextInput id="location" value={config.general.location} onChange={this._requestChange} />
+					</InputGroup>
 
-				<InputGroup id="snmp">
-					<div className="input-group-cluster">
-						<label htmlFor="mib">MIB</label>
-						<a id="mib" href="#nogo">Download MIB</a>
-					</div>
-				</InputGroup>
+					<InputGroup id="support">
+						<TextInput id="contact" value={config.support.contact} onChange={this._requestChange} />
+						<TextInput id="email" value={config.support.email} onChange={this._requestChange} />
+						<TextInput id="phone"  value={config.support.phone} onChange={this._requestChange} />
+					</InputGroup>
 
-				<InputGroup id="http">
-					<TextInput id="cors" 
-						placeholder="CORS whitelist" 
-						value={config.http.corsWhitelist} />
-				</InputGroup>
+					<NetConfig config={config.network} />
+					
+					<ClockConfig config={config.clock} />
+
+					<InputGroup id="snmp">
+						<div className="input-group-cluster">
+							<label htmlFor="mib">MIB</label>
+							<a id="mib" href="#nogo">Download MIB</a>
+						</div>
+					</InputGroup>
+
+					<InputGroup id="http">
+						<TextInput id="cors" 
+							placeholder="CORS whitelist" 
+							value={config.http.corsWhitelist} />
+					</InputGroup>
+
+				</div>
 
 			</div>
 		);
