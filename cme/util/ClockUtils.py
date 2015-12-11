@@ -50,7 +50,7 @@ def manage_time(ntp_settings):
 # update the current time
 def refresh_time(ntp_settings):
 	# sets the current time
-	ntp_settings['current'] = datetime.utcnow().isoformat()
+	ntp_settings['current'] = datetime.utcnow().isoformat() + 'Z'
 
 	# if useNTP, we'll update the NTP status
 	if ntp_settings['ntp']:
@@ -163,8 +163,8 @@ def __parse_ntpq(ntpq_result):
 	# We use the "poll" field to tell how many seconds between polling then
 	# use the first non-zero bit position as the multiplier.
 	else:
-		last_success_s = last_poll_s + __lowestSet(reach) * poll_s
-		last_success_time = (datetime.now() - timedelta(seconds=(last_success_s))).isoformat()
+		last_success_s = (last_poll_s + __lowestSet(reach) * poll_s) + 'Z'
+		last_success_time = (datetime.now() - timedelta(seconds=(last_success_s))).isoformat() + 'Z'
 
 	return last_poll_time, last_success_time
 

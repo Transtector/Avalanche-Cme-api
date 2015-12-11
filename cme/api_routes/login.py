@@ -26,5 +26,5 @@ def login():
 	token = s.dumps(u)
 
 	# send response with session_cookie = token
-	return json_response(status, token)
+	return json_response(status(), token)
 
