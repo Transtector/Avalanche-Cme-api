@@ -4,7 +4,6 @@
 /* input-groups used in the config panel */
 .input-group
 	position relative
-	display inline-block
 	margin 10px
 	float left
 	text-align left
@@ -17,11 +16,13 @@
 .input-group-title::after
 	content ''
 	position absolute
-	width 20px
-	height 32px
+	width 0
+	height 0
 	left 6px
-	background-repeat no-repeat
-	background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23FFFFFF' d='m10,15l-8,-8l16,0l-8,8z' /%3E%3C/svg%3E")
+	top 12px
+	border-left 8px solid transparent
+	border-right 8px solid transparent
+	border-top 8px solid #fff
 	transition all 0.3s ease 0s
 		
 .input-group.collapsed

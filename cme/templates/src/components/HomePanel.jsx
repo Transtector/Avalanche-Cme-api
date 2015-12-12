@@ -9,10 +9,44 @@ var React = require('react');
 var Constants = require('../Constants');
 var Actions = require('../Actions');
 
+var moment = require('moment');
+
 var Scb = React.createClass({
 	render: function() {
 		return (
-			<div className="scb">{this.props.data.name + ": " + this.props.data.description}</div>
+			<div className="scb">
+				<div className="scb-header">
+					{this.props.data.name + ": " + this.props.data.description}
+				</div>
+	
+				<div className="scb-primary">
+					<div className="sensor-value">
+						{this.props.data.sensors[0].value}
+					</div>
+					<div className="sensor-unit">
+						{this.props.data.sensors[0].unit}
+					</div>
+				</div>
+
+				<div className="scb-secondary">
+					<div className="sensor-value">
+						{this.props.data.sensors[1].value}
+					</div>
+					<div className="sensor-unit">
+						{this.props.data.sensors[1].unit}
+					</div>
+				</div>
+
+
+				<div className="scb-controls">
+
+				</div>
+
+				<button className="btn scb-history-badge">
+					42 days
+				</button>
+
+			</div>
 		);
 	}
 })
@@ -34,12 +68,18 @@ var HomePanel = React.createClass({
 	render: function () {
 
 		var status = this.props.status,
-			scbs;
+			scbs, clock, date, time;
 
 		if (status.scbs) {
 			scbs = status.scbs.map(function(scb){
 				return <Scb key={scb.id} data={scb} />;
 			});
+		}
+
+		if (status.timestamp) {
+			clock = moment.utc(status.timestamp);
+			date = clock.format("M/D");
+			time = clock.format("h:mm:ss A");
 		}
 
 		return (
@@ -51,8 +91,17 @@ var HomePanel = React.createClass({
 					<div className="subtitle">
 						CME device sensor control blocks
 					</div>
+
+					<div className="clock">
+						<div className="date">
+							{date}
+						</div>
+						<div className="time">
+							{time}
+						</div>
+					</div>
 				</div>
-				<div className="panel-content scbs">
+				<div className="panel-content">
 					{scbs}
 				</div>
 			</div>

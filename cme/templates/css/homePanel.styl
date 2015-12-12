@@ -1,11 +1,85 @@
 
-.scbs
-	margin 0 10px
+
+.panel-header .clock
+	position absolute
+	right 32px
+	bottom 20px
+	color #fff
+	font-size 16px
+	> div
+		padding 6px 8px
+		text-align center
+		display inline-block
+		background-color button-bg-color
+	.date
+		background-color lightness(button-bg-color, 50%)
+	
 .scb
-	background lightBlue
 	position relative
-	display inline-block
-	margin 0 10px 10px 0
-	overflow hidden
-	width 360px
+	margin 10px
+	width 380px
 	height 225px
+	float left	
+	overflow hidden
+	color #fff
+	background button-bg-color
+	box-shadow 1px 1px 3px #ccc
+	
+.scb-header
+	padding 0 10px
+
+.scb-primary,
+.scb-secondary
+	text-align center
+	> div
+		display inline-block
+
+scb-readout-height = 160 // px
+scb-primary-secondary-ratio = 1.5
+scb-secondary-height = scb-readout-height / (scb-primary-secondary-ratio + 1)
+scb-primary-height = scb-readout-height - scb-secondary-height
+
+.scb-primary
+	height unit(scb-primary-height, 'px')
+	line-height unit(scb-primary-height, 'px')
+	.sensor-value
+		font-size unit(scb-primary-height / 2, 'px')
+	.sensor-unit
+		font-size unit(scb-primary-height / ( 10 / 3), 'px')
+
+.scb-secondary
+	height unit(scb-secondary-height, 'px')
+	line-height unit(scb-secondary-height, 'px')
+	.sensor-value
+		font-size unit(scb-secondary-height / 2, 'px')
+	.sensor-unit
+		font-size unit(scb-secondary-height / ( 10 / 3 ), 'px')
+
+.btn.scb-history-badge
+	position absolute
+	display inline-block
+	font-size 1em
+	width auto
+	height auto
+	font-weight bold
+	padding 6px 8px 6px 46px
+	bottom 30px
+	right 17px
+	background-color #EA9338
+	box-shadow 0 1px 1.5px 0 rgba(0, 0, 0, 0.12), 0 1px 1px 0 rgba(0, 0, 0, 0.24)	
+	&::before
+		content ''
+		position absolute
+		top 0
+		left 0
+		width 40px
+		height 100%
+		background-color lightness(#EA9338, 50%)
+		background-repeat no-repeat
+		background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E")
+	
+.scb-controls
+	background lightness(button-bg-color, 50%)
+	position absolute
+	width 100%
+	height 48px

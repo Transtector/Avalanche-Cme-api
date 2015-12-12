@@ -17,7 +17,7 @@ html,
 body {
   font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1.4em;
-  background: #eee;
+  background: #e6e6e6;
   color: #4d4d4d;
   margin: 0;
   padding: 0;
@@ -158,6 +158,10 @@ header #info > div {
 header #info > div .separator {
   margin: 0 16px 0 2px;
 }
+header #info > div > label {
+  font-size: 12px;
+  font-style: italic;
+}
 header #info > div > span {
   font-weight: bold;
 }
@@ -220,8 +224,10 @@ header #buttons button:last-child {
 }
 #login {
   position: relative;
-  width: 400px;
-  margin: 64px auto;
+  width: 100%;
+  min-width: 400px;
+  padding: 64px 0;
+  background-color: #eee;
   text-align: center;
 }
 #login #welcome {
@@ -276,8 +282,8 @@ header #buttons button:last-child {
   position: relative;
 }
 .panel-header {
-  padding: 12px;
-  line-height: 1.6em;
+  position: relative;
+  padding: 10px;
   background-color: #eee;
   border-bottom: 1px solid #ccc;
 }
@@ -285,11 +291,8 @@ header #buttons button:last-child {
   font-size: 150%;
 }
 .panel-header .subtitle {
-  margin-top: 0.5em;
+  margin: 0.5em 0 0 0.5em;
   font-style: italic;
-}
-.panel-content {
-  background-color: #e6e6e6;
 }
 .panel-content::after {
   content: '';
@@ -503,7 +506,6 @@ td.rdtYear:hover {
 }
 .input-group {
   position: relative;
-  display: inline-block;
   margin: 10px;
   float: left;
   text-align: left;
@@ -521,11 +523,13 @@ td.rdtYear:hover {
 .input-group-title::after {
   content: '';
   position: absolute;
-  width: 20px;
-  height: 32px;
+  width: 0;
+  height: 0;
   left: 6px;
-  background-repeat: no-repeat;
-  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23FFFFFF' d='m10,15l-8,-8l16,0l-8,8z' /%3E%3C/svg%3E");
+  top: 12px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
   -webkit-transition: all 0.3s ease 0s;
   -moz-transition: all 0.3s ease 0s;
   -ms-transition: all 0.3s ease 0s;
@@ -719,17 +723,101 @@ td.rdtYear:hover {
   height: 0;
   clear: both;
 }
-.scbs {
-  margin: 0 10px;
+.panel-header .clock {
+  position: absolute;
+  right: 32px;
+  bottom: 20px;
+  color: #fff;
+  font-size: 16px;
+}
+.panel-header .clock > div {
+  padding: 6px 8px;
+  text-align: center;
+  display: inline-block;
+  background-color: #3ea4e1;
+}
+.panel-header .clock .date {
+  background-color: #2297dd;
 }
 .scb {
-  background: lightBlue;
   position: relative;
-  display: inline-block;
-  margin: 0 10px 10px 0;
-  overflow: hidden;
-  width: 360px;
+  margin: 10px;
+  width: 380px;
   height: 225px;
+  float: left;
+  overflow: hidden;
+  color: #fff;
+  background: #3ea4e1;
+  -webkit-box-shadow: 1px 1px 3px #ccc;
+  -moz-box-shadow: 1px 1px 3px #ccc;
+  -ms-box-shadow: 1px 1px 3px #ccc;
+  -o-box-shadow: 1px 1px 3px #ccc;
+  box-shadow: 1px 1px 3px #ccc;
+}
+.scb-header {
+  padding: 0 10px;
+}
+.scb-primary,
+.scb-secondary {
+  text-align: center;
+}
+.scb-primary > div,
+.scb-secondary > div {
+  display: inline-block;
+}
+.scb-primary {
+  height: 96px;
+  line-height: 96px;
+}
+.scb-primary .sensor-value {
+  font-size: 48px;
+}
+.scb-primary .sensor-unit {
+  font-size: 28.799999999999997px;
+}
+.scb-secondary {
+  height: 64px;
+  line-height: 64px;
+}
+.scb-secondary .sensor-value {
+  font-size: 32px;
+}
+.scb-secondary .sensor-unit {
+  font-size: 19.2px;
+}
+.btn.scb-history-badge {
+  position: absolute;
+  display: inline-block;
+  font-size: 1em;
+  width: auto;
+  height: auto;
+  font-weight: bold;
+  padding: 6px 8px 6px 46px;
+  bottom: 30px;
+  right: 17px;
+  background-color: #ea9338;
+  -webkit-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
+  -moz-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
+  -ms-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
+  -o-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
+  box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
+}
+.btn.scb-history-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 100%;
+  background-color: #e78218;
+  background-repeat: no-repeat;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E");
+}
+.scb-controls {
+  background: #2297dd;
+  position: absolute;
+  width: 100%;
+  height: 48px;
 }
 div#test-buttons {
   display: none;
