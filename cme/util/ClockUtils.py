@@ -138,7 +138,7 @@ def __parse_ntpq(ntpq_result):
 	else:
 		last_poll_s = int(last_poll)
 
-	last_poll_time = (datetime.now() - timedelta(seconds=last_poll_s)).isoformat()
+	last_poll_time = (datetime.utcnow() - timedelta(seconds=last_poll_s)).isoformat()
 
 	# how often are we polling
 	poll_s = int(data['poll'])
@@ -164,7 +164,7 @@ def __parse_ntpq(ntpq_result):
 	# use the first non-zero bit position as the multiplier.
 	else:
 		last_success_s = (last_poll_s + __lowestSet(reach) * poll_s)
-		last_success_time = (datetime.now() - timedelta(seconds=(last_success_s))).isoformat() + 'Z'
+		last_success_time = (datetime.utcnow() - timedelta(seconds=(last_success_s))).isoformat() + 'Z'
 
 	return last_poll_time, last_success_time
 
