@@ -5,7 +5,7 @@ from . import router
 from .auth import require_auth
 from .util import json_response
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import random
 
@@ -24,8 +24,6 @@ def sensor(timestamp, index, sensor_type):
 	obj['id'] = 's' + str(index)
 	obj['type'] = sensor_type
 	obj['unit'] = UNITS[sensor_type]
-	obj['timestamp'] = timestamp
-	obj['points'] = 1
 
 	if sensor_type == 'AC_VOLTAGE':
 		val = random.randrange(118000, 122001)
@@ -43,7 +41,6 @@ def control(timestamp, index, control_type):
 	obj = {}
 	obj['id'] = 'c' + str(index)
 	obj['type'] = control_type
-	obj['timestamp'] = timestamp
 	obj['open'] = True
 
 	return obj
@@ -55,10 +52,16 @@ def scb(timestamp, index):
 	obj['id'] = 'scb' + str(index)
 	obj['name'] = 'scb' + str(index)
 	obj['description'] = 'sensor control block ' + str(index)
+
+	obj['timestamp'] = timestamp
+	obj['timestamp_0'] = (datetime.utcnow() - timedelta(days=12)).isoformat() + 'Z'
+	obj['points'] = 1
+
 	obj['sensors'] = [
 		sensor(timestamp, 0, 'AC_VOLTAGE'),
 		sensor(timestamp, 1, 'AC_CURRENT')
 	]
+
 	obj['controls'] = [
 		control(timestamp, 0, 'SPST_RELAY')
 	]
@@ -73,7 +76,9 @@ def status():
 	obj['timestamp'] = timestamp
 	obj['scbs'] = [
 		scb(timestamp, 0),
-		scb(timestamp, 1)
+		scb(timestamp, 1),
+		scb(timestamp, 2),
+		scb(timestamp, 3)
 	]
 
 	return obj
