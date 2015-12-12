@@ -152,7 +152,7 @@ header #info {
 }
 header #info > div {
   display: inline-block;
-  margin: 0 12px;
+  margin: 0 16px;
   line-height: 30px;
 }
 header #info > div .separator {
@@ -182,9 +182,6 @@ header #buttons {
 }
 header #buttons button {
   margin: 26px 16px;
-}
-header #buttons button:last-child {
-  margin-right: 32px;
 }
 @media only screen and (max-width: 700px) {
   header #branding {
@@ -725,13 +722,13 @@ td.rdtYear:hover {
 }
 .panel-header .clock {
   position: absolute;
-  right: 32px;
-  bottom: 20px;
+  right: 16px;
+  bottom: 10px;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
 }
 .panel-header .clock > div {
-  padding: 6px 8px;
+  padding: 4px 6px;
   text-align: center;
   display: inline-block;
   background-color: #3ea4e1;
@@ -793,7 +790,7 @@ td.rdtYear:hover {
   height: auto;
   font-weight: bold;
   padding: 6px 8px 6px 46px;
-  bottom: 30px;
+  bottom: 32px;
   right: 17px;
   background-color: #ea9338;
   -webkit-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
@@ -819,8 +816,73 @@ td.rdtYear:hover {
   width: 100%;
   height: 48px;
 }
-div#test-buttons {
+.scb-history {
   display: none;
+  color: #4d4d4d;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
+  text-align: center;
+  line-height: 225px;
+}
+.scb-history > .btn {
+  position: absolute;
+  padding: 0;
+  color: #4d4d4d;
+  background-color: transparent;
+  font-size: 14px;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+}
+.scb-history.open {
+  display: block;
+}
+.scb-config {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 360px;
+  -webkit-transition: all 0.3s ease 0s;
+  -moz-transition: all 0.3s ease 0s;
+  -ms-transition: all 0.3s ease 0s;
+  -o-transition: all 0.3s ease 0s;
+  transition: all 0.3s ease 0s;
+}
+.scb-config.open {
+  right: -20px;
+}
+.scb-config > .btn,
+.scb-config-content > .btn {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 20px;
+  padding: 0;
+  background-color: transparent;
+}
+.scb-config > .btn {
+  right: 0;
+}
+.scb-config-content {
+  background-color: #fff;
+  color: #4d4d4d;
+  text-align: center;
+  height: 100%;
+  line-height: 225px;
+  margin-right: 20px;
+  margin-left: -20px;
+}
+.scb-config-content > .btn {
+  position: absolute;
+  left: -20px;
+  color: #4d4d4d;
+}
+div#test-buttons {
   margin: 10px;
   padding: 10px;
   border-top: 1px solid #ccc;

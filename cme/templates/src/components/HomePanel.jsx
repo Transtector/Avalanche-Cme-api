@@ -10,9 +10,34 @@ var Constants = require('../Constants');
 var Actions = require('../Actions');
 
 var moment = require('moment');
+var classNames = require('classnames');
 
 var Scb = React.createClass({
+
+	getInitialState: function() {
+
+		return {
+			configOpen: false,
+			historyOpen: false
+		}
+	},
+
 	render: function() {
+		var contentClass = classNames({
+			'scb-config': true,
+			'open': this.state.configOpen
+		});
+
+		var historyClass = classNames({
+			'scb-history': true,
+			'open': this.state.historyOpen
+		});
+
+		var end = moment.utc(this.props.data.timestamp),
+			start = moment.utc(this.props.data.timestamp_0),
+			duration = end.from(start, true);
+
+
 		return (
 			<div className="scb">
 				<div className="scb-header">
@@ -42,13 +67,49 @@ var Scb = React.createClass({
 
 				</div>
 
-				<button className="btn scb-history-badge">
-					42 days
+				<button className="btn scb-history-badge"
+						onClick={this._showHideHistory}>
+					{duration}
 				</button>
+				<div className={historyClass}>
+					<button className="btn"
+							onClick={this._showHideHistory}>
+						x
+					</button>
+
+					History Plot
+
+				</div>
+
+				<div className={contentClass}>
+					
+					<div className='scb-config-content'>
+						<button className='btn'
+								onClick={this._showHideConfig}>&laquo;
+						</button>
+
+						Sensor Control Block Configuration
+
+					</div>
+
+					<button className='btn'
+							onClick={this._showHideConfig}>&raquo;
+					</button>
+
+				</div>
 
 			</div>
 		);
+	},
+
+	_showHideConfig: function() {
+		this.setState({configOpen: !this.state.configOpen});
+	},
+
+	_showHideHistory: function() {
+		this.setState({historyOpen: !this.state.historyOpen});
 	}
+
 })
 
 var HomePanel = React.createClass({
@@ -78,7 +139,7 @@ var HomePanel = React.createClass({
 
 		if (status.timestamp) {
 			clock = moment.utc(status.timestamp);
-			date = clock.format("M/D");
+			date = clock.format("MMM D");
 			time = clock.format("h:mm:ss A");
 		}
 
