@@ -44,16 +44,24 @@ scb-primary-height = scb-readout-height - scb-secondary-height
 	line-height unit(scb-primary-height, 'px')
 	.sensor-value
 		font-size unit(scb-primary-height / 2, 'px')
-	.sensor-unit
-		font-size unit(scb-primary-height / ( 10 / 3), 'px')
+	.sensor-unit .U
+		font-size unit(scb-primary-height / ( 10 / 4), 'px')
+	.sensor-unit .u
+		font-size unit(scb-primary-height / ( 10 / 2), 'px')
 
 .scb-secondary
 	height unit(scb-secondary-height, 'px')
 	line-height unit(scb-secondary-height, 'px')
 	.sensor-value
 		font-size unit(scb-secondary-height / 2, 'px')
-	.sensor-unit
-		font-size unit(scb-secondary-height / ( 10 / 3 ), 'px')
+	.sensor-unit .U
+		font-size unit(scb-secondary-height / ( 10 / 4 ), 'px')
+	.sensor-unit .u
+		font-size unit(scb-secondary-height / ( 10 / 2 ), 'px')
+		
+.sensor-unit
+	margin-left 0.5em
+
 
 .btn.scb-history-badge
 	position absolute

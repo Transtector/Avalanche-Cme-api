@@ -769,8 +769,11 @@ td.rdtYear:hover {
 .scb-primary .sensor-value {
   font-size: 48px;
 }
-.scb-primary .sensor-unit {
-  font-size: 28.799999999999997px;
+.scb-primary .sensor-unit .U {
+  font-size: 38.4px;
+}
+.scb-primary .sensor-unit .u {
+  font-size: 19.2px;
 }
 .scb-secondary {
   height: 64px;
@@ -779,8 +782,14 @@ td.rdtYear:hover {
 .scb-secondary .sensor-value {
   font-size: 32px;
 }
-.scb-secondary .sensor-unit {
-  font-size: 19.2px;
+.scb-secondary .sensor-unit .U {
+  font-size: 25.6px;
+}
+.scb-secondary .sensor-unit .u {
+  font-size: 12.8px;
+}
+.sensor-unit {
+  margin-left: 0.5em;
 }
 .btn.scb-history-badge {
   position: absolute;

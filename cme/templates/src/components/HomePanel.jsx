@@ -46,22 +46,31 @@ var Scb = React.createClass({
 	
 				<div className="scb-primary">
 					<div className="sensor-value">
-						{this.props.data.sensors[0].value}
+						{this.props.data.sensors[0].value.toFixed(2)}
 					</div>
 					<div className="sensor-unit">
-						{this.props.data.sensors[0].unit}
+						<span className="U">
+							{this.props.data.sensors[0].unit.substr(0, 1)}
+						</span>
+						<span className="u">
+							{this.props.data.sensors[0].unit.substr(1)}
+						</span>
 					</div>
 				</div>
 
 				<div className="scb-secondary">
 					<div className="sensor-value">
-						{this.props.data.sensors[1].value}
+						{this.props.data.sensors[1].value.toFixed(1)}
 					</div>
 					<div className="sensor-unit">
-						{this.props.data.sensors[1].unit}
+						<span className="U">
+							{this.props.data.sensors[1].unit.substr(0, 1)}
+						</span>
+						<span className="u">
+							{this.props.data.sensors[1].unit.substr(1)}
+						</span>
 					</div>
 				</div>
-
 
 				<div className="scb-controls">
 
