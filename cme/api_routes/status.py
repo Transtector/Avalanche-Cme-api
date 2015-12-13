@@ -48,13 +48,15 @@ def control(timestamp, index, control_type):
 
 def scb(timestamp, index):
 	''' Sensor Control Block '''
+	d = random.randrange(3, 42);
+
 	obj = {}
 	obj['id'] = 'scb' + str(index)
 	obj['name'] = 'scb' + str(index)
 	obj['description'] = 'sensor control block ' + str(index)
 
 	obj['timestamp'] = timestamp
-	obj['timestamp_0'] = (datetime.utcnow() - timedelta(days=12)).isoformat() + 'Z'
+	obj['timestamp_0'] = (datetime.utcnow() - timedelta(days=d)).isoformat() + 'Z'
 	obj['points'] = 1
 
 	obj['sensors'] = [
