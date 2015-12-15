@@ -5,7 +5,7 @@ from . import router
 from .auth import require_auth
 from .util import json_response
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 
 import random
 
@@ -17,55 +17,77 @@ UNITS = {
 	'DC_CURRENT': 'A'
 }
 
+CONTROLS = {}
 
-def sensor(timestamp, index, sensor_type):
+SENSORS = {}
+
+def sensor(index, sensor_type):
 	''' Sensor object '''
+	id = 's' + str(index)
+
+	if sensor_type == 'AC_VOLTAGE':
+		value = random.randrange(118000, 122001) / 1000
+
+	else:
+		value = random.randrange(25, 51) / 10
+
 	obj = {}
-	obj['id'] = 's' + str(index)
+	obj['id'] = id
 	obj['type'] = sensor_type
 	obj['unit'] = UNITS[sensor_type]
 
-	if sensor_type == 'AC_VOLTAGE':
-		val = random.randrange(118000, 122001)
-		obj['value'] = val / 1000
+	ts = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
 
-	else:
-		val = random.randrange(25, 51)
-		obj['value'] = val / 10
+	if not (id in SENSORS):
+		SENSORS[id] = [[ ts - 259200, value ]]
 
+	SENSORS[id].append([ ts, value ])
+
+	obj['data'] = [
+		SENSORS[id][0],
+		SENSORS[id][-1]
+	]
+	
 	return obj
 
 
-def control(timestamp, index, control_type):
+def control(index, control_type):
 	''' Control object '''
+	id = 'c' + str(index)
+
 	obj = {}
-	obj['id'] = 'c' + str(index)
+	obj['id'] = id
 	obj['type'] = control_type
-	obj['open'] = True
+
+	ts = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()
+
+	if not (id in CONTROLS):
+		CONTROLS[id] = [[ ts - 259200, True ]]
+		
+	CONTROLS[id].append([ ts, True ])
+
+	obj['data'] = [
+		CONTROLS[id][0],
+		CONTROLS[id][-1]
+	]
 
 	return obj
 
 
-def scb(timestamp, index):
-	''' Sensor Control Block '''
-	d = random.randrange(3, 42);
-
+def channel(index):
+	''' Channel - includes sensors and controls '''
 	obj = {}
-	obj['id'] = 'scb' + str(index)
-	obj['name'] = 'scb' + str(index)
-	obj['description'] = 'sensor control block ' + str(index)
-
-	obj['timestamp'] = timestamp
-	obj['timestamp_0'] = (datetime.utcnow() - timedelta(days=d)).isoformat() + 'Z'
-	obj['points'] = 1
+	obj['id'] = 'ch' + str(index)
+	obj['name'] = 'ch' + str(index)
+	obj['description'] = 'channel ' + str(index) + ' description'
 
 	obj['sensors'] = [
-		sensor(timestamp, 0, 'AC_VOLTAGE'),
-		sensor(timestamp, 1, 'AC_CURRENT')
+		sensor(0, 'AC_VOLTAGE'),
+		sensor(1, 'AC_CURRENT')
 	]
 
 	obj['controls'] = [
-		control(timestamp, 0, 'SPST_RELAY')
+		control(0, 'SPST_RELAY')
 	]
 
 	return obj
@@ -76,11 +98,11 @@ def status():
 	timestamp = datetime.utcnow().isoformat() + 'Z'
 
 	obj['timestamp'] = timestamp
-	obj['scbs'] = [
-		scb(timestamp, 0),
-		scb(timestamp, 1),
-		scb(timestamp, 2),
-		scb(timestamp, 3)
+	obj['channels'] = [
+		channel(0) #,
+		#channel(1),
+		#channel(2),
+		#channel(3)
 	]
 
 	return obj
