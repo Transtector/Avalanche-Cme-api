@@ -28,7 +28,7 @@ var API = {
 }
 
 function configItemToUrl(item) {
-	var config = Store.getState().cme['config'],
+	var config = Store.getState().config,
 		itemUrl = '';
 
 	if (item === 'config') // top-level config object

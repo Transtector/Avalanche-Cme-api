@@ -303,18 +303,40 @@ header #buttons button {
   top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.1);
 }
 .panel#error .popup {
+  position: absolute;
+  width: 380px;
+  height: 180px;
+  top: 50%;
+  margin-top: -90px;
+  left: 50%;
+  margin-left: -190px;
+  overflow: hidden;
   background: #fff;
-  width: 400px;
-  margin: 0 auto;
+  -webkit-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  -moz-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  -ms-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  -o-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 .panel#error .message {
-  color: #f22;
+  text-align: left;
+  font-size: 120%;
+  color: #aaa;
+  height: 84px;
+  padding: 24px;
 }
 .panel#error .buttons {
-  background: #ffc0cb;
+  text-align: right;
+}
+.panel#error .btn {
+  font-size: 18px;
+  width: 120px;
+  color: #3ea4e1;
+  background: transparent;
+  text-transform: uppercase;
 }
 /*
  * https://github.com/arqex/react-datetime
@@ -720,6 +742,92 @@ td.rdtYear:hover {
   height: 0;
   clear: both;
 }
+.togglebutton,
+.togglebutton label,
+.togglebutton input,
+.togglebutton .toggle {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.togglebutton {
+  vertical-align: middle;
+}
+.togglebutton label {
+  cursor: pointer;
+  text-align: right;
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-size: 16px;
+  line-height: 1.43;
+  color: #bdbdbd;
+  font-weight: 400;
+}
+.togglebutton label input[type=checkbox] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.togglebutton label .toggle {
+  content: '';
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+  background-color: rgba(80,80,80,0.7);
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  -ms-border-radius: 15px;
+  -o-border-radius: 15px;
+  border-radius: 15px;
+  margin-right: 15px;
+  -webkit-transition: background 0.3s ease;
+  -moz-transition: background 0.3s ease;
+  -ms-transition: background 0.3s ease;
+  -o-transition: background 0.3s ease;
+  transition: background 0.3s ease;
+  text-align: left;
+  vertical-align: middle;
+}
+.togglebutton label .toggle::after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: #f1f1f1;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  -ms-border-radius: 20px;
+  -o-border-radius: 20px;
+  border-radius: 20px;
+  position: relative;
+  -webkit-box-shadow: 0 1px 3px 1px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0 1px 3px 1px rgba(0,0,0,0.4);
+  -ms-box-shadow: 0 1px 3px 1px rgba(0,0,0,0.4);
+  -o-box-shadow: 0 1px 3px 1px rgba(0,0,0,0.4);
+  box-shadow: 0 1px 3px 1px rgba(0,0,0,0.4);
+  left: -5px;
+  top: -2px;
+  -webkit-transition: left 0.3s ease, background 0.3s ease, box-shadow 0.1s ease;
+  -moz-transition: left 0.3s ease, background 0.3s ease, box-shadow 0.1s ease;
+  -ms-transition: left 0.3s ease, background 0.3s ease, box-shadow 0.1s ease;
+  -o-transition: left 0.3s ease, background 0.3s ease, box-shadow 0.1s ease;
+  transition: left 0.3s ease, background 0.3s ease, box-shadow 0.1s ease;
+}
+.togglebutton label input[type=checkbox]:checked + .toggle,
+.togglebutton label input[type=checkbox]:checked + .toggle::after {
+  background-color: #ea9338;
+}
+.togglebutton label input[type=checkbox]:checked + .toggle::after {
+  left: 15px;
+}
 .panel-header .clock {
   position: absolute;
   right: 16px;
@@ -736,7 +844,7 @@ td.rdtYear:hover {
 .panel-header .clock .date {
   background-color: #2297dd;
 }
-.scb {
+.ch {
   position: relative;
   margin: 10px;
   width: 380px;
@@ -745,53 +853,53 @@ td.rdtYear:hover {
   overflow: hidden;
   color: #fff;
   background: #3ea4e1;
-  -webkit-box-shadow: 1px 1px 3px #ccc;
-  -moz-box-shadow: 1px 1px 3px #ccc;
-  -ms-box-shadow: 1px 1px 3px #ccc;
-  -o-box-shadow: 1px 1px 3px #ccc;
-  box-shadow: 1px 1px 3px #ccc;
+  -webkit-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -moz-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -ms-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -o-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
 }
-.scb-header {
+.ch-header {
   padding: 0 10px;
 }
-.scb-primary,
-.scb-secondary {
+.ch-primary,
+.ch-secondary {
   text-align: center;
 }
-.scb-primary > div,
-.scb-secondary > div {
+.ch-primary > div,
+.ch-secondary > div {
   display: inline-block;
 }
-.scb-primary {
-  height: 96px;
-  line-height: 96px;
+.ch-primary {
+  height: 80px;
+  line-height: 80px;
 }
-.scb-primary .sensor-value {
+.ch-primary .sensor-value {
   font-size: 48px;
 }
-.scb-primary .sensor-unit .U {
-  font-size: 38.4px;
+.ch-primary .sensor-unit .U {
+  font-size: 38px;
 }
-.scb-primary .sensor-unit .u {
-  font-size: 19.2px;
+.ch-primary .sensor-unit .u {
+  font-size: 19px;
 }
-.scb-secondary {
-  height: 64px;
-  line-height: 64px;
+.ch-secondary {
+  height: 60px;
+  line-height: 60px;
 }
-.scb-secondary .sensor-value {
-  font-size: 32px;
+.ch-secondary .sensor-value {
+  font-size: 34px;
 }
-.scb-secondary .sensor-unit .U {
-  font-size: 25.6px;
+.ch-secondary .sensor-unit .U {
+  font-size: 27px;
 }
-.scb-secondary .sensor-unit .u {
-  font-size: 12.8px;
+.ch-secondary .sensor-unit .u {
+  font-size: 13px;
 }
 .sensor-unit {
   margin-left: 0.5em;
 }
-.btn.scb-history-badge {
+.btn.ch-history-badge {
   position: absolute;
   display: inline-block;
   font-size: 1em;
@@ -799,8 +907,8 @@ td.rdtYear:hover {
   height: auto;
   font-weight: bold;
   padding: 6px 8px 6px 46px;
-  bottom: 32px;
-  right: 17px;
+  bottom: 33px;
+  right: 20px;
   background-color: #ea9338;
   -webkit-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
   -moz-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
@@ -808,7 +916,7 @@ td.rdtYear:hover {
   -o-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
   box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
 }
-.btn.scb-history-badge::before {
+.btn.ch-history-badge::before {
   content: '';
   position: absolute;
   top: 0;
@@ -819,13 +927,16 @@ td.rdtYear:hover {
   background-repeat: no-repeat;
   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E");
 }
-.scb-controls {
+.ch-controls {
   background: #2297dd;
   position: absolute;
-  width: 100%;
-  height: 48px;
+  padding: 10px 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 27px;
 }
-.scb-history {
+.ch-history {
   display: none;
   color: #4d4d4d;
   position: absolute;
@@ -836,7 +947,7 @@ td.rdtYear:hover {
   text-align: center;
   line-height: 225px;
 }
-.scb-history > .btn {
+.ch-history > .btn {
   position: absolute;
   padding: 0;
   color: #4d4d4d;
@@ -847,10 +958,10 @@ td.rdtYear:hover {
   width: 20px;
   height: 20px;
 }
-.scb-history.open {
+.ch-history.open {
   display: block;
 }
-.scb-config {
+.ch-config {
   position: absolute;
   height: 100%;
   width: 100%;
@@ -862,11 +973,11 @@ td.rdtYear:hover {
   -o-transition: all 0.3s ease 0s;
   transition: all 0.3s ease 0s;
 }
-.scb-config.open {
+.ch-config.open {
   right: -20px;
 }
-.scb-config > .btn,
-.scb-config-content > .btn {
+.ch-config > .btn,
+.ch-config-content > .btn {
   position: absolute;
   top: 0;
   height: 100%;
@@ -874,10 +985,10 @@ td.rdtYear:hover {
   padding: 0;
   background-color: transparent;
 }
-.scb-config > .btn {
+.ch-config > .btn {
   right: 0;
 }
-.scb-config-content {
+.ch-config-content {
   background-color: #fff;
   color: #4d4d4d;
   text-align: center;
@@ -886,7 +997,7 @@ td.rdtYear:hover {
   margin-right: 20px;
   margin-left: -20px;
 }
-.scb-config-content > .btn {
+.ch-config-content > .btn {
   position: absolute;
   left: -20px;
   color: #4d4d4d;

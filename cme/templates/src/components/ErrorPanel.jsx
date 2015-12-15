@@ -17,6 +17,9 @@ var ErrorPanel = React.createClass({
 			return (
 				<div id="error" className="panel">
 					<div className="popup">
+						<div className="title">
+						</div>
+						
 						<div className="message">
 							{this.props.errors}
 						</div>

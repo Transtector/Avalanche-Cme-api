@@ -12,7 +12,7 @@ var Actions = require('../Actions');
 var moment = require('moment');
 var classNames = require('classnames');
 
-var Scb = React.createClass({
+var Channel = React.createClass({
 
 	getInitialState: function() {
 
@@ -24,59 +24,88 @@ var Scb = React.createClass({
 
 	render: function() {
 		var contentClass = classNames({
-			'scb-config': true,
+			'ch-config': true,
 			'open': this.state.configOpen
 		});
 
 		var historyClass = classNames({
-			'scb-history': true,
+			'ch-history': true,
 			'open': this.state.historyOpen
 		});
 
-		var end = moment.utc(this.props.data.timestamp),
-			start = moment.utc(this.props.data.timestamp_0),
-			duration = end.from(start, true);
+		var name = this.props.ch.name,
+			description = this.props.ch.description,
+			title = name + ": " + description;
 
+		var primary = this.props.ch.sensors[0],
+			primary_value = primary.data[primary.data.length - 1][1] || 0,
+
+			secondary = this.props.ch.sensors[1],
+			secondary_value = secondary.data[secondary.data.length - 1][1] || 0;
+
+		var timestamps = [], ts_start, ts_end;
+		this.props.ch.sensors.forEach(function(s) {
+			s.data.forEach(function(p){
+				timestamps.push(p[0]);
+			});
+		});
+		this.props.ch.controls.forEach(function(c) { 
+			c.data.forEach(function(p){
+				timestamps.push(p[0]);
+			});
+		});
+
+		ts_end = moment.unix(Math.max.apply(null, timestamps)).utc();
+		ts_start = moment.unix(Math.min.apply(null, timestamps)).utc();
+
+		var duration = ts_end.from(ts_start, true);
 
 		return (
-			<div className="scb">
-				<div className="scb-header">
-					{this.props.data.name + ": " + this.props.data.description}
+			<div className="ch">
+				<div className="ch-header">
+					{title}
 				</div>
 	
-				<div className="scb-primary">
+				<div className="ch-primary">
 					<div className="sensor-value">
-						{this.props.data.sensors[0].value.toFixed(2)}
+						{primary_value.toFixed(2)}
 					</div>
 					<div className="sensor-unit">
 						<span className="U">
-							{this.props.data.sensors[0].unit.substr(0, 1)}
+							{primary.unit.substr(0, 1)}
 						</span>
 						<span className="u">
-							{this.props.data.sensors[0].unit.substr(1)}
+							{primary.unit.substr(1)}
 						</span>
 					</div>
 				</div>
 
-				<div className="scb-secondary">
+				<div className="ch-secondary">
 					<div className="sensor-value">
-						{this.props.data.sensors[1].value.toFixed(1)}
+						{secondary_value.toFixed(1)}
 					</div>
 					<div className="sensor-unit">
 						<span className="U">
-							{this.props.data.sensors[1].unit.substr(0, 1)}
+							{secondary.unit.substr(0, 1)}
 						</span>
 						<span className="u">
-							{this.props.data.sensors[1].unit.substr(1)}
+							{secondary.unit.substr(1)}
 						</span>
 					</div>
 				</div>
 
-				<div className="scb-controls">
-
+				<div className="ch-controls">
+					<div className="togglebutton">
+						<label>
+							<input type="checkbox" />
+							<span className="toggle">
+							</span>
+							Toggle button
+						</label>	
+					</div>
 				</div>
 
-				<button className="btn scb-history-badge"
+				<button className="btn ch-history-badge"
 						onClick={this._showHideHistory}>
 					{duration}
 				</button>
@@ -86,18 +115,18 @@ var Scb = React.createClass({
 						x
 					</button>
 
-					History Plot
+					Channel History Plots
 
 				</div>
 
 				<div className={contentClass}>
 					
-					<div className='scb-config-content'>
+					<div className='ch-config-content'>
 						<button className='btn'
 								onClick={this._showHideConfig}>&laquo;
 						</button>
 
-						Sensor Control Block Configuration
+						Channel Configuration
 
 					</div>
 
@@ -138,11 +167,11 @@ var HomePanel = React.createClass({
 	render: function () {
 
 		var status = this.props.status,
-			scbs, clock, date, time;
+			channels, clock, date, time;
 
-		if (status.scbs) {
-			scbs = status.scbs.map(function(scb){
-				return <Scb key={scb.id} data={scb} />;
+		if (status.channels) {
+			channels = status.channels.map(function(ch){
+				return <Channel key={ch.id} ch={ch} />;
 			});
 		}
 
@@ -159,7 +188,7 @@ var HomePanel = React.createClass({
 						Status
 					</div>
 					<div className="subtitle">
-						CME device sensor control blocks
+						CME device channels status
 					</div>
 
 					<div className="clock">
@@ -172,11 +201,12 @@ var HomePanel = React.createClass({
 					</div>
 				</div>
 				<div className="panel-content">
-					{scbs}
+					{channels}
 				</div>
 			</div>
 		);
 	}
 });
+window.moment = moment;
 
 module.exports = HomePanel;
