@@ -15,7 +15,7 @@ def status():
 	''' top-level CME status object '''
 
 	obj = {}
-	obj['timestamp'] = datetime.utcnow().replace(tzinfo=timezone.utc).timestamp() + 'Z'
+	obj['timestamp'] = datetime.utcnow().isoformat() + 'Z'
 
 	# try to read temperature (could fail if not on RPi)
 	# temp in millidegrees C
