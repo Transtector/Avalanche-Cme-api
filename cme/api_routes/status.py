@@ -22,7 +22,7 @@ def status():
 	temp = subprocess.getoutput("cat /sys/class/thermal/thermal_zone0/temp")
 
 	try:
-		obj['temperature_degC'] = int(temp) / 1000
+		obj['temperature_degC'] = round(int(temp) / 1000, 1)
 	except:
 		obj['temperature_degC'] = -40.0 # None
 
