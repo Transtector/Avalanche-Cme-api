@@ -49,20 +49,33 @@
 .togglebutton label input[type=checkbox]:checked + .toggle::after	
 	left 15px
 
-.panel-header .clock
+.panel-header .wigets
 	position absolute
 	right 16px
 	bottom 10px
 	color #fff
 	font-size 14px
-	> div
-		padding 4px 6px
-		text-align center
+	div
 		display inline-block
+		text-align center
+		> div
+			padding 4px 6px
+	.clock
 		background-color button-bg-color
 	.date
 		background-color lightness(button-bg-color, 50%)
-	
+	.thermometer
+		margin-right 10px
+		background-color #334
+		> div
+			margin 0 2px 2px 2px
+			padding-bottom 0
+			border-bottom 2px solid green
+	.thermometer.warn > div
+		border-color yellow
+	.thermometer.alarm > div
+		border-color red
+
 .ch
 	position relative
 	margin 10px
@@ -75,7 +88,21 @@
 	box-shadow 0 2px 9px 0 rgba(0,0,0,0.2)
 	
 .ch-header
-	padding 0 10px
+	padding 0 20px
+	white-space nowrap
+	overflow hidden
+	input[type=text]
+		font-size 14px
+		color #fff
+		text-align left
+		background transparent
+		border 1px solid transparent
+		&:hover, &:focus	
+			border-bottom-color rgba(255,255,255,0.2)
+	input#name
+		width 98px
+	input#description
+		width 234px
 
 .ch-primary,
 .ch-secondary

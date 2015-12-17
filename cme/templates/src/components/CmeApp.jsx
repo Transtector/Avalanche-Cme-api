@@ -15,6 +15,7 @@ var HomePanel = require('./HomePanel');
 var ErrorPanel = require('./ErrorPanel');
 
 var Actions = require('../Actions');
+var Constants = require('../Constants');
 var Store = require('../Store');
 
 var CmeApp = React.createClass({
@@ -57,6 +58,12 @@ var CmeApp = React.createClass({
 				<div id="test-buttons">
 					<button onClick={this._testError}
 							disabled={this.state.errors.length > 0}>Test Error</button>
+
+					<button onClick={this._pausePolling}
+							disabled={this.state.errors.length > 0}>Pause Polling</button>
+
+					<button onClick={this._unpausePolling}
+							disabled={this.state.errors.length > 0}>UnPause Polling</button>
 				</div>
 				
 			</div>
@@ -69,6 +76,14 @@ var CmeApp = React.createClass({
 
 	_testError: function() {
 		Actions.injectError('This is a test');
+	},
+
+	_pausePolling: function() {
+		Actions.poll(Constants.PAUSE);
+	},
+
+	_unpausePolling: function() {
+		Actions.poll(Constants.UNPAUSE);
 	}
 });
 

@@ -101,6 +101,43 @@ var CmeAPI = {
 		});
 	},
 
+	channel: function(chId, obj, success, failure) {
+		var chIndex = parseInt(chId.slice(2)),
+			method = obj ? 'POST' : 'GET',
+			payload = obj ? JSON.stringify(obj) : null;
+
+		$.ajax({
+			type: method,
+			url: API_ROOT + 'ch/' + chIndex, // /api/ch/0
+			contentType: 'application/json; charset=UTF-8',
+			data: payload,
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				debug('Channel error: ', textStatus);
+				failure([ textStatus ]);
+			}
+		});
+	},
+
+	channelControl: function(chId, controlId, state, success, failure) {
+		var chIndex = parseInt(chId.slice(2)), // chId: "chX"
+			ctrlIndex = parseInt(controlId.slice(1)); // controlId: "cY"
+
+		$.ajax({
+			type: 'POST',
+			url: API_ROOT + 'ch/' + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
+			contentType: 'application/json; charset=UTF-8',
+			data: JSON.stringify({ state: state }),
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				debug('Channel control error: ', textStatus);
+				failure([ textStatus ]);
+			}
+		});
+	},
+
 	config: function(obj, success, failure) {
 		var item, url, payload, method;
 

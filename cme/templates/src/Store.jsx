@@ -31,13 +31,16 @@ var Store = assign({}, EventEmitter.prototype, {
 
 	getState: function() {
 		return {
-			status: _status,
-			device: _device,
-			config: _config,
-			errors: _errors,
-			isLoggedIn: _isLoggedIn,
-			isSubmitting: _isSubmitting,
-			isConfigVisible: _isConfigVisible
+			status: _status, // { timestamp: <timestamp>, temperature_degC: <float>, channels: [ <channel> ] }
+			device: _device, // { modelNumber: <string>, serialNumber: <string>, firmware: <string> }
+			config: _config, // { <cme_config> }
+			errors: _errors, // [ <string> ]
+
+			// generally UI-specific states follow:
+
+			isLoggedIn: _isLoggedIn, // set via CmeAPI.session(callback(<bool>)); true if valid session
+			isSubmitting: _isSubmitting, // Actions that make server requests set this true before request
+			isConfigVisible: _isConfigVisible // 
 		}
 	},
 
@@ -98,6 +101,24 @@ var Store = assign({}, EventEmitter.prototype, {
 
 			case Constants.STATUS:
 				_status = action.data;
+				break;
+
+			case Constants.CHANNEL:
+				// action.data = { chX: <channelX> }
+				var id = Object.keys(action.data)[0],
+					ch_index = parseInt(id.slice(2));
+
+				assign(_status.channels[ch_index], action.data[id]);
+				break;
+
+			case Constants.CHANNEL_CONTROL:
+				// action.data = { 'chX:cY': <controlY> }
+				var id = Object.keys(action.data)[0],
+					keys = id.split(':'),
+					ch_index = parseInt(keys[0].slice(2)),
+					c_index = parseInt(keys[1].slice(1));
+
+				assign(_status.channels[ch_index].controls[c_index], action.data[id]);
 				break;
 
 			case Constants.CONFIG:

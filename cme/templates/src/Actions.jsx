@@ -17,12 +17,49 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
-var INTERVALS = {}; // polling interval refs
+var INTERVALS = {};
+
+function pausePolling(name) {
+	var name = name || true;
+
+	if (INTERVALS.paused)
+		return;
+
+	for (var i in INTERVALS) {
+		clearInterval(INTERVALS[i].r);
+		INTERVALS[i].r = null;
+	}
+	INTERVALS.paused = name;
+}
+
+function unpausePolling(name) {
+	var name = name || true;
+
+	if (INTERVALS.paused && INTERVALS.paused === name) {
+
+		delete INTERVALS.paused;
+		for (var i in INTERVALS) {
+			INTERVALS[i].r = setInterval(INTERVALS[i].f, INTERVALS[i].i);
+		}
+	}
+}
+
+function readClock() {
+	dispatchRequest('reading clock');
+	CmeAPI.poll('config/clock', function(data) {
+		AppDispatcher.dispatch({ actionType: Constants.CLOCK, data: data });
+	}, onErrors);
+}
+
+function readStatus() {
+	dispatchRequest('reading status');
+	CmeAPI.poll('', function(data) {
+		AppDispatcher.dispatch({ actionType: Constants.STATUS, data: data });
+	}, onErrors);
+}
 
 function onErrors(errors) {
-	for (var intervalType in INTERVALS) {
-		clearInterval(INTERVALS[intervalType].r);
-	}
+	pausePolling('errors');
 
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
@@ -60,14 +97,12 @@ var Actions = {
 
 	clearErrors: function() {
 		// restart polling when errors cleared
-		for (var intervalType in INTERVALS) {
-			var I = INTERVALS[intervalType];
-			I.r = setInterval(I.f, I.i);
-		}
+		unpausePolling('errors');
 		AppDispatcher.dispatch({ actionType: Constants.CLEAR_ERRORS });
 	},
 
 	injectError: function(err) {
+		
 		onErrors([ err ]);
 	},
 
@@ -84,59 +119,56 @@ var Actions = {
 	},
 
 	home: function() {
+
 		AppDispatcher.dispatch({ actionType: Constants.HOME });
 	},
 
-	poll: function(type, action, interval) {
+	poll: function(pollCommand, pollFunctionType, interval) {
 		var interval = interval || 1000;
 
-		function pollClock() {
-			dispatchRequest('polling clock');
-			CmeAPI.poll('config/clock', function(data) {
-				AppDispatcher.dispatch({ actionType: Constants.CLOCK, data: data });
-			}, onErrors);
-		}
-
-		function pollStatus() {
-			dispatchRequest('polling status');
-			CmeAPI.poll('', function(data) {
-				AppDispatcher.dispatch({ actionType: Constants.STATUS, data: data });
-			}, onErrors);
-		}
-
 		var pollFunction;
-		switch(type) {
+		switch(pollFunctionType) {
 			case Constants.CLOCK:
-				pollFunction = pollClock;
+				pollFunction = readClock;
 				break;
 
 			case Constants.STATUS:
-				pollFunction = pollStatus;
+				pollFunction = readStatus;
 				break;
-
-			default:
-				return;
 		}
 
-		switch(action) {
+		switch(pollCommand) {
 			case Constants.START:
-				if (!INTERVALS[type])
-					INTERVALS[type] = {
+				if (!pollFunctionType)
+					return;
+
+				if (!INTERVALS[pollFunctionType])
+					INTERVALS[pollFunctionType] = {
 						r: setInterval(pollFunction, interval),
 						f: pollFunction,
 						i: interval
 					};
 				break;
 
-			case Constants.STOP:
-				if (INTERVALS[type]) {
-					clearInterval(INTERVALS[type].r);
-					delete INTERVALS[type];
-				}
+			case Constants.PAUSE:
+				pausePolling();
 				break;
 
-			default:
-				return;
+			case Constants.UNPAUSE:
+				unpausePolling();
+				break;
+
+			case Constants.STOP:
+				if (!pollFunctionType) {
+					for (var intervalType in INTERVALS) {
+						clearInterval(INTERVALS[intervalType].r);
+					}
+					INTERVALS = {};
+				} else if (INTERVALS[pollFunctionType]) {
+					clearInterval(INTERVALS[pollFunctionType].r);
+					delete INTERVALS[pollFunctionType];
+				}
+				break;
 		}
 	},
 
@@ -146,7 +178,21 @@ var Actions = {
 		CmeAPI.config(obj, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
 		}, onErrors);
+	},
+
+	channel: function(chId, obj) {
+		dispatchRequest(chId);
+		CmeAPI.channel(chId, obj, function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
+		}, onErrors);
+	},
+
+	channelControl: function(chId, controlId, state) {
+		dispatchRequest(chId + ':' + controlId + ' = ' + state);
+		CmeAPI.channelControl(chId, controlId, state, function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.CHANNEL_CONTROL, data: data });
+		}, onErrors);
 	}
 };
-
+window.INTERVALS = INTERVALS;
 module.exports = Actions;

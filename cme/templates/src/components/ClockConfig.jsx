@@ -126,7 +126,7 @@ var ClockConfig = React.createClass({
 	},
 
 	componentWillUnmount: function() {
-		Actions.poll(Constants.CLOCK, Constants.STOP);
+		Actions.poll(Constants.STOP, Constants.CLOCK);
 	},
 
 	render: function() {
@@ -259,11 +259,11 @@ var ClockConfig = React.createClass({
 
 	_startClockPoll: function() {
 		if (this.state.ntp)
-			Actions.poll(Constants.CLOCK, Constants.START);
+			Actions.poll(Constants.START, Constants.CLOCK);
 	},
 
 	_stopClockPoll: function() {
-		Actions.poll(Constants.CLOCK, Constants.STOP);
+		Actions.poll(Constants.STOP, Constants.CLOCK);
 	},
 
 	_onApply: function() {
