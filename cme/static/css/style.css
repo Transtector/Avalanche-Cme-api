@@ -842,6 +842,9 @@ td.rdtYear:hover {
 .panel-header .wigets div > div {
   padding: 4px 6px;
 }
+.panel-header .wigets > div {
+  margin-left: 10px;
+}
 .panel-header .wigets .clock {
   background-color: #3ea4e1;
 }
@@ -849,7 +852,6 @@ td.rdtYear:hover {
   background-color: #2297dd;
 }
 .panel-header .wigets .thermometer {
-  margin-right: 10px;
   background-color: #334;
 }
 .panel-header .wigets .thermometer > div {

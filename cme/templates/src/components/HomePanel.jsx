@@ -240,12 +240,6 @@ var HomePanel = React.createClass({
 					</div>
 
 					<div className={wigetsClasses}>
-						<div className={thermometerClasses}>
-							<div>
-								{temperature}
-							</div>
-						</div>
-
 						<div className={clockClasses}>
 							<div className="date">
 								{date}
@@ -254,6 +248,13 @@ var HomePanel = React.createClass({
 								{time}
 							</div>
 						</div>
+
+						<div className={thermometerClasses}>
+							<div>
+								{temperature}
+							</div>
+						</div>
+
 					</div>
 				</div>
 				<div className="panel-content">
