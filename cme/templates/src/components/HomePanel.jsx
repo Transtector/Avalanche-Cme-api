@@ -81,7 +81,7 @@ var Channel = React.createClass({
 	
 				<div className="ch-primary">
 					<div className="sensor-value">
-						{primary_value.toFixed(2)}
+						{primary_value.toFixed(1)}
 					</div>
 					<div className="sensor-unit">
 						<span className="U">
@@ -95,7 +95,7 @@ var Channel = React.createClass({
 
 				<div className="ch-secondary">
 					<div className="sensor-value">
-						{secondary_value.toFixed(1)}
+						{secondary_value.toFixed(3)}
 					</div>
 					<div className="sensor-unit">
 						<span className="U">

@@ -27,10 +27,10 @@ class Sensor:
 		ts = time()		
 
 		if self.type == 'AC_VOLTAGE':
-			value = random.randrange(118000, 122001) / 1000
+			value = random.randrange(1180, 1220) / 10
 
 		else:
-			value = random.randrange(25, 51) / 10
+			value = random.randrange(2500, 5500) / 1000
 
 		self.__data.append([ ts, value ])
 
