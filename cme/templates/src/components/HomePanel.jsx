@@ -216,7 +216,7 @@ var HomePanel = React.createClass({
 		}
 
 		if (t) {
-			temperature = t + '°C';
+			temperature = t.toFixed(1) + '°C';
 			thermometerClasses = classNames({
 				'thermometer': true,
 				'warn': t > 40,
