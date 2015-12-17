@@ -19,10 +19,9 @@ def status():
 
 	# try to read temperature (could fail if not on RPi)
 	# temp in millidegrees C
-	temp = subprocess.getoutput("cat /sys/class/thermal/thermal_zone0/temp")
-
 	try:
-		obj['temperature_degC'] = int(temp) / 1000
+		tempC = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
+		obj['temperature_degC'] = tempC
 	except:
 		obj['temperature_degC'] = -40.0 # None
 
