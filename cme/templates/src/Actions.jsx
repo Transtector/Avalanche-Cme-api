@@ -87,11 +87,8 @@ var Actions = {
 
 	device: function() {
 		dispatchRequest('device');
-		return CmeAPI.device(function(deviceData) {
-			AppDispatcher.dispatch({
-				actionType: Constants.DEVICE,
-				data: deviceData
-			});
+		return CmeAPI.device(function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.DEVICE, data: data });
 		}, onErrors);
 	},
 
@@ -118,9 +115,14 @@ var Actions = {
 		AppDispatcher.dispatch({ actionType: Constants.LOGOUT });
 	},
 
-	home: function() {
+	showHome: function() {
 
-		AppDispatcher.dispatch({ actionType: Constants.HOME });
+		AppDispatcher.dispatch({ actionType: Constants.SHOW_HOME });
+	},
+
+	showConfig: function() {
+
+		AppDispatcher.dispatch({ actionType: Constants.SHOW_CONFIG });
 	},
 
 	poll: function(pollCommand, pollFunctionType, interval) {
@@ -139,7 +141,7 @@ var Actions = {
 
 		switch(pollCommand) {
 			case Constants.START:
-				if (!pollFunctionType)
+				if (!pollFunctionType || INTERVALS.paused)
 					return;
 
 				if (!INTERVALS[pollFunctionType])
@@ -175,7 +177,7 @@ var Actions = {
 	config: function(obj) {
 		// obj is _cme['config'] or an object on _cme['config']
 		dispatchRequest('config');
-		CmeAPI.config(obj, function(data) {
+		return CmeAPI.config(obj, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
 		}, onErrors);
 	},
