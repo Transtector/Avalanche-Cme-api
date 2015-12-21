@@ -8,9 +8,20 @@ from ..util.ClockUtils import refresh_time, manage_time
 
 @router.route('/config/clock', methods=['GET', 'POST'])
 @require_auth
-def time():
+def clock():
 	if request.method == 'POST':
-		return json_error([ 'Not implemented' ])
+		newclock = request.get_json()['clock']
+
+		settings['clock']['zone'] = newclock['zone']
+		settings['clock']['ntp'] = newclock['ntp']
+		settings['clock']['servers'] = newclock['servers']
+		settings['clock']['displayRelativeTo'] = newclock['displayRelativeTo']
+		settings['clock']['display12HourTime'] = newclock['display12HourTime']
+		settings['clock']['displayDateFormat'] = newclock['displayDateFormat']
+		settings['clock']['displayTimeFormat24Hour'] = newclock['displayTimeFormat24Hour']
+		settings['clock']['displayTimeFormat12Hour'] = newclock['displayTimeFormat12Hour']
+
+		manage_time(settings['clock'])
 
 	refresh_time(settings['clock'])
 	return json_response({'clock': settings['clock']})
@@ -51,9 +62,7 @@ def ntp_update():
 	item = UriParse.path_parse(request.path)[-1]
 
 	if request.method == 'POST':
-		settings_group = settings['clock']
-		settings_group[item] = request.get_json()[item]
-		settings['clock'] = settings_group
+		settings['clock'][item] = request.get_json()[item]
 		manage_time(settings['clock'])
 
 	return json_response({ item: settings['clock'][item] })
@@ -64,3 +73,17 @@ def ntp_status():
 	refresh_time(settings['clock'])
 	return json_response({ 'status': settings['clock']['status'] })
 
+@router.route('/config/clock/displayRelativeTo', methods=['GET', 'POST'])
+@router.route('/config/clock/display12HourTime', methods=['GET', 'POST'])
+@router.route('/config/clock/displayDateFormat', methods=['GET', 'POST'])
+@router.route('/config/clock/displayTimeFormat24Hour', methods=['GET', 'POST'])
+@router.route('/config/clock/displayTimeFormat12Hour', methods=['GET', 'POST'])
+@require_auth
+def clock_display():
+	# parse out the setting item (last element of request path)
+	item = UriParse.path_parse(request.path)[-1]
+
+	if request.method == 'POST':
+		settings['clock'][item] = request.get_json()[item]
+
+	return json_response({ item: settings['clock'][item] })

@@ -38,10 +38,17 @@ settings['support'] = settings.get('support', {
 
 settings['clock'] = settings.get('clock', {
 	'current': '', # updated on init and reads
-	'zone': app.config['TIME_ZONE_OFFSET'],
-	'ntp': app.config['TIME_USE_NTP'],
-	'servers': app.config['TIME_NTP_SERVERS'],
-	'status': [] # updated on reads
+	'zone': app.config['CLOCK_ZONE_OFFSET'],
+	'ntp': app.config['CLOCK_USE_NTP'],
+	'servers': app.config['CLOCK_NTP_SERVERS'],
+	'status': [], # updated on reads
+
+	# UI-related clock settings
+	'displayRelativeTo': app.config['CLOCK_DISPLAY_RELATIVE_TO'],
+	'display12HourTime': app.config['CLOCK_DISPLAY_12HOUR'],
+	'displayDateFormat': app.config['CLOCK_DISPLAY_DATE_FORMAT'],
+	'displayTimeFormat24Hour': app.config['CLOCK_DISPLAY_24HOUR_FORMAT'],
+	'displayTimeFormat12Hour': app.config['CLOCK_DISPLAY_12HOUR_FORMAT']
 })
 
 settings['snmp'] = settings.get('snmp', {

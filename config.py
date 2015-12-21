@@ -67,7 +67,7 @@ USERNAME = 'admin'
 PASSHASH = 'b56e0b4ea4962283bee762525c2d490f' # md5('Welcome1')
 
 DEVICE_MODEL_NUMBER = "CME-1000A"
-DEVICE_SERIAL_NUMBER = "100A00123"
+DEVICE_SERIAL_NUMBER = "1000A12345"
 DEVICE_FIRMWARE = "0.1.0"
 
 GENERAL_NAME = "My CME"
@@ -78,10 +78,32 @@ SUPPORT_CONTACT = ""
 SUPPORT_EMAIL = ""
 SUPPORT_PHONE = ""
 
+
+# CME Clock configuration
+
+# lookup for clock display reference zone
+# this is manually duplicated in client code,
+# so be careful when making changes
+class RelativeTo:
+	UTC = 0 # display times relative to UTC (zone offset = 0)
+	CmeLocal = 1 # display times relative to Cme's zone offset
+	Local = 2 # display times relative to the client zone
+
 # default NTP settings
-TIME_USE_NTP = True
-TIME_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
-TIME_ZONE_OFFSET = 0
+CLOCK_USE_NTP = True
+CLOCK_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
+CLOCK_ZONE_OFFSET = 0
+
+# clock display settings
+# see momentjs.org for valid display formats
+CLOCK_DISPLAY_RELATIVE_TO = RelativeTo.UTC
+CLOCK_DISPLAY_12HOUR = False
+CLOCK_DISPLAY_DATE_FORMAT = "YYYY-MM-DD" 
+CLOCK_DISPLAY_24HOUR_FORMAT = "HH:mm:ss"
+CLOCK_DISPLAY_12HOUR_FORMAT = "h:mm:ss A"
+
+
+# CME Network configuration
 
 # default network settings - mirror changes in the deployed interfaces files
 # (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
