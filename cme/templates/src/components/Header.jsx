@@ -58,11 +58,11 @@ var Header = React.createClass({
 	},
 
 	_showHome: function() {
-		Actions.home();
+		Actions.showHome();
 	},
 
 	_showSettings: function() {
-		Actions.config();
+		Actions.showConfig();
 	},
 
 	_logout: function () {
