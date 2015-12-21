@@ -654,6 +654,10 @@ td.rdtYear:hover {
 .input-group-buttons .btn:first-child {
   border-right: 1px solid #e6e6e6;
 }
+.input-group-buttons .btn:disabled {
+  background-color: transparent;
+  color: #ddd;
+}
 .rdt {
   display: inline-block;
 }
