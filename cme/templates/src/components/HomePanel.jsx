@@ -4,6 +4,8 @@
  *
  * CME status indicators site in the Home panel.
  */
+ 'use strict';
+ 
 var React = require('react');
 
 var Constants = require('../Constants');
@@ -177,27 +179,26 @@ var Channel = React.createClass({
 		// channelControl(chId, controlId, state)
 		Actions.channelControl(this.props.ch.id, e.target.id, e.target.checked);
 	}
+});
 
-})
+var utils = require('../CmeApiUtils');
 
 var HomePanel = React.createClass({
 
-	getInitialState: function () {
-		return {}
-	},
-
 	componentDidMount: function() {
+
 		Actions.poll(Constants.START, Constants.STATUS);
 	},
 
 	componentWillUnmount: function() {
-		Actions.poll(Constants.STOP, Constants.STATUS);
+
+			Actions.poll(Constants.STOP, Constants.STATUS);
 	},
 
 	render: function () {
 
 		var status = this.props.status, channels, 
-			clock, date, time, clockClasses = 'hidden',
+			clock, date, time, timeformat, clockClasses = 'hidden',
 			t = status.temperature_degC, 
 			temperature, thermometerClasses = 'hidden',
 			wigetsClasses = 'hidden';
@@ -209,9 +210,21 @@ var HomePanel = React.createClass({
 		}
 
 		if (status.timestamp) {
-			clock = moment.utc(status.timestamp);
-			date = clock.format("MMM D");
-			time = clock.format("h:mm:ss A");
+
+			clock = utils.formatRelativeMoment(
+					moment.utc(status.timestamp),
+					this.props.clock.displayRelativeTo,
+					this.props.clock.zone
+			);
+			
+			date = clock.format("MMM D"); // hardcoded date format (for now?)
+
+			timeformat = this.props.clock.display12HourTime
+				? this.props.clock.displayTimeFormat12Hour
+				: this.props.clock.displayTimeFormat24Hour
+
+			time = clock.format(timeformat);
+
 			clockClasses = classNames({'clock': true })
 		}
 
@@ -264,6 +277,5 @@ var HomePanel = React.createClass({
 		);
 	}
 });
-window.moment = moment;
 
 module.exports = HomePanel;

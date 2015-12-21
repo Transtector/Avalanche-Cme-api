@@ -4,6 +4,8 @@
  *
  * Component to group all the Cme clock configuration.
  */
+ 'use strict';
+
 var React = require('react');
 
 var Constants = require('../Constants');
@@ -19,26 +21,45 @@ var Datetime = require('react-datetime');
 var classNames = require('classnames');
 var assign = require('object-assign'); // ES6 polyfill
 
-var DATE_FORMAT = "YYYY-MM-DD";
-var TIME_FORMAT = "HH:mm:ss";
-var TIME_FORMAT_12HOUR = "h:mm:ss a"
-var TIME_DISPLAY = {
-	UTC: 0,
-	CME_LOCAL: 1,
-	LOCAL: 2
+function formatPropsToState(props) {
+
+	var state = assign({}, props);
+
+	state.current = moment.utc(props.current);
+	state.status = [];
+	props.status.forEach(function(s) {
+		state.status.push(s ? moment.utc(s) : moment.invalid());
+	});
+
+	if (props.servers)
+		state.serversCSV = props.servers.length > 0 ? props.servers.join(', ') : '';
+	else
+		state.serversCSV = '';
+
+	return state;
 }
 
-var _pendingUpdate = false;
+var utils = require('../CmeApiUtils');
 
 var NtpStatus = React.createClass({
+
 	propTypes: {
 		id: React.PropTypes.string.isRequired,
 		value: React.PropTypes.array.isRequired,
-		display12Hour: React.PropTypes.bool
+		format: React.PropTypes.string.isRequired,
+		zone: React.PropTypes.number,
+		relativeTo: React.PropTypes.number
 	},
 
+	getDefaultProps: function () {
+    	return { 
+    		relativeTo: utils.TIME_DISPLAY.UTC,
+    		zone: 0
+    	};
+  	},
+
 	render: function() {
-		var statusTime, statusText;
+		var statusTime, statusColor, statusText;
 
 		if (this.props.value.length == 0) {
 			statusTime = moment.invalid();
@@ -47,19 +68,19 @@ var NtpStatus = React.createClass({
 
 		} else {
 			if (!this.props.value[1]) {
-				statusTime = moment(this.props.value[0]);
+				statusTime = this.props.value[0];
 				statusColor = 'red';
 			} else {
-				statusTime = moment(this.props.value[1]);
+				statusTime = this.props.value[1];
 				statusColor = (this.props.value[0] == this.props.value[1])
 					? 'green'
 					: 'yellow';
 			}
-			statusText = statusTime.format(this.props.display12Hour ? TIME_FORMAT_12HOUR : TIME_FORMAT);
+			statusTime = utils.formatRelativeMoment(statusTime, this.props.relativeTo, this.props.zone);
+			statusText = statusTime.format(this.props.format);
 		}
 
 		var ledClass = classNames('led', statusColor);
-
 
 		return (
 			<div id={this.props.id} className={this.props.className}>
@@ -75,74 +96,53 @@ var NtpStatus = React.createClass({
 	}
 });
 
-function wrapTimeFields(obj) {
-	obj.current = moment.utc(obj.current);
-	obj.status.forEach(function(s) {
-		s = moment.utc(s);
-	});
-	return obj;
-}
-
 var ClockConfig = React.createClass({
 
 	getInitialState: function () {
 
-		return assign(wrapTimeFields(this.props.config), 
-		{
-			displayAs: TIME_DISPLAY.UTC,
-			display12Hour: false
-		});
+		return formatPropsToState(this.props.config);
 	},
 
 	componentWillReceiveProps: function(nextProps) {
 
-		// We receive updated clock every time the clock poll ticks.
-		// However, we only want to set our component state to new
-		// values if we've requested an update and are waiting for
-		// the new clock configuration.  If we haven't requested
-		// to update the clock configuration only the current and
-		// status fields will update from the nextProps refresh.
+		// only update our internal state with those props that
+		// are different from our current props.
+		var updateState = {},
+			oldprops = formatPropsToState(this.props.config),
+			newprops = formatPropsToState(nextProps.config);
 
-		var cfg = {};
-
-		if (_pendingUpdate) {
-
-			_pendingUpdate = false;
-			cfg = wrapTimeFields(nextProps.config);			
-
-		} else {
-
-			// no pending clock config update - update the 
-			// current time and status fields if not NTP
-			if (this.state.ntp) {
-				cfg = wrapTimeFields({
-					current: nextProps.config.current,
-					status: nextProps.config.status
-				});
+		Object.keys(newprops).forEach(function(key){
+			if (key !== 'servers' && oldprops[key] !== newprops[key]) {
+				updateState[key] = newprops[key];
 			}
-		}
+		}, this);
 
-		this.setState(cfg);
+		this.setState(updateState);
 	},
 
 	componentWillUnmount: function() {
-		Actions.poll(Constants.STOP, Constants.CLOCK);
+
+		this._stopClockPoll();
 	},
 
 	render: function() {
 
-		var time = moment(this.state.current);
+		// Changes are pending if certain states !== props.  These are the states the user may
+		// want to apply.  Other state items will always be changing (e.g., the current time and
+		// ntp status).  We don't track these changes because they're read-only as far as the
+		// clock is concerned.  We also don't compare the ntp servers array.  We use serversCSV
+		// string internally and format and submit new servers array based on serversCSV in Apply.
+		var currentProps = formatPropsToState(this.props.config);
+		var changesPending = Object.keys(currentProps)
+			.filter(function (key) {
+				return ['current', 'servers', 'status'].indexOf(key) == -1;
+			}, this)
+			.some(function(key) {
+				return currentProps[key] !== this.state[key];
+			}, this);
 
-		switch(this.state.displayAs) {
-
-			case TIME_DISPLAY.CME_LOCAL:
-				time.utcOffset(this.state.zone * 60);
-				break;
-
-			case TIME_DISPLAY.LOCAL:
-				time.local();
-				break;
-		}
+		var datetime = utils.formatRelativeMoment(this.state.current, 
+			this.state.displayRelativeTo, this.state.zone);
 
 		return (
 			<InputGroup id="clock" onExpand={this._startClockPoll} onCollapse={this._stopClockPoll}>
@@ -151,16 +151,18 @@ var ClockConfig = React.createClass({
 					<div id="current">
 						<Datetime 
 							timeFormat={false} 
-							dateFormat={DATE_FORMAT} 
+							dateFormat={this.state.displayDateFormat} 
 							inputProps={{ disabled: this.state.ntp }} 
 							onChange={this._requestDateChange} 
-							value={time} />
+							value={moment(datetime)} />
 						<Datetime 
 							dateFormat={false} 
-							timeFormat={this.state.display12Hour ? TIME_FORMAT_12HOUR : TIME_FORMAT} 
+							timeFormat={this.state.display12HourTime 
+								? this.state.displayTimeFormat12Hour 
+								: this.state.displayTimeFormat24Hour} 
 							inputProps={{ disabled: this.state.ntp }} 
 							onChange={this._requestTimeChange} 
-							value={time} 
+							value={moment(datetime)} 
 							className="shifted" />
 					</div>
 				</div>
@@ -181,7 +183,7 @@ var ClockConfig = React.createClass({
 								id="displayAs_utc" 
 								name="displayAs" 
 								onChange={this._requestDisplayAsChange}
-								checked={this.state.displayAs === TIME_DISPLAY.UTC} />
+								checked={this.state.displayRelativeTo === utils.TIME_DISPLAY.UTC} />
 							UTC
 						</label>
 
@@ -190,7 +192,7 @@ var ClockConfig = React.createClass({
 								id="displayAs_cmelocal" 
 								name="displayAs" 
 								onChange={this._requestDisplayAsChange}
-								checked={this.state.displayAs === TIME_DISPLAY.CME_LOCAL} />
+								checked={this.state.displayRelativeTo === utils.TIME_DISPLAY.CME_LOCAL} />
 							Cme local
 						</label>
 
@@ -199,7 +201,7 @@ var ClockConfig = React.createClass({
 								id="displayAs_local" 
 								name="displayAs" 
 								onChange={this._requestDisplayAsChange}
-								checked={this.state.displayAs === TIME_DISPLAY.LOCAL} />
+								checked={this.state.displayRelativeTo === utils.TIME_DISPLAY.LOCAL} />
 							Local
 						</label>
 
@@ -209,7 +211,7 @@ var ClockConfig = React.createClass({
 									id="display_12Hour"
 									name="display12hour"
 									onChange={this._requestDisplay12HourChange}
-									checked={this.state.display12Hour} />
+									checked={this.state.display12HourTime} />
 								12-Hour
 							</label>
 						</div>
@@ -233,7 +235,11 @@ var ClockConfig = React.createClass({
 
 						<NtpStatus id="status" placeholder="Status" 
 							value={this.state.status}
-							display12Hour={this.state.display12Hour} />
+							zone={this.state.zone}
+							relativeTo={this.state.displayRelativeTo}
+							format={ this.state.display12HourTime
+								? this.state.displayTimeFormat12Hour
+								: this.state.displayTimeFormat24Hour} />
 
 						<div id="ta-wrapper">
 							<label htmlFor="servers">NTP servers</label>
@@ -241,7 +247,7 @@ var ClockConfig = React.createClass({
 								name="tainput"
 								id="servers"
 								placeholder="NTP servers"
-								value={this.state.servers}
+								value={this.state.serversCSV}
 								disabled={!this.state.ntp}
 								onChange={this._requestServersChange}
 							/>
@@ -250,8 +256,12 @@ var ClockConfig = React.createClass({
 				</div>
 
 				<div className="input-group-buttons">
-					<button className='btn' onClick={this._onReset}>Reset</button>
-					<button className='btn' onClick={this._onApply}>Apply</button>
+					<button className='btn' 
+							onClick={this._onReset}
+							disabled={!changesPending}>Reset</button>
+					<button className='btn' 
+							onClick={this._onApply}
+							disabled={!changesPending}>Apply</button>
 				</div>
 			</InputGroup>
 		);
@@ -263,81 +273,87 @@ var ClockConfig = React.createClass({
 	},
 
 	_stopClockPoll: function() {
+
 		Actions.poll(Constants.STOP, Constants.CLOCK);
 	},
 
 	_onApply: function() {
-		console.log("[ClockConfig]._onApply");
+
+		// convert the serversCSV to arrays and remove the
+		// property from the submitted object
+		var clock = this.state;
+		clock.servers = clock.serversCSV.trim() != '' 
+			? clock.serversCSV.split(', ').map(function(s) { return s.trim(); }) 
+			: [];
+
+		Actions.config({ clock: clock });
 	},
 
 	_onReset: function() {
-		this.setState(this.props.config);
+
+		this.setState(formatPropsToState(this.props.config));
 	},
 
 	_requestServersChange: function(e) {
-		this.setState({ servers: e.target.value });
+
+		this.setState({ serversCSV: e.target.value });
 	},
 
 	_requestZoneChange: function(z) {
+
 		this.setState({ zone: z });
 	},
 
 	_requestDateChange: function(m) {
-		var current = moment(m.format(DATE_FORMAT) + "T" + moment(this.state.current).format(TIME_FORMAT));
+		var newdate = m.utc().utcOffset(0);
+		var currenttime = this.state.current.utc().utcOffset(0);
+		var current = moment(newdate.format("YYYY-MM-DD") + "T" + currenttime.format("HH:mm:ssZ"));
+
 		this.setState({ current: current });
 	},
 
 	_requestTimeChange: function(m) {
-		var current = moment(moment(this.state.current).format(DATE_FORMAT) + "T" + m.format(TIME_FORMAT));
+		var currentdate = this.state.current.utc().utcOffset(0);
+		var newtime = m.utc().utcOffset(0);
+		var current = moment(currentdate.format("YYYY-MM-DD") + "T" + newtime.format("HH:mm:ssZ"));
+		
 		this.setState({ current: current });
 	},
 
 	_requestDisplayAsChange: function(e) {
-		var td = TIME_DISPLAY.UTC,
+		var td = utils.TIME_DISPLAY.UTC,
 			id = e.target.id.split('_')[1].toUpperCase();
 
 		switch(id) {
 			case 'LOCAL':
-				td = TIME_DISPLAY.LOCAL;
+				td = utils.TIME_DISPLAY.LOCAL;
 				break;
 			case 'CMELOCAL':
-				td = TIME_DISPLAY.CME_LOCAL;
+				td = utils.TIME_DISPLAY.CME_LOCAL;
 				break;
 		}
 
-		this.setState({ displayAs: td })
+		this.setState({ displayRelativeTo: td });
 	},
 
 	_requestDisplay12HourChange: function(e) {
-		// clone current state as well to 
-		// force Datetime to update
-		this.setState({ 
-			display12Hour: e.target.checked,
-			current: moment(this.state.current)
-		});
+
+		this.setState({ display12HourTime: e.target.checked });
 	},
 
 	_requestNtpChange: function(event) {
 		var ntp = event.target.checked;
 
-		if (ntp) {
-			// start polling for current time
-			// and reset Ntp servers and status to current config
-			Actions.poll(Constants.TIME, Constants.START);
-			this.setState({
-				ntp: true,
-				status: this.props.config.status
-			});
-		} else {
-			// stop polling for Cme time and
-			// set current time to client
-			Actions.poll(Constants.TIME, Constants.STOP);
-			this.setState({
-				ntp: false,
-				status: [],
-				current: moment.utc()
-			})
-		}
+		// start polling for current time
+		// and reset Ntp servers and status to current config
+		this.setState({
+			ntp: ntp,
+			status: ntp ? this.props.config.status : [],
+			current: ntp ? this.state.current : moment.utc()
+		}, (ntp
+			? this._startClockPoll
+			: this._stopClockPoll)
+		);
 	}
 });
 
