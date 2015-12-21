@@ -153,7 +153,7 @@ var CmeAPI = {
 			method = 'POST';
 		}
 
-		$.ajax({
+		return $.ajax({
 			type: method,
 			url: url,
 			contentType: 'application/json; charset=UTF-8',

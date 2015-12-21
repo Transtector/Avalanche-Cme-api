@@ -17,7 +17,12 @@ var CmeApp = require('./components/CmeApp');
 // being CmeActions that get dispatched and handled by the CmeStore.
 
 // Wait for these requests to complete - they initialize the Store.
-Actions.session().always(Actions.device().always(function () {
-	console.log("rendering the app...");
-	ReactDOM.render(<CmeApp />, document.getElementById('cmeapp'));
-}));
+Actions.session()
+	.always(Actions.device()
+		.always(Actions.config()
+			.always(function () {
+				console.log("rendering the app...");
+				ReactDOM.render(<CmeApp />, document.getElementById('cmeapp'));
+			})
+		)
+	);
