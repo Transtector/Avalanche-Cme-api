@@ -46,8 +46,11 @@ var CmeApp = React.createClass({
 					: <div id="console">
 
 						{this.state.isConfigVisible
+
 							? <ConfigPanel config={this.state.config} />
-							: <HomePanel status={this.state.status} />
+
+							: <HomePanel status={this.state.status}
+										 clock={this.state.config.clock} />
 						}
 
 						<ErrorPanel errors={this.state.errors} />
