@@ -31,6 +31,7 @@ module.exports = keyMirror({
 	LOGIN: null, // successful login to CME api
 	LOGOUT: null, // logout of CME api
 
-	HOME: null,
+	SHOW_HOME: null,
+	SHOW_CONFIG: null,
 	CONFIG: null
 });

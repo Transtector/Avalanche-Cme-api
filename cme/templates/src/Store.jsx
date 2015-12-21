@@ -95,8 +95,12 @@ var Store = assign({}, EventEmitter.prototype, {
 				_isLoggedIn = false;
 				break;
 
-			case Constants.HOME:
+			case Constants.SHOW_HOME:
 				_isConfigVisible = false;
+				break;
+
+			case Constants.SHOW_CONFIG:
+				_isConfigVisible = true;
 				break;
 
 			case Constants.STATUS:
@@ -122,9 +126,6 @@ var Store = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.CONFIG:
-
-				_isConfigVisible = true;
-
 				// item key name:
 				var item = Object.keys(action.data)[0];
 
