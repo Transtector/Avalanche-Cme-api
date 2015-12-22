@@ -40,7 +40,8 @@ var Store = assign({}, EventEmitter.prototype, {
 
 			isLoggedIn: _isLoggedIn, // set via CmeAPI.session(callback(<bool>)); true if valid session
 			isSubmitting: _isSubmitting, // Actions that make server requests set this true before request
-			isConfigVisible: _isConfigVisible // 
+
+			isConfigVisible: _isConfigVisible // show/hide the main configuration panel
 		}
 	},
 
@@ -64,35 +65,21 @@ var Store = assign({}, EventEmitter.prototype, {
 				_isSubmitting = true;
 				break;
 
-			case Constants.CLOCK: // cme time responds
-				_config.clock = action.data.clock;
-				break;
-
-			case Constants.SESSION: // a session object has been replied
-				_isLoggedIn = action.data;
-				break;
-
 			case Constants.DEVICE: // a device object has been replied
 				_device = action.data;
 				break;
 
+			case Constants.SESSION: // a session object has been replied
+				// set the _isLoggedIn state (login/logout actions update the session)
+				_isLoggedIn = action.data;
+				break;
+
 			case Constants.ERROR:
-				debug('handling dispatched error action: ', action.data);
 				_errors = Array.isArray(action.data) ? action.data : [action.data];
 				break;
 
 			case Constants.CLEAR_ERRORS:
 				_errors = [];
-				break;
-
-			case Constants.LOGIN: // a valid login has been obtained
-				_isConfigVisible = false;
-				_isLoggedIn = true;
-				break;
-
-			case Constants.LOGOUT: // session has been logged out
-				_isConfigVisible = false;
-				_isLoggedIn = false;
 				break;
 
 			case Constants.SHOW_HOME:
@@ -101,6 +88,10 @@ var Store = assign({}, EventEmitter.prototype, {
 
 			case Constants.SHOW_CONFIG:
 				_isConfigVisible = true;
+				break;
+
+			case Constants.CLOCK: // cme time responds
+				_config.clock = action.data.clock;
 				break;
 
 			case Constants.STATUS:
@@ -155,7 +146,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				return true;
 		}
 
-		// explicitely check here for REQUEST action
+		// explicitly check here for REQUEST action
 		// to reset the _isSubmitting bool
 		if (action.actionType !== Constants.REQUEST)
 			_isSubmitting = false;

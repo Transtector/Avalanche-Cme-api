@@ -5,7 +5,7 @@
  * CME status indicators site in the Home panel.
  */
  'use strict';
- 
+
 var React = require('react');
 
 var Constants = require('../Constants');
@@ -13,6 +13,8 @@ var Actions = require('../Actions');
 
 var moment = require('moment');
 var classNames = require('classnames');
+
+var utils = require('../CmeApiUtils');
 
 var Channel = React.createClass({
 
@@ -180,8 +182,6 @@ var Channel = React.createClass({
 		Actions.channelControl(this.props.ch.id, e.target.id, e.target.checked);
 	}
 });
-
-var utils = require('../CmeApiUtils');
 
 var HomePanel = React.createClass({
 

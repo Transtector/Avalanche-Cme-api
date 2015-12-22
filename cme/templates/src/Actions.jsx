@@ -75,16 +75,6 @@ function dispatchRequest(action) {
 
 var Actions = {
 
-	session: function () {
-		dispatchRequest('session');
-		return CmeAPI.session(function(validSession) {
-			AppDispatcher.dispatch({
-				actionType: Constants.SESSION,
-				data: validSession
-			});
-		});
-	},
-
 	device: function() {
 		dispatchRequest('device');
 		return CmeAPI.device(function(data) {
@@ -103,16 +93,42 @@ var Actions = {
 		onErrors([ err ]);
 	},
 
+	// Login can be called a couple of different ways.  If called with no arguments,
+	// then we simply try to request the CME config object.  On success, the SESSION
+	// and CONFIG states are set (dispatched).  On failure, we do nothing as our intial
+	// state assumes invalid session (i.e., not yet logged in).
+	//
+	// Login can also be used in the "traditional" mode, where a username and password
+	// are passed to the CmeAPI.  In this case, the successful return dispatches to
+	// update the SESSION state and a new CmeAPI call is performed to retrieve the CME
+	// configuration.  On success of that call, the CONFIG state is updated.  In this
+	// mode, errors are reported as normal (i.e., through the onErrors callback).
 	login: function(u, p) {
 		dispatchRequest('login');
-		CmeAPI.login({ u: u, p: p }, function() {
-			AppDispatcher.dispatch({ actionType: Constants.LOGIN });
-		}, onErrors);
+
+		if (arguments.length == 0) {
+
+			return CmeAPI.config(null, function(data) {
+				if (data.config) {
+					AppDispatcher.dispatch({ actionType: Constants.SESSION, data: true });
+					AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
+				}
+			}, function () { /* NOP */ });
+		
+		} else {
+
+			return CmeAPI.login({ u: u, p: p }, function(data) {
+				AppDispatcher.dispatch({ actionType: Constants.SESSION, data: data });
+				CmeAPI.config(null, function(data) {
+					AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
+				}, onErrors);
+			}, onErrors);
+		}
 	},
 
 	logout: function() {
 		CmeAPI.logout('logout'); // don't wait - just dispatch logout
-		AppDispatcher.dispatch({ actionType: Constants.LOGOUT });
+		AppDispatcher.dispatch({ actionType: Constants.SESSION, data: false });
 	},
 
 	showHome: function() {
@@ -196,5 +212,5 @@ var Actions = {
 		}, onErrors);
 	}
 };
-window.INTERVALS = INTERVALS;
+
 module.exports = Actions;

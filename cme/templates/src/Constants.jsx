@@ -11,6 +11,12 @@ var keyMirror = require('keymirror');
 module.exports = keyMirror({
 	REQUEST: null,
 
+	SESSION: null,
+	DEVICE: null,
+
+	ERROR: null, // somebody said "errors!" - array of string
+	CLEAR_ERRORS: null,
+
 	// polling commands
 	START: null,
 	STOP: null,
@@ -21,15 +27,6 @@ module.exports = keyMirror({
 	STATUS: null,
 	CHANNEL: null,
 	CHANNEL_CONTROL: null,
-
-	SESSION: null,
-	DEVICE: null,
-
-	ERROR: null, // somebody said "errors!" - array of string
-	CLEAR_ERRORS: null,
-
-	LOGIN: null, // successful login to CME api
-	LOGOUT: null, // logout of CME api
 
 	SHOW_HOME: null,
 	SHOW_CONFIG: null,

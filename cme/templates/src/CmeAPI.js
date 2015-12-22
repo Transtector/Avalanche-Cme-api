@@ -27,6 +27,10 @@ var API = {
 	config: API_ROOT + 'config'
 }
 
+function jqXhrErrorMessage(jqXHR) {
+	return jqXHR.responseJSON.join(',\n') + ' (status: ' + jqXHR.status + ')';
+}
+
 function configItemToUrl(item) {
 	var config = Store.getState().config,
 		itemUrl = '';
@@ -56,19 +60,6 @@ function configItemToUrl(item) {
 
 var CmeAPI = {
 
-	session: function(callback) {
-		var validSession = false;
-
-		return $.ajax({
-			url: API_ROOT,
-			dataType: 'json',
-			success: function(data) {
-				validSession = !!data.timestamp;
-			},
-			complete: function() { callback(validSession); }
-		});
-	},
-
 	device: function(success, failure) {
 		return $.ajax({
 			url: API.device,
@@ -82,11 +73,41 @@ var CmeAPI = {
 					success(data.device);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Device error:\n', textStatus);
-				failure([ textStatus ]);
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.device error: ', msg);
+				failure([ msg ]);
 			}
 		});
 	},
+
+	// login with CME username, password credentials
+	login: function(credentials, success, failure) {
+		var u = credentials.u,
+			p = $.md5(credentials.p);
+
+		return $.ajax({
+			url: API.login,
+			data: { u: u, p: p },
+			dataType: 'json',
+			success: function(data) {
+
+				if (!data.timestamp) {
+					debug('Login failure: ', data);
+					failure(data);
+				} else {
+					success(true);
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.login error: ', msg);
+				failure([ msg ]);
+			}
+		});
+	},
+
+	// just remove the session - ignore return value
+	logout: function() { $.ajax({ url: API.logout }); },
 
 	poll: function(url, success, failure) {
 		$.ajax({
@@ -95,8 +116,9 @@ var CmeAPI = {
 			dataType: 'json',
 			success: success,
 			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Poll error: ', textStatus);
-				failure([ textStatus ]);
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.poll error: ', msg);
+				failure([ msg ]);
 			}
 		});
 	},
@@ -114,8 +136,9 @@ var CmeAPI = {
 			dataType: 'json',
 			success: success,
 			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Channel error: ', textStatus);
-				failure([ textStatus ]);
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.channel error: ', msg);
+				failure([ msg ]);
 			}
 		});
 	},
@@ -132,8 +155,9 @@ var CmeAPI = {
 			dataType: 'json',
 			success: success,
 			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Channel control error: ', textStatus);
-				failure([ textStatus ]);
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.channelControl error: ', msg);
+				failure([ msg ]);
 			}
 		});
 	},
@@ -160,50 +184,16 @@ var CmeAPI = {
 			data: payload,
 			dataType: 'json',
 			success: function(data) {
-				debug('Config success: ', data);
-
 				if (Object.keys(data)[0] === item) // did we get back what we requested?
 					success(data);
 				else
 					failure([ "Config error with: " + item ]);
 			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Config update error: ', textStatus);
-				failure([ textStatus ]);
+			error: function(jqXHR, textStatus, errorThrown) {				
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.config error: ', msg);
+				failure([ msg ]);
 			}
-		});
-	},
-
-	// login with CME username, password credentials
-	login: function(credentials, success, failure) {
-		var u = credentials.u,
-			p = $.md5(credentials.p);
-
-		$.ajax({
-			url: API.login,
-			data: { u: u, p: p },
-			dataType: 'json',
-			success: function(data) {
-
-				if (!data.timestamp) {
-					debug('Login failure: ', data);
-					failure(data);
-				} else {
-					debug('Login success: ', data);
-					success(data);
-				}
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				debug('Login error: ', textStatus);
-				failure([ textStatus ]);
-			}
-		});
-	},
-
-	// just remove the session - ignore return value
-	logout: function() {
-		$.ajax({
-			url: API.logout
 		});
 	}
 };

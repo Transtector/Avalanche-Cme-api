@@ -34,29 +34,26 @@ var CmeApp = React.createClass({
 
 	render: function() {
 
+		function renderLoginOrConsole(state) {
+			
+			if (!state.isLoggedIn)
+				return <Login errors={state.errors} isSubmitting={state.isSubmitting} />
+
+			if (Object.keys(state.config).length == 0)
+				return null;
+
+			if (state.isConfigVisible)
+				return <ConfigPanel config={state.config} />
+
+			return <HomePanel status={state.status} clock={state.config.clock} />
+		}
+
 		return (
 			<div>
 				<Header device={this.state.device}
 						isLoggedIn={this.state.isLoggedIn} />
 
-				{!this.state.isLoggedIn
-
-					? <Login errors={this.state.errors} isSubmitting={this.state.isSubmitting} />
-					
-					: <div id="console">
-
-						{this.state.isConfigVisible
-
-							? <ConfigPanel config={this.state.config} />
-
-							: <HomePanel status={this.state.status}
-										 clock={this.state.config.clock} />
-						}
-
-						<ErrorPanel errors={this.state.errors} />
-
-					</div>
-				}
+				{renderLoginOrConsole(this.state)}
 
 				<div id="test-buttons">
 					<button onClick={this._testError}
