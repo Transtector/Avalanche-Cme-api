@@ -14,6 +14,11 @@ settings = DictPersistJSON(app.config['SETTINGS'])
 settings['__username'] = settings.get('__username', app.config['USERNAME'])
 settings['__passhash'] = settings.get('__passhash', app.config['PASSHASH'])
 
+
+# user-defined channels attributes
+settings['__channels'] = settings.get('__channels', {})
+
+
 # hide device from regular /config requests, but keep a copy
 # in settings for easy access
 settings['__device'] = {
@@ -69,4 +74,3 @@ settings['network'] = settings.get('network', {
 	'secondary': app.config['SECONDARY']
 })
 settings['network']['mac'] = app.config['MAC']
-
