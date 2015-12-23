@@ -26,7 +26,7 @@ module.exports = keyMirror({
 	CLOCK: null,
 	STATUS: null,
 	CHANNEL: null,
-	CHANNEL_CONTROL: null,
+	CONTROL: null,
 
 	SHOW_HOME: null,
 	SHOW_CONFIG: null,

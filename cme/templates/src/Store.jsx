@@ -106,7 +106,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				assign(_status.channels[ch_index], action.data[id]);
 				break;
 
-			case Constants.CHANNEL_CONTROL:
+			case Constants.CONTROL:
 				// action.data = { 'chX:cY': <controlY> }
 				var id = Object.keys(action.data)[0],
 					keys = id.split(':'),

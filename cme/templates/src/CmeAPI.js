@@ -143,7 +143,7 @@ var CmeAPI = {
 		});
 	},
 
-	channelControl: function(chId, controlId, state, success, failure) {
+	control: function(chId, controlId, obj, success, failure) {
 		var chIndex = parseInt(chId.slice(2)), // chId: "chX"
 			ctrlIndex = parseInt(controlId.slice(1)); // controlId: "cY"
 
@@ -151,7 +151,7 @@ var CmeAPI = {
 			type: 'POST',
 			url: API_ROOT + 'ch/' + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
 			contentType: 'application/json; charset=UTF-8',
-			data: JSON.stringify({ state: state }),
+			data: JSON.stringify(obj),
 			dataType: 'json',
 			success: success,
 			error: function(jqXHR, textStatus, errorThrown) {

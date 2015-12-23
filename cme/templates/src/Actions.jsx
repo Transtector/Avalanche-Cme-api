@@ -205,10 +205,10 @@ var Actions = {
 		}, onErrors);
 	},
 
-	channelControl: function(chId, controlId, state) {
-		dispatchRequest(chId + ':' + controlId + ' = ' + state);
-		CmeAPI.channelControl(chId, controlId, state, function(data) {
-			AppDispatcher.dispatch({ actionType: Constants.CHANNEL_CONTROL, data: data });
+	control: function(chId, controlId, control) {
+		dispatchRequest(chId + ':' + controlId + ': ' + JSON.stringify(control));
+		CmeAPI.control(chId, controlId, control, function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.CONTROL, data: data });
 		}, onErrors);
 	}
 };

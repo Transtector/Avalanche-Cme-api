@@ -46,10 +46,10 @@ var Channel = React.createClass({
 
 		// ch primary/secondary sensor display values
 		var primary = this.props.ch.sensors[0],
-			primary_value = primary.data[primary.data.length - 1][1] || 0,
+			primary_value = primary.data[0][1] || 0,
 
 			secondary = this.props.ch.sensors[1],
-			secondary_value = secondary.data[secondary.data.length - 1][1] || 0;
+			secondary_value = secondary.data[0][1] || 0;
 
 		// Calculate the range of timestamps supplied 
 		// in the controls and sensors data and display
@@ -73,9 +73,10 @@ var Channel = React.createClass({
 
 
 		// Ch controls (only 1 for now)
-		var c = this.props.ch.controls[0],
-			cState = c.data[c.data.length - 1][1]; // data: [[ timestamp, state ], ..., ]
-
+		if (this.props.ch.controls && this.props.ch.controls.length > 0) {
+			var c = this.props.ch.controls[0],
+				cState = c.data[c.data.length - 1][1]; // data: [[ timestamp, state ], ..., ]
+		}
 		return (
 			<div className="ch">
 				<div className="ch-header">
@@ -111,10 +112,11 @@ var Channel = React.createClass({
 					</div>
 				</div>
 
+				{/*
 				<div className="ch-controls">
 					<div className="togglebutton">
 						<label>
-							<input type="checkbox" 
+							<input type="checkbox"
 								   id={c.id}
 								   checked={cState} 
 								   onChange={this._requestControlChange} />
@@ -123,6 +125,7 @@ var Channel = React.createClass({
 						</label>	
 					</div>
 				</div>
+				*/}
 
 				<button className="btn ch-history-badge"
 						onClick={this._toggleHistoryVisibility}>
@@ -178,8 +181,8 @@ var Channel = React.createClass({
 	},
 
 	_requestControlChange: function(e) {
-		// channelControl(chId, controlId, state)
-		Actions.channelControl(this.props.ch.id, e.target.id, e.target.checked);
+		// control(chId, controlId, { name: name, state: state })
+		Actions.control(this.props.ch.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
 	}
 });
 
