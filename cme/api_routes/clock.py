@@ -4,7 +4,7 @@ from . import router, settings, request, UriParse
 
 from .auth import require_auth
 from .util import json_response, json_error
-from ..util.ClockUtils import refresh_time, manage_time
+from ..util.ClockUtils import refresh_time, manage_clock
 
 @router.route('/config/clock', methods=['GET', 'POST'])
 @require_auth
@@ -21,7 +21,7 @@ def clock():
 		settings['clock']['displayTimeFormat24Hour'] = newclock['displayTimeFormat24Hour']
 		settings['clock']['displayTimeFormat12Hour'] = newclock['displayTimeFormat12Hour']
 
-		manage_time(settings['clock'])
+		manage_clock(settings['clock'])
 
 	refresh_time(settings['clock'])
 	return json_response({'clock': settings['clock']})
@@ -63,7 +63,7 @@ def ntp_update():
 
 	if request.method == 'POST':
 		settings['clock'][item] = request.get_json()[item]
-		manage_time(settings['clock'])
+		manage_clock(settings['clock'])
 
 	return json_response({ item: settings['clock'][item] })
 

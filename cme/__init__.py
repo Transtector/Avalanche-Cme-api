@@ -6,7 +6,7 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
-from .util.ClockUtils import manage_time
+from .util.ClockUtils import manage_clock
 from .util.IpUtils import manage_network
 
 # load application configuration from module
@@ -51,7 +51,7 @@ logger.debug("\tPUBLIC:\t\t{0}".format(app.static_folder))
 logger.debug("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
 
 if app.config['IS_CME']:
-	manage_time(settings['time'])
+	manage_clock(settings['clock'])
 
 # Network init
 if app.config['IS_CME']:

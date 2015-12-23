@@ -15,14 +15,14 @@ def check_ntp():
 	return cmd.stdout.decode().find('failed') == -1
 
 # manage the NTP daemon and servers used in ntp.conf
-def manage_time(ntp_settings):
+def manage_clock(clock_settings):
 
 	update_ntp = False
 	currently_ntp = check_ntp()
 	current_servers = __read_ntp_servers()
 
-	use_ntp = ntp_settings['ntp']
-	ntp_servers = ntp_settings['servers']
+	use_ntp = clock_settings['ntp']
+	ntp_servers = clock_settings['servers']
 
 	# NTP init
 	# Note that ntp should NOT be setup in init.d to start automatically:
@@ -48,20 +48,20 @@ def manage_time(ntp_settings):
 
 
 # update the current time
-def refresh_time(ntp_settings):
+def refresh_time(clock_settings):
 	# sets the current time
-	ntp_settings['current'] = datetime.utcnow().isoformat() + 'Z'
+	clock_settings['current'] = datetime.utcnow().isoformat() + 'Z'
 
 	# if useNTP, we'll update the NTP status
-	if ntp_settings['ntp']:
+	if clock_settings['ntp']:
 		cmd = subprocess.run(["ntpq", "-pn"], stdout=subprocess.PIPE)
 		last_request, last_success = __parse_ntpq(cmd.stdout.decode())
-		ntp_settings['status'] = [ last_request, last_success ]
+		clock_settings['status'] = [ last_request, last_success ]
 	else:
-		ntp_settings['status'] = [ '-', '-' ]
+		clock_settings['status'] = [ '-', '-' ]
 
 	# get NTPServers from /etc/ntp.conf beginning at line # CME current
-	ntp_settings['servers'] = __read_ntp_servers()
+	clock_settings['servers'] = __read_ntp_servers()
 
 
 # Parse the ntpq output for NTP status
