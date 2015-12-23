@@ -50,7 +50,7 @@ def json_serialize(obj):
 
 		elif isinstance(obj, tuple):
 			return tuple(serialize([item for item in obj]))
-
+		
 		elif hasattr(obj, '__dict__'):
 			return serialize(obj.__dict__)
 

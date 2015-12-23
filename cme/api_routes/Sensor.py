@@ -1,43 +1,29 @@
-from time import time
-import random
+
 
 class Sensor:
 	''' Sensor objects provide read-only values depending on sensor type '''
 
-	# Units by sensor type
-	UNITS = {
-		'AC_VOLTAGE': 'Vrms',
-		'AC_CURRENT': 'Arms',
-		'DC_VOLTAGE': 'V',
-		'DC_CURRENT': 'A'
-	}
 
-	__data = []
+	def __init__(self, ch_id, hw_sensor):
+	
+		self.channel_id = ch_id # track which channel we belong to for settings and data lookups
 
-	def __init__(self, index, sensor_type):
-		id = 's' + str(index)
+		self.id = hw_sensor['id'] # e.g., 's0'
+		self.type = hw_sensor['type']
+		self.unit = hw_sensor['unit']
+		self.data = self.read(hw_sensor)
 
-		self.id = id
-		self.type = sensor_type
-		self.unit = self.UNITS[sensor_type]
-		self.data = self.__data
-		self.read()
+	def read(self, hw_sensor, expanded=False):
 
-	def read(self, expanded=False):
-		ts = time()		
-
-		if self.type == 'AC_VOLTAGE':
-			value = random.randrange(1180, 1220) / 10
+		if expanded:
+			# TODO: return sensor data from file:
+			# [  [ most_recent_timestamp, most_recent_value ], 
+			#	 [            < points in between >         ],
+			#    [ first_timestamp      , first_value       ]  ]
+			return [ [ 1, 2 ], [ 3, 4] ]
 
 		else:
-			value = random.randrange(2500, 5500) / 1000
-
-		self.__data.append([ ts, value ])
-
-		if (expanded):
-			self.data = self.__data
-		else:
-			self.data = [ self.__data[0], self.__data[-1] ]
-
-		return [ ts, value ]
+			# [  [ most_recent_timestamp, most_recent_value ], 
+			#    [ first_timestamp, first_value             ]  ]
+			return hw_sensor['data'] 
 

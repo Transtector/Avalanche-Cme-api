@@ -1,20 +1,40 @@
-from time import time
+
+from . import settings
 
 class Control:
 	''' Control objects provide read-write access to control state '''
 
-	__data = []
+	def __init__(self, ch_id, hw_control):
+		
+		self.channel_id = ch_id # track which channel we belong to for settings lookups
 
-	def __init__(self, index, name, control_type, state):
-		id = 'c' + str(index)
+		self.id = hw_control['id'] # e.g., 'c0'
 
-		self.id = id
-		self.name = name
-		self.type = control_type
-		self.data = self.__data
-		self.set(state)
+		''' user-settable Control data stored in settings '''
+		if not 'controls' in settings['__channels'][ch_id]:
+			chs = settings['__channels']
+			chs[ch_id]['controls'] = {}
+			settings['__channels'] = chs
 
-	def set(self, state):
-		ts = time()
-		self.__data.append([ ts, state ])
-		self.data = [ self.__data[0], self.__data[-1] ]
+		if not self.id in settings['__channels'][ch_id]['controls']:
+			chs = settings['__channels']
+			chs[ch_id]['controls'][self.id] = {}
+			settings['__channels'] = chs
+
+		self.type = hw_control['type']
+		self.state = hw_control['state']
+
+		# Add class properties to this instance to get __dict__ serialization
+		self.__dict__['name'] = self.name
+
+
+	@property
+	def name(self):
+		return settings['__channels'][self.channel_id]['controls'][self.id]['name']
+
+	@name.setter
+	def name(self, value):
+		chs = settings['__channels']
+		chs[self.channel_id]['controls'][self.id]['name'] = value
+		settings['__channels'] = chs
+

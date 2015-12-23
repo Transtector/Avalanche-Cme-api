@@ -1,6 +1,6 @@
 # root level api access provides CME status
 
-from . import router, request, UriParse
+from . import settings, router, request, UriParse
 
 from .auth import require_auth
 from .util import json_response, json_error
@@ -8,8 +8,27 @@ from .util import json_response, json_error
 from datetime import datetime, timezone
 import subprocess
 
-CHANNELS = []
 from .Channel import Channel
+
+# hw status held in memcached object
+import memcache
+mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+
+# Note you can use the memcache server on another machine
+# if you allow access.  Comment the approppriate line in
+# the /etc/memcached.conf on the other machine and restart
+# the memcached service.
+# mc = memcache.Client(['10.16.120.174:11211'], debug=0)
+
+# TODO: add some controls on the hw side and see if this works!
+def set_control_state(ch_index, control_index, state):
+	''' Updates a particular control state in the hw status
+		object.  The control object must already exist in the
+		status object hierarchy. '''
+	hw = mc.get('status')
+	hw['channels'][ch_index]['controls'][control_index].state = state
+	mc.set('status', hw)
+
 
 def status():
 	''' top-level CME status object '''
@@ -25,18 +44,13 @@ def status():
 	except:
 		obj['temperature_degC'] = -40.0 # None
 
+	_channels = []
 
-	# create and add channels if not there yet
-	if (len(CHANNELS) == 0):
-		for i in range(1):
-			CHANNELS.append(Channel(i))
+	# update the channels objects with the hardware data (from memcache)
+	for ch in mc.get('status')['channels']:
+		_channels.append(Channel(ch))
 
-	# else just update the channels' sensors and controls
-	else:
-		for ch in CHANNELS:
-			ch.update()
-
-	obj['channels'] = CHANNELS
+	obj['channels'] = _channels
 
 	return obj
 
@@ -47,6 +61,13 @@ def status():
 @require_auth
 def index():
 	return json_response(status())
+
+
+@router.route('/ch/raw')
+@require_auth
+def raw():
+	''' Just the raw CME hwloop memcached status object '''
+	return json_response(mc.get('status'))
 
 
 # CME channel update
@@ -60,12 +81,12 @@ def channel(ch_index):
 	if not (ch_index >= 0 and ch_index < len(s['channels'])):
 		return json_error('Channel not found', 404)
 
+	# get the requested channel
+	ch = s['channels'][ch_index]
+
 	# parse out the item name (last element of request path)
 	segments = UriParse.path_parse(request.path)
 	item = segments[-1].lower()
-
-	# get the requested channel
-	ch = s['channels'][ch_index]
 
 	# update name or description (or both) from POST data
 	if request.method == 'POST':
@@ -129,6 +150,8 @@ def sensor(ch_index, s_index):
 
 
 @router.route('/ch/<int:ch_index>/controls/<int:c_index>', methods=['GET', 'POST'])
+@router.route('/ch/<int:ch_index>/controls/<int:c_index>/name', methods=['GET', 'POST'])
+@router.route('/ch/<int:ch_index>/controls/<int:c_index>/state', methods=['GET', 'POST'])
 @require_auth
 def control(ch_index, c_index):
 	s = status()
@@ -143,7 +166,27 @@ def control(ch_index, c_index):
 
 	ctrl = ch.controls[c_index]
 
-	if request.method == 'POST':
-		ctrl.set(request.get_json()['state'])
+	# parse out the item name (last element of request path)
+	segments = UriParse.path_parse(request.path)
+	item = segments[-1].lower()
 
-	return json_response({ ch.id + ':' + ctrl.id: ctrl })
+	# update name or description (or both) from POST data
+	if request.method == 'POST':
+		ctrl_update = request.get_json()
+		if item == 'name':
+			ctrl.name = ctrl_update.get('name', ctrl.name)
+		elif item == 'state':
+			ctrl.state = ctrl_update.get('state', ctrl.state)
+			set_control_state(ch_index, c_index, ctrl.state)
+		else:
+			ctrl.name = ctrl_update.get('name', ctrl.name)
+			ctrl.state = ctrl_update.get('state', ctrl.state)
+			set_control_state(ch_index, c_index, ctrl.state)
+
+	# figure out what to return
+	if item == 'name':
+		return json_response({ ch.id + ':' + ctrl.id: { 'name': ctrl.name }})
+	elif item == 'state':
+		return json_response({ ch.id + ':' + ctrl.id: { 'state': ctrl.state }})
+	else:
+		return json_response({ ch.id + ':' + ctrl.id: ctrl })

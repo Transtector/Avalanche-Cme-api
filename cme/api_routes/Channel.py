@@ -1,24 +1,57 @@
+from . import settings
+
 from .Control import Control
 from .Sensor import Sensor
 
 class Channel:
-	''' Channel - includes sensors and controls '''
+	
+	def __init__(self, hw_ch): 
 
-	def __init__(self, index): 
-		id = 'ch' + str(index)
+		self.id = hw_ch['id'] # e.g., 'ch0'
 
-		self.id = id
-		self.name = id
-		self.description = 'channel ' + str(index) + ' description'
-		self.controls = [
-			Control(0, "Circuit switch", "SPST_RELAY", True)
-		]
-		self.sensors = [
-			Sensor(0, "AC_VOLTAGE"),
-			Sensor(1, "AC_CURRENT")
-		]
+		''' user-settable channel settings are cached in settings['__channels'] by channel id '''
+		if not self.id in settings['__channels']:
+			chs = settings['__channels']
+			chs[self.id] = {}
+			settings['__channels'] = chs
 
-	def update(self):
-		for s in self.sensors:
-			s.read()
+			self.name = self.id
+			self.description = self.id + ' description'
+
+		self.sensors = []
+		self.controls = []
+
+		# Add class properties to this instance to get __dict__ serialization
+		self.__dict__['name'] = self.name
+		self.__dict__['description'] = self.description
+
+		# Add channel sensors...
+		if 'sensors' in hw_ch:
+			for s in hw_ch['sensors']:
+				self.sensors.append(Sensor(hw_ch['id'], s))
+
+		# Add channel controls...
+		if 'controls' in hw_ch:
+			for c in hw_ch['controls']:
+				self.controls.append(Control(hw_ch['id'], c))
+
+	@property
+	def name(self):
+		return settings['__channels'][self.id]['name']
+
+	@name.setter
+	def name(self, value):
+		chs = settings['__channels']
+		chs[self.id]['name'] = value
+		settings['__channels'] = chs
+
+	@property
+	def description(self):
+		return settings['__channels'][self.id]['description']
+	
+	@description.setter
+	def description(self, value):
+		chs = settings['__channels']
+		chs[self.id]['description'] = value
+		settings['__channels'] = chs
 
