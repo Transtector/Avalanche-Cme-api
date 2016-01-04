@@ -6,7 +6,7 @@
  */
 var React = require('react');
 
-var Store = require('../Store');
+var Actions = require('../Actions');
 
 var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
@@ -18,6 +18,10 @@ var NetConfig = React.createClass({
 	},
 
 	render: function() {
+		changesPending = Object.keys(this.props.config).some(function(key) {
+			return this.props.config[key] !== this.state[key];
+		}, this);
+
 		return (
 			<InputGroup id="network">
 				<TextInput id="mac" placeholder="MAC" value={this.state.mac} />
@@ -46,19 +50,25 @@ var NetConfig = React.createClass({
 					value={this.state.secondary} onChange={this._requestChange} disabled={this.state.dhcp} />
 
 				<div className="input-group-buttons">
-					<button className='btn' onClick={this._onReset}>Reset</button>
-					<button className='btn' onClick={this._onApply}>Apply</button>
+					<button className='btn' 
+							onClick={this._onReset}
+							disabled={!changesPending}>Reset</button>
+					<button className='btn' 
+							onClick={this._onApply}
+							disabled={!changesPending}>Apply</button>
 				</div>
 			</InputGroup>
 		);
 	},
 
 	_onReset: function() {
+
 		this.setState(this.props.config);
 	},
 
 	_onApply: function() {
-		console.log("[NetConfig]._onApply");
+
+		Actions.config({ network: this.state });
 	},
 
 	_requestChange: function(event) {

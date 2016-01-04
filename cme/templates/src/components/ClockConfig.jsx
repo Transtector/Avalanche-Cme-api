@@ -283,7 +283,7 @@ var ClockConfig = React.createClass({
 		// property from the submitted object
 		var clock = this.state;
 		clock.servers = clock.serversCSV.trim() != '' 
-			? clock.serversCSV.split(', ').map(function(s) { return s.trim(); }) 
+			? clock.serversCSV.split(',').map(function(s) { return s.trim(); }) 
 			: [];
 
 		Actions.config({ clock: clock });
