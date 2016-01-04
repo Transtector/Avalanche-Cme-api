@@ -21,14 +21,16 @@ var API_ROOT = '/api/';
 
 // use enumeration for API routes
 var API = {
-	device: API_ROOT + 'device',
+	device: API_ROOT + 'device/',
 	login: API_ROOT + 'login',
 	logout: API_ROOT + 'logout',
-	config: API_ROOT + 'config'
+	config: API_ROOT + 'config/'
 }
 
 function jqXhrErrorMessage(jqXHR) {
-	return jqXHR.responseJSON.join(',\n') + ' (status: ' + jqXHR.status + ')';
+	if (jqXHR.responseJSON)
+		return jqXHR.responseJSON.join(',\n') + ' (status: ' + jqXHR.status + ')';
+	return jqXHR.responseText;
 }
 
 function configItemToUrl(item) {
@@ -39,15 +41,13 @@ function configItemToUrl(item) {
 		return '';
 
 	if (config[item] !== undefined) // first level config group
-		return '/' + item;
-
-	var itemUrl = '';
+		return item + '/';
 
 	// else we have to search for the item in the config groups
 	// (note: this needs to change if we want to support deeper config object)
 	for (var group in config) {
 		if (config[group][item] !== undefined) {
-			itemUrl = '/' + group + '/' + item;
+			itemUrl = group + '/' + item;
 			break;
 		}
 	}
