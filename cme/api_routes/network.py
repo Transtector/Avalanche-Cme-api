@@ -13,9 +13,28 @@ import threading
 @require_auth
 def network():
 	if request.method == 'POST':
-		return json_error([ 'Not implemented' ])
 
-	return json_response(settings['network'])
+		newnet = request.get_json()['network']
+
+		curnet = settings['network']
+
+		curnet['dhcp'] = newnet['dhcp']
+		curnet['address'] = newnet['address']
+		curnet['netmask'] = newnet['netmask']
+		curnet['gateway'] = newnet['gateway']
+		curnet['primary'] = newnet['primary']
+		curnet['secondary'] = newnet['secondary']
+
+		settings['network'] = curnet
+
+		# Network settings updated.  Reload the network after some delay
+		# to give a response.  Note that manage_network() will only reload
+		# the network if the settings have actually changed from current.
+		t = threading.Thread(target=delay_manage_network, args=(5,))
+		t.setDaemon(True)
+		t.start()
+
+	return json_response({ 'network': settings['network']})
 
 
 @router.route('/config/network/mac')
