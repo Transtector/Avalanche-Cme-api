@@ -2,7 +2,7 @@
 # Provide access to API session token (cookie)
 # given matching username and passhash
 
-from . import app, settings, router, request, Serializer
+from . import app, settings, router, request
 
 from .util import json_response
 from .status import status
@@ -18,13 +18,5 @@ def login():
 	if p != settings['__passhash']:
 		return json_response([ 'Login failed - invalid password.' ]),
 
-	# else we've got valid login
-
-	# generate a signed token
-	s = Serializer(app.config['SECRET_KEY'],
-				   expires_in = app.config['SESSION_EXPIRATION'])
-	token = s.dumps(u)
-
-	# send response with session_cookie = token
-	return json_response(status(), token)
-
+	# else we've got valid login send response and force set session
+	return json_response(status(), True)
