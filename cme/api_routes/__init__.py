@@ -14,5 +14,5 @@ from cme.util import UriParse
 router = Blueprint('apiroutes', __name__)
 
 # make routes available
-from . import (login, logout, status, config, device,
+from . import (login, logout, user, status, config, device,
 			   general, clock, http, network, snmp)

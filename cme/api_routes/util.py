@@ -28,7 +28,7 @@ def json_response(obj, force_session=False):
 
 # JSON reponse on errors
 def json_error(obj, code=500):
-	return Response(json.serialize(obj), status=code, mimetype='application/json')
+	return Response(json_serialize(obj), status=code, mimetype='application/json')
 
 
 # Filter out items named with double underscore "__" prefix

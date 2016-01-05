@@ -22,9 +22,10 @@ var API_ROOT = '/api/';
 // use enumeration for API routes
 var API = {
 	device: API_ROOT + 'device/',
+	config: API_ROOT + 'config/',
 	login: API_ROOT + 'login',
 	logout: API_ROOT + 'logout',
-	config: API_ROOT + 'config/'
+	user: API_ROOT + 'user/'
 }
 
 function jqXhrErrorMessage(jqXHR) {
@@ -106,11 +107,36 @@ var CmeAPI = {
 		});
 	},
 
+	// update username, password credentials
+	user: function(u, p, success, failure) {
+		return $.ajax({
+			type: 'POST',
+			url: API.user,
+			data: JSON.stringify({ user: { username: u, password: $.md5(p) }}),
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8',
+			success: function(data, textStatus, jqXHR) {
+				if (jqXHR.status !== 200) {
+					debug('CmeAPI.user error: ', data);
+					failure(data);
+				} else {
+					success(data);
+				}
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.user error: ', msg);
+				failure([ msg ]);
+			}
+
+		});
+	},
+
 	// just remove the session - ignore return value
-	logout: function() { $.ajax({ url: API.logout }); },
+	logout: function() { return $.ajax({ url: API.logout }); },
 
 	poll: function(url, success, failure) {
-		$.ajax({
+		return $.ajax({
 			url: API_ROOT + url,
 			contentType: 'application/json; charset=UTF-8',
 			dataType: 'json',
@@ -128,7 +154,7 @@ var CmeAPI = {
 			method = obj ? 'POST' : 'GET',
 			payload = obj ? JSON.stringify(obj) : null;
 
-		$.ajax({
+		return $.ajax({
 			type: method,
 			url: API_ROOT + 'ch/' + chIndex, // /api/ch/0
 			contentType: 'application/json; charset=UTF-8',
@@ -147,7 +173,7 @@ var CmeAPI = {
 		var chIndex = parseInt(chId.slice(2)), // chId: "chX"
 			ctrlIndex = parseInt(controlId.slice(1)); // controlId: "cY"
 
-		$.ajax({
+		return $.ajax({
 			type: 'POST',
 			url: API_ROOT + 'ch/' + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
 			contentType: 'application/json; charset=UTF-8',
