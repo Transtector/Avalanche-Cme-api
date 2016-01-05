@@ -8,10 +8,19 @@ module.exports = exports = {
 		LOCAL: 2
 	},
 
-	formatRelativeMoment: function (moment, relativeTo, zone) {
+	formatRelativeMoment: function (moment, relativeTo, zone_hours) {
 
-		if (relativeTo == this.TIME_DISPLAY.CME_LOCAL)
-			return moment.utcOffset(zone * 60);
+		if (relativeTo == this.TIME_DISPLAY.CME_LOCAL) {
+			var offset_minutes = zone_hours * 60;
+
+			// Due to the way moment.utcOffset() interprets the parameter, we
+			// have to adjust it back to the fractional zone_hours.
+			// see: http://momentjs.com/docs/#/manipulating/utc-offset/
+			if (offset_minutes < 16 && offset_minutes > -16)
+				offset_minutes = zone_hours
+
+			return moment.utcOffset(offset_minutes);
+		}
 
 		if (relativeTo == this.TIME_DISPLAY.LOCAL)
 			return moment.local();

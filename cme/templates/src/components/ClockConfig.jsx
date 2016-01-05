@@ -28,7 +28,9 @@ function formatPropsToState(props) {
 	state.current = moment.utc(props.current);
 	state.status = [];
 	props.status.forEach(function(s) {
-		state.status.push(s ? moment.utc(s) : moment.invalid());
+		// s _must_ conform to ISO 8601 otherwise invalid...
+		var m = moment.utc(s, moment.ISO_8601);
+		state.status.push(m.isValid() ? m : moment.invalid());
 	});
 
 	if (props.servers)
@@ -356,5 +358,6 @@ var ClockConfig = React.createClass({
 		);
 	}
 });
+window.moment = moment;
 
 module.exports = ClockConfig;
