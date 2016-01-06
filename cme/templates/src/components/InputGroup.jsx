@@ -24,6 +24,14 @@ var InputGroup = React.createClass({
 		}
 	},
 
+	collapse: function() {
+		this.setState({ collapsed: true });
+	},
+
+	expand: function() {
+		this.setState({ collapsed: false });
+	},
+
 	render: function() {
 		var capitalizedId = this.props.id.charAt(0).toUpperCase() + this.props.id.slice(1);
 		var cn = classNames({'input-group': true, 'collapsed': this.state.collapsed});

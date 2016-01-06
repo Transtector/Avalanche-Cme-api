@@ -13,6 +13,7 @@ var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
 var ClockConfig = require('./ClockConfig');
 var NetConfig = require('./NetConfig');
+var UserConfig = require('./UserConfig');
 
 var classNames = require('classnames');
 var assign = require('object-assign'); // ES6 polyfill
@@ -31,6 +32,8 @@ var ConfigPanel = React.createClass({
 
 				<div className="panel-content">
 				
+					<UserConfig />
+
 					<InputGroup id="general">
 						<TextInput id="name" value={config.general.name} onChange={this._requestChange} />
 						<TextInput id="description" value={config.general.description} onChange={this._requestChange} />
@@ -56,9 +59,17 @@ var ConfigPanel = React.createClass({
 
 					<InputGroup id="http">
 						<TextInput id="cors" 
-							placeholder="CORS whitelist" 
-							value={config.http.corsWhitelist} />
+								   placeholder="CORS whitelist" 
+								   value={config.http.corsWhitelist} />
 					</InputGroup>
+
+					<div className="input-group">
+						<button id="factory-reset"
+								className='btn' 
+								onClick={this._factoryReset}>
+							Factory Reset
+						</button>
+					</div>
 
 				</div>
 
@@ -70,6 +81,11 @@ var ConfigPanel = React.createClass({
 		var obj = {};
 		obj[e.target.name] = e.target.value;
 		Actions.config(obj);
+	},
+
+	_factoryReset: function() {
+		if (confirm("CME configuration will be reset to factory defaults.\n\nOk to continue?\n\n"))
+			Actions.factoryReset();
 	}
 });
 

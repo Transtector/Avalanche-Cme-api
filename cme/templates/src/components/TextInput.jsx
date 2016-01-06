@@ -18,6 +18,8 @@ var TextInput = React.createClass({
 		var id = this.props.id,
 			value = this.props.value,
 			placeholder = this.props.placeholder || id.charAt(0).toUpperCase() + id.slice(1),
+			caption = this.props.caption || placeholder,
+			type = this.props.type || "text",
 			onChange = this.props.onChange,
 			onBlur = this.props.onBlur,
 			readonly = !(onChange || onBlur),
@@ -25,9 +27,9 @@ var TextInput = React.createClass({
 
 		return (
 			<div className={cn}>
-				<label htmlFor={id}>{placeholder}</label>
+				<label htmlFor={id}>{caption}</label>
 				<input
-					type="text"
+					type={type}
 					name={id}
 					id={id}
 					placeholder={placeholder}
