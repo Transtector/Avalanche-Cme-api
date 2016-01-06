@@ -23,9 +23,9 @@ var API_ROOT = '/api/';
 var API = {
 	device: API_ROOT + 'device/',
 	config: API_ROOT + 'config/',
+	user: API_ROOT + 'user/',
 	login: API_ROOT + 'login',
-	logout: API_ROOT + 'logout',
-	user: API_ROOT + 'user/'
+	logout: API_ROOT + 'logout'
 }
 
 function jqXhrErrorMessage(jqXHR) {
@@ -60,6 +60,28 @@ function configItemToUrl(item) {
 }
 
 var CmeAPI = {
+
+	factoryReset: function(success, failure) {
+
+		function onError(jqXHR, textStatus, errorThrown) {
+			failure("Error performing factory reset:\nstatus: " + jqXHR.status + " - " + textStatus);
+		}
+
+		return $.ajax({
+			url: API.config + 'factoryReset',
+			dataType: 'json',
+			success: function(data, textStatus, jqXHR) {
+				if (jqXHR.status !== 200) {
+					debug('CMEAPI.factoryReset error: ', data);
+					onError(jqXHR, textStatus, data);
+				} else {
+					success();
+				}
+			},
+			error: onError
+
+		});
+	},
 
 	device: function(success, failure) {
 		return $.ajax({
