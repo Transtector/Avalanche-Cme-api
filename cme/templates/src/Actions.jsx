@@ -63,7 +63,7 @@ function onErrors(errors) {
 
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
-		data: errors
+		data: Array.isArray(errors) ? errors : [ errors ]
 	});
 }
 
@@ -127,8 +127,21 @@ var Actions = {
 	},
 
 	logout: function() {
-		CmeAPI.logout('logout'); // don't wait - just dispatch logout
+		CmeAPI.logout(); // don't wait - just dispatch logout
 		AppDispatcher.dispatch({ actionType: Constants.SESSION, data: false });
+	},
+
+	factoryReset: function() {
+		dispatchRequest("factory reset");
+		CmeAPI.factoryReset(Actions.logout, onErrors);
+	},
+
+	profile: function(u, p, success) {
+		dispatchRequest("user profile");
+
+		// Note here the application state will not change -
+		// so no need to dispatch an update to the Store.
+		CmeAPI.user(u, p, success, onErrors);
 	},
 
 	showHome: function() {
