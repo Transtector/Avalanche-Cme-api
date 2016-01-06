@@ -23,14 +23,12 @@ def user():
 	except KeyError:
 		return json_error(['Error updating profile - missing password'], code=400)
 
-	if not (u and p):
-		return json_error(['Error updating profile - username and password cannot be empty'], code=400)
-
 	# md5(password) = 128-bit or 32 hex digits
 	if not len(p) == 32:
 		return json_error(['Error updating profile - invalid password format'], code=400)
 
-	settings['__username'] = newuser['username']
-	settings['__passhash'] = newuser['password']
+	# empty username/password preserves current settings
+	settings['__username'] = u or settings['__username']
+	settings['__passhash'] = p or settings['__passhash']
 
 	return json_response([ 'User profile successfully updated.' ])
