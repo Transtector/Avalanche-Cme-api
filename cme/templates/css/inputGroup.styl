@@ -9,6 +9,13 @@
 	text-align left
 	overflow hidden
 	box-shadow 1px 1px 3px #ccc
+	
+.input-group > button
+	height 32px
+	width 380px
+	
+.input-group > button#factory-reset
+	background-color error-color
 
 .input-group-title button
 	width 100%
@@ -48,7 +55,8 @@
 		color #006EC5
 		font-size 90%
 		font-weight bold
-	> input[type="text"]
+	> input[type="text"],
+	> input[type="password"]
 		margin-left 8px
 		width 350px
 	input, a, .led-text
@@ -102,3 +110,6 @@
 	.btn:disabled
 		background-color transparent
 		color #ddd
+	.btn.full-width
+		width 100%
+		border-right 0
