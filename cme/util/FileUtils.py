@@ -1,4 +1,4 @@
-import os
+import os, time
 from .. import app, settings
 
 # check for firmware update file presence
@@ -14,3 +14,21 @@ def refresh_device():
 	settings['__device']['__update'] = '' if len(files) == 0 else files[0]
 
 
+
+def delay_factory_reset(delay=5):
+	
+	# create/touch the reset file
+	# from: http://stackoverflow.com/a/6222692/1169898
+	resetFile = app.config['RESET']
+
+	try:
+		os.utime(resetFile, None)
+	except:
+		open(resetFile, 'a').close()
+
+	print("Factory reset and restart in {0} seconds...".format(delay))
+	time.sleep(delay)
+
+	if app.config['IS_CME']:
+		os.system("shutdown -r now")
+	

@@ -53,6 +53,8 @@ def create_dir_if_not_exist(dir):
 create_dir_if_not_exist(UPLOADS)
 create_dir_if_not_exist(LOGDIR)
 
+# this for uploading files (ostensibly firmware files)
+# TODO: figure out size/extension for actual firmware files
 ALLOWED_EXTENSIONS = ['txt', 'pdf', 'png', 'jpg']
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16 MB
 
