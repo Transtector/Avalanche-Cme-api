@@ -48,12 +48,21 @@ var CmeApp = React.createClass({
 			return <HomePanel status={state.status} clock={state.config.clock} />
 		}
 
+		function renderErrorPanel(state) {
+			if (!state.isLoggedIn)
+				return null;
+
+			return <ErrorPanel errors={state.errors} />
+		}
+
 		return (
 			<div>
 				<Header device={this.state.device}
 						isLoggedIn={this.state.isLoggedIn} />
 
 				{renderLoginOrConsole(this.state)}
+
+				{renderErrorPanel(this.state)}	
 
 				<div id="test-buttons">
 					<button onClick={this._testError}
