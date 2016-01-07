@@ -11,23 +11,23 @@ import subprocess
 from .Channel import Channel
 
 # hw status held in memcached object
-import memcache
-mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+import memcache, json
+#mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 
 # Note you can use the memcache server on another machine
 # if you allow access.  Comment the approppriate line in
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
-# mc = memcache.Client(['10.16.120.174:11211'], debug=0)
+mc = memcache.Client(['10.16.120.174:11211'], debug=0)
 
 # TODO: add some controls on the hw side and see if this works!
 def set_control_state(ch_index, control_index, state):
 	''' Updates a particular control state in the hw status
 		object.  The control object must already exist in the
 		status object hierarchy. '''
-	hw = mc.get('status')
+	hw = json.loads(mc.get('status'))
 	hw['channels'][ch_index]['controls'][control_index].state = state
-	mc.set('status', hw)
+	mc.set('status', json.dumps(hw))
 
 
 def status():
@@ -47,7 +47,10 @@ def status():
 	_channels = []
 
 	# update the channels objects with the hardware data (from memcache)
-	for ch in mc.get('status')['channels']:
+	status = json.loads(mc.get('status'))
+	print("\nstatus: {0}\n\n".format(status))
+
+	for ch in status['channels']:
 		_channels.append(Channel(ch))
 
 	obj['channels'] = _channels
@@ -67,7 +70,7 @@ def index():
 @require_auth
 def raw():
 	''' Just the raw CME hwloop memcached status object '''
-	return json_response(mc.get('status'))
+	return json_response(json.loads(mc.get('status')))
 
 
 # CME channel update
