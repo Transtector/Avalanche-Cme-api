@@ -9,6 +9,8 @@ class Channel:
 
 		self.id = hw_ch['id'] # e.g., 'ch0'
 
+		self.__dict__['error'] = hw_ch['error']
+
 		''' user-settable channel settings are cached in settings['__channels'] by channel id '''
 		if not self.id in settings['__channels']:
 			chs = settings['__channels']
@@ -54,4 +56,3 @@ class Channel:
 		chs = settings['__channels']
 		chs[self.id]['description'] = value
 		settings['__channels'] = chs
-

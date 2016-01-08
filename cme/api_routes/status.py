@@ -48,7 +48,7 @@ def status():
 
 	# update the channels objects with the hardware data (from memcache)
 	status = json.loads(mc.get('status'))
-	print("\nstatus: {0}\n\n".format(status))
+	#print("\nstatus: {0}\n\n".format(status))
 
 	for ch in status['channels']:
 		_channels.append(Channel(ch))
