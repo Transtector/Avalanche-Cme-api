@@ -21,7 +21,7 @@ DOCROOT = os.path.join(APPROOT, 'cme') # /home/pi/Cme/cme
 UPLOADS = os.path.join(APPROOT, 'tmp') # /home/pi/tmp
 
 # logging to files
-LOGDIR = os.path.join('log') # /home/pi/log
+LOGDIR = os.path.join(APPROOT, 'log') # /home/pi/log
 LOGBYTES = 1024 * 10
 LOGCOUNT = 5
 
