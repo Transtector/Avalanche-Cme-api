@@ -7,7 +7,6 @@
 
 import os
 import uuid
-import errno
 import platform
 
 DEBUG = True
@@ -18,18 +17,20 @@ IS_CME = HOSTNAME == 'cme'
 
 APPROOT = os.path.abspath(os.getcwd()) # /home/pi/Cme
 DOCROOT = os.path.join(APPROOT, 'cme') # /home/pi/Cme/cme
-UPLOADS = os.path.join(APPROOT, 'tmp') # /home/pi/tmp
+SNMPDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-snmp')) # /home/pi/Cme-snmp
+HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /home/pi/Cme-hw
 
-# logging to files
-LOGDIR = os.path.join(APPROOT, 'log') # /home/pi/log
+# uploads go to temp folder above app
+UPLOADS = os.path.abspath(os.path.join(APPROOT, '../tmp')) # /home/pi/tmp
+
+# logging to files in parent foldr
+LOGDIR = os.path.abspath(os.path.join(APPROOT, '../log')) # /home/pi/log
 LOGBYTES = 1024 * 10
 LOGCOUNT = 5
 
 APPLOG = os.path.join(LOGDIR, 'cme.log')
 SERVERLOG = os.path.join(LOGDIR, 'server.log')
 ACCESSLOG = os.path.join(LOGDIR, 'access.log')
-
-SNMPDIR = os.path.join(APPROOT, 'Cme-snmp')
 
 RESET = os.path.join(APPROOT, 'cme-reset')
 SETTINGS = os.path.join(APPROOT, 'settings.json')
@@ -40,18 +41,13 @@ if os.path.isfile(RESET):
 	os.remove(SETTINGS)
 	os.remove(RESET)
 
-def create_dir_if_not_exist(dir):
-	''' try to create directory if it does not exist
-		from http://stackoverflow.com/a/5032238 '''
-	try:
-		os.makedirs(dir)
-	except OSError as e:
-		if e.errno != errno.EEXIST:
-			raise
+# create uploads and log folders if they don't yet exist
+if not os.path.exists(UPLOADS):
+	os.makedirs(UPLOADS)
 
-# make sure we have uploads and log folders
-create_dir_if_not_exist(UPLOADS)
-create_dir_if_not_exist(LOGDIR)
+if not os.path.exists(LOGDIR):
+	os.makedirs(LOGDIR)
+
 
 # this for uploading files (ostensibly firmware files)
 # TODO: figure out size/extension for actual firmware files

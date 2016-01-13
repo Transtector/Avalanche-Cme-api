@@ -1,6 +1,6 @@
 # root level api access provides CME status
 
-from . import settings, router, request, UriParse
+from . import config, settings, router, request, UriParse
 
 from .auth import require_auth
 from .util import json_response, json_error
@@ -12,13 +12,15 @@ from .Channel import Channel
 
 # hw status held in memcached object
 import memcache, json
-#mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 
 # Note you can use the memcache server on another machine
 # if you allow access.  Comment the approppriate line in
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
+
+#mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 mc = memcache.Client(['10.16.120.174:11211'], debug=0)
+
 
 # TODO: add some controls on the hw side and see if this works!
 def set_control_state(ch_index, control_index, state):
@@ -33,29 +35,26 @@ def set_control_state(ch_index, control_index, state):
 def status():
 	''' top-level CME status object '''
 
-	obj = {}
-	obj['timestamp'] = datetime.utcnow().isoformat() + 'Z'
-
 	# try to read temperature (could fail if not on RPi)
 	# temp in millidegrees C
 	try:
-		tempC = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
-		obj['temperature_degC'] = tempC
+		temp_C = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
 	except:
-		obj['temperature_degC'] = -40.0 # None
+		temp_C = -40.0 # Not on a RPi
 
-	_channels = []
+	# Update the channels objects with the hardware data (from memcache).
+	# I found that sometimes the mc.get('status') was returning None which
+	# results in a 500 server error when json.loads().  To avoid that,
+	# we check if cme_status is None and assign an object with empty
+	# channels.
+	cme_status = mc.get('status')	
+	status = json.loads(cme_status) if cme_status else { 'channels': [] }
 
-	# update the channels objects with the hardware data (from memcache)
-	status = json.loads(mc.get('status'))
-	#print("\nstatus: {0}\n\n".format(status))
-
-	for ch in status['channels']:
-		_channels.append(Channel(ch))
-
-	obj['channels'] = _channels
-
-	return obj
+	return {
+		'timestamp': datetime.utcnow().isoformat() + 'Z',
+		'temperature_degC': temp_C,
+		'channels': [Channel(ch) for ch in status['channels']]
+	}
 
 
 # CME status request
