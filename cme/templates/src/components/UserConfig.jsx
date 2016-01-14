@@ -31,7 +31,7 @@ var UserConfig = React.createClass({
 			valid = this.state.p === this.state.pc && (this.state.p.length == 0 || this.state.p.length >= 4);
 
 		return (
-			<InputGroup id="profile" ref={function(ref) { this._InputGroup = ref;} } >
+			<InputGroup id="profile" ref="_InputGroup">
 
 				{/* These hidden inputs are to stop Chrome from autofilling the username and password fields.
 					See: http://stackoverflow.com/questions/12374442/chrome-browser-ignoring-autocomplete-off	*/}
@@ -69,7 +69,7 @@ var UserConfig = React.createClass({
 		Actions.profile(this.state.u, this.state.p, function() {
 			 alert("CME user profile updated.");
 			 self.setState({ u: '', p: '', pc: '' });
-			 self._InputGroup.collapse();
+			 self.refs['_InputGroup'].collapse();
 		});
 	},
 
