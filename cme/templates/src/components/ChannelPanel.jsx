@@ -69,92 +69,104 @@ var ChannelPanel = React.createClass({
 
 		var duration = ts_end.from(ts_start, true);
 
-
-		// Ch controls (only 1 for now)
+		// Ch controls (only 1 for now, and it's hidden)
 		if (this.props.ch.controls && this.props.ch.controls.length > 0) {
 			var c = this.props.ch.controls[0],
 				cState = c.data[c.data.length - 1][1]; // data: [[ timestamp, state ], ..., ]
 		}
+
+		var chWrapperClass = classNames({
+			'ch-wrapper': true,
+			'error': this.props.ch.error.length > 0
+		});
+
+
 		return (
-			<div className="ch">
-				<div className="ch-header">
-					<input type="text" id="name" name="name" value={name} onChange={this._requestChange} />
-					<input type="text" id="description" name="description" value={description} onChange={this._requestChange} />
-				</div>
-	
-				<div className="ch-primary">
-					<div className="sensor-value">
-						{primary_value.toFixed(1)}
+			<div className={chWrapperClass}>
+				<div className="ch">
+					<div className="ch-header">
+						<input type="text" id="name" name="name" value={name} onChange={this._requestChange} />
+						<input type="text" id="description" name="description" value={description} onChange={this._requestChange} />
 					</div>
-					<div className="sensor-unit">
-						<span className="U">
-							{primary.unit.substr(0, 1)}
-						</span>
-						<span className="u">
-							{primary.unit.substr(1)}
-						</span>
-					</div>
-				</div>
 
-				<div className="ch-secondary">
-					<div className="sensor-value">
-						{secondary_value.toFixed(3)}
-					</div>
-					<div className="sensor-unit">
-						<span className="U">
-							{secondary.unit.substr(0, 1)}
-						</span>
-						<span className="u">
-							{secondary.unit.substr(1)}
-						</span>
-					</div>
-				</div>
 
-				{/*
-				<div className="ch-controls">
-					<div className="togglebutton">
-						<label>
-							<input type="checkbox"
-								   id={c.id}
-								   checked={cState} 
-								   onChange={this._requestControlChange} />
-							<span className="toggle"></span>
-							{c.name}
-						</label>	
+		
+					<div className="ch-primary">
+						<div className="sensor-value">
+							{primary_value.toFixed(1)}
+						</div>
+						<div className="sensor-unit">
+							<span className="U">
+								{primary.unit.substr(0, 1)}
+							</span>
+							<span className="u">
+								{primary.unit.substr(1)}
+							</span>
+						</div>
 					</div>
-				</div>
-				*/}
 
-				<button className="btn ch-history-badge"
-						onClick={this._toggleHistoryVisibility}>
-					{duration}
-				</button>
-				<div className={historyClass}>
-					<button className="btn"
+					<div className="ch-secondary">
+						<div className="sensor-value">
+							{secondary_value.toFixed(3)}
+						</div>
+						<div className="sensor-unit">
+							<span className="U">
+								{secondary.unit.substr(0, 1)}
+							</span>
+							<span className="u">
+								{secondary.unit.substr(1)}
+							</span>
+						</div>
+					</div>
+
+					{/*
+					<div className="ch-controls">
+						<div className="togglebutton">
+							<label>
+								<input type="checkbox"
+									   id={c.id}
+									   checked={cState} 
+									   onChange={this._requestControlChange} />
+								<span className="toggle"></span>
+								{c.name}
+							</label>	
+						</div>
+					</div>
+					*/}
+
+					<button className="btn ch-history-badge"
 							onClick={this._toggleHistoryVisibility}>
-						x
+						{duration}
 					</button>
-
-					Channel History Plots
-
-				</div>
-
-				<div className={configClass}>
-					
-					<div className='ch-config-content'>
-						<button className='btn'
-								onClick={this._toggleConfigVisibility}>&laquo;
+					<div className={historyClass}>
+						<button className="btn"
+								onClick={this._toggleHistoryVisibility}>
+							x
 						</button>
 
-						Channel Configuration
+						Channel History Plots
 
 					</div>
 
-					<button className='btn'
-							onClick={this._toggleConfigVisibility}>&raquo;
-					</button>
+					<div className={configClass}>
+						
+						<div className='ch-config-content'>
+							<button className='btn'
+									onClick={this._toggleConfigVisibility}>&laquo;
+							</button>
 
+							Channel Configuration
+
+						</div>
+
+						<button className='btn'
+								onClick={this._toggleConfigVisibility}>&raquo;
+						</button>
+
+					</div>
 				</div>
+
+				<div className="ch-error-badge">!</div>
 
 			</div>
 		);

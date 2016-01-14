@@ -28,17 +28,41 @@
 	.thermometer.alarm > div
 		border-color red
 
+.ch-wrapper
+	position relative
+	float left	
+
+error-badge-size = 30px
+.ch-error-badge
+	position absolute
+	text-align center
+	top 0
+	right 0
+	width error-badge-size
+	height error-badge-size
+	line-height error-badge-size
+	font-size error-badge-size
+	font-weight bold
+	border-radius 100%
+	color white
+	background-color error-color
+	box-shadow 0 2px 9px 0 rgba(0,0,0,0.2)	
+	opacity 0
+
+.ch-wrapper.error .ch-error-badge
+	opacity 1
+
+
 .ch
 	position relative
 	margin 10px
 	width 380px
 	height 225px
-	float left	
 	overflow hidden
 	color #fff
 	background button-bg-color
 	box-shadow 0 2px 9px 0 rgba(0,0,0,0.2)
-	
+
 .ch-header
 	padding 0 20px
 	white-space nowrap
@@ -58,6 +82,7 @@
 
 .ch-primary,
 .ch-secondary
+	position relative // for z-index layering
 	text-align center
 	> div
 		display inline-block

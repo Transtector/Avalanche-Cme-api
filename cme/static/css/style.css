@@ -881,12 +881,42 @@ td.rdtYear:hover {
 .panel-header .wigets .thermometer.alarm > div {
   border-color: #f00;
 }
+.ch-wrapper {
+  position: relative;
+  float: left;
+}
+.ch-error-badge {
+  position: absolute;
+  text-align: center;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 30px;
+  font-weight: bold;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+  color: #fff;
+  background-color: #f22;
+  -webkit-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -moz-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -ms-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -o-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  opacity: 0;
+}
+.ch-wrapper.error .ch-error-badge {
+  opacity: 1;
+}
 .ch {
   position: relative;
   margin: 10px;
   width: 380px;
   height: 225px;
-  float: left;
   overflow: hidden;
   color: #fff;
   background: #3ea4e1;
@@ -920,6 +950,7 @@ td.rdtYear:hover {
 }
 .ch-primary,
 .ch-secondary {
+  position: relative;
   text-align: center;
 }
 .ch-primary > div,
