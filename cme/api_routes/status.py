@@ -44,7 +44,7 @@ def status(ch_index=-1):
 	cme_status = mc.get('status')	
 	status = json.loads(cme_status) if cme_status else { 'channels': [] }
 
-	# select a particular channel and/or sensor/control?
+	# select a particular channel
 	if not ch_index < 0:
 		if not (ch_index >= 0 and ch_index < len(status['channels'])):
 			return None
