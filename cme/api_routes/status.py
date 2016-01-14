@@ -18,8 +18,8 @@ import memcache, json
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
 
-#mc = memcache.Client(['127.0.0.1:11211'], debug=0)
-mc = memcache.Client(['10.16.120.174:11211'], debug=0)
+mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+#mc = memcache.Client(['10.16.120.174:11211'], debug=0)
 
 
 # TODO: add some controls on the hw side and see if this works!
