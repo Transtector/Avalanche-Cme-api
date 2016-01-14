@@ -1,4 +1,5 @@
 
+from . import settings
 
 class Sensor:
 	''' Sensor objects provide read-only values depending on sensor type '''
@@ -12,6 +13,32 @@ class Sensor:
 		self.type = hw_sensor['type']
 		self.unit = hw_sensor['unit']
 		self.data = self.read(hw_sensor)
+
+		''' user-settable Sensor data stored in settings '''
+		if not 'sensors' in settings['__channels'][ch_id]:
+			chs = settings['__channels']
+			chs[ch_id]['sensors'] = {}
+			settings['__channels'] = chs
+
+		if not self.id in settings['__channels'][ch_id]['sensors']:
+			chs = settings['__channels']
+			chs[ch_id]['sensors'][self.id] = {}
+			settings['__channels'] = chs
+			self.name = self.id
+
+		# Add class properties to this instance to get __dict__ serialization
+		self.__dict__['name'] = self.name
+
+
+	@property
+	def name(self):
+		return settings['__channels'][self.channel_id]['sensors'][self.id]['name']
+
+	@name.setter
+	def name(self, value):
+		chs = settings['__channels']
+		chs[self.channel_id]['sensors'][self.id]['name'] = value
+		settings['__channels'] = chs
 
 	def read(self, hw_sensor, expanded=False):
 

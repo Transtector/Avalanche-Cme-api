@@ -20,6 +20,7 @@ class Control:
 			chs = settings['__channels']
 			chs[ch_id]['controls'][self.id] = {}
 			settings['__channels'] = chs
+			self.name = self.id
 
 		self.type = hw_control['type']
 		self.state = hw_control['state']
