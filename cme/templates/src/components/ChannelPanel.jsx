@@ -19,11 +19,15 @@ window.jQuery = require('jquery');
 var $ = window.jQuery;
 var flot = require('flot');
 
+var ENTER_KEY_CODE = 13;
+
 var ChannelPanel = React.createClass({
 
 	getInitialState: function() {
 
 		return {
+			name: this.props.ch.name,
+			description: this.props.ch.description,
 			configOpen: false,
 			historyOpen: false
 		}
@@ -51,10 +55,6 @@ var ChannelPanel = React.createClass({
 			'ch-history': true,
 			'open': this.state.historyOpen
 		});
-
-		// ch name and description inputs
-		var name = this.props.ch.name,
-			description = this.props.ch.description;
 
 		// ch primary/secondary sensor display values
 		var primary = this.props.ch.sensors[0],
@@ -118,8 +118,14 @@ var ChannelPanel = React.createClass({
 			<div className={chWrapperClass}>
 				<div className="ch">
 					<div className="ch-header">
-						<input type="text" id="name" name="name" value={name} onChange={this._requestChange} />
-						<input type="text" id="description" name="description" value={description} onChange={this._requestChange} />
+						<input type="text" id="name" name="name" 
+							   value={this.state.name} 
+							   onChange={this._requestChange}
+							   onKeyDown={this._onKeyDown} />
+						<input type="text" id="description" name="description"
+							   value={this.state.description}
+							   onChange={this._requestChange}
+							   onKeyDown={this._onKeyDown} />
 					</div>
 
 					<div className="ch-primary">
@@ -211,7 +217,18 @@ var ChannelPanel = React.createClass({
 		var v = e.target.value,
 			n = e.target.name,
 			obj = {};
+		obj[n] = v;
 
+		this.setState(obj);
+	},
+
+	_onKeyDown: function(e) {
+		if (e.keyCode !== ENTER_KEY_CODE)
+			return;
+
+		var v = e.target.value.trim(),
+			n = e.target.name,
+			obj = {};
 		obj[n] = v;
 
 		Actions.channel(this.props.ch.id, obj);
