@@ -20,6 +20,7 @@ var $ = window.jQuery;
 var flot = require('flot');
 
 var ENTER_KEY_CODE = 13;
+var ESCAPE_KEY_CODE = 27;
 
 var ChannelPanel = React.createClass({
 
@@ -223,6 +224,13 @@ var ChannelPanel = React.createClass({
 	},
 
 	_onKeyDown: function(e) {
+		if (e.keyCode === ESCAPE_KEY_CODE) {
+			this.setState({
+				name: this.props.ch.name,
+				description: this.props.ch.description
+			});
+		}
+
 		if (e.keyCode !== ENTER_KEY_CODE)
 			return;
 

@@ -146,6 +146,10 @@ var ClockConfig = React.createClass({
 		var datetime = utils.formatRelativeMoment(this.state.current, 
 			this.state.displayRelativeTo, this.state.zone);
 
+		var ntpStatusFormat = this.state.display12HourTime
+								? this.state.displayTimeFormat12Hour
+								: this.state.displayTimeFormat24Hour;
+
 		return (
 			<InputGroup id="clock" ref="_InputGroup" onExpand={this._startClockPoll} onCollapse={this._stopClockPoll}>
 				<div className="input-group-cluster">
@@ -239,9 +243,7 @@ var ClockConfig = React.createClass({
 							value={this.state.status}
 							zone={this.state.zone}
 							relativeTo={this.state.displayRelativeTo}
-							format={ this.state.display12HourTime
-								? this.state.displayTimeFormat12Hour
-								: this.state.displayTimeFormat24Hour} />
+							format={ntpStatusFormat} />
 
 						<div id="ta-wrapper">
 							<label htmlFor="servers">NTP servers</label>
