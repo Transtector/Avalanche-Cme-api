@@ -80,6 +80,15 @@ var ChannelPanel = React.createClass({
 			'error': this.props.ch.error.length > 0
 		});
 
+		var errorMessages = this.props.ch.error.split(', ').map(function(err, i) {
+			return <div key={i}>{err}</div>
+		});
+
+		var errorMessagesClass = classNames({
+			'errors': true,
+			'hidden': errorMessages.length == 0
+		});
+
 
 		return (
 			<div className={chWrapperClass}>
@@ -89,8 +98,6 @@ var ChannelPanel = React.createClass({
 						<input type="text" id="description" name="description" value={description} onChange={this._requestChange} />
 					</div>
 
-
-		
 					<div className="ch-primary">
 						<div className="sensor-value">
 							{primary_value.toFixed(1)}
@@ -154,8 +161,12 @@ var ChannelPanel = React.createClass({
 							<button className='btn'
 									onClick={this._toggleConfigVisibility}>&laquo;
 							</button>
+							<div className='title'>Channel Configuration</div>
 
-							Channel Configuration
+							<div className={errorMessagesClass}>
+								<div className='title'>Errors</div>
+								{errorMessages}
+							</div>
 
 						</div>
 
@@ -166,7 +177,7 @@ var ChannelPanel = React.createClass({
 					</div>
 				</div>
 
-				<div className="ch-error-badge">!</div>
+				<div className="ch-error-badge" title={this.props.ch.error}>!</div>
 
 			</div>
 		);

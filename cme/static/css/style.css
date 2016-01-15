@@ -274,8 +274,7 @@ header #buttons button {
   background: transparent;
   outline: none;
 }
-/* Main console styles */
-#console {
+#cmeapp > div {
   position: relative;
 }
 .panel-header {
@@ -1076,13 +1075,26 @@ td.rdtYear:hover {
   right: 0;
 }
 .ch-config-content {
-  background-color: #fff;
-  color: #4d4d4d;
-  text-align: center;
   height: 100%;
-  line-height: 225px;
   margin-right: 20px;
   margin-left: -20px;
+  padding: 10px;
+  background-color: #fff;
+  color: #4d4d4d;
+}
+.ch-config-content .title {
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 5px;
+}
+.ch-config-content .errors > div {
+  padding: 0 10px;
+}
+.ch-config-content .errors .title {
+  padding: 0 5px;
+  border: 0;
+  font-style: italic;
+  font-size: 85%;
 }
 .ch-config-content > .btn {
   position: absolute;
@@ -1090,9 +1102,10 @@ td.rdtYear:hover {
   color: #4d4d4d;
 }
 .hidden {
-  display: none;
+  display: none !important;
 }
 div#test-buttons {
+  display: none;
   margin: 10px;
   padding: 10px;
   border-top: 1px solid #ccc;

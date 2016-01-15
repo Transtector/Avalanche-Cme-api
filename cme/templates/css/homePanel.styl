@@ -176,7 +176,7 @@ error-badge-size = 30px
 .ch-config.open
 	right -20px
 
-.ch-config	> .btn,
+.ch-config > .btn,
 .ch-config-content > .btn
 	position absolute
 	top 0
@@ -188,13 +188,23 @@ error-badge-size = 30px
 	right 0
 
 .ch-config-content
-	background-color #fff
-	color fg-color
-	text-align center
 	height 100%
-	line-height 225px
 	margin-right 20px
 	margin-left -20px
+	padding 10px
+	background-color #fff
+	color fg-color
+	.title
+		font-weight bold
+		border-bottom 1px solid #ddd
+		margin-bottom 5px
+	.errors	> div
+		padding 0 10px
+	.errors .title
+		padding 0 5px
+		border 0
+		font-style italic
+		font-size 85%
 	> .btn
 		position absolute
 		left -20px

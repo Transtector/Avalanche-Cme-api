@@ -23,7 +23,7 @@ var NetConfig = React.createClass({
 		}, this);
 
 		return (
-			<InputGroup id="network">
+			<InputGroup id="network" ref="_InputGroup">
 				<TextInput id="mac" placeholder="MAC" value={this.state.mac} />
 
 				<div className="input-group-cluster">
@@ -67,8 +67,8 @@ var NetConfig = React.createClass({
 	},
 
 	_onApply: function() {
-
 		Actions.config({ network: this.state });
+		this.refs['_InputGroup'].collapse();
 	},
 
 	_requestChange: function(event) {

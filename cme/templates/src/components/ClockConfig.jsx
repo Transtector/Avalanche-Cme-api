@@ -147,7 +147,7 @@ var ClockConfig = React.createClass({
 			this.state.displayRelativeTo, this.state.zone);
 
 		return (
-			<InputGroup id="clock" onExpand={this._startClockPoll} onCollapse={this._stopClockPoll}>
+			<InputGroup id="clock" ref="_InputGroup" onExpand={this._startClockPoll} onCollapse={this._stopClockPoll}>
 				<div className="input-group-cluster">
 					<label htmlFor="current">Current</label>
 					<div id="current">
@@ -289,6 +289,7 @@ var ClockConfig = React.createClass({
 			: [];
 
 		Actions.config({ clock: clock });
+		this.refs['_InputGroup'].collapse();
 	},
 
 	_onReset: function() {
