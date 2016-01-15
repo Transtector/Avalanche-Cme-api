@@ -886,9 +886,10 @@ td.rdtYear:hover {
 }
 .ch-error-badge {
   position: absolute;
+  z-index: 2;
   text-align: center;
-  top: 0;
-  right: 0;
+  top: -5px;
+  right: -5px;
   width: 30px;
   height: 30px;
   line-height: 30px;
@@ -985,6 +986,15 @@ td.rdtYear:hover {
 .sensor-unit {
   margin-left: 0.5em;
 }
+.ch-controls {
+  background: #2297dd;
+  position: absolute;
+  padding: 10px 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 27px;
+}
 .btn.ch-history-badge {
   position: absolute;
   display: inline-block;
@@ -1013,22 +1023,13 @@ td.rdtYear:hover {
   background-repeat: no-repeat;
   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E");
 }
-.ch-controls {
-  background: #2297dd;
-  position: absolute;
-  padding: 10px 20px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 27px;
-}
 .ch-history {
-  display: none;
-  color: #4d4d4d;
   position: absolute;
   top: 0;
   height: 100%;
   width: 100%;
+  z-index: -1;
+  color: #4d4d4d;
   background-color: #fff;
   text-align: center;
   line-height: 225px;
@@ -1039,13 +1040,22 @@ td.rdtYear:hover {
   color: #4d4d4d;
   background-color: transparent;
   font-size: 14px;
-  top: 10px;
-  right: 10px;
+  top: 5px;
+  right: 5px;
   width: 20px;
   height: 20px;
 }
 .ch-history.open {
-  display: block;
+  z-index: 1;
+}
+.ch-history .plot-wrapper {
+  width: 100%;
+  height: 50%;
+}
+.ch-history .plot {
+  width: 90%;
+  height: 90%;
+  margin: 5px auto 0 auto;
 }
 .ch-config {
   position: absolute;
@@ -1105,7 +1115,6 @@ td.rdtYear:hover {
   display: none !important;
 }
 div#test-buttons {
-  display: none;
   margin: 10px;
   padding: 10px;
   border-top: 1px solid #ccc;

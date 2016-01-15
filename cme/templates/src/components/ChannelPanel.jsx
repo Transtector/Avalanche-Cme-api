@@ -13,6 +13,11 @@ var Actions = require('../Actions');
 var moment = require('moment');
 var classNames = require('classnames');
 
+// flot charting requires global jQuery
+window.jQuery = require('jquery');
+
+var $ = window.jQuery;
+var flot = require('flot');
 
 var ChannelPanel = React.createClass({
 
@@ -22,6 +27,15 @@ var ChannelPanel = React.createClass({
 			configOpen: false,
 			historyOpen: false
 		}
+	},
+
+	componentDidMount: function() {
+
+		var _sensorPlot = this.refs["_sensorPlot"],
+			_controlPlot = this.refs["_controlPlot"];
+
+		$.plot($(_sensorPlot), [ [[0, 0], [1, 1]] ]);
+		$.plot($(_controlPlot), [ [[0, 0], [1, 1]] ]);
 	},
 
 	render: function() {
@@ -52,17 +66,24 @@ var ChannelPanel = React.createClass({
 		// Calculate the range of timestamps supplied 
 		// in the controls and sensors data and display
 		// it in plain terms on the history button.
-		var timestamps = [], ts_start, ts_end;
+		var timestamps = [], ts_start, ts_end,
+			sensorPlot = [], controlPlot = [];
+
 		this.props.ch.sensors.forEach(function(s) {
 			s.data.forEach(function(p){
 				timestamps.push(p[0]);
-			});
-		});
+
+				if (this.state.historyOpen) {
+
+				}
+
+			}, this);
+		}, this);
 		this.props.ch.controls.forEach(function(c) { 
 			c.data.forEach(function(p){
 				timestamps.push(p[0]);
-			});
-		});
+			}, this);
+		}, this);
 
 		ts_end = moment.unix(Math.max.apply(null, timestamps)).utc();
 		ts_start = moment.unix(Math.min.apply(null, timestamps)).utc();
@@ -80,13 +101,16 @@ var ChannelPanel = React.createClass({
 			'error': this.props.ch.error.length > 0
 		});
 
-		var errorMessages = this.props.ch.error.split(', ').map(function(err, i) {
-			return <div key={i}>{err}</div>
-		});
+		var errorMessages = null;
+		if (this.props.ch.error) {
+			errorMessages = this.props.ch.error.split(', ').map(function(err, i) {
+				return <div key={i}>{err}</div>
+			});
+		}
 
 		var errorMessagesClass = classNames({
 			'errors': true,
-			'hidden': errorMessages.length == 0
+			'hidden': errorMessages == null
 		});
 
 
@@ -141,22 +165,18 @@ var ChannelPanel = React.createClass({
 					</div>
 					*/}
 
-					<button className="btn ch-history-badge"
-							onClick={this._toggleHistoryVisibility}>
-						{duration}
-					</button>
+					<button className="btn ch-history-badge" onClick={this._toggleHistoryVisibility}>{duration}</button>
 					<div className={historyClass}>
-						<button className="btn"
-								onClick={this._toggleHistoryVisibility}>
-							x
-						</button>
-
-						Channel History Plots
-
+						<div className="plot-wrapper">
+							<div className="plot sensorPlot" ref="_sensorPlot"></div>
+						</div>
+						<div className="plot-wrapper">
+							<div className="plot controlPlot" ref="_controlPlot"></div>
+						</div>
+						<button className="btn" onClick={this._toggleHistoryVisibility}>x</button>
 					</div>
 
 					<div className={configClass}>
-						
 						<div className='ch-config-content'>
 							<button className='btn'
 									onClick={this._toggleConfigVisibility}>&laquo;
@@ -167,13 +187,9 @@ var ChannelPanel = React.createClass({
 								<div className='title'>Errors</div>
 								{errorMessages}
 							</div>
-
 						</div>
 
-						<button className='btn'
-								onClick={this._toggleConfigVisibility}>&raquo;
-						</button>
-
+						<button className='btn' onClick={this._toggleConfigVisibility}>&raquo;</button>
 					</div>
 				</div>
 
