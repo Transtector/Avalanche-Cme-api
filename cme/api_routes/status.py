@@ -18,8 +18,8 @@ import memcache, json
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
 
-mc = memcache.Client(['127.0.0.1:11211'], debug=0)
-#mc = memcache.Client(['10.16.120.174:11211'], debug=0)
+#mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+mc = memcache.Client(['10.16.137.146:11211'], debug=0)
 
 
 # TODO: add some controls on the hw side and see if this works!
@@ -32,7 +32,7 @@ def set_control_state(ch_index, control_index, state):
 	mc.set('status', json.dumps(hw))
 
 
-def status(ch_index=-1):
+def status(ch_index=-1, expand=False):
 	''' Top-level CME status object
 	'''
 
@@ -44,17 +44,18 @@ def status(ch_index=-1):
 	cme_status = mc.get('status')	
 	status = json.loads(cme_status) if cme_status else { 'channels': [] }
 
-	# select a particular channel
+	# Select a particular channel or all channels
 	if not ch_index < 0:
 		if not (ch_index >= 0 and ch_index < len(status['channels'])):
 			return None
 
-		return Channel(status['channels'][ch_index])
+		channels = [Channel(status['channels'][ch_index])]
 
-	# If we reach here we return entire status object, including
-	# the CPU temperature and timestamp.
+	else:
 
-	# try to read temperature (could fail if not on RPi)
+		channels = [Channel(ch) for ch in status['channels']]
+
+	# Try to read temperature (could fail if not on RPi)
 	# temp in millidegrees C
 	try:
 		temp_C = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
@@ -64,7 +65,7 @@ def status(ch_index=-1):
 	return {
 		'timestamp': datetime.utcnow().isoformat() + 'Z',
 		'temperature_degC': temp_C,
-		'channels': [Channel(ch) for ch in status['channels']]
+		'channels': channels
 	}
 
 

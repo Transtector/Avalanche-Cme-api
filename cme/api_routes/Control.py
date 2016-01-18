@@ -4,7 +4,7 @@ from . import settings
 class Control:
 	''' Control objects provide read-write access to control state '''
 
-	def __init__(self, ch_id, hw_control, loadHistory=False):
+	def __init__(self, ch_id, hw_control):
 		
 		self.channel_id = ch_id # track which channel we belong to for settings lookups
 
@@ -23,7 +23,7 @@ class Control:
 			self.name = self.id
 
 		self.type = hw_control['type']
-		self.state = self._loadHistory() if loadHistory else hw_control['state']
+		self.state = hw_control['state']
 
 		# Add class properties to this instance to get __dict__ serialization
 		self.__dict__['name'] = self.name
@@ -38,6 +38,3 @@ class Control:
 		chs = settings['__channels']
 		chs[self.channel_id]['controls'][self.id]['name'] = value
 		settings['__channels'] = chs
-
-	def _loadHistory(self):
-		return []

@@ -5,14 +5,14 @@ class Sensor:
 	''' Sensor objects provide read-only values depending on sensor type '''
 
 
-	def __init__(self, ch_id, hw_sensor, loadHistory=False):
+	def __init__(self, ch_id, hw_sensor):
 	
 		self.channel_id = ch_id # track which channel we belong to for settings and data lookups
 
 		self.id = hw_sensor['id'] # e.g., 's0'
 		self.type = hw_sensor['type']
 		self.unit = hw_sensor['unit']
-		self.data = self._loadHistory() if loadHistory else hw_sensor['data']
+		self.data = hw_sensor['data']
 
 		''' user-settable Sensor data stored in settings '''
 		if not 'sensors' in settings['__channels'][ch_id]:
@@ -39,6 +39,3 @@ class Sensor:
 		chs = settings['__channels']
 		chs[self.channel_id]['sensors'][self.id]['name'] = value
 		settings['__channels'] = chs
-
-	def _loadHistory(self):
-		return []
