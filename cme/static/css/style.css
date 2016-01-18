@@ -62,7 +62,6 @@ input[type="text"] {
 }
 header {
   position: relative;
-  z-index: 1;
   margin: 0;
   padding: 0;
   background-color: #7ab9e3;
@@ -221,13 +220,10 @@ header #buttons button {
   }
 }
 #login {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  padding-top: 140px;
+  position: relative;
   width: 100%;
   min-width: 400px;
-  min-height: 400px;
+  padding: 64px 0;
   background-color: #eee;
   text-align: center;
 }
@@ -278,15 +274,8 @@ header #buttons button {
   background: transparent;
   outline: none;
 }
-#cmeapp {
-  position: absolute;
-  width: 100%;
-  top: 0;
-  bottom: 0;
-}
 #cmeapp > div {
   position: relative;
-  height: 100%;
 }
 .panel-header {
   position: relative;
