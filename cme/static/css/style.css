@@ -62,6 +62,7 @@ input[type="text"] {
 }
 header {
   position: relative;
+  z-index: 1;
   margin: 0;
   padding: 0;
   background-color: #7ab9e3;
@@ -182,6 +183,11 @@ header #buttons {
 }
 header #buttons button {
   margin: 26px 16px;
+}
+@media only screen and (min-width: 1400px) {
+  header #buttons {
+    min-width: 1024px;
+  }
 }
 @media only screen and (max-width: 700px) {
   header #branding {
