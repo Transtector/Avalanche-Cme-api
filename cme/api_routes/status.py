@@ -18,8 +18,8 @@ import memcache, json
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
 
-#mc = memcache.Client(['127.0.0.1:11211'], debug=0)
-mc = memcache.Client(['10.16.137.146:11211'], debug=0)
+mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+#mc = memcache.Client(['10.16.137.146:11211'], debug=0)
 
 
 # TODO: add some controls on the hw side and see if this works!
@@ -36,6 +36,9 @@ def status(ch_index=-1, expand=False):
 	''' Top-level CME status object
 	'''
 
+	if expand:
+		mc.set('expanded_channels', json.dumps(['ch0']))
+
 	# Update the channels objects with the hardware data (from memcache).
 	# I found that sometimes the mc.get('status') was returning None which
 	# results in a 500 server error when json.loads().  To avoid that,
@@ -49,11 +52,10 @@ def status(ch_index=-1, expand=False):
 		if not (ch_index >= 0 and ch_index < len(status['channels'])):
 			return None
 
-		channels = [Channel(status['channels'][ch_index])]
+		return Channel(status['channels'][ch_index])
 
-	else:
 
-		channels = [Channel(ch) for ch in status['channels']]
+	channels = [Channel(ch) for ch in status['channels']]
 
 	# Try to read temperature (could fail if not on RPi)
 	# temp in millidegrees C
@@ -82,6 +84,13 @@ def index():
 def raw():
 	''' Just the raw CME hwloop memcached status object '''
 	return json_response(json.loads(mc.get('status')))
+
+
+@router.route('/ch/expand')
+@require_auth
+def expand():
+	''' Test expanding the data on ch 0 '''
+	return json_response(status(0, True))
 
 
 # CME channel update
