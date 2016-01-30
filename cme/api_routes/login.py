@@ -3,9 +3,9 @@
 # given matching username and passhash
 
 from . import app, settings, router, request
-
+from .auth import require_auth
 from .util import json_response
-from .status import status
+from .status import timestamp
 
 @router.route('/login')
 def login():
@@ -19,4 +19,10 @@ def login():
 		return json_response([ 'Login failed - invalid password.' ]),
 
 	# else we've got valid login send response and force set session
-	return json_response(status(), True)
+	return json_response({ 'timestamp': timestamp() }, True)
+
+# CME root (index) request
+@router.route('/')
+@require_auth
+def index():
+	return json_response({ 'timestamp': timestamp() })

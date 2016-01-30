@@ -42,7 +42,6 @@ settings['support'] = settings.get('support', {
 })
 
 settings['clock'] = settings.get('clock', {
-	'current': '', # updated on init and reads
 	'zone': app.config['CLOCK_ZONE_OFFSET'],
 	'ntp': app.config['CLOCK_USE_NTP'],
 	'servers': app.config['CLOCK_NTP_SERVERS'],
@@ -54,6 +53,12 @@ settings['clock'] = settings.get('clock', {
 	'displayDateFormat': app.config['CLOCK_DISPLAY_DATE_FORMAT'],
 	'displayTimeFormat24Hour': app.config['CLOCK_DISPLAY_24HOUR_FORMAT'],
 	'displayTimeFormat12Hour': app.config['CLOCK_DISPLAY_12HOUR_FORMAT']
+})
+
+settings['temperature'] = settings.get('temperature', {
+	'displayUnits': app.config['TEMPERATURE_DISPLAY_UNITS'],
+	'warningTemp': app.config['TEMPERATURE_WARNING_TEMP'],
+	'alarmTemp': app.config['TEMPERATURE_ALARM_TEMP']
 })
 
 settings['snmp'] = settings.get('snmp', {

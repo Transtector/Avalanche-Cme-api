@@ -47,10 +47,8 @@ def manage_clock(clock_settings):
 			os.system('sudo service ntp stop')
 
 
-# update the current time
+# update the current clock settings
 def refresh_time(clock_settings):
-	# sets the current time
-	clock_settings['current'] = datetime.utcnow().isoformat() + 'Z'
 
 	# if useNTP, we'll update the NTP status
 	if clock_settings['ntp']:

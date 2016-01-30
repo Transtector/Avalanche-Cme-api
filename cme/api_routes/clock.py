@@ -1,14 +1,23 @@
 # CME clock configuration routes
+import os
 
 from . import router, settings, request, UriParse
 
 from .auth import require_auth
 from .util import json_response, json_error
+from .status import timestamp
 from ..util.ClockUtils import refresh_time, manage_clock
+
+def set_clock(newtime):
+	# use the system 'date' command to set it
+	# "%Y-%m-%dT%H:%M:%S.SSSSSS"
+	# TODO: parse/validate the format
+	os.system('sudo date -s "{0}"'.format(newtime))
+
 
 @router.route('/config/clock/', methods=['GET', 'POST'])
 @require_auth
-def clock():
+def clock_config():
 	if request.method == 'POST':
 		newclock = request.get_json()['clock']
 
@@ -25,28 +34,26 @@ def clock():
 
 		settings['clock'] = curclock
 
+		# if they've also sent a 'current' key, set the
+		# clock to that value (but don't save it in settings)
+		try:
+			set_clock(newclock['current'])
+		except:
+			pass
 		manage_clock(settings['clock'])
 
 	refresh_time(settings['clock'])
 	return json_response({'clock': settings['clock']})
 	
 
-@router.route('/config/clock/current', methods=['GET', 'POST'])
+@router.route('/config/clock/current', methods=['POST'])
 @require_auth
 def current():
-	if request.method == 'POST':
-		if settings['clock']['ntp']:
-			return json_error(['Time is read-only when using NTP'])
+	newtime = request.get_json()['current']
 
-		newtime = request.get_json()['current']
+	set_clock(newtime)
 
-		# use the system 'date' command to set it
-		# "%Y-%m-%dT%H:%M:%S.SSSSSS"
-		# TODO: parse/validate the format
-		os.system('sudo date -s "{0}"'.format(newtime))
-
-	refresh_time(settings['clock'])
-	return json_response({ 'current': settings['clock']['current'] })
+	return json_response({ 'current': timestamp() })
 
 
 

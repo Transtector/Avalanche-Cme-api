@@ -4,7 +4,6 @@ from . import settings
 class Sensor:
 	''' Sensor objects provide read-only values depending on sensor type '''
 
-
 	def __init__(self, ch_id, hw_sensor):
 	
 		self.channel_id = ch_id # track which channel we belong to for settings and data lookups

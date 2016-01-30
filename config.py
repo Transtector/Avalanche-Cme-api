@@ -76,6 +76,15 @@ SUPPORT_CONTACT = ""
 SUPPORT_EMAIL = ""
 SUPPORT_PHONE = ""
 
+# CME Temperature configuration
+
+class TemperatureUnits:
+	CELSIUS = 0
+	FAHRENHEIT = 1
+
+TEMPERATURE_DISPLAY_UNITS = TemperatureUnits.CELSIUS
+TEMPERATURE_WARNING_TEMP = 65 # ºC
+TEMPERATURE_ALARM_TEMP = 80 # ºC
 
 # CME Clock configuration
 
