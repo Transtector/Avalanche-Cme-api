@@ -25,7 +25,6 @@ function formatPropsToState(props) {
 
 	var state = assign({}, props);
 
-	state.current = moment.utc(props.current);
 	state.status = [];
 	props.status.forEach(function(s) {
 		// s _must_ conform to ISO 8601 otherwise invalid...
@@ -37,6 +36,10 @@ function formatPropsToState(props) {
 		state.serversCSV = props.servers.length > 0 ? props.servers.join(', ') : '';
 	else
 		state.serversCSV = '';
+
+	if (!state.ntp) {
+		state.current = moment.utc()
+	}
 
 	return state;
 }
@@ -100,8 +103,10 @@ var NtpStatus = React.createClass({
 
 var ClockConfig = React.createClass({
 
-	getInitialState: function () {
+	_clockPollInterval: null,
+	_clockPollPeriod: 1000,
 
+	getInitialState: function () {
 		return formatPropsToState(this.props.config);
 	},
 
@@ -133,17 +138,18 @@ var ClockConfig = React.createClass({
 		// want to apply.  Other state items will always be changing (e.g., the current time and
 		// ntp status).  We don't track these changes because they're read-only as far as the
 		// clock is concerned.  We also don't compare the ntp servers array.  We use serversCSV
-		// string internally and format and submit new servers array based on serversCSV in Apply.
+		// string internally and format and submit new servers array based on serversCSV in _onApply.
 		var currentProps = formatPropsToState(this.props.config);
 		var changesPending = Object.keys(currentProps)
 			.filter(function (key) {
-				return ['current', 'servers', 'status'].indexOf(key) == -1;
+				return ['servers', 'status'].indexOf(key) == -1;
 			}, this)
 			.some(function(key) {
 				return currentProps[key] !== this.state[key];
 			}, this);
 
-		var datetime = utils.formatRelativeMoment(this.state.current, 
+		var clock = moment.utc(this.props.clock);
+		var datetime = utils.formatRelativeMoment(clock, 
 			this.state.displayRelativeTo, this.state.zone);
 
 		var ntpStatusFormat = this.state.display12HourTime
@@ -272,13 +278,16 @@ var ClockConfig = React.createClass({
 	},
 
 	_startClockPoll: function() {
-		if (this.state.ntp)
-			Actions.poll(Constants.START, Constants.CLOCK);
+
+		if (!this._clockPollInterval && this.state.ntp) {
+			this._clockPollInterval = setInterval(Actions.clock, this._clockPollPeriod);
+		}
 	},
 
 	_stopClockPoll: function() {
 
-		Actions.poll(Constants.STOP, Constants.CLOCK);
+		clearInterval(this._clockPollInterval);
+		this._clockPollInterval = null;
 	},
 
 	_onApply: function() {
@@ -289,6 +298,10 @@ var ClockConfig = React.createClass({
 		clock.servers = clock.serversCSV.trim() != '' 
 			? clock.serversCSV.split(',').map(function(s) { return s.trim(); }) 
 			: [];
+
+		if (clock.ntp) {
+			delete clock.current;
+		}
 
 		Actions.config({ clock: clock });
 		this.refs['_InputGroup'].collapse();

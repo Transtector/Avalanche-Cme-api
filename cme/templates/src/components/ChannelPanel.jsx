@@ -15,14 +15,17 @@ var classNames = require('classnames');
 
 // flot charting requires global jQuery
 window.jQuery = require('jquery');
+var $ = window.jQuery; // shim for flot
 
-var $ = window.jQuery;
-var flot = require('flot');
+var flot = require('../Flot/jquery.flot');
+flot.time = require('../Flot/jquery.flot.time');
 
 var ENTER_KEY_CODE = 13;
 var ESCAPE_KEY_CODE = 27;
 
 var ChannelPanel = React.createClass({
+	_chPollInterval: null,
+	_chPollPeriod: 2000,
 
 	getInitialState: function() {
 
@@ -35,12 +38,13 @@ var ChannelPanel = React.createClass({
 	},
 
 	componentDidMount: function() {
+		
+		this._startChPoll();
+	},
 
-		var _sensorPlot = this.refs["_sensorPlot"],
-			_controlPlot = this.refs["_controlPlot"];
+	componentWillUnmount: function() {
 
-		$.plot($(_sensorPlot), [ [[0, 0], [1, 1]] ]);
-		$.plot($(_controlPlot), [ [[0, 0], [1, 1]] ]);
+		this._stopChPoll();
 	},
 
 	render: function() {
@@ -59,35 +63,52 @@ var ChannelPanel = React.createClass({
 
 		// ch primary/secondary sensor display values
 		var primary = this.props.ch.sensors[0],
-			primary_value = primary.data[0][1] || 0,
+			primary_value = primary.data[primary.data.length - 1][1] || 0,
 
 			secondary = this.props.ch.sensors[1],
-			secondary_value = secondary.data[0][1] || 0;
+			secondary_value = secondary.data[secondary.data.length - 1][1] || 0;
 
 		// Calculate the range of timestamps supplied 
 		// in the controls and sensors data and display
 		// it in plain terms on the history button.
 		var timestamps = [], ts_start, ts_end,
-			sensorPlot = [], controlPlot = [];
+			sensorsData = [], controlsData = [];
 
 		this.props.ch.sensors.forEach(function(s) {
-			s.data.forEach(function(p){
-				timestamps.push(p[0]);
+			timestamps.push(s.data[0][0]); // earliest sensor point
+			timestamps.push(s.data[s.data.length - 1][0]); // most recent sensor point		
 
-				if (this.state.historyOpen) {
+			// Unix (seconds) to Javascript (milliseconds) timestamps for plots
+			sensorsData.push(s.data.map(function(d) { return [ d[0] * 1000, d[1] ]; }));
+		});
 
-				}
-
-			}, this);
-		}, this);
 		this.props.ch.controls.forEach(function(c) { 
-			c.data.forEach(function(p){
-				timestamps.push(p[0]);
-			}, this);
-		}, this);
+			// TODO: process controls for history plots
+		});
 
-		ts_end = moment.unix(Math.max.apply(null, timestamps)).utc();
+		if (this.state.historyOpen) {
+
+			$.plot($(this._sensorsPlot()), 
+				[
+					{ data: sensorsData[0] },
+					{ data: sensorsData[1], yaxis: 2 }
+				],
+				{
+					xaxes: [ { mode: "time" } ],
+					yaxes: [ 
+						{ min: 0 }, 
+						{
+							alignTicksWithAxis: 1,
+							position: "right"
+						} 
+					]
+				});
+
+			//$.plot($(this._controlsPlot()), controlsData);
+		}
+
 		ts_start = moment.unix(Math.min.apply(null, timestamps)).utc();
+		ts_end = moment.unix(Math.max.apply(null, timestamps)).utc();
 
 		var duration = ts_end.from(ts_start, true);
 
@@ -172,14 +193,16 @@ var ChannelPanel = React.createClass({
 					</div>
 					*/}
 
-					<button className="btn ch-history-badge" onClick={this._toggleHistoryVisibility}>{duration}</button>
+					<button className="btn ch-history-badge" disabled={this.props.ch.error} onClick={this._toggleHistoryVisibility}>{duration}</button>
 					<div className={historyClass}>
 						<div className="plot-wrapper">
-							<div className="plot sensorPlot" ref="_sensorPlot"></div>
+							<div className="plot sensorPlot" ref="_sensorsPlot"></div>
 						</div>
+						{/*
 						<div className="plot-wrapper">
-							<div className="plot controlPlot" ref="_controlPlot"></div>
+							<div className="plot controlPlot" ref="_controlsPlot"></div>
 						</div>
+						*/}
 						<button className="btn" onClick={this._toggleHistoryVisibility}>x</button>
 					</div>
 
@@ -206,11 +229,40 @@ var ChannelPanel = React.createClass({
 		);
 	},
 
+	_startChPoll: function() {
+		var _this = this;
+		function pollChannel() {
+			Actions.channel(_this.props.ch.id);
+		}
+
+		if (!this._chPollInterval) {
+			this._chPollInterval = setInterval(pollChannel, this._chPollPeriod);
+		}
+	},
+
+	_stopClockPoll: function() {
+
+		clearInterval(this._chPollInterval);
+		this._chPollInterval = null;
+	},
+
+	_sensorsPlot: function() {
+
+		return this.refs["_sensorsPlot"];
+	},
+
+	_controlsPlot: function() {
+
+		return this.refs["_controlsPlot"];
+	},
+
 	_toggleConfigVisibility: function() {
+
 		this.setState({configOpen: !this.state.configOpen});
 	},
 
 	_toggleHistoryVisibility: function() {
+
 		this.setState({historyOpen: !this.state.historyOpen});
 	},
 

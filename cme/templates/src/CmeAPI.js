@@ -4,7 +4,6 @@
  *
  * Client side AJAX wrapper library for Cme API.
  */
-
 'use strict';
 var DEBUG = true; // turn API console logging on/off
 function debug(/* arguments */) {
@@ -25,7 +24,10 @@ var API = {
 	config: API_ROOT + 'config/',
 	user: API_ROOT + 'user/',
 	login: API_ROOT + 'login',
-	logout: API_ROOT + 'logout'
+	logout: API_ROOT + 'logout',
+	clock: API_ROOT + 'clock',
+	temperature: API_ROOT + 'temperature',
+	channels: API_ROOT + 'ch/'
 }
 
 function jqXhrErrorMessage(jqXHR) {
@@ -157,15 +159,48 @@ var CmeAPI = {
 	// just remove the session - ignore return value
 	logout: function() { return $.ajax({ url: API.logout }); },
 
-	poll: function(url, success, failure) {
+	clock: function(success, failure) {
 		return $.ajax({
-			url: API_ROOT + url,
+			url: API.clock,
 			contentType: 'application/json; charset=UTF-8',
 			dataType: 'json',
 			success: success,
 			error: function(jqXHR, textStatus, errorThrown) {
 				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.poll error: ', msg);
+				debug('CmeAPI.clock error: ', msg);
+				failure([ msg ]);
+			}			
+		});
+	},
+
+	temperature: function(success, failure) {
+		return $.ajax({
+			url: API.temperature,
+			contentType: 'application/json; charset=UTF-8',
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.temperature error: ', msg);
+				failure([ msg ]);
+			}			
+		});
+	},
+
+	channels: function(expand_channels, success, failure) {
+		var qs = (expand_channels && expand_channels.length > 0)
+			? { expand: expand_channels.join(',') }
+			: null
+
+		return $.ajax({
+			url: API.channels,
+			data: qs,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.channels error: ', msg);
 				failure([ msg ]);
 			}
 		});
@@ -178,10 +213,10 @@ var CmeAPI = {
 
 		return $.ajax({
 			type: method,
-			url: API_ROOT + 'ch/' + chIndex, // /api/ch/0
-			contentType: 'application/json; charset=UTF-8',
+			url: API.channels + chIndex, // /api/ch/0
 			data: payload,
 			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8',
 			success: success,
 			error: function(jqXHR, textStatus, errorThrown) {
 				var msg = jqXhrErrorMessage(jqXHR);
@@ -197,7 +232,7 @@ var CmeAPI = {
 
 		return $.ajax({
 			type: 'POST',
-			url: API_ROOT + 'ch/' + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
+			url: API.channels + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
 			contentType: 'application/json; charset=UTF-8',
 			data: JSON.stringify(obj),
 			dataType: 'json',

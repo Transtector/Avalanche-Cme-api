@@ -591,6 +591,7 @@ td.rdtYear:hover {
   transition: all 0.3s ease 0s;
 }
 .input-group-cluster {
+  width: 360px;
   margin: 10px auto;
   white-space: nowrap;
   border-bottom: 1px solid #ccc;
@@ -618,6 +619,7 @@ td.rdtYear:hover {
 .input-group-cluster input[type="checkbox"],
 .input-group-cluster input[type="radio"] {
   zoom: 2;
+  margin-right: 0;
   vertical-align: middle;
 }
 .input-group-cluster input[readonly] {
@@ -640,18 +642,21 @@ td.rdtYear:hover {
 .input-group-cluster .radio-group > div {
   margin-top: 10px;
 }
-.input-group-cluster #ntpGroup {
+.input-group-cluster #ntpGroup,
+.input-group-cluster #tempGroup {
   padding: 10px;
   position: relative;
 }
-.input-group-cluster #ntpGroup #status {
+.input-group-cluster #ntpGroup #status,
+.input-group-cluster #tempGroup #status {
   border: 0;
   margin: 0;
   position: absolute;
   top: -10px;
   right: 10px;
 }
-.input-group-cluster #ntpGroup #ta-wrapper label {
+.input-group-cluster #ntpGroup #ta-wrapper label,
+.input-group-cluster #tempGroup #ta-wrapper label {
   margin-top: 10px;
   display: block;
 }
@@ -850,41 +855,41 @@ td.rdtYear:hover {
 .togglebutton label input[type=checkbox]:checked + .toggle::after {
   left: 15px;
 }
-.panel-header .wigets {
+.panel-header .widgets {
   position: absolute;
   right: 16px;
   bottom: 10px;
   color: #fff;
   font-size: 14px;
 }
-.panel-header .wigets div {
+.panel-header .widgets div {
   display: inline-block;
   text-align: center;
 }
-.panel-header .wigets div > div {
+.panel-header .widgets div > div {
   padding: 4px 6px;
 }
-.panel-header .wigets > div {
+.panel-header .widgets > div {
   margin-left: 10px;
 }
-.panel-header .wigets .clock {
+.panel-header .widgets .clock {
   background-color: #3ea4e1;
 }
-.panel-header .wigets .date {
+.panel-header .widgets .date {
   background-color: #2297dd;
 }
-.panel-header .wigets .thermometer {
+.panel-header .widgets .thermometer {
   background-color: #334;
 }
-.panel-header .wigets .thermometer > div {
+.panel-header .widgets .thermometer > div {
   margin: 0 2px 2px 2px;
   padding-bottom: 0;
   border-bottom: 2px solid #008000;
 }
-.panel-header .wigets .thermometer.warn > div {
+.panel-header .widgets .thermometer.warn > div {
   border-color: #ff0;
 }
-.panel-header .wigets .thermometer.alarm > div {
+.panel-header .widgets .thermometer.alarm > div {
   border-color: #f00;
 }
 .ch-wrapper {
@@ -915,6 +920,7 @@ td.rdtYear:hover {
   -o-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
   box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
   opacity: 0;
+  cursor: default;
 }
 .ch-wrapper.error .ch-error-badge {
   opacity: 1;
@@ -1030,6 +1036,9 @@ td.rdtYear:hover {
   background-repeat: no-repeat;
   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E");
 }
+.btn.ch-history-badge[disabled]::before {
+  background-color: #909090;
+}
 .ch-history {
   position: absolute;
   top: 0;
@@ -1039,7 +1048,6 @@ td.rdtYear:hover {
   color: #4d4d4d;
   background-color: #fff;
   text-align: center;
-  line-height: 225px;
 }
 .ch-history > .btn {
   position: absolute;
@@ -1057,12 +1065,12 @@ td.rdtYear:hover {
 }
 .ch-history .plot-wrapper {
   width: 100%;
-  height: 50%;
+  height: 100%;
 }
 .ch-history .plot {
-  width: 90%;
-  height: 90%;
-  margin: 5px auto 0 auto;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 .ch-config {
   position: absolute;

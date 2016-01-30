@@ -19,9 +19,11 @@ var assign = require('object-assign'); // ES6 polyfill
 
 var CHANGE_EVENT = 'change';
 
-var _status = {};
 var _device = {};
 var _config = {};
+var _channels = [];
+var _clock;
+var _temperature;
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
@@ -31,10 +33,13 @@ var Store = assign({}, EventEmitter.prototype, {
 
 	getState: function() {
 		return {
-			status: _status, // { timestamp: <timestamp>, temperature_degC: <float>, channels: [ <channel> ] }
 			device: _device, // { modelNumber: <string>, serialNumber: <string>, firmware: <string> }
 			config: _config, // { <cme_config> }
 			errors: _errors, // [ <string> ]
+
+			channels: _channels, // [ <channel> ]
+			clock: _clock, // <ISO-8601 string>, CPU datetime, UTC
+			temperature: _temperature, // <float>, CPU temperature degree C
 
 			// generally UI-specific states follow:
 
@@ -90,12 +95,16 @@ var Store = assign({}, EventEmitter.prototype, {
 				_isConfigVisible = true;
 				break;
 
-			case Constants.CLOCK: // cme time responds
-				_config.clock = action.data.clock;
+			case Constants.CLOCK: // clock response
+				_clock = action.data.clock;
 				break;
 
-			case Constants.STATUS:
-				_status = action.data;
+			case Constants.TEMPERATURE: // cpu temperature response
+				_temperature = action.data.temperature;
+				break;
+
+			case Constants.CHANNELS: // status/channels response
+				_channels = action.data.channels;
 				break;
 
 			case Constants.CHANNEL:
@@ -103,7 +112,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				var id = Object.keys(action.data)[0],
 					ch_index = parseInt(id.slice(2));
 
-				assign(_status.channels[ch_index], action.data[id]);
+				assign(_channels[ch_index], action.data[id]);
 				break;
 
 			case Constants.CONTROL:
@@ -113,7 +122,7 @@ var Store = assign({}, EventEmitter.prototype, {
 					ch_index = parseInt(keys[0].slice(2)),
 					c_index = parseInt(keys[1].slice(1));
 
-				assign(_status.channels[ch_index].controls[c_index], action.data[id]);
+				assign(_channels[ch_index].controls[c_index], action.data[id]);
 				break;
 
 			case Constants.CONFIG:
@@ -133,7 +142,9 @@ var Store = assign({}, EventEmitter.prototype, {
 					for (var group in _config) {
 
 						if (_config[group][item] !== undefined) {
-							_config[group][item] = action.data[item] || '';
+							_config[group][item] = (action.data[item] !== null || action.data[item] !== undefined) 
+								? action.data[item]
+								: '';
 							break;
 						}
 
@@ -142,8 +153,8 @@ var Store = assign({}, EventEmitter.prototype, {
 				}
 				break;
 
-			default: // not an action we're looking for - ignore
-				return true;
+			default: // unknown action
+				// ignore
 		}
 
 		// explicitly check here for REQUEST action

@@ -1,6 +1,6 @@
 @import toggleButton
 
-.panel-header .wigets
+.panel-header .widgets
 	position absolute
 	right 16px
 	bottom 10px
@@ -49,6 +49,7 @@ error-badge-size = 30px
 	background-color error-color
 	box-shadow 0 2px 9px 0 rgba(0,0,0,0.2)	
 	opacity 0
+	cursor default
 
 .ch-wrapper.error .ch-error-badge
 	opacity 1
@@ -145,6 +146,8 @@ error-badge-size = 30px
 		background-repeat no-repeat
 		background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E")
 
+.btn.ch-history-badge[disabled]::before
+	background-color #909090
 	
 .ch-history
 	position absolute
@@ -155,7 +158,6 @@ error-badge-size = 30px
 	color fg-color
 	background-color #fff
 	text-align center
-	line-height 225px
 	> .btn
 		position absolute
 		padding 0
@@ -172,12 +174,12 @@ error-badge-size = 30px
 
 .ch-history .plot-wrapper
 	width 100%
-	height 50%
+	height 100%
 		
 .ch-history .plot
-	width 90%
-	height 90%
-	margin 5px auto 0 auto
+	width 100%
+	height 100%
+	margin 0
 
 
 			

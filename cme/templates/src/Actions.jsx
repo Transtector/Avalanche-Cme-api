@@ -17,49 +17,7 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
-var INTERVALS = {};
-
-function pausePolling(name) {
-	var name = name || true;
-
-	if (INTERVALS.paused)
-		return;
-
-	for (var i in INTERVALS) {
-		clearInterval(INTERVALS[i].r);
-		INTERVALS[i].r = null;
-	}
-	INTERVALS.paused = name;
-}
-
-function unpausePolling(name) {
-	var name = name || true;
-
-	if (INTERVALS.paused && INTERVALS.paused === name) {
-
-		delete INTERVALS.paused;
-		for (var i in INTERVALS) {
-			INTERVALS[i].r = setInterval(INTERVALS[i].f, INTERVALS[i].i);
-		}
-	}
-}
-
-function readClock() {
-	dispatchRequest('reading clock');
-	CmeAPI.poll('config/clock', function(data) {
-		AppDispatcher.dispatch({ actionType: Constants.CLOCK, data: data });
-	}, onErrors);
-}
-
-function readStatus() {
-	dispatchRequest('reading status');
-	CmeAPI.poll('', function(data) {
-		AppDispatcher.dispatch({ actionType: Constants.STATUS, data: data });
-	}, onErrors);
-}
-
 function onErrors(errors) {
-	pausePolling('errors');
 
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
@@ -70,21 +28,24 @@ function onErrors(errors) {
 // alert that server request is going out
 function dispatchRequest(action) {
 	debug("Server request: " + action);
-	AppDispatcher.dispatch({ actionType: Constants.REQUEST });
+	
+	// kind of hacky for now, but enforces serialized dispatching...
+	setTimeout(function () {
+		AppDispatcher.dispatch({ actionType: Constants.REQUEST });
+	}, 0);
 }
 
 var Actions = {
 
 	device: function() {
-		dispatchRequest('device');
+		dispatchRequest('reading device');
 		return CmeAPI.device(function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.DEVICE, data: data });
 		}, onErrors);
 	},
 
 	clearErrors: function() {
-		// restart polling when errors cleared
-		unpausePolling('errors');
+
 		AppDispatcher.dispatch({ actionType: Constants.CLEAR_ERRORS });
 	},
 
@@ -154,60 +115,32 @@ var Actions = {
 		AppDispatcher.dispatch({ actionType: Constants.SHOW_CONFIG });
 	},
 
-	poll: function(pollCommand, pollFunctionType, interval) {
-		var interval = interval || 1000;
-
-		var pollFunction;
-		switch(pollFunctionType) {
-			case Constants.CLOCK:
-				pollFunction = readClock;
-				break;
-
-			case Constants.STATUS:
-				pollFunction = readStatus;
-				break;
-		}
-
-		switch(pollCommand) {
-			case Constants.START:
-				if (!pollFunctionType || INTERVALS.paused)
-					return;
-
-				if (!INTERVALS[pollFunctionType])
-					INTERVALS[pollFunctionType] = {
-						r: setInterval(pollFunction, interval),
-						f: pollFunction,
-						i: interval
-					};
-				break;
-
-			case Constants.PAUSE:
-				pausePolling();
-				break;
-
-			case Constants.UNPAUSE:
-				unpausePolling();
-				break;
-
-			case Constants.STOP:
-				if (!pollFunctionType) {
-					for (var intervalType in INTERVALS) {
-						clearInterval(INTERVALS[intervalType].r);
-					}
-					INTERVALS = {};
-				} else if (INTERVALS[pollFunctionType]) {
-					clearInterval(INTERVALS[pollFunctionType].r);
-					delete INTERVALS[pollFunctionType];
-				}
-				break;
-		}
-	},
-
 	config: function(obj) {
 		// obj is _cme['config'] or an object on _cme['config']
-		dispatchRequest('config');
+		dispatchRequest('reading config');
 		return CmeAPI.config(obj, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
+		}, onErrors);
+	},
+
+	clock: function() {
+		dispatchRequest('reading clock');
+		CmeAPI.clock(function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.CLOCK, data: data });
+		}, onErrors);
+	},
+
+	temperature: function() {
+		dispatchRequest('reading temperature');
+		CmeAPI.temperature(function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.TEMPERATURE, data: data });
+		}, onErrors);
+	},
+
+	channels: function() {
+		dispatchRequest('reading channels');
+		CmeAPI.channels([], function(data) {
+			AppDispatcher.dispatch({ actionType: Constants.CHANNELS, data: data });
 		}, onErrors);
 	},
 

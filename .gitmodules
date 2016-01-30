@@ -1,0 +1,3 @@
+[submodule "cme/templates/src/Flot"]
+	path = cme/templates/src/Flot
+	url = https://github.com/flot/flot.git

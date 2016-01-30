@@ -1,6 +1,23 @@
 module.exports = exports = {
 
-	// This lookup defined in settings.py on the server side.
+	// This lookup defined in config.py on the server side.
+	// Needs update if changes are made there.
+	TEMPERATURE_UNITS: {
+		CELSIUS: 0,
+		FAHRENHEIT: 1
+	},
+
+	formatTemperatureDisplay: function(celsius, units, digits) {
+		var value = (units == this.TEMPERATURE_UNITS.CELSIUS) 
+			? celsius 
+			: celsius * (9/5) + 32,
+			
+			unit = (units == this.TEMPERATURE_UNITS.CELSIUS) ? '°C' : '°F';
+
+		return value.toFixed(digits) + ' ' + unit;
+	},
+
+	// This lookup defined in config.py on the server side.
 	// Needs update if changes are made there.
 	TIME_DISPLAY: {
 		UTC: 0,

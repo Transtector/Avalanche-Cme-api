@@ -43,9 +43,15 @@ var CmeApp = React.createClass({
 				return null;
 
 			if (state.isConfigVisible)
-				return <ConfigPanel config={state.config} />
+				return <ConfigPanel clock={state.clock} 
+									temperature={state.temperature}
+									config={state.config} />
 
-			return <HomePanel status={state.status} clock={state.config.clock} />
+			return <HomePanel channels={state.channels}
+							  clock={state.clock}
+							  clockConfig={state.config.clock}
+							  temperature={state.temperature}
+							  temperatureConfig={state.config.temperature} />
 		}
 
 		function renderErrorPanel(state) {
@@ -67,12 +73,6 @@ var CmeApp = React.createClass({
 				<div id="test-buttons">
 					<button onClick={this._testError}
 							disabled={this.state.errors.length > 0}>Test Error</button>
-
-					<button onClick={this._pausePolling}
-							disabled={this.state.errors.length > 0}>Pause Polling</button>
-
-					<button onClick={this._unpausePolling}
-							disabled={this.state.errors.length > 0}>UnPause Polling</button>
 				</div>
 				
 			</div>
@@ -85,14 +85,6 @@ var CmeApp = React.createClass({
 
 	_testError: function() {
 		Actions.injectError('This is a test');
-	},
-
-	_pausePolling: function() {
-		Actions.poll(Constants.PAUSE);
-	},
-
-	_unpausePolling: function() {
-		Actions.poll(Constants.UNPAUSE);
 	}
 });
 

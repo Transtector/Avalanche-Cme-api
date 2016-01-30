@@ -14,17 +14,12 @@ module.exports = keyMirror({
 	SESSION: null,
 	DEVICE: null,
 
-	ERROR: null, // somebody said "errors!" - array of string
+	ERROR: null, // somebody said "errors!" - [ <string> ]
 	CLEAR_ERRORS: null,
 
-	// polling commands
-	START: null,
-	STOP: null,
-	PAUSE: null,
-	UNPAUSE: null,
-
 	CLOCK: null,
-	STATUS: null,
+	TEMPERATURE: null,
+	CHANNELS: null,
 	CHANNEL: null,
 	CONTROL: null,
 
