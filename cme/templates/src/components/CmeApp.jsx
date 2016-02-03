@@ -8,15 +8,15 @@
  */
 var React = require('react');
 
+var Actions = require('../Actions');
+var Constants = require('../Constants');
+var Store = require('../Store');
+
 var Header = require('./Header');
 var Login = require('./Login');
 var ConfigPanel = require('./ConfigPanel');
 var HomePanel = require('./HomePanel');
 var ErrorPanel = require('./ErrorPanel');
-
-var Actions = require('../Actions');
-var Constants = require('../Constants');
-var Store = require('../Store');
 
 var CmeApp = React.createClass({
 
@@ -43,14 +43,9 @@ var CmeApp = React.createClass({
 				return null;
 
 			if (state.isConfigVisible)
-				return <ConfigPanel clock={state.clock} 
-									temperature={state.temperature}
-									config={state.config} />
+				return <ConfigPanel config={state.config} />
 
-			return <HomePanel channels={state.channels}
-							  clock={state.clock}
-							  clockConfig={state.config.clock}
-							  temperature={state.temperature}
+			return <HomePanel clockConfig={state.config.clock}
 							  temperatureConfig={state.config.temperature} />
 		}
 

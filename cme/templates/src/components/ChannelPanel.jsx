@@ -7,8 +7,9 @@
  'use strict';
 
 var React = require('react');
-
 var Actions = require('../Actions');
+var Constants = require('../Constants');
+var PollingStore = require('../PollingStore');
 
 var moment = require('moment');
 var classNames = require('classnames');
@@ -24,27 +25,33 @@ var ENTER_KEY_CODE = 13;
 var ESCAPE_KEY_CODE = 27;
 
 var ChannelPanel = React.createClass({
-	_chPollInterval: null,
-	_chPollPeriod: 2000,
+	_chPollTimeout: null,
+	_chPollPeriod: 1000,
+	_chPollTime: 0,
 
 	getInitialState: function() {
+		var chIndex = parseInt(this.props.id.substr(2)),
+			ch = PollingStore.getState().channels[chIndex];
 
 		return {
-			name: this.props.ch.name,
-			description: this.props.ch.description,
+			ch: ch,
+			name: ch.name,
+			description: ch.description,
 			configOpen: false,
 			historyOpen: false
 		}
 	},
 
 	componentDidMount: function() {
-		
+		// Request channel data when mounted.
+		PollingStore.addChangeListener(Constants.ChangeTypes.CHANNEL, this._onChannelChange);
 		this._startChPoll();
 	},
 
 	componentWillUnmount: function() {
 
 		this._stopChPoll();
+		PollingStore.removeChangeListener(Constants.ChangeTypes.CHANNEL, this._onChannelChange);		
 	},
 
 	render: function() {
@@ -62,10 +69,10 @@ var ChannelPanel = React.createClass({
 		});
 
 		// ch primary/secondary sensor display values
-		var primary = this.props.ch.sensors[0],
+		var primary = this.state.ch.sensors[0],
 			primary_value = primary.data[primary.data.length - 1][1] || 0,
 
-			secondary = this.props.ch.sensors[1],
+			secondary = this.state.ch.sensors[1],
 			secondary_value = secondary.data[secondary.data.length - 1][1] || 0;
 
 		// Calculate the range of timestamps supplied 
@@ -74,7 +81,7 @@ var ChannelPanel = React.createClass({
 		var timestamps = [], ts_start, ts_end,
 			sensorsData = [], controlsData = [];
 
-		this.props.ch.sensors.forEach(function(s) {
+		this.state.ch.sensors.forEach(function(s) {
 			timestamps.push(s.data[0][0]); // earliest sensor point
 			timestamps.push(s.data[s.data.length - 1][0]); // most recent sensor point		
 
@@ -82,7 +89,7 @@ var ChannelPanel = React.createClass({
 			sensorsData.push(s.data.map(function(d) { return [ d[0] * 1000, d[1] ]; }));
 		});
 
-		this.props.ch.controls.forEach(function(c) { 
+		this.state.ch.controls.forEach(function(c) { 
 			// TODO: process controls for history plots
 		});
 
@@ -113,19 +120,19 @@ var ChannelPanel = React.createClass({
 		var duration = ts_end.from(ts_start, true);
 
 		// Ch controls (only 1 for now, and it's hidden)
-		if (this.props.ch.controls && this.props.ch.controls.length > 0) {
-			var c = this.props.ch.controls[0],
+		if (this.state.ch.controls && this.state.ch.controls.length > 0) {
+			var c = this.state.ch.controls[0],
 				cState = c.data[c.data.length - 1][1]; // data: [[ timestamp, state ], ..., ]
 		}
 
 		var chWrapperClass = classNames({
 			'ch-wrapper': true,
-			'error': this.props.ch.error.length > 0
+			'error': this.state.ch.error.length > 0
 		});
 
 		var errorMessages = null;
-		if (this.props.ch.error) {
-			errorMessages = this.props.ch.error.split(', ').map(function(err, i) {
+		if (this.state.ch.error) {
+			errorMessages = this.state.ch.error.split(', ').map(function(err, i) {
 				return <div key={i}>{err}</div>
 			});
 		}
@@ -193,7 +200,7 @@ var ChannelPanel = React.createClass({
 					</div>
 					*/}
 
-					<button className="btn ch-history-badge" disabled={this.props.ch.error} onClick={this._toggleHistoryVisibility}>{duration}</button>
+					<button className="btn ch-history-badge" disabled={this.state.ch.error} onClick={this._toggleHistoryVisibility}>{duration}</button>
 					<div className={historyClass}>
 						<div className="plot-wrapper">
 							<div className="plot sensorPlot" ref="_sensorsPlot"></div>
@@ -223,27 +230,45 @@ var ChannelPanel = React.createClass({
 					</div>
 				</div>
 
-				<div className="ch-error-badge" title={this.props.ch.error}>!</div>
+				<div className="ch-error-badge" title={this.state.ch.error}>!</div>
 
 			</div>
 		);
 	},
 
-	_startChPoll: function() {
-		var _this = this;
-		function pollChannel() {
-			Actions.channel(_this.props.ch.id);
-		}
+	_onChannelChange: function() {
+		var index = parseInt(this.state.ch.id.substr(2)),
+			_this = this;
 
-		if (!this._chPollInterval) {
-			this._chPollInterval = setInterval(pollChannel, this._chPollPeriod);
-		}
+		//console.log("Channel " + this.state.ch.id + " changed - updating");
+
+		this.setState({ ch: PollingStore.getState().channels[index]}, function () {
+
+			if (!_this._chPollTime) return;
+
+			var age = moment().valueOf() - _this._chPollTime,
+				period = _this._chPollPeriod - (age % _this._chPollPeriod);
+
+			//console.log('Updating ' + _this.state.ch.id + ' - age = ' + (age/1000) + " seconds, making request in " + period/1000 + " seconds...");
+
+			clearTimeout(_this._chPollTimeout);
+			_this._chPollTimeout = setTimeout(function () {
+				_this._chPollTime = moment().valueOf();
+				Actions.channel(_this.state.ch.id, _this.state.historyOpen);
+			}, period);
+
+		});
 	},
 
-	_stopClockPoll: function() {
+	_startChPoll: function() {
+		this._chPollTime = moment().valueOf();
+		Actions.channel(this.state.ch.id, this.state.historyOpen);
+	},
 
-		clearInterval(this._chPollInterval);
-		this._chPollInterval = null;
+	_stopChPoll: function() {
+		this._chPollTime = 0;
+		clearTimeout(this._chPollTimeout);
+		this._chPollTimeout = null;
 	},
 
 	_sensorsPlot: function() {
@@ -258,14 +283,22 @@ var ChannelPanel = React.createClass({
 
 	_toggleConfigVisibility: function() {
 
-		this.setState({configOpen: !this.state.configOpen});
+		this.setState({ configOpen: !this.state.configOpen });
 	},
 
 	_toggleHistoryVisibility: function() {
+		if (this.state.historyOpen) {
+			this._stopChPoll();
+			this._startChPoll();
+		}
 
-		this.setState({historyOpen: !this.state.historyOpen});
+		this.setState({ historyOpen: !this.state.historyOpen });
 	},
 
+	// Making channel object changes just
+	// changes the channel state (in the UI).
+	// Press ENTER to send changes to server
+	// or ESCAPE to reset.
 	_requestChange: function(e) {
 		var v = e.target.value,
 			n = e.target.name,
@@ -275,11 +308,13 @@ var ChannelPanel = React.createClass({
 		this.setState(obj);
 	},
 
+	// ENTER to persist changes to server
+	// ESCAPE to reset changes back to last saved state
 	_onKeyDown: function(e) {
 		if (e.keyCode === ESCAPE_KEY_CODE) {
 			this.setState({
-				name: this.props.ch.name,
-				description: this.props.ch.description
+				name: this.state.ch.name,
+				description: this.state.ch.description
 			});
 		}
 
@@ -291,12 +326,12 @@ var ChannelPanel = React.createClass({
 			obj = {};
 		obj[n] = v;
 
-		Actions.channel(this.props.ch.id, obj);
+		Actions.channel(this.state.ch.id, obj);
 	},
 
 	_requestControlChange: function(e) {
 		// control(chId, controlId, { name: name, state: state })
-		Actions.control(this.props.ch.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
+		Actions.control(this.state.ch.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
 	}
 });
 
