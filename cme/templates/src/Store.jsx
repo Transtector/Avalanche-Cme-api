@@ -21,9 +21,9 @@ var CHANGE_EVENT = 'change';
 
 var _device = {};
 var _config = {};
-var _channels = [];
-var _clock;
-var _temperature;
+//var _channels = [];
+//var _clock;
+//var _temperature;
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
@@ -37,9 +37,9 @@ var Store = assign({}, EventEmitter.prototype, {
 			config: _config, // { <cme_config> }
 			errors: _errors, // [ <string> ]
 
-			channels: _channels, // [ <channel> ]
-			clock: _clock, // <ISO-8601 string>, CPU datetime, UTC
-			temperature: _temperature, // <float>, CPU temperature degree C
+//			channels: _channels, // [ <channel> ]
+//			clock: _clock, // <ISO-8601 string>, CPU datetime, UTC
+//			temperature: _temperature, // <float>, CPU temperature degree C
 
 			// generally UI-specific states follow:
 
@@ -95,35 +95,35 @@ var Store = assign({}, EventEmitter.prototype, {
 				_isConfigVisible = true;
 				break;
 
-			case Constants.CLOCK: // clock response
-				_clock = action.data.clock;
-				break;
+//			case Constants.CLOCK: // clock response
+//				_clock = action.data.clock;
+//				break;
 
-			case Constants.TEMPERATURE: // cpu temperature response
-				_temperature = action.data.temperature;
-				break;
+//			case Constants.TEMPERATURE: // cpu temperature response
+//				_temperature = action.data.temperature;
+//				break;
 
-			case Constants.CHANNELS: // status/channels response
-				_channels = action.data.channels;
-				break;
+//			case Constants.CHANNELS: // status/channels response
+//				_channels = [ action.data.channels[0] ];
+//				break;
 
-			case Constants.CHANNEL:
+//			case Constants.CHANNEL:
 				// action.data = { chX: <channelX> }
-				var id = Object.keys(action.data)[0],
-					ch_index = parseInt(id.slice(2));
+//				var id = Object.keys(action.data)[0],
+//					ch_index = parseInt(id.slice(2));
 
-				assign(_channels[ch_index], action.data[id]);
-				break;
+//				assign(_channels[ch_index], action.data[id]);
+//				break;
 
-			case Constants.CONTROL:
+//			case Constants.CONTROL:
 				// action.data = { 'chX:cY': <controlY> }
-				var id = Object.keys(action.data)[0],
-					keys = id.split(':'),
-					ch_index = parseInt(keys[0].slice(2)),
-					c_index = parseInt(keys[1].slice(1));
+//				var id = Object.keys(action.data)[0],
+//					keys = id.split(':'),
+//					ch_index = parseInt(keys[0].slice(2)),
+//					c_index = parseInt(keys[1].slice(1));
 
-				assign(_channels[ch_index].controls[c_index], action.data[id]);
-				break;
+//				assign(_channels[ch_index].controls[c_index], action.data[id]);
+//				break;
 
 			case Constants.CONFIG:
 				// item key name:

@@ -26,4 +26,15 @@ module.exports = keyMirror({
 	SHOW_HOME: null,
 	SHOW_CONFIG: null,
 	CONFIG: null
+
+});
+
+// Change Types for PollingStore event registration
+module.exports.ChangeTypes = keyMirror({
+	CHANGE: null,
+	CLOCK: null,
+	TEMPERATURE: null,
+	CHANNELS: null,
+	CHANNEL: null,
+	CONTROL: null
 });
