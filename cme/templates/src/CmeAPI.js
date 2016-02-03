@@ -206,11 +206,16 @@ var CmeAPI = {
 		});
 	},
 
-	channel: function(chId, obj, success, failure) {
+	channel: function(chId, expand, obj, success, failure) {
 		var chIndex = parseInt(chId.slice(2)),
 			method = obj ? 'POST' : 'GET',
 			payload = obj ? JSON.stringify(obj) : null;
 
+		if (typeof(expand) == 'boolean') {
+			method = 'GET';
+			payload = { expand: expand };
+		}
+		
 		return $.ajax({
 			type: method,
 			url: API.channels + chIndex, // /api/ch/0

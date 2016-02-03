@@ -137,16 +137,16 @@ var Actions = {
 		}, onErrors);
 	},
 
-	channels: function() {
+	channels: function(expand_channels) {
 		dispatchRequest('reading channels');
-		CmeAPI.channels([], function(data) {
+		CmeAPI.channels(expand_channels, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CHANNELS, data: data });
 		}, onErrors);
 	},
 
-	channel: function(chId, obj) {
+	channel: function(chId, expand, obj) {
 		dispatchRequest(chId);
-		CmeAPI.channel(chId, obj, function(data) {
+		CmeAPI.channel(chId, expand, obj, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 		}, onErrors);
 	},
