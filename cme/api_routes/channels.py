@@ -21,87 +21,104 @@ import memcache, json
 #mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 mc = memcache.Client(['10.16.120.174:11211'], debug=0)
 
+def channel_parameter_to_list(param=None):
+	param = request.args.get(param, None)
 
-# TODO: add some controls on the hw side and see if this works!
-def set_control_state(ch_index, control_index, state):
-	''' Updates a particular control state in the hw status
-		object.  The control object must already exist in the
-		status object hierarchy. '''
-	hw = json.loads(mc.get('status'))
-	hw['channels'][ch_index]['controls'][control_index].state = state
-	mc.set('status', json.dumps(hw))
-
-
-def get_expanded_channel_list():
-	expand = request.args.get('expand', None)
-
-	if not expand:
+	if not param:
 		return []
 
-	if expand.lower() == 'true':
+	if param.lower() == 'true':
 		return True
 
 	try:
-		return [int(i) for i in expand.split(',')]
+		return [int(i) for i in param.split(',')]
 	
 	except:
 		return []
 
+def update_config(config, key, value):
+	try:
+		config[key].update(value)
+	except:
+		config[key] = value
 
-def expand_this_channel(expand_channels_arg, ch_index):
-	if not expand_channels_arg:
-		return False
+def channels_config(ch_index=-1, number_of_channels=0):
+	config = {}
 
-	if isinstance(expand_channels_arg, list):
-		return ch_index in expand_channels_arg
+	list_of_channels_to_reset = channel_parameter_to_list('reset') # e.g., [ 0, 1, ... ] or True/False
+	list_of_channels_to_expand = channel_parameter_to_list('expand') # e.g., [ 0, 1, ... ] or True/False
+	
+	# expand or reset requested?  if not, just return empty
+	if not (list_of_channels_to_expand or list_of_channels_to_reset):
+		return config
 
-	return expand_channels_arg
+	# dealing with an individual channel?
+	if not ch_index < 0:
+		if list_of_channels_to_reset == True or ch_index in list_of_channels_to_reset:
+			update_config(config, 'ch' + str(ch_index), { 'reset': True })
+		if list_of_channels_to_expand == True or ch_index in list_of_channels_to_expand:
+			update_config(config, 'ch' + str(ch_index), { 'expand': True })
+	
+	# else dealing with "all" channels
+	else:
 
+		# reset all channels (i.e., request had "reset=true")
+		if type(list_of_channels_to_reset) is bool and list_of_channels_to_reset and number_of_channels > 0:
+			for i in range(number_of_channels):
+				update_config(config, 'ch' + str(i), { 'reset': True })
+		
+		# reset specific channels (i.e., request had "reset=0,1,2")
+		elif list_of_channels_to_reset:
+			for i in list_of_channels_to_reset:
+				update_config(config, 'ch' + str(i), { 'reset': True })
 
-def status(ch_index=-1, expand_channels=False):
+		if type(list_of_channels_to_expand) is bool and list_of_channels_to_expand and number_of_channels > 0:
+			for i in range(number_of_channels):
+				update_config(config, 'ch' + str(i), { 'expand': True })
+
+		elif list_of_channels_to_expand:
+			for i in list_of_channels_to_expand:
+				update_config(config, 'ch' + str(i), { 'expand': True })
+
+	return config
+
+def status(ch_index=-1):
 	''' Top-level CME status object
 
-		ch_index - Returns a single channel object identified with integer index.
-			If ch_index is included in expand_channels, then the channel data
-			will be pulled from log file rather than live data. 
-		
-		expand_channels - a list of channel indices for which data should be pulled
-			from log file rather than the live hardware.  Set True to expand all
-			requested channels' data.
+		Returns a single channel identified with integer ch_index
+		from the channels in the memcache status['channels'] list
+		or all channels if ch_index < 0 (the default).
 	'''
-
 	# Update the channels objects with the hardware data (from memcache).
 	# I found that sometimes the mc.get('status') was returning None which
 	# results in a 500 server error when json.loads().  To avoid that,
 	# we check if cme_status is None and assign an object with empty
 	# channels.
-	cme_status = mc.get('status')	
-	status = json.loads(cme_status) if cme_status else { 'channels': [] }
+	status = mc.get('status')	
+	status = json.loads(status) if status else { 'channels': [] }
+
+	# Update the channels_config every time we read status
+	ch_config = channels_config(ch_index, len(status['channels']))
+	if ch_config:
+		mc.set('channels_config', json.dumps(ch_config))
+	else:
+		mc.delete('channels_config')
 
 	# Select a particular channel or all channels
 	if not ch_index < 0:
 		if not (ch_index >= 0 and ch_index < len(status['channels'])):
 			return None
 
-		return Channel(status['channels'][ch_index], expand_this_channel(expand_channels, ch_index))
+		return Channel(status['channels'][ch_index])
 
-	channels = [Channel(ch, expand_this_channel(expand_channels, i)) for i, ch in enumerate(status['channels'])]
-
-	# Try to read temperature (could fail if not on RPi)
-	# temp in millidegrees C
-	try:
-		temp_C = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
-	except:
-		temp_C = -40.0 # Not on a RPi
-
-	return { 'channels': channels }
+	return { 'channels': [Channel(ch) for ch in status['channels']] }
 
 
 # CME channels request
 @router.route('/ch/')
 @require_auth
 def channels():
-	return json_response(status(-1, get_expanded_channel_list()))
+	return json_response(status(-1))
 
 
 @router.route('/ch/raw')
@@ -120,7 +137,7 @@ def raw():
 @require_auth
 def channel(ch_index):
 
-	ch = status(ch_index, get_expanded_channel_list())
+	ch = status(ch_index)
 
 	if not ch:
 		return json_error('Channel not found', 404)
@@ -162,7 +179,7 @@ def channel(ch_index):
 @router.route('/ch/<int:ch_index>/controls/<int:sc_index>/data')
 @require_auth
 def sensor_control(ch_index, sc_index):
-	ch = status(ch_index, get_expanded_channel_list())
+	ch = status(ch_index)
 
 	if not ch:
 		return json_error('Channel not found', 404)
