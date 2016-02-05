@@ -187,10 +187,10 @@ var CmeAPI = {
 		});
 	},
 
-	channels: function(expand_channels, success, failure) {
-		var qs = (expand_channels && expand_channels.length > 0)
-			? { expand: expand_channels.join(',') }
-			: null
+	channels: function(channels_config, success, failure) {
+		var qs = null;
+
+		// TODO:  send channels_config object
 
 		return $.ajax({
 			url: API.channels,
@@ -206,16 +206,15 @@ var CmeAPI = {
 		});
 	},
 
-	channel: function(chId, expand, obj, success, failure) {
+	channel: function(chId, ch_read_config, obj, success, failure) {
 		var chIndex = parseInt(chId.slice(2)),
 			method = obj ? 'POST' : 'GET',
-			payload = obj ? JSON.stringify(obj) : null;
+			payload = obj 
+				? JSON.stringify(obj) 
+				: ch_read_config
+					? ch_read_config
+					: null;
 
-		if (typeof(expand) == 'boolean') {
-			method = 'GET';
-			payload = { expand: expand };
-		}
-		
 		return $.ajax({
 			type: method,
 			url: API.channels + chIndex, // /api/ch/0

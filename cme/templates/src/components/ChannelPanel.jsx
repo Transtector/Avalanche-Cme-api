@@ -29,6 +29,8 @@ var ChannelPanel = React.createClass({
 	_chPollPeriod: 1000,
 	_chPollTime: 0,
 
+	_chConfig: {},
+
 	getInitialState: function() {
 		var chIndex = parseInt(this.props.id.substr(2)),
 			ch = PollingStore.getState().channels[chIndex];
@@ -210,7 +212,8 @@ var ChannelPanel = React.createClass({
 							<div className="plot controlPlot" ref="_controlsPlot"></div>
 						</div>
 						*/}
-						<button className="btn" onClick={this._toggleHistoryVisibility}>x</button>
+						<button className="btn glyph_close" onClick={this._toggleHistoryVisibility}>X</button>
+						<button className="btn glyph_reset" onClick={this._clearHistory}>R</button>
 					</div>
 
 					<div className={configClass}>
@@ -242,6 +245,8 @@ var ChannelPanel = React.createClass({
 
 		//console.log("Channel " + this.state.ch.id + " changed - updating");
 
+		delete this._chConfig['reset'];
+
 		this.setState({ ch: PollingStore.getState().channels[index]}, function () {
 
 			if (!_this._chPollTime) return;
@@ -253,16 +258,23 @@ var ChannelPanel = React.createClass({
 
 			clearTimeout(_this._chPollTimeout);
 			_this._chPollTimeout = setTimeout(function () {
+
+				if (_this.state.historyOpen)
+					_this._chConfig['expand'] = true;
+				else
+					delete _this._chConfig['expand'];
+
 				_this._chPollTime = moment().valueOf();
-				Actions.channel(_this.state.ch.id, _this.state.historyOpen);
+				Actions.channel(_this.state.ch.id, _this._chConfig);
 			}, period);
 
 		});
 	},
 
 	_startChPoll: function() {
+
 		this._chPollTime = moment().valueOf();
-		Actions.channel(this.state.ch.id, this.state.historyOpen);
+		Actions.channel(this.state.ch.id, this._chConfig);
 	},
 
 	_stopChPoll: function() {
@@ -293,6 +305,14 @@ var ChannelPanel = React.createClass({
 		}
 
 		this.setState({ historyOpen: !this.state.historyOpen });
+	},
+
+	_clearHistory: function() {
+		if (confirm("Are you sure?  This action cannot be undone.")) {
+			this._chConfig['reset'] = true;
+			this._stopChPoll();
+			this._startChPoll();
+		}
 	},
 
 	// Making channel object changes just

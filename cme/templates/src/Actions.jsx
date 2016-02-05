@@ -137,16 +137,16 @@ var Actions = {
 		}, onErrors);
 	},
 
-	channels: function(expand_channels) {
+	channels: function(channels_config) {
 		dispatchRequest('reading channels');
-		CmeAPI.channels(expand_channels, function(data) {
+		CmeAPI.channels(channels_config, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CHANNELS, data: data });
 		}, onErrors);
 	},
 
-	channel: function(chId, expand, obj) {
-		dispatchRequest(chId);
-		CmeAPI.channel(chId, expand, obj, function(data) {
+	channel: function(chId, ch_read_config, ch_config) {
+		dispatchRequest(chId + ' ' + JSON.stringify(ch_read_config));
+		CmeAPI.channel(chId, ch_read_config, ch_config, function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 		}, onErrors);
 	},
