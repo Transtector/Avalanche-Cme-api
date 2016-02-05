@@ -42,22 +42,42 @@ def update_config(config, key, value):
 	except:
 		config[key] = value
 
-def channels_config(ch_index=-1, number_of_channels=0):
-	config = {}
+def channels_config(config, ch_index=-1, number_of_channels=0):
 
 	list_of_channels_to_reset = channel_parameter_to_list('reset') # e.g., [ 0, 1, ... ] or True/False
 	list_of_channels_to_expand = channel_parameter_to_list('expand') # e.g., [ 0, 1, ... ] or True/False
 	
-	# expand or reset requested?  if not, just return empty
+	# if neither expand nor reset is requested?
 	if not (list_of_channels_to_expand or list_of_channels_to_reset):
+		# if requesting all channels - remove all channel configs
+		if ch_index < 0:
+			return {}
+		
+		# remove identified channel config if present
+		try:
+			del config['ch' + str(ch_index)]
+		except:
+			pass
+
 		return config
 
 	# dealing with an individual channel?
 	if not ch_index < 0:
 		if list_of_channels_to_reset == True or ch_index in list_of_channels_to_reset:
 			update_config(config, 'ch' + str(ch_index), { 'reset': True })
+		else:
+			try:
+				del config['ch' + str(ch_index)]['reset']
+			except:
+				pass
+
 		if list_of_channels_to_expand == True or ch_index in list_of_channels_to_expand:
 			update_config(config, 'ch' + str(ch_index), { 'expand': True })
+		else:
+			try:
+				del config['ch' + str(ch_index)]['expand']
+			except:
+				pass
 	
 	# else dealing with "all" channels
 	else:
@@ -98,7 +118,7 @@ def status(ch_index=-1):
 	status = json.loads(status) if status else { 'channels': [] }
 
 	# Update the channels_config every time we read status
-	ch_config = channels_config(ch_index, len(status['channels']))
+	ch_config = channels_config(json.loads(mc.get('channels_config') or '{}'), ch_index, len(status['channels']))
 	if ch_config:
 		mc.set('channels_config', json.dumps(ch_config))
 	else:
