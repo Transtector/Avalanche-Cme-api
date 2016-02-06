@@ -27,7 +27,8 @@ var API = {
 	logout: API_ROOT + 'logout',
 	clock: API_ROOT + 'clock',
 	temperature: API_ROOT + 'temperature',
-	channels: API_ROOT + 'ch/'
+	channels: API_ROOT + 'channels',
+	channel: API_ROOT + 'ch/'
 }
 
 function jqXhrErrorMessage(jqXHR) {
@@ -187,14 +188,10 @@ var CmeAPI = {
 		});
 	},
 
-	channels: function(channels_config, success, failure) {
-		var qs = null;
-
-		// TODO:  send channels_config object
-
+	channels: function(success, failure) {
 		return $.ajax({
 			url: API.channels,
-			data: qs,
+			data: null,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8',
 			success: success,
@@ -217,7 +214,7 @@ var CmeAPI = {
 
 		return $.ajax({
 			type: method,
-			url: API.channels + chIndex, // /api/ch/0
+			url: API.channel + chIndex, // /api/ch/0
 			data: payload,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8',

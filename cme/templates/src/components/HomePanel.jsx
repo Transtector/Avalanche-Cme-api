@@ -60,7 +60,7 @@ var HomePanel = React.createClass({
 				<div className="panel-content">
 					{	
 						this.state.channels.map(function(ch) {
-							return <ChannelPanel key={ch.id} id={ch.id} />;
+							return <ChannelPanel key={ch} id={ch} />;
 						})
 					}
 				</div>

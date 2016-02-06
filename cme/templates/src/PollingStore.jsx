@@ -19,6 +19,7 @@ var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign'); // ES6 polyfill
 
 var _channels = [];
+var _channel_objs = {};
 var _clock;
 var _temperature;
 
@@ -26,7 +27,8 @@ var PollingStore = assign({}, EventEmitter.prototype, {
 
 	getState: function() {
 		return {
-			channels: _channels, // [ <channel> ]
+			channels: _channels, // [ <channel_id> ], list of active channels
+			channel_objs: _channel_objs, // holds the actual channel objects by channel id { chX: <channel_object> }
 			clock: _clock, // <ISO-8601 string>, CPU datetime, UTC
 			temperature: _temperature // <float>, CPU temperature degree C
 		}
@@ -59,16 +61,15 @@ var PollingStore = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.CHANNELS: // status/channels response
-				_channels = [ action.data.channels[0] ];
+				_channels = action.data.channels.sort();
 				PollingStore.emitChange(Constants.ChangeTypes.CHANNELS);
 				break;
 
 			case Constants.CHANNEL:
 				// action.data = { chX: <channelX> }
-				var id = Object.keys(action.data)[0],
-					ch_index = parseInt(id.slice(2));
+				var ch_id = Object.keys(action.data)[0];
 
-				assign(_channels[ch_index], action.data[id]);
+				_channel_objs[ch_id] = action.data[ch_id];
 				PollingStore.emitChange(Constants.ChangeTypes.CHANNEL);
 				break;
 
