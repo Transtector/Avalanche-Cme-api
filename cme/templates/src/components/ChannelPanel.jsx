@@ -34,6 +34,7 @@ var ChannelPanel = React.createClass({
 	_chInitialized: false,
 
 	getInitialState: function() {
+		this._chConfig[this.props.id] = {}
 		return {
 			ch: null,
 			name: '',
@@ -98,8 +99,8 @@ var ChannelPanel = React.createClass({
 
 		if (this.state.ch) {
 			this.state.ch.sensors.forEach(function(s) {
-				timestamps.push(s.data[0][0]); // earliest sensor point
-				timestamps.push(s.data[s.data.length - 1][0]); // most recent sensor point		
+				timestamps.push(s.data[0][0]*1000); // earliest sensor point
+				timestamps.push(s.data[s.data.length - 1][0]*1000); // most recent sensor point		
 
 				// Unix (seconds) to Javascript (milliseconds) timestamps for plots
 				sensorsData.push(s.data.map(function(d) { return [ d[0] * 1000, d[1] ]; }));
@@ -109,6 +110,16 @@ var ChannelPanel = React.createClass({
 				// TODO: process controls for history plots
 			});
 		}
+
+		var debugCurrent = moment.utc(timestamps[timestamps.length - 1]).format("MMM D H:mm:ss") + ', ' 
+			+ primary_value.toFixed(1) + ', ' 
+			+ secondary_value.toFixed(3);
+		var debugPoints = 0;
+		var debugHead = "";
+		var debugTail = "";
+
+		window.sensorsData = sensorsData;
+		window.timestamps = timestamps;
 
 		if (this.state.historyOpen) {
 
@@ -128,11 +139,19 @@ var ChannelPanel = React.createClass({
 					]
 				});
 
+			debugPoints = sensorsData[0].length;
+			debugTail = moment.utc(sensorsData[0][debugPoints-1][0]).format("MMM D H:mm:ss") + ', ' 
+				+ sensorsData[0][debugPoints-1][1].toFixed(1) + ', ' 
+				+ sensorsData[1][debugPoints-1][1].toFixed(3);
+			debugHead = moment.utc(sensorsData[0][0][0]).format("MMM D H:mm:ss") + ', ' 
+				+ sensorsData[0][0][1].toFixed(1) + ', ' 
+				+ sensorsData[1][0][1].toFixed(3);
+
 			//$.plot($(this._controlsPlot()), controlsData);
 		}
 
-		ts_start = moment.unix(Math.min.apply(null, timestamps)).utc();
-		ts_end = moment.unix(Math.max.apply(null, timestamps)).utc();
+		ts_start = moment.utc(Math.min.apply(null, timestamps));
+		ts_end = moment.utc(Math.max.apply(null, timestamps));
 
 		var duration = ts_end.from(ts_start, true);
 
@@ -221,6 +240,13 @@ var ChannelPanel = React.createClass({
 					</div>
 					*/}
 
+					<div className="debug-info">
+						<div>Current: {debugCurrent}</div>
+						<div>Points: {debugPoints}</div>
+						<div>Head: {debugHead}</div>
+						<div>Tail: {debugTail}</div>
+					</div>
+
 					<button className="btn ch-history-badge" disabled={history_disabled} onClick={this._toggleHistoryVisibility}>{duration}</button>
 					<div className={historyClass}>
 						<div className="plot-wrapper">
@@ -231,6 +257,7 @@ var ChannelPanel = React.createClass({
 							<div className="plot controlPlot" ref="_controlsPlot"></div>
 						</div>
 						*/}
+
 						<button className="btn glyph_close" onClick={this._toggleHistoryVisibility}>X</button>
 						<button className="btn glyph_reset" onClick={this._clearHistory}>R</button>
 					</div>
@@ -264,9 +291,9 @@ var ChannelPanel = React.createClass({
 				ch: PollingStore.getState().channel_objs[this.props.id]
 			}
 
-		//console.log("Channel " + this.state.ch.id + " changed - updating");
-
-		delete this._chConfig['reset'];
+		if (newState.ch && newState.ch.reset) {
+			delete this._chConfig[this.props.id]['reset'];
+		}
 
 		if (this._chInitialized && newState.ch) {
 			newState.name = newState.ch.name,
@@ -288,12 +315,13 @@ var ChannelPanel = React.createClass({
 			_this._chPollTimeout = setTimeout(function () {
 
 				if (_this.state.historyOpen)
-					_this._chConfig['expand'] = true;
+					_this._chConfig[_this.props.id]['expand'] = true;
 				else
-					delete _this._chConfig['expand'];
+					if (_this._chConfig && _this._chConfig[_this.props.id])
+						delete _this._chConfig[_this.props.id]['expand'];
 
 				_this._chPollTime = moment().valueOf();
-				Actions.channel(_this.props.id, _this._chConfig);
+				Actions.channel(_this.props.id, _this._chConfig[_this.props.id] || {});
 			}, period);
 
 		});
@@ -302,7 +330,7 @@ var ChannelPanel = React.createClass({
 	_startChPoll: function() {
 
 		this._chPollTime = moment().valueOf();
-		Actions.channel(this.props.id, this._chConfig);
+		Actions.channel(this.props.id, this._chConfig[this.props.id]);
 	},
 
 	_stopChPoll: function() {
@@ -337,9 +365,8 @@ var ChannelPanel = React.createClass({
 
 	_clearHistory: function() {
 		if (confirm("Are you sure?  This action cannot be undone.")) {
-			this._chConfig['reset'] = true;
-			this._stopChPoll();
-			this._startChPoll();
+			this._chConfig[this.props.id]['reset'] = true;
+			this.setState({ historyOpen: false });
 		}
 	},
 
@@ -374,13 +401,14 @@ var ChannelPanel = React.createClass({
 			obj = {};
 		obj[n] = v;
 
-		Actions.channel(this.state.ch.id, obj);
+		Actions.channel(this.props.id, obj);
 	},
 
 	_requestControlChange: function(e) {
 		// control(chId, controlId, { name: name, state: state })
-		Actions.control(this.state.ch.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
+		Actions.control(this.props.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
 	}
 });
+window.moment = moment;
 
 module.exports = ChannelPanel;
