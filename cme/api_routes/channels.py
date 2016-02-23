@@ -135,7 +135,7 @@ def channels():
 @router.route('/channels')
 @require_auth
 def channels_list():
-	return json_response({ 'channels': json.loads(mc.get('channels')) })
+	return json_response({ 'channels': json.loads(mc.get('channels') or '[]') })
 
 
 # CME channel update
