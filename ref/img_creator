@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# ___ CREDITS
+# Based on work found in https://github.com/aweijnitz/pi_backup
+
+# This script used to create a gzipped image file from a raw partition.
+# Ostensibly used to create the "system" image from a base "recovery" partition.
+
+# Requirements:
+#   pv installed (used to display progress during image file creation; sudo apt-get install pv)
+
+#   CME eMMC partitions:
+#			/dev/mmcblk0p1  "boot" partition, mounted at /boot
+#			/dev/mmcblk0p2	"recovery" partition, mounted at /; this script runs from this partion!
+#			/dev/mmcblk0p3  "data" partition, mounted at /data; this is where the image will be written
+#			/dev/mmcblk0p4  "system" partiion, mounted at /system; not used in this script
+
+
+# ======================== CHANGE THESE VALUES ========================
+
+function stopServices {
+	echo -e "${purple}${bold}Stopping services before backup${NC}${normal}" | tee -a $DEST/$LOG
+		sudo service cme stop
+		sudo service avahi-daemon stop
+		sudo service netatalk stop
+		sudo service cron stop
+		#sudo service ssh stop
+}
+
+function startServices {
+	echo -e "${purple}${bold}Starting the stopped services${NC}${normal}" | tee -a $DEST/$LOG
+		#sudo service ssh start
+		sudo service cron start
+		sudo service netatalk start
+		sudo service avahi-daemon start
+		sudo service cme start
+}
+
+
+# Setting up directories; DEST must be a mounted partition at /data
+SRC=/dev/mmcblk0p2
+DEST=/data
+LOG=img_creator.log
+
+# Part number for the (released) firmware image
+PN=R950000
+
+# Firmware revsion (major.minor.patch)
+REV=0.1.0
+
+# Image filename follows a specific convention:
+#		PartNumber-Revision-FWARE-CME.img.gz
+FILE=${PN}-Rev${REV}-FWARE-CME.img.gz
+
+# =====================================================================
+
+# Setting up echo fonts
+red='\e[0;31m'
+green='\e[0;32m'
+cyan='\e[0;36m'
+yellow='\e[1;33m'
+purple='\e[0;35m'
+NC='\e[0m' # No Color
+bold=`tput bold`
+normal=`tput sgr0`
+
+# Check if mount point is mounted, if not abort!
+if ! mountpoint -q "$DEST" ; then
+		echo -e "${yellow}${bold}$DEST is not mounted; Aborting! ${NC}${normal}"
+		exit 1
+fi
+
+# Remove previous log if present
+if [ -f "$DEST/$LOG" ]; then
+	echo -e "${yellow}${bold}Removing previous log.${NC}${normal}"
+	sudo rm -f $DEST/$LOG
+fi
+
+
+echo -e "${green}${bold}Starting CME partition imaging process!${NC}${normal}" | tee -a $DEST/$LOG
+echo "____ IMAGING ON $(date +%Y/%m/%d_%H:%M:%S)" | tee -a $DEST/$LOG
+echo ""
+
+
+# Create a filename with datestamp for our current image
+OFILE="$DEST/$FILE"
+
+
+# First sync disks
+sync; sync
+
+
+# Shut down some services before starting
+stopServices
+
+
+# Begin imaging, should take about 45 minutes hour from 8Gb SD card to HDD
+echo -e "${green}${bold}Imaging and gzipping $SRC to $DEST ${NC}${normal}" | tee -a $DEST/$LOG
+SDSIZE=`sudo blockdev --getsize64 $SRC`;
+sudo pv -tpreb $SRC -s $SDSIZE | dd  bs=1M conv=sync,noerror iflag=fullblock | gzip > $OFILE
+
+# Wait for DD to finish and catch result
+BACKUP_SUCCESS=$?
+
+# Start services again that where shutdown before backup process
+startServices
+
+# If command has completed successfully, delete previous backups and exit
+if [ $BACKUP_SUCCESS =  0 ];
+then
+		echo -e "${green}${bold}Imaging process completed! FILE: $OFILE${NC}${normal}" | tee -a $DEST/$LOG
+		exit 0
+else 
+		# Else remove attempted image file
+		 echo -e "${red}${bold}Imaging failed!${NC}${normal}" | tee -a $DEST/$LOG
+		 sudo rm -f $OFILE
+		 exit 1
+fi
