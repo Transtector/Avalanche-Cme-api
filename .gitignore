@@ -15,6 +15,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+.AppleDouble
 log
 node_modules
 bower_components
