@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ___ CREDITS
+# CREDITS
 # Based on work found in https://github.com/aweijnitz/pi_backup
 
 # This script used to create a gzipped image file from a raw partition.
@@ -8,34 +8,37 @@
 
 # Requirements:
 # 	Run as root - use `sudo cme_img_creator`
-#   pv installed (used to display progress during image file creation; sudo apt-get install pv)
+#	pv installed (used to display progress during image file creation; sudo apt-get install pv)
 
 #   CME eMMC partitions:
-#			/dev/mmcblk0p1  "boot" partition, mounted at /boot
-#			/dev/mmcblk0p2	"recovery" partition, mounted at /; this script runs from this partion!
-#			/dev/mmcblk0p3  "data" partition, mounted at /data; this is where the image will be written
-#			/dev/mmcblk0p4  "system" partiion, mounted at /system; not used in this script
+#		/dev/mmcblk0p1  "boot" partition, mounted at /boot
+#		/dev/mmcblk0p2	"recovery" partition, mounted at /; this script runs from this partion!
+#		/dev/mmcblk0p3  "data" partition, mounted at /data; this is where the image will be written
+#		/dev/mmcblk0p4  "system" partiion, mounted at /system; not used in this script
 
 # ======================== CHANGE THESE VALUES ========================
 
+# add service names to list - they will be stopped prior to imaging
+# and restarted afterwards
+services=(cme avahi-daemon netatalk cron)
+
 function stopServices {
-	echo -e "${purple}${bold}Stopping services before imaging${NC}${normal}" | tee -a $DEST/$LOG
-		service cme stop
-		service avahi-daemon stop
-		service netatalk stop
-		service cron stop
-		#service ssh stop
+	echo -e "${purple}${bold}Stopping services before imaging...${NC}${normal}" | tee -a $DEST/$LOG
+	for service in ${services[*]}
+	do
+		echo -e "${red}${bold}   stopping $service!${NC}${normal}" | tee -a $DEST/$LOG
+		service $service stop
+	done
 }
 
 function startServices {
-	echo -e "${purple}${bold}Starting the stopped services${NC}${normal}" | tee -a $DEST/$LOG
-		#service ssh start
-		service cron start
-		service netatalk start
-		service avahi-daemon start
-		service cme start
+	echo -e "${purple}${bold}Starting the stopped services...${NC}${normal}" | tee -a $DEST/$LOG
+	for service in ${services[*]}
+	do
+		echo -e "${green}${bold}    starting $service!${NC}${normal}" | tee -a $DEST/$LOG
+		service $service start
+	done
 }
-
 
 # Setting up directories; DEST must be a mounted partition at /data
 SRC=/dev/mmcblk0p2
@@ -99,7 +102,7 @@ sync; sync
 # Shut down some services before starting
 stopServices
 
-echo "____ IMAGING BEGIN $(date +%Y/%m/%d_%H:%M:%S)" | tee -a $DEST/$LOG
+echo "---- BEGIN imaging $(date +%Y/%m/%d_%H:%M:%S)" | tee -a $DEST/$LOG
 SECONDS=0
 
 # Begin imaging, should take about 45 minutes hour from 8Gb SD card to HDD
@@ -111,7 +114,7 @@ pv -tpreb $SRC -s $SDSIZE | dd  bs=1M conv=sync,noerror iflag=fullblock | gzip >
 SUCCESS=$?
 DURATION=$SECONDS
 
-echo "____ IMAGING END $(date +%Y/%m/%d_%H:%M:%S) $(($DURATION / 60))m $(($DURATION % 60))s" | tee -a $DEST/$LOG
+echo "---- DONE imaging $(date +%Y/%m/%d_%H:%M:%S) ($(($DURATION / 60))m $(($DURATION % 60))s)" | tee -a $DEST/$LOG
 
 # Start services again that where shutdown before backup process
 startServices
@@ -120,9 +123,9 @@ startServices
 if [ $SUCCESS =  0 ];
 then
 		echo -e "${green}${bold}Imaging process completed! FILE: $OFILE${NC}${normal}" | tee -a $DEST/$LOG
-		echo "____ generating md5sum for $OFILE" | tee -a $DEST/$LOG
+		echo -e "${purple}${bold}generating md5sum for $OFILE...${NC}${normal}" | tee -a $DEST/$LOG
 		MD5SUM=`md5sum $OFILE`
-		echo "${green}${bold}Saving md5sum $MD5SUM to file${NC}${normal}" | tee -a $DEST/$LOG
+		echo -e "${green}${bold}Saving md5sum $MD5SUM${NC}${normal}" | tee -a $DEST/$LOG
 		echo $MD5SUM >> $OFILE.md5
 		exit 0
 else 
