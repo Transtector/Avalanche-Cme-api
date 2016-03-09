@@ -123,7 +123,7 @@ then
 		echo "____ generating md5sum for $OFILE" | tee -a $DEST/$LOG
 		MD5SUM=`md5sum $OFILE`
 		echo "${green}${bold}Saving md5sum $MD5SUM to file${NC}${normal}" | tee -a $DEST/$LOG
-		cat $MD5SUM >> $OFILE.md5
+		echo $MD5SUM >> $OFILE.md5
 		exit 0
 else 
 		# Else remove attempted image file
