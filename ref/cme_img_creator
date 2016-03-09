@@ -19,7 +19,7 @@
 # ======================== CHANGE THESE VALUES ========================
 
 function stopServices {
-	echo -e "${purple}${bold}Stopping services before backup${NC}${normal}" | tee -a $DEST/$LOG
+	echo -e "${purple}${bold}Stopping services before imaging${NC}${normal}" | tee -a $DEST/$LOG
 		service cme stop
 		service avahi-daemon stop
 		service netatalk stop
@@ -43,14 +43,20 @@ DEST=/data
 LOG=img_creator.log
 
 # Part number for the (released) firmware image
-PN=R950000
+PN=1500-002
 
-# Firmware revsion (major.minor.patch)
+# Revsion (major.minor.patch)
 REV=0.1.0
 
 # Image filename follows a specific convention:
-#		PartNumber-Revision-FWARE-CME.img.gz
-FILE=${PN}-Rev${REV}-FWARE-CME.img.gz
+#		1500-ABC-vX.Y.Z-SWARE-CME.img.gz
+#
+# 1500 : part number prefix for "software" category
+# ABC : 3-digit sequentially assigned part number (e.g., "002")
+# X.Y.Z : major.minor.patch software version string (see semver.org)
+# SWARE : human-readable subcategory (e.g., "FIRMWARE", "SOFTWARE", "DRIVER", etc.)
+# CME : human-readable product name or designation
+FILE=${PN}-v${REV}-SWARE-CME.img.gz
 
 # =====================================================================
 
@@ -82,23 +88,19 @@ if [ -f "$DEST/$LOG" ]; then
 	rm -f $DEST/$LOG
 fi
 
-
 echo -e "${green}${bold}Starting CME partition imaging process!${NC}${normal}" | tee -a $DEST/$LOG
-echo "____ IMAGING ON $(date +%Y/%m/%d_%H:%M:%S)" | tee -a $DEST/$LOG
-echo ""
-
 
 # Create a filename with datestamp for our current image
 OFILE="$DEST/$FILE"
 
-
 # First sync disks
 sync; sync
-
 
 # Shut down some services before starting
 stopServices
 
+echo "____ IMAGING BEGIN $(date +%Y/%m/%d_%H:%M:%S)" | tee -a $DEST/$LOG
+SECONDS=0
 
 # Begin imaging, should take about 45 minutes hour from 8Gb SD card to HDD
 echo -e "${green}${bold}Imaging and gzipping $SRC to $DEST ${NC}${normal}" | tee -a $DEST/$LOG
@@ -106,15 +108,22 @@ SDSIZE=`blockdev --getsize64 $SRC`;
 pv -tpreb $SRC -s $SDSIZE | dd  bs=1M conv=sync,noerror iflag=fullblock | gzip > $OFILE
 
 # Wait for DD to finish and catch result
-BACKUP_SUCCESS=$?
+SUCCESS=$?
+DURATION=$SECONDS
+
+echo "____ IMAGING END $(date +%Y/%m/%d_%H:%M:%S) $(($DURATION / 60))m $(($DURATION % 60))s" | tee -a $DEST/$LOG
 
 # Start services again that where shutdown before backup process
 startServices
 
-# If command has completed successfully, delete previous backups and exit
-if [ $BACKUP_SUCCESS =  0 ];
+# If command has completed successfully, create MD5 checksum and exit
+if [ $SUCCESS =  0 ];
 then
 		echo -e "${green}${bold}Imaging process completed! FILE: $OFILE${NC}${normal}" | tee -a $DEST/$LOG
+		echo "____ generating md5sum for $OFILE" | tee -a $DEST/$LOG
+		MD5SUM=`md5sum $OFILE`
+		echo "${green}${bold}Saving md5sum $MD5SUM to file${NC}${normal}" | tee -a $DEST/$LOG
+		cat $MD5SUM >> $OFILE.md5
 		exit 0
 else 
 		# Else remove attempted image file
