@@ -108,7 +108,7 @@ SECONDS=0
 # Begin imaging, should take about 45 minutes hour from 8Gb SD card to HDD
 echo -e "${green}${bold}Imaging and gzipping $SRC to $DEST ${NC}${normal}" | tee -a $DEST/$LOG
 SDSIZE=`blockdev --getsize64 $SRC`;
-pv -tpreb $SRC -s $SDSIZE | dd  bs=1M conv=sync,noerror iflag=fullblock | gzip > $OFILE
+pv $SRC -s $SDSIZE | dd  bs=1M conv=sync,noerror iflag=fullblock | gzip > $OFILE
 
 # Wait for DD to finish and catch result
 SUCCESS=$?
