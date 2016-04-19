@@ -108,18 +108,17 @@ CLOCK_DISPLAY_12HOUR_FORMAT = "h:mm:ss A"
 
 
 # CME Network configuration
-from .util.IpUtils import mac
-
-# default network settings - mirror changes in the deployed interfaces files
+# These settings are read from the /etc/network configuration.  On factory
+# resets, the network can (optionally) be reset as well.
 # (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
+from cme.util.IpUtils import mac, dhcp, address, netmask, gateway
 
 # just read the MAC
 MAC = mac()
 
-DHCP = False
-ADDRESS = '192.168.1.30'
-NETMASK = '255.255.255.0'
-GATEWAY = '192.168.1.1'
+DHCP = dhcp() # False
+ADDRESS = address() # 192.168.1.30
+NETMASK = netmask() # 255.255.255.0
+GATEWAY = gateway() # 192.168.1.1
 PRIMARY = '8.8.4.4'
 SECONDARY = '8.8.8.8'
-

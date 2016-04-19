@@ -1,8 +1,8 @@
 import os
-import logging
-import logging.handlers
+import logging, logging.handlers
 
 from flask import Flask
+
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
