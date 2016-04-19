@@ -75,12 +75,12 @@ def manage_network(network_settings):
 		# reset for dhcp
 		if use_dhcp:
 			logger.info("Setting network to DHCP configuration.")
-			os.system('sudo ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
+			os.system('ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
 
 		# reset for static
 		else:
 			logger.info("Setting network to static configuration.")
-			os.system('sudo ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
+			os.system('ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
 
 	# else dhcp settings match current state -
 	# check and update addresses if we're static
@@ -99,7 +99,7 @@ def manage_network(network_settings):
 			write_network_addresses(network_settings)
 
 		# restarts/reloads the network
-		os.system('sudo service networking restart')
+		os.system('systemctl restart networking')
 
 
 # write new addresses to /etc/network/interfaces_static

@@ -10,9 +10,15 @@ from .Switch import switch
 
 logger = logging.getLogger(__name__)
 
+def set_clock(newtime):
+	# use the system 'date' command to set it
+	# "%Y-%m-%dT%H:%M:%S.SSSSSS"
+	# TODO: parse/validate the format
+	os.system('date -s "{0}"'.format(newtime))
+
 def check_ntp():
-	cmd = subprocess.run(["sudo", "service", "ntp", "status"], stdout=subprocess.PIPE)
-	return cmd.stdout.decode().find('failed') == -1
+	cmd = subprocess.run(["systemctl", "status", "ntp"], stdout=subprocess.PIPE)
+	return cmd.stdout.decode().find('inactive') == -1
 
 # manage the NTP daemon and servers used in ntp.conf
 def manage_clock(clock_settings):
@@ -40,11 +46,13 @@ def manage_clock(clock_settings):
 
 		if use_ntp:
 			logger.info("Starting NTP service.")
-			os.system('sudo service ntp restart')
+			os.system('systemctl enable ntp')
+			os.system('systemctl start ntp')
 
 		else:
 			logger.info("Stopping NTP service.")
-			os.system('sudo service ntp stop')
+			os.system('systemctl stop ntp')
+			os.system('systemctl disable ntp')
 
 
 # update the current clock settings
