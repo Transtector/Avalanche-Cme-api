@@ -5,9 +5,6 @@ from flask import Flask
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
-from .util.ClockUtils import manage_clock
-from .util.IpUtils import manage_network
-
 # load application configuration from module
 app.config.from_object('config')
 
@@ -37,6 +34,9 @@ logger.addHandler(fh)
 
 # load settings which may override values in config
 from settings import settings
+
+from .util.ClockUtils import manage_clock
+from .util.IpUtils import manage_network
 
 # say something nice at startup
 logger.info("Avalanche ({0}) is rumbling...".format(app_name))
