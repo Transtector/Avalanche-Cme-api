@@ -32,7 +32,7 @@ def manage_clock(clock_settings):
 
 	# NTP init
 	# Note that ntp should NOT be setup in init.d to start automatically:
-	# > sudo update-rc.d -f ntp remove
+	# root@minibian:~# systemctl disable ntp
 	logger.debug("\n\tNTP\t\t\t(current)")
 	logger.debug("\t---------------------------------------------")
 	logger.debug("\tUSE NTP:\t{0}\t({1})".format(use_ntp, currently_ntp))
