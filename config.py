@@ -13,18 +13,20 @@ DEBUG = True
 
 HOSTNAME = platform.node()
 SYSTEM = platform.system()
-IS_CME = HOSTNAME == 'cme'
+IS_CME = HOSTNAME.startswith('cme') # cme.local
 
-APPROOT = os.path.abspath(os.getcwd()) # /home/pi/Cme
-DOCROOT = os.path.join(APPROOT, 'cme') # /home/pi/Cme/cme
-SNMPDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-snmp')) # /home/pi/Cme-snmp
-HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /home/pi/Cme-hw
+APPROOT = os.path.abspath(os.getcwd()) # /root/Cme
+DOCROOT = os.path.join(APPROOT, 'cme') # /root/Cme/cme
+SNMPDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-snmp')) # /root/Cme-snmp
+HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /root/Cme-hw
+
+USERDATA = os.path.abspath('/data') # Cme user data is stored here
 
 # uploads go to temp folder above app
-UPLOADS = os.path.abspath(os.path.join(APPROOT, '../tmp')) # /home/pi/tmp
+UPLOADS = os.path.abspath(os.path.join(USERDATA, 'tmp')) # /data/tmp
 
 # logging to files in parent foldr
-LOGDIR = os.path.abspath(os.path.join(APPROOT, '../log')) # /home/pi/log
+LOGDIR = os.path.abspath(os.path.join(USERDATA, 'log')) # /data/log
 LOGBYTES = 1024 * 10
 LOGCOUNT = 5
 
@@ -32,14 +34,8 @@ APPLOG = os.path.join(LOGDIR, 'cme.log')
 SERVERLOG = os.path.join(LOGDIR, 'server.log')
 ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 
-RESET = os.path.join(APPROOT, 'cme-reset')
-SETTINGS = os.path.join(APPROOT, 'settings.json')
+SETTINGS = os.path.join(USERDATA, 'settings.json')
 
-# If RESET_FILE exists delete it and the SETTINGS_FILE
-# so that the default values in config.py are used.
-if os.path.isfile(RESET):
-	os.remove(SETTINGS)
-	os.remove(RESET)
 
 # create uploads and log folders if they don't yet exist
 if not os.path.exists(UPLOADS):
@@ -51,8 +47,8 @@ if not os.path.exists(LOGDIR):
 
 # this for uploading files (ostensibly firmware files)
 # TODO: figure out size/extension for actual firmware files
-ALLOWED_EXTENSIONS = ['txt', 'pdf', 'png', 'jpg']
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16 MB
+ALLOWED_EXTENSIONS = ['tgz', 'tar.gz']
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024 #  16MB
 
 SESSION_COOKIE_NAME = 'cmeSession'
 SESSION_EXPIRATION = 86400 # 24 hours
@@ -86,6 +82,7 @@ TEMPERATURE_DISPLAY_UNITS = TemperatureUnits.CELSIUS
 TEMPERATURE_WARNING_TEMP = 65 # ºC
 TEMPERATURE_ALARM_TEMP = 80 # ºC
 
+
 # CME Clock configuration
 
 # lookup for clock display reference zone
@@ -96,7 +93,7 @@ class RelativeTo:
 	CmeLocal = 1 # display times relative to Cme's zone offset
 	Local = 2 # display times relative to the client zone
 
-# default NTP settings
+# default NTP settings are obtained from /etc/ntp.conf
 CLOCK_USE_NTP = True
 CLOCK_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
 CLOCK_ZONE_OFFSET = 0
@@ -111,10 +108,14 @@ CLOCK_DISPLAY_12HOUR_FORMAT = "h:mm:ss A"
 
 
 # CME Network configuration
+from .util.IpUtils import mac
 
 # default network settings - mirror changes in the deployed interfaces files
 # (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
-MAC = str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
+
+# just read the MAC
+MAC = mac()
+
 DHCP = False
 ADDRESS = '192.168.1.30'
 NETMASK = '255.255.255.0'
