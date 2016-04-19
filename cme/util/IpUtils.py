@@ -58,8 +58,8 @@ def manage_network(network_settings):
 
 	use_dhcp = network_settings['dhcp']
 
-	# get the app logger
-	logger = logging.getLogger(__name__)
+	# get the app root logger
+	logger = logging.getLogger()
 
 	logger.debug("\n\tNETWORKING\t\t\t(current)")
 	logger.debug("\t---------------------------------------------")
