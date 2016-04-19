@@ -7,6 +7,8 @@ import fcntl
 import struct
 import fileinput
 
+print("IpUtils logger for name: {0}".format(__name__))
+
 logger = logging.getLogger(__name__)
 
 # RPi uses only single network interface, 'eth0'

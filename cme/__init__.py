@@ -2,7 +2,6 @@ import os
 import logging, logging.handlers
 
 from flask import Flask
-
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
 
@@ -43,19 +42,18 @@ from settings import settings
 logger.info("Avalanche ({0}) is rumbling...".format(app_name))
 logger.debug("\tHOSTNAME:\t{0}".format(app.config['HOSTNAME']))
 logger.debug("\tPLATFORM:\t{0}".format(app.config['SYSTEM']))
-logger.debug("\tSERVER_HOST:\t{0}".format(app.config['SERVER_HOST']))
+logger.debug("\tSERVER_IP:\t{0}".format(app.config['ADDRESS']))
 logger.debug("\tSERVER_PORT:\t{0}".format(app.config['SERVER_PORT']))
 logger.debug("\tDEBUG:\t\t{0}".format(app.config['DEBUG']))
 logger.debug("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
 logger.debug("\tPUBLIC:\t\t{0}".format(app.static_folder))
 logger.debug("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
 
-if app.config['IS_CME']:
-	manage_clock(settings['clock'])
+# log network status
+manage_network(settings['network'])
 
-# Network init
-if app.config['IS_CME']:
-	manage_network(settings['network'])
+# log ntp/clock status
+manage_clock(settings['clock'])
 
 # import ui, api routes
 from .ui_routes import index
