@@ -105,7 +105,7 @@ stopServices
 echo "---- BEGIN imaging $(date +%Y/%m/%d_%H:%M:%S)" | tee -a $DEST/$LOG
 SECONDS=0
 
-# Begin imaging, should take about 45 minutes hour from 8Gb SD card to HDD
+# Begin imaging, should take about 45 minutes from 8Gb SD card to HDD
 echo -e "${green}${bold}Imaging and gzipping $SRC to $DEST ${NC}${normal}" | tee -a $DEST/$LOG
 SDSIZE=`blockdev --getsize64 $SRC`;
 pv $SRC -s $SDSIZE | dd  bs=1M conv=sync,noerror iflag=fullblock | gzip > $OFILE

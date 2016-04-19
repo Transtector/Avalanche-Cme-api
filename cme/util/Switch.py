@@ -1,6 +1,5 @@
-# This class provides the functionality we want. You only need to look at
-# this if you want to know how this works. It only needs to be defined
-# once, no need to muck around with its internals.
+# This class provides the functionality we want (i.e., a Python Javascript-like "switch" statement).
+# See example usage below.
 class switch(object):
     def __init__(self, value):
         self.value = value
