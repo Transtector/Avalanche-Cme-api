@@ -7,12 +7,6 @@ import fcntl
 import struct
 import fileinput
 
-logger = logging.getLogger(__name__)
-
-
-logger.debug("\n\tLoading IpUtils!")
-
-
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
 
@@ -63,6 +57,9 @@ def manage_network(network_settings):
 	currently_dhcp = dhcp()
 
 	use_dhcp = network_settings['dhcp']
+
+	# get the app logger
+	logger = logging.getLogger(__name__)
 
 	logger.debug("\n\tNETWORKING\t\t\t(current)")
 	logger.debug("\t---------------------------------------------")

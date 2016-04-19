@@ -53,7 +53,7 @@ logger.debug("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
 manage_network(settings['network'])
 
 # log ntp/clock status
-manage_clock(settings['clock'])
+#manage_clock(settings['clock'])
 
 # import ui, api routes
 from .ui_routes import index
