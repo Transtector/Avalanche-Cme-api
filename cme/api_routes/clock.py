@@ -6,13 +6,7 @@ from . import router, settings, request, UriParse
 from .auth import require_auth
 from .util import json_response, json_error
 from .status import timestamp
-from ..util.ClockUtils import refresh_time, manage_clock
-
-def set_clock(newtime):
-	# use the system 'date' command to set it
-	# "%Y-%m-%dT%H:%M:%S.SSSSSS"
-	# TODO: parse/validate the format
-	os.system('sudo date -s "{0}"'.format(newtime))
+from ..util.ClockUtils import refresh_time, manage_clock, set_clock
 
 
 @router.route('/config/clock/', methods=['GET', 'POST'])
