@@ -35,9 +35,6 @@ logger.addHandler(fh)
 # load settings which may override values in config
 from settings import settings
 
-from .util.ClockUtils import manage_clock
-from .util.IpUtils import manage_network
-
 # say something nice at startup
 logger.info("Avalanche ({0}) is rumbling...".format(app_name))
 logger.debug("\tHOSTNAME:\t{0}".format(app.config['HOSTNAME']))
@@ -49,11 +46,15 @@ logger.debug("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
 logger.debug("\tPUBLIC:\t\t{0}".format(app.static_folder))
 logger.debug("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
 
+
 # log network status
+from .util.IpUtils import manage_network
 manage_network(settings['network'])
 
 # log ntp/clock status
+#from .util.ClockUtils import manage_clock
 #manage_clock(settings['clock'])
+
 
 # import ui, api routes
 from .ui_routes import index
