@@ -82,7 +82,7 @@ var Actions = {
 			dispatchRequest('login');
 
 			return CmeAPI.login({ u: u, p: p }, function(data) {
-				AppDispatcher.dispatch({ actionType: Constants.SESSION, data: data });
+				AppDispatcher.dispatch({ actionType: Constants.SESSION, data: true });
 
 				dispatchRequest('config');
 				CmeAPI.config(null, function(data) {
