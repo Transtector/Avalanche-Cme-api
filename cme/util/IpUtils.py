@@ -59,15 +59,14 @@ def manage_network(network_settings):
 	use_dhcp = network_settings['dhcp']
 
 	# get the app root logger
-	logger = logging.getLogger()
+	logger = logging.getLogger('cme')
 
-	logger.debug("\n\tNETWORKING\t\t\t(current)")
-	logger.debug("\t---------------------------------------------")
-	logger.debug("\tMAC:\t\t{0}".format(network_settings['mac']))
-	logger.debug("\tDHCP:\t\t{0}\t\t({1})".format(network_settings['dhcp'], currently_dhcp))
-	logger.debug("\tIP:\t\t{0}\t({1})".format(network_settings['address'], address()))
-	logger.debug("\tMASK:\t\t{0}\t({1})".format(network_settings['netmask'], netmask()))
-	logger.debug("\tGATE:\t\t{0}\t({1})".format(network_settings['gateway'], gateway()))
+	logger.info("Network\t\tSetting\t(current)")
+	logger.info("\tMAC:\t\t{0}".format(network_settings['mac']))
+	logger.info("\tDHCP:\t\t{0}\t\t({1})".format(network_settings['dhcp'], currently_dhcp))
+	logger.info("\tIP:\t\t{0}\t({1})".format(network_settings['address'], address()))
+	logger.info("\tMASK:\t\t{0}\t({1})".format(network_settings['netmask'], netmask()))
+	logger.info("\tGATE:\t\t{0}\t({1})".format(network_settings['gateway'], gateway()))
 
 	# if settings say use DHCP and we're not
 	if use_dhcp != currently_dhcp:

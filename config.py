@@ -84,6 +84,15 @@ TEMPERATURE_ALARM_TEMP = 80 # ºC
 
 
 # CME Clock configuration
+# These settings are read from the /etc/network configuration.  On factory
+# resets, the network can (optionally) be reset as well.
+# (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
+from cme.util.ClockUtils import check_ntp, ntp_servers
+
+# default NTP settings are obtained from /etc/ntp.conf
+CLOCK_USE_NTP = check_ntp()
+CLOCK_NTP_SERVERS = ntp_servers()
+CLOCK_ZONE_OFFSET = 0
 
 # lookup for clock display reference zone
 # this is manually duplicated in client code,
@@ -93,10 +102,6 @@ class RelativeTo:
 	CmeLocal = 1 # display times relative to Cme's zone offset
 	Local = 2 # display times relative to the client zone
 
-# default NTP settings are obtained from /etc/ntp.conf
-CLOCK_USE_NTP = True
-CLOCK_NTP_SERVERS = ['0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org']
-CLOCK_ZONE_OFFSET = 0
 
 # clock display settings
 # see momentjs.org for valid display formats

@@ -8,15 +8,15 @@ import re
 from datetime import datetime, timedelta
 from .Switch import switch
 
-logger = logging.getLogger(__name__)
-
 def set_clock(newtime):
-	# use the system 'date' command to set it
-	# "%Y-%m-%dT%H:%M:%S.SSSSSS"
-	# TODO: parse/validate the format
+	''' use the system 'date' command to set it
+		format of newtime string: "%Y-%m-%dT%H:%M:%S.SSSSSS"
+		TODO: parse/validate the format
+	'''
 	os.system('date -s "{0}"'.format(newtime))
 
 def check_ntp():
+	''' Requests ntpd status from the system.  Returns True if ntp is currently being used. '''
 	cmd = subprocess.run(["systemctl", "status", "ntp"], stdout=subprocess.PIPE)
 	return cmd.stdout.decode().find('inactive') == -1
 
@@ -24,25 +24,26 @@ def check_ntp():
 def manage_clock(clock_settings):
 
 	update_ntp = False
-	currently_ntp = check_ntp()
-	current_servers = __read_ntp_servers()
+	current_ntp = check_ntp()
+	current_servers = ntp_servers()
 
-	use_ntp = clock_settings['ntp']
-	ntp_servers = clock_settings['servers']
+	new_use_ntp = clock_settings['ntp']
+	new_ntp_servers = clock_settings['servers']
 
 	# NTP init
 	# Note that ntp should NOT be setup in init.d to start automatically:
 	# root@minibian:~# systemctl disable ntp
-	logger.debug("\n\tNTP\t\t\t(current)")
-	logger.debug("\t---------------------------------------------")
-	logger.debug("\tUSE NTP:\t{0}\t({1})".format(use_ntp, currently_ntp))
-	print("\tNTP SERVERS:\t{0}\t({1})".format(ntp_servers, current_servers))
+	logger = logging.getLogger('cme')
 
-	if ntp_servers != current_servers:
+	logger.info("NTP\t\tSetting\t(current)")
+	logger.info("\tUSE NTP:\t{0}\t({1})".format(new_use_ntp, current_ntp))
+	logger.info("\tSERVERS:\t{0}\t({1})".format(new_ntp_servers, current_servers))
+
+	if new_ntp_servers != current_servers:
 		update_ntp = True
-		__write_ntp_servers(ntp_servers)
+		ntp_servers(new_ntp_servers)
 
-	if update_ntp or (use_ntp != currently_ntp):
+	if update_ntp or (new_use_ntp != current_ntp):
 
 		if use_ntp:
 			logger.info("Starting NTP service.")
@@ -55,8 +56,8 @@ def manage_clock(clock_settings):
 			os.system('systemctl disable ntp')
 
 
-# update the current clock settings
 def refresh_time(clock_settings):
+	''' Update the current clock settings with values from the system '''
 
 	# if useNTP, we'll update the NTP status
 	if clock_settings['ntp']:
@@ -66,14 +67,66 @@ def refresh_time(clock_settings):
 	else:
 		clock_settings['status'] = [ '-', '-' ]
 
-	# get NTPServers from /etc/ntp.conf beginning at line # CME current
-	clock_settings['servers'] = __read_ntp_servers()
+	# read ntp servers from /etc/ntp.conf
+	clock_settings['servers'] = ntp_servers()
 
 
-# Parse the ntpq output for NTP status
-# good referece here:
-# http://www.linuxjournal.com/article/6812
+def ntp_servers(new_servers=None):
+	''' 
+		Reads current NTP servers from /etc/ntp.conf.
+
+		If new_servers is not None, then ntp.conf will
+		be updated with the new servers.  ntp service restart
+		will be required to pick up the new servers.
+	'''
+	ntp_conf = "ntp.conf"
+	servers = new_servers or []
+	servers_added = False
+	writing = new_servers is not None
+
+	# the fileinput hijacks std.output, so the prints below go to the
+	# file, not the console.
+	with fileinput.input(files=(ntp_conf), inplace=writing) as f:
+		for line in f:
+			line = line.strip()
+
+			# read (and dup lines if writing) to "server" entry(ies)
+			if not line.startswith("server"):
+				if writing:
+					print(line)
+				continue
+
+			# insert new servers
+			if writing and not servers_added:
+				servers_added = True
+				for s in new_servers:
+					print("server {0} iburst".format(s))
+				print()
+
+			# append found servers if we're reading
+			if not writing:
+				# server line format (we want the address in the middle)
+				# server abc.def.123.100 iburst
+				servers.append(line.split()[1])
+
+	# EDGE CASE: We're updating the servers, but there were no current
+	# servers in the file (and thus no "server" lines), so we've reached
+	# the end of the file without adding our new_servers.  If we do
+	# actually have some new_servers, we'll add them now at the end of the file.
+	if writing and not servers_added:
+		with open(ntp_conf, "a") as f:
+			f.write('\n# NTP servers\n')
+			for s in new_servers:
+				f.write("server {0} iburst\n".format(s))
+			f.write('\n')
+
+	return servers
+
+
 def __parse_ntpq(ntpq_result):
+	''' Parse the ntpq output for NTP status
+		good referece:	http://www.linuxjournal.com/article/6812
+	'''
 
 	# remove header lines
 	start = ntpq_result.find("===\n")
@@ -188,60 +241,3 @@ def __lowestSet(int_type):
 	return(lowBit)
 
 
-
-# read current NTP servers from /etc/ntp.conf
-def __read_ntp_servers():
-	ntp_conf = "/etc/ntp.conf"
-	marker = "# CME current"
-	marker_found = False
-	servers = []
-
-	for line in fileinput.input(ntp_conf):
-		line = line.strip()
-		marker_found = marker_found or line.startswith(marker)
-
-		# read to marker
-		if not marker_found or line.startswith(marker):
-			continue
-
-		# break at next empty or comment line
-		if not line or line.startswith ("#"):
-			break
-
-		# server line format (we want the address in the middle)
-		# server abc.def.123.100 iburst
-		servers.append(line.split()[1])
-
-	fileinput.close()
-
-	return servers
-
-
-# write new servers to /etc/ntp.conf
-def __write_ntp_servers(servers):
-	ntp_conf = "/etc/ntp.conf"
-	marker = "# CME current"
-	marker_found = False
-	servers_added = False
-
-	for line in fileinput.input(ntp_conf, inplace=True):
-		line = line.rstrip()
-		marker_found = marker_found or line.startswith(marker)
-
-		# dup lines until marker
-		if not marker_found or line.startswith(marker):
-			print(line)
-			continue
-
-		# insert our servers
-		if not servers_added:
-			servers_added = True
-			for s in servers:
-				print("server {0} iburst".format(s))
-			print()
-
-		# remove existing servers
-		if not line.strip().startswith('server'):
-			print(line)
-
-	fileinput.close()

@@ -37,14 +37,14 @@ from settings import settings
 
 # say something nice at startup
 logger.info("Avalanche ({0}) is rumbling...".format(app_name))
-logger.debug("\tHOSTNAME:\t{0}".format(app.config['HOSTNAME']))
-logger.debug("\tPLATFORM:\t{0}".format(app.config['SYSTEM']))
-logger.debug("\tSERVER_IP:\t{0}".format(app.config['ADDRESS']))
-logger.debug("\tSERVER_PORT:\t{0}".format(app.config['SERVER_PORT']))
-logger.debug("\tDEBUG:\t\t{0}".format(app.config['DEBUG']))
-logger.debug("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
-logger.debug("\tPUBLIC:\t\t{0}".format(app.static_folder))
-logger.debug("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
+logger.info("\tHOSTNAME:\t{0}".format(app.config['HOSTNAME']))
+logger.info("\tPLATFORM:\t{0}".format(app.config['SYSTEM']))
+logger.info("\tSERVER_IP:\t{0}".format(app.config['ADDRESS']))
+logger.info("\tSERVER_PORT:\t{0}".format(app.config['SERVER_PORT']))
+logger.info("\tDEBUG:\t\t{0}".format(app.config['DEBUG']))
+logger.info("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
+logger.info("\tPUBLIC:\t\t{0}".format(app.static_folder))
+logger.info("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
 
 
 # log network status
@@ -52,8 +52,8 @@ from .util.IpUtils import manage_network
 manage_network(settings['network'])
 
 # log ntp/clock status
-#from .util.ClockUtils import manage_clock
-#manage_clock(settings['clock'])
+from .util.ClockUtils import manage_clock
+manage_clock(settings['clock'])
 
 
 # import ui, api routes
