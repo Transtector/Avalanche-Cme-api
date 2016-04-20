@@ -6,8 +6,7 @@ from .auth import require_auth
 from .util import json_response, json_error
 from ..util.IpUtils import manage_network
 
-import time
-import threading
+import time, threading
 
 @router.route('/config/network/', methods=['GET', 'POST'])
 @require_auth
@@ -70,6 +69,5 @@ def network_general():
 	return json_response({ item: settings['network'][item] })
 
 def delay_manage_network(delay=5):
-	print("Network management in {0} seconds...".format(delay))
 	time.sleep(delay)
 	manage_network(settings['network'])

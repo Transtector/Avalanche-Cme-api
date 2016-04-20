@@ -49,6 +49,13 @@ def gateway():
 			return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
 
 
+def set_dhcp(on=True):
+	if on:
+		os.system('ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
+	else:
+		os.system('ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
+
+
 # looks at network settings compared with current network
 # and reconfigures and reloads the network if different
 def manage_network(network_settings):
@@ -75,12 +82,12 @@ def manage_network(network_settings):
 		# reset for dhcp
 		if use_dhcp:
 			logger.info("Setting network to DHCP configuration.")
-			os.system('ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
+			set_dhcp(True)
 
 		# reset for static
 		else:
 			logger.info("Setting network to static configuration.")
-			os.system('ln -s -f /etc/network/interfaces_static /etc/network/interfaces')
+			set_dhcp(False)
 
 	# else dhcp settings match current state -
 	# check and update addresses if we're static
@@ -117,6 +124,7 @@ def write_network_addresses(net_settings):
 		'gateway': net_settings['gateway']
 	}
 
+	# fileinput uses the print functions to write to the config file
 	for line in fileinput.input(network_conf, inplace=True):
 		line = line.rstrip()
 		found = found or line.startswith(marker)

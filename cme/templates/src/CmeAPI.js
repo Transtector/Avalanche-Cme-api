@@ -64,18 +64,21 @@ function configItemToUrl(item) {
 
 var CmeAPI = {
 
-	factoryReset: function(success, failure) {
+	reset: function(success, failure, reset_network, reset_clock) {
 
 		function onError(jqXHR, textStatus, errorThrown) {
 			failure("Error performing factory reset:\nstatus: " + jqXHR.status + " - " + textStatus);
 		}
 
 		return $.ajax({
-			url: API.config + 'factoryReset',
+			type: 'POST',
+			url: API.config + 'reset',
+			data: JSON.stringify({ reset_network: reset_network, reset_clock: reset_clock }),
+			contentType: 'application/json; charset=UTF-8',			
 			dataType: 'json',
 			success: function(data, textStatus, jqXHR) {
 				if (jqXHR.status !== 200) {
-					debug('CMEAPI.factoryReset error: ', data);
+					debug('CMEAPI.reset error: ', data);
 					onError(jqXHR, textStatus, data);
 				} else {
 					success();

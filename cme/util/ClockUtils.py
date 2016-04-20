@@ -79,7 +79,7 @@ def ntp_servers(new_servers=None):
 		be updated with the new servers.  ntp service restart
 		will be required to pick up the new servers.
 	'''
-	ntp_conf = "ntp.conf"
+	ntp_conf = "/etc/ntp.conf"
 	servers = new_servers or []
 	servers_added = False
 	writing = new_servers is not None
