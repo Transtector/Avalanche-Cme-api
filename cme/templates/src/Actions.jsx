@@ -38,7 +38,7 @@ function dispatchRequest(action) {
 var Actions = {
 
 	device: function() {
-		dispatchRequest('reading device');
+		dispatchRequest('device');
 		return CmeAPI.device(function(data) {
 			AppDispatcher.dispatch({ actionType: Constants.DEVICE, data: data });
 		}, onErrors);
@@ -65,9 +65,10 @@ var Actions = {
 	// configuration.  On success of that call, the CONFIG state is updated.  In this
 	// mode, errors are reported as normal (i.e., through the onErrors callback).
 	login: function(u, p) {
-		dispatchRequest('login');
 
 		if (arguments.length == 0) {
+
+			dispatchRequest('config');
 
 			return CmeAPI.config(null, function(data) {
 				if (data.config) {
@@ -78,8 +79,12 @@ var Actions = {
 		
 		} else {
 
+			dispatchRequest('login');
+
 			return CmeAPI.login({ u: u, p: p }, function(data) {
 				AppDispatcher.dispatch({ actionType: Constants.SESSION, data: data });
+
+				dispatchRequest('config');
 				CmeAPI.config(null, function(data) {
 					AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
 				}, onErrors);
@@ -92,9 +97,9 @@ var Actions = {
 		AppDispatcher.dispatch({ actionType: Constants.SESSION, data: false });
 	},
 
-	factoryReset: function() {
-		dispatchRequest("factory reset");
-		CmeAPI.factoryReset(Actions.logout, onErrors);
+	reset: function() {
+		dispatchRequest("reset");
+		CmeAPI.reset(Actions.logout, onErrors);
 	},
 
 	profile: function(u, p, success) {
