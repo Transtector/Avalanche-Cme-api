@@ -45,7 +45,7 @@ def manage_clock(clock_settings):
 
 	if update_ntp or (new_use_ntp != current_ntp):
 
-		if use_ntp:
+		if new_use_ntp:
 			logger.info("Starting NTP service.")
 			os.system('systemctl enable ntp')
 			os.system('systemctl start ntp')

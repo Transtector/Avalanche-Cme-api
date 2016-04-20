@@ -100,7 +100,7 @@ var ConfigPanel = React.createClass({
 
 	_factoryReset: function() {
 		if (confirm("CME configuration will be reset to factory defaults.\n\nOk to continue?\n\n"))
-			Actions.factoryReset();
+			Actions.reset();
 	}
 });
 
