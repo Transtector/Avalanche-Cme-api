@@ -1,14 +1,10 @@
 # api routes
 
 from flask import Blueprint, Response, request, json, send_from_directory
-
 from werkzeug import secure_filename
 
-from itsdangerous import (TimedJSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired)
-
-from cme import app, settings
-from cme.util import UriParse
+from .. import app, settings
+from ..util import UriParse
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)

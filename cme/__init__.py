@@ -57,11 +57,11 @@ manage_clock(settings['clock'])
 
 
 # import ui, api routes
-from .ui_routes import index
-import cme.api_routes as api
+from . import ui_routes as ui
+from . import api_routes as api
 
 # register route blueprints
-app.register_blueprint(index.router)
+app.register_blueprint(ui.router)
 app.register_blueprint(api.router, url_prefix='/api')
 
 # main entry only for dev_mode Flask built-in server

@@ -1,7 +1,8 @@
 
-from . import settings, request, Response, json, app, Serializer
-
 from datetime import datetime, timedelta
+from . import app, settings, request, Response, json
+from ..util.Auth import Serializer
+
 
 # JSON repsonse wrapper w/session cookie support
 def json_response(obj, force_session=False):

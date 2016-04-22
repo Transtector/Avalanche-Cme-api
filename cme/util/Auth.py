@@ -1,5 +1,8 @@
 from functools import wraps
-from . import app, Response, request, json, Serializer
+from .. import app
+from flask import Response, request, json
+from itsdangerous import (TimedJSONWebSignatureSerializer
+						  as Serializer, BadSignature, SignatureExpired)
 
 # access denied
 def access_denied(message='Access denied'):
