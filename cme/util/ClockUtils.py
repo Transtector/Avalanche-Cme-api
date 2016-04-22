@@ -35,7 +35,7 @@ def manage_clock(clock_settings):
 	# root@minibian:~# systemctl disable ntp
 	logger = logging.getLogger('cme')
 
-	logger.info("NTP\t\tSetting\t(current)")
+	logger.info("NTP\t\t\tSetting\t(current)")
 	logger.info("\tUSE NTP:\t{0}\t({1})".format(new_use_ntp, current_ntp))
 	logger.info("\tSERVERS:\t{0}\t({1})".format(new_ntp_servers, current_servers))
 

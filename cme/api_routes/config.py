@@ -117,6 +117,21 @@ def reset():
 	return json_response(None)
 
 
+@router.route('/config/logs', methods=['GET'])
+@require_auth
+def logs():
+	''' Returns the requested log file and optionally clears it.
+	'''
+
+	csv = """"REVIEW_DATE","AUTHOR","ISBN","DISCOUNTED_PRICE"
+	"1985/01/21","Douglas Adams",0345391802,5.95
+	"1990/01/12","Douglas Hofstadter",0465026567,9.95
+	"1998/07/15","Timothy ""The Parser"" Campbell",0968411304,18.99
+	"1999/12/03","Richard Friedman",0060630353,5.95
+	"2004/10/04","Randel Helms",0879755725,4.50"""
+
+	return csv
+
 
 # check for firmware update file presence
 def __refresh_device():
@@ -183,7 +198,6 @@ def __reset(delay=5, reset_network=False, reset_clock=False):
 
 	# reboot system
 	os.system("reboot")
-	
 
 
 # check allowed filename extensions
