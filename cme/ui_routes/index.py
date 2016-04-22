@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template
 
+from .util.Auth import require_auth
+
 router = Blueprint('uiroutes', __name__)
 
 # APIError wraps a simple error object

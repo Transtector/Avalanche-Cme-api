@@ -3,9 +3,9 @@
 # given matching username and passhash
 
 from . import app, settings, router, request
-from .auth import require_auth
 from .util import json_response
 from .status import timestamp
+from ..util.Auth import require_auth
 
 @router.route('/login')
 def login():

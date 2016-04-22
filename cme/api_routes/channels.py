@@ -1,13 +1,11 @@
 # CME sensor/control channels API
 
-from . import settings, router, request, UriParse
-
-from .auth import require_auth
-from .util import json_response, json_error
-
 from datetime import datetime, timezone
 import subprocess
 
+from . import settings, router, request, UriParse
+from .util import json_response, json_error
+from ..util.Auth import require_auth
 from .Channel import Channel
 
 # hw status held in memcached object

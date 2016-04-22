@@ -1,12 +1,13 @@
 # CME device and configuration API route handlers
-from . import app, router, settings, request, UriParse, secure_filename
 
-from .auth import require_auth
+import os, time, threading, logging
+
+from . import app, router, settings, request, UriParse, secure_filename
 from .util import json_response, json_error, json_filter
+from ..util.Auth import require_auth
 from ..util.IpUtils import set_dhcp, write_network_addresses
 from ..util.ClockUtils import refresh_time, ntp_servers
 
-import os, time, threading, logging
 
 # Read-only device settings - NOT password protected
 # These are saved in settings, but under the "__device" key

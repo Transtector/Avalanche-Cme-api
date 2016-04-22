@@ -2,9 +2,8 @@
 
 import os.path as path
 from . import router, app, settings, request, UriParse, secure_filename
-
-from .auth import require_auth
 from .util import json_response, json_error, json_filter
+from ..util.Auth import require_auth
 from ..util.FileUtils import refresh_device
 
 # Read-only device settings - NOT password protected

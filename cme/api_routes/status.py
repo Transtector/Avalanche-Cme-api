@@ -1,11 +1,9 @@
 # root level CME API
 
-from . import settings, router
-
-from .auth import require_auth
-from .util import json_response, json_error
-
 from datetime import datetime, timezone
+from . import settings, router
+from .util import json_response, json_error
+from ..util.Auth import require_auth
 
 def timestamp():
 	return datetime.utcnow().isoformat() + 'Z'

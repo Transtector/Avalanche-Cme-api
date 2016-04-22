@@ -2,10 +2,9 @@
 import os
 
 from . import router, settings, request, UriParse
-
-from .auth import require_auth
 from .util import json_response, json_error
 from .status import timestamp
+from ..util.Auth import require_auth
 from ..util.ClockUtils import refresh_time, manage_clock, set_clock
 
 

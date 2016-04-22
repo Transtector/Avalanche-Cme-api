@@ -1,12 +1,11 @@
 # CME network interface configuration routes
+import time, threading
 
 from . import router, settings, request, UriParse
-
-from .auth import require_auth
 from .util import json_response, json_error
+from ..util.Auth import require_auth
 from ..util.IpUtils import manage_network
 
-import time, threading
 
 @router.route('/config/network/', methods=['GET', 'POST'])
 @require_auth
