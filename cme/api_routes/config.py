@@ -101,16 +101,16 @@ def config():
 	return json_response({ 'config': json_filter(settings.items()) })
 
 
-@router.route('/config/reset', methods=['POST'])
+@router.route('/config/reset', methods=['GET'])
 @require_auth
 def reset():
 
-	reset_network = request.get_json()['reset_network']
-	reset_clock = request.get_json()['reset_clock']
+	reset_network = request.args.get('reset_network')
+	reset_clock = request.args.get('reset_clock')
 	
 	# Factory reset deletes the settings.json file and performs a 
 	# reboot.
-	t = threading.Thread(target=__reset, args=(5, False, False, ))
+	t = threading.Thread(target=__reset, args=(5, reset_network, reset_clock, ))
 	t.setDaemon(True)
 	t.start()
 
@@ -122,16 +122,14 @@ def reset():
 @require_auth
 def logs():
 	''' Returns the requested log file and optionally clears it.
+
+		If request made without parameters, just returns a list of
+		the log files available.
 	'''
 
-	csv = """"REVIEW_DATE","AUTHOR","ISBN","DISCOUNTED_PRICE"
-	"1985/01/21","Douglas Adams",0345391802,5.95
-	"1990/01/12","Douglas Hofstadter",0465026567,9.95
-	"1998/07/15","Timothy ""The Parser"" Campbell",0968411304,18.99
-	"1999/12/03","Richard Friedman",0060630353,5.95
-	"2004/10/04","Randel Helms",0879755725,4.50"""
+	logs = [f for f in os.listdir(app.config['LOGDIR']) if os.path.isfile(f)]
 
-	return csv
+	return json_response(logs)
 
 
 # check for firmware update file presence

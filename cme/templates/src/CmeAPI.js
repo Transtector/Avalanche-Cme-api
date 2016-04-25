@@ -71,10 +71,8 @@ var CmeAPI = {
 		}
 
 		return $.ajax({
-			type: 'POST',
 			url: API.config + 'reset',
 			data: JSON.stringify({ reset_network: reset_network, reset_clock: reset_clock }),
-			contentType: 'application/json; charset=UTF-8',			
 			dataType: 'json',
 			success: function(data, textStatus, jqXHR) {
 				if (jqXHR.status !== 200) {
