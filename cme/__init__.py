@@ -55,6 +55,11 @@ manage_network(settings['network'])
 from .util.ClockUtils import manage_clock
 manage_clock(settings['clock'])
 
+# function decorator for routes that require authorization (i.e., login)
+from .util.Auth import require_auth
+
+# function to parse URI's easily
+from .util.UriParse import path_parse
 
 # import ui, api routes
 from . import ui_routes as ui
