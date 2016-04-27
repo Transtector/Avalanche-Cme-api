@@ -2,10 +2,8 @@
 # Provide access to API session token (cookie)
 # given matching username and passhash
 
-from . import app, settings, router, request
-from .util import json_response
+from . import settings, router, request, require_auth, json_response
 from .status import timestamp
-from ..util.Auth import require_auth
 
 @router.route('/login')
 def login():

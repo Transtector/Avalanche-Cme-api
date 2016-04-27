@@ -1,9 +1,7 @@
 # CME temperature configuration routes
 
-from . import router, settings, request, UriParse
-from .util import json_response, json_error
-from ..util.Auth import require_auth
-from ..util.ClockUtils import refresh_time, manage_clock
+from . import router, settings, request, path_parse, json_response, json_error, require_auth
+
 
 @router.route('/config/temperature/', methods=['GET', 'POST'])
 @require_auth
@@ -26,7 +24,7 @@ def temperature_config():
 @require_auth
 def temp_displayUnits_config():
 	# parse out the setting item (last element of request path)
-	item = UriParse.path_parse(request.path)[-1]
+	item = path_parse(request.path)[-1]
 	
 	if request.method == 'POST':
 		newunits = request.get_json()[item]

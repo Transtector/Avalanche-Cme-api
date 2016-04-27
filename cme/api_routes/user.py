@@ -1,8 +1,6 @@
 # CME user profile
 
-from . import router, settings, request, UriParse
-from .util import json_response, json_error
-from ..util.Auth import require_auth
+from . import router, settings, request, json_response, json_error, require_auth
 
 @router.route('/user/', methods=['POST'])
 @require_auth

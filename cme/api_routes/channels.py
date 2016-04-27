@@ -1,21 +1,16 @@
 # CME sensor/control channels API
 
 from datetime import datetime, timezone
-import subprocess
+import subprocess, json
+import memcache
 
-from . import settings, router, request, UriParse
-from .util import json_response, json_error
-from ..util.Auth import require_auth
+from . import settings, router, request, path_parse, json_response, json_error, require_auth
 from .Channel import Channel
-
-# hw status held in memcached object
-import memcache, json
 
 # Note you can use the memcache server on another machine
 # if you allow access.  Comment the approppriate line in
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
-
 mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 
 def get_request_param(key):
@@ -129,7 +124,7 @@ def channels():
 	return json_response(status(-1))
 
 
-@router.route('/channels')
+@router.route('/channels/')
 @require_auth
 def channels_list():
 	return json_response({ 'channels': json.loads(mc.get('channels') or '[]') })
@@ -151,7 +146,7 @@ def channel(ch_index):
 		return json_error('Channel not found', 404)
 
 	# parse out the item name (last element of request path)
-	segments = UriParse.path_parse(request.path)
+	segments = path_parse(request.path)
 	item = segments[-1].lower()
 
 	# update name or description (or both) from POST data
@@ -195,7 +190,7 @@ def sensor_control(ch_index, sc_index):
 		return json_error('Channel not found', 404)
 
 	# parse out the item (name, state) and the item type (sensor or control)
-	segments = UriParse.path_parse(request.path)
+	segments = path_parse(request.path)
 	item = segments[-1].lower()
 
 	if item == 'name' or item == 'state' or item == 'data':

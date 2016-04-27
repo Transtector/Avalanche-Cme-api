@@ -1,26 +1,26 @@
 # root level CME API
 
 from datetime import datetime, timezone
-from . import settings, router
-from .util import json_response, json_error
-from ..util.Auth import require_auth
+from . import settings, router, json_response, json_error, require_auth
 
 def timestamp():
+	''' Raw function to get current CME date/time in UTC and ISO 8601 format.
+	'''
 	return datetime.utcnow().isoformat() + 'Z'
 
-# CME clock (datetime) request
+
 @router.route('/clock')
 @require_auth
 def clock():
+	''' CME date/time requuest.
+	'''
 	return json_response({ 'clock': timestamp() })
 
-# CME CPU temperature request
 @router.route('/temperature')
 @require_auth
 def temperature():
-
-	# Try to read temperature (could fail if not on RPi)
-	# temp in millidegrees C
+	''' Try to read temperature (could fail if not on RPi) millidegrees C.
+	'''
 	try:
 		temp_C = int(open('/sys/class/thermal/thermal_zone0/temp').read()) / 1e3
 	except:

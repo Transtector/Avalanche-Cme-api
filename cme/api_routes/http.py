@@ -1,8 +1,6 @@
 # CME http (web server) configuration handlers
 
-from . import router, settings, request
-from .util import json_response, json_error
-from ..util.Auth import require_auth
+from . import router, settings, request, json_response, json_error, require_auth
 
 
 @router.route('/config/http/', methods=['GET', 'POST'])

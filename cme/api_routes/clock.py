@@ -1,10 +1,8 @@
 # CME clock configuration routes
 import os
 
-from . import router, settings, request, UriParse
-from .util import json_response, json_error
+from . import router, settings, request, path_parse, json_response, json_error, require_auth
 from .status import timestamp
-from ..util.Auth import require_auth
 from ..util.ClockUtils import refresh_time, manage_clock, set_clock
 
 
@@ -68,7 +66,7 @@ def ntp_status():
 @require_auth
 def clock_display():
 	# parse out the setting item (last element of request path)
-	item = UriParse.path_parse(request.path)[-1]
+	item = path_parse(request.path)[-1]
 
 	if request.method == 'POST':
 		clock = settings['clock']

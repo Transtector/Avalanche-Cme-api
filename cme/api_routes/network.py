@@ -1,9 +1,7 @@
 # CME network interface configuration routes
 import time, threading
 
-from . import router, settings, request, UriParse
-from .util import json_response, json_error
-from ..util.Auth import require_auth
+from . import router, settings, request, path_parse, json_response, json_error, require_auth
 from ..util.IpUtils import manage_network
 
 
@@ -50,7 +48,7 @@ def mac():
 @require_auth
 def network_general():
 	# parse out the setting item (last element of request path)
-	segments = UriParse.path_parse(request.path)
+	segments = path_parse(request.path)
 	item = segments[-1]
 
 	if request.method == 'POST':

@@ -1,8 +1,6 @@
 # Handle general and support configuration fields
 
-from . import router, settings, request, UriParse
-from .util import json_response, json_error
-from ..util.Auth import require_auth
+from . import router, settings, request, path_parse, json_response, json_error, require_auth
 
 # These routes handle reading and updating the general and support fields
 @router.route('/config/general/', methods=['GET', 'POST'])
@@ -16,7 +14,7 @@ from ..util.Auth import require_auth
 @require_auth
 def generic_config_handler():
 	# parse out the setting name (last element of request path)
-	segments = UriParse.path_parse(request.path)
+	segments = path_parse(request.path)
 	group = segments[-2]
 	item = segments[-1]
 
