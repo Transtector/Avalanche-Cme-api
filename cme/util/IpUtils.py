@@ -1,4 +1,5 @@
 import os
+import platform
 import logging
 import subprocess
 import uuid
@@ -7,24 +8,41 @@ import fcntl
 import struct
 import fileinput
 
+from . import is_a_cme
+
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
 
-# return network interface MAC address
-# note - only works if single interface
+
 def mac():
+	''' Return the network interface MAC address.
+	
+		NOTE - only works if there's a single addressed interface.
+	'''
 	return str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
 
 
-# Check the content of the file pointed at by the symbolic link /etc/network/interfaces.
-# If it contains 'dhcp' then assume the interface is handled by the dhclient
 def dhcp():
+	''' Check the content of the file pointed at by the symbolic link /etc/network/interfaces.
+		If it contains 'dhcp' then assume the interface is handled by the dhclient.
+
+		If not a cme module, this function always returns True.
+	'''
+	if not is_a_cme():
+		return True
+
 	cmd = subprocess.run(["cat", "/etc/network/interfaces"], stdout=subprocess.PIPE)
 	return cmd.stdout.decode().find('dhcp') > -1
 
 
-# Return the current eth0 interface ip address
 def address():
+	''' Return the current eth0 interface ip address.
+
+		If not a cme module, this function always returns '127.0.0.30'.
+	'''
+	if not is_a_cme():
+		return '127.0.0.30'
+
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	ifreq = struct.pack('16sH14s', iface, socket.AF_INET, b'\x00'*14)
 
@@ -35,11 +53,24 @@ def address():
 
 
 def netmask():
+	''' Return the current netmask.
+
+		if not a cme device, this function always returns '255.255.255.0'.
+	'''
+	if not is_a_cme():
+		return '255.255.255.0'
+
 	return socket.inet_ntoa(fcntl.ioctl(socket.socket(socket.AF_INET, socket.SOCK_DGRAM), 35099, struct.pack('256s', iface))[20:24])
 
 
 def gateway():
-	'''Read the default gateway directly from /proc.'''
+	''' Read the default gateway directly from /proc.
+
+		If not a cme module, this function always returns '127.0.0.1'.
+	'''
+	if not is_a_cme():
+		return '127.0.0.1'
+
 	with open("/proc/net/route") as fh:
 		for line in fh:
 			fields = line.strip().split()
@@ -50,6 +81,15 @@ def gateway():
 
 
 def set_dhcp(on=True):
+	''' Sets the network interface with (or without) DHCP.  This function
+		only sets the configuration.  A network restart or a full reboot
+		is necessary for the change to occur.
+
+		If not a cme device, this function does nothing.
+	'''
+	if not is_a_cme():
+		return
+
 	if on:
 		os.system('ln -s -f /etc/network/interfaces_dhcp /etc/network/interfaces')
 	else:
@@ -74,6 +114,10 @@ def manage_network(network_settings):
 	logger.info("\tIP:\t\t{0}\t({1})".format(network_settings['address'], address()))
 	logger.info("\tMASK:\t\t{0}\t({1})".format(network_settings['netmask'], netmask()))
 	logger.info("\tGATE:\t\t{0}\t({1})".format(network_settings['gateway'], gateway()))
+
+	if not is_a_cme():
+		logger.info("\tWARNING: Not a recognized CME platform - no actual changes will be made!")
+		return
 
 	# if settings say use DHCP and we're not
 	if use_dhcp != currently_dhcp:
@@ -109,8 +153,14 @@ def manage_network(network_settings):
 		os.system('systemctl restart networking')
 
 
-# write new addresses to /etc/network/interfaces_static
 def write_network_addresses(net_settings):
+	''' Updates the static network addresses (/etc/network/interfaces_static) with
+		the settings passed in.
+
+		If not a cme device, this function does nothing.
+	'''
+	if not is_a_cme():
+		return
 
 	network_conf = '/etc/network/interfaces_static'
 	marker = "iface eth0 inet static"

@@ -8,21 +8,40 @@ import re
 from datetime import datetime, timedelta
 from .Switch import switch
 
+from . import is_a_cme
+
 def set_clock(newtime):
 	''' use the system 'date' command to set it
 		format of newtime string: "%Y-%m-%dT%H:%M:%S.SSSSSS"
+		
 		TODO: parse/validate the format
+
+		This function does nothing if not a cme device.
 	'''
+	if not is_a_cme():
+		return
+
 	os.system('date -s "{0}"'.format(newtime))
 
 def check_ntp():
-	''' Requests ntpd status from the system.  Returns True if ntp is currently being used. '''
+	''' Requests ntpd status from the system.  
+
+		Returns True if ntp is currently being used. 
+
+		If not a cme device, this function always returns True.
+	'''
+	if not is_a_cme():
+		return True
+
 	cmd = subprocess.run(["systemctl", "status", "ntp"], stdout=subprocess.PIPE)
 	return cmd.stdout.decode().find('inactive') == -1
 
-# manage the NTP daemon and servers used in ntp.conf
-def manage_clock(clock_settings):
 
+def manage_clock(clock_settings):
+	''' Manage the NTP daemon and servers used in ntp.conf.
+
+		Function does nothing if not a cme device.
+	''' 
 	update_ntp = False
 	current_ntp = check_ntp()
 	current_servers = ntp_servers()
@@ -38,6 +57,10 @@ def manage_clock(clock_settings):
 	logger.info("NTP\t\t\tSetting\t(current)")
 	logger.info("\tUSE NTP:\t{0}\t({1})".format(new_use_ntp, current_ntp))
 	logger.info("\tSERVERS:\t{0}\t({1})".format(new_ntp_servers, current_servers))
+
+	if not is_a_cme():
+		logger.info("\tWARNING: Not a recognized CME platform - no actual changes will be made!")
+		return
 
 	if new_ntp_servers != current_servers:
 		update_ntp = True
@@ -57,10 +80,12 @@ def manage_clock(clock_settings):
 
 
 def refresh_time(clock_settings):
-	''' Update the current clock settings with values from the system '''
+	''' Update the current clock settings with values from the system.
 
+		Does not update settings if not a cme device.
+	'''
 	# if useNTP, we'll update the NTP status
-	if clock_settings['ntp']:
+	if clock_settings['ntp'] and is_a_cme():
 		cmd = subprocess.run(["ntpq", "-pn"], stdout=subprocess.PIPE)
 		last_request, last_success = __parse_ntpq(cmd.stdout.decode())
 		clock_settings['status'] = [ last_request, last_success ]
@@ -78,11 +103,13 @@ def ntp_servers(new_servers=None):
 		If new_servers is not None, then ntp.conf will
 		be updated with the new servers.  ntp service restart
 		will be required to pick up the new servers.
+
+		No changes are made if not a cme device.
 	'''
 	ntp_conf = "/etc/ntp.conf"
 	servers = new_servers or []
 	servers_added = False
-	writing = new_servers is not None
+	writing = new_servers is not None and is_a_cme()
 
 	# the fileinput hijacks std.output, so the prints below go to the
 	# file, not the console.
