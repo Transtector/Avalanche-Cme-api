@@ -13,7 +13,6 @@ DEBUG = True
 
 HOSTNAME = platform.node()
 SYSTEM = platform.uname()
-IS_CME = HOSTNAME.startswith('cme') # cme.local
 
 APPROOT = os.path.abspath(os.getcwd()) # /root/Cme
 DOCROOT = os.path.join(APPROOT, 'cme') # /root/Cme/cme
