@@ -2,7 +2,8 @@
 
 import os, time, threading, logging
 
-from . import app, router, settings, request, json_response, json_error, json_filter, require_auth
+from . import (app, router, settings, request, json_response, 
+	json_error, json_filter, require_auth, refresh_device)
 from ..util.IpUtils import set_dhcp, write_network_addresses
 from ..util.ClockUtils import refresh_time, ntp_servers
 
@@ -14,7 +15,7 @@ def config():
 	if request.method == 'POST':
 		return json_error([ 'Not implemented' ])
 
-	__refresh_device()
+	refresh_device()
 	refresh_time(settings['clock'])
 
 	return json_response({ 'config': json_filter(settings.items()) })
