@@ -4,11 +4,10 @@ import os
 import json
 from datetime import datetime, timedelta
 
-from flask import Blueprint, Response, request, send_from_directory
+from flask import Blueprint, Response, request, send_from_directory, send_file
 from werkzeug import secure_filename
 
-from .. import app, settings, require_auth, path_parse
-
+from .. import app, settings, require_auth, path_parse, Serializer
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)
@@ -26,7 +25,7 @@ def json_response(obj, force_session=False):
 
 	if force_session or prev_cookie is not None:
 		# generate a signed session cookie
-		session_cookie = Auth.Serializer(app.config['SECRET_KEY'],
+		session_cookie = Serializer(app.config['SECRET_KEY'],
 					   				expires_in = app.config['SESSION_EXPIRATION'])
 
 		res.set_cookie(app.config['SESSION_COOKIE_NAME'],
