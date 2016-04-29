@@ -1,9 +1,23 @@
 import os
 import logging, logging.handlers
 
-from flask import Flask
+from flask import Flask, g
 app_name = __name__.split('.')[0]
 app = Flask(app_name, static_url_path='')
+
+# set up for deferred requests
+def after_this_request(f):
+	if not hasattr(g, 'after_request_callbacks'):
+		g.after_request_callbacks = []
+	g.after_request_callbacks.append(f)
+	return f
+
+# register the after request callbacks
+@app.after_request
+def call_after_request_callbacks(response):
+	for callback in getattr(g, 'after_request_callbacks', ()):
+		callback(response)
+	return response
 
 # load application configuration from module
 app.config.from_object('config')
@@ -56,7 +70,7 @@ from .util.ClockUtils import manage_clock
 manage_clock(settings['clock'])
 
 # function decorator for routes that require authorization (i.e., login)
-from .util.Auth import require_auth
+from .util.Auth import require_auth, Serializer
 
 # function to parse URI's easily
 from .util.UriParse import path_parse
