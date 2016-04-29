@@ -17,6 +17,7 @@ var TempConfig= require('./Thermometer');
 
 var NetConfig = require('./NetConfig');
 var UserConfig = require('./UserConfig');
+var LogsConfig = require('./LogsConfig');
 
 var utils = require('../CmeApiUtils');
 var moment = require('moment');
@@ -77,6 +78,8 @@ var ConfigPanel = React.createClass({
 								   value={config.http.corsWhitelist} />
 					</InputGroup>
 					*/}
+
+					<LogsConfig />
 
 					<div className="input-group">
 						<button id="factory-reset"

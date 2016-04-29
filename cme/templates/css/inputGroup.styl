@@ -45,6 +45,10 @@
 	overflow hidden
 	background #fff
 	transition all 0.3s ease 0s
+	> ul
+		margin 0
+		padding 0
+		list-style none
 
 .input-group-cluster
 	width 360px
@@ -98,6 +102,18 @@
 		#ta-wrapper label
 			margin-top 10px
 			display block
+
+li.input-group-cluster
+	position relative
+	padding 8px 0
+	font-size 90%
+	text-align right
+	> .btn
+		background-color transparent
+	> .btn.icon-left
+		float left
+	
+
 
 .input-group-buttons
 	margin -10px // changes with .input-group margin above
