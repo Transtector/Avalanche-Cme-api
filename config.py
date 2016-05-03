@@ -8,6 +8,7 @@
 import os
 import uuid
 import platform
+import json
 
 DEBUG = True
 
@@ -33,8 +34,11 @@ APPLOG = os.path.join(LOGDIR, 'cme.log')
 SERVERLOG = os.path.join(LOGDIR, 'server.log')
 ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 
+# user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')
 
+# recovery flag is signaled by presence of this file
+RECOVERY = os.path.isfile(os.path.join(APPROOT, 'recovery.txt'))
 
 # create uploads and log folders if they don't yet exist
 if not os.path.exists(UPLOADS):
@@ -59,8 +63,18 @@ SERVER_PORT = 80 # ports < 1024 require sudo to start
 USERNAME = 'admin'
 PASSHASH = 'b56e0b4ea4962283bee762525c2d490f' # md5('Welcome1')
 
-DEVICE_MODEL_NUMBER = "CME-1000A"
-DEVICE_SERIAL_NUMBER = "1000A12345"
+# CME Device info is 'hard-coded' into the device.json
+# read-only file in the USERDATA folder.
+try:
+	with open(os.path.join(USERDATA, 'device.json'), "r") as f:
+		device_data = json.load(f)
+except:
+	device_data = { 'modelNumber': 'UNKNOWN', 'serialNumber': '00000000' }
+
+DEVICE_MODEL_NUMBER = device_data['modelNumber']
+DEVICE_SERIAL_NUMBER = device_data['serialNumber']
+
+# The firmware version is stored right here (for now)
 DEVICE_FIRMWARE = "0.1.0"
 
 GENERAL_NAME = "My CME"
