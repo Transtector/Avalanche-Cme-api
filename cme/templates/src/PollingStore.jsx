@@ -18,6 +18,7 @@ var EventEmitter = require('events').EventEmitter;
 
 var assign = require('object-assign'); // ES6 polyfill
 
+var _logs = [];
 var _channels = [];
 var _channel_objs = {};
 var _clock;
@@ -29,6 +30,7 @@ var PollingStore = assign({}, EventEmitter.prototype, {
 		return {
 			channels: _channels, // [ <channel_id> ], list of active channels
 			channel_objs: _channel_objs, // holds the actual channel objects by channel id { chX: <channel_object> }
+			logs: _logs, // [ { filename <string>: size <int> } ]
 			clock: _clock, // <ISO-8601 string>, CPU datetime, UTC
 			temperature: _temperature // <float>, CPU temperature degree C
 		}
@@ -58,6 +60,11 @@ var PollingStore = assign({}, EventEmitter.prototype, {
 			case Constants.TEMPERATURE: // cpu temperature response
 				_temperature = action.data.temperature;
 				PollingStore.emitChange(Constants.ChangeTypes.TEMPERATURE);
+				break;
+
+			case Constants.LOGS: // cme log files
+				_logs = action.data.logs;
+				PollingStore.emitChange(Constants.ChangeTypes.LOGS);
 				break;
 
 			case Constants.CHANNELS: // status/channels response

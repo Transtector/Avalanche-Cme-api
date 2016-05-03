@@ -27,6 +27,7 @@ var API = {
 	logout: API_ROOT + 'logout',
 	clock: API_ROOT + 'clock',
 	temperature: API_ROOT + 'temperature',
+	logs: API_ROOT + 'logs/',
 	channels: API_ROOT + 'channels',
 	channel: API_ROOT + 'ch/'
 }
@@ -187,6 +188,46 @@ var CmeAPI = {
 				failure([ msg ]);
 			}			
 		});
+	},
+
+	logs: function(retrieve, success, failure) {
+		if (!retrieve) {
+			return $.ajax({
+				url: API.logs,
+				contentType: 'application/json; charset=UTF-8',
+				dataType: 'json',
+				success: success,
+				error: function(jqXHR, textStatus, errorThrown) {
+					var msg = jqXhrErrorMessage(jqXHR);
+					debug('CmeAPI.logs error: ', msg);
+					failure([ msg ]);
+				}
+			});
+		}
+
+		// else we can retrieve the identified log file
+		var name = retrieve.name;
+		var download = retrieve.download;
+		var clear = retrieve.clear;
+
+		// prepare a new base URL for the request
+		var url = window.location.protocol + '//' + window.location.host + API.logs + name;
+		var qs = [];
+
+		if (download) {
+			qs.push('download=true');
+		}
+		if (clear) {
+			qs.push('clear=true');
+		}
+		qs = qs.join('&');
+
+		if (qs.length > 0)
+			url += '?' + qs;
+
+		debug("attempting to open `" + url + "`");
+
+		window.open(url, (!download ? "_blank" : null));
 	},
 
 	channels: function(success, failure) {

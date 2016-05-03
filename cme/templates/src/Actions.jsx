@@ -142,6 +142,22 @@ var Actions = {
 		}, onErrors);
 	},
 
+	logs: function(filename, download, clear) {
+		if (!filename) {
+			dispatchRequest('reading logs');
+			CmeAPI.logs(null, function(data) {
+				AppDispatcher.dispatch({ actionType: Constants.LOGS, data: data });
+			}, onErrors);
+		} else {
+			var request = {};
+			request.name = filename;
+			request.download = !!download;
+			request.clear = !!clear;
+
+			CmeAPI.logs(request);
+		}
+	},
+
 	channels: function() {
 		dispatchRequest('reading channels');
 		CmeAPI.channels(function(data) {
