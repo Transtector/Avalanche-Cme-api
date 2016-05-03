@@ -717,6 +717,10 @@ li.input-group-cluster > .btn {
 li.input-group-cluster > .btn.icon-left {
   float: left;
 }
+li.input-group-cluster > .btn:disabled {
+  color: #ddd;
+  opacity: 0.4;
+}
 .input-group-buttons {
   margin: -10px;
   margin-top: 0;
