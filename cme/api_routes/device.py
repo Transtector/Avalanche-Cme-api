@@ -1,14 +1,16 @@
 # api/device routes
 
-import os
+import os, threading
 
 from . import (router, app, settings, request, path_parse, secure_filename, refresh_device,
 	allowed_file, json_response, json_error, json_filter, require_auth)
+from ..util.Reboot import restart
 
 @router.route('/device/')
 @router.route('/device/modelNumber')
 @router.route('/device/serialNumber')
 @router.route('/device/firmware')
+@router.route('/device/recovery')
 def device_read_only_settings():
 	''' Read-only device settings - NOT password protected.
 		These are saved in settings, but under the "__device" key.
@@ -20,17 +22,29 @@ def device_read_only_settings():
 	# device requests need to check for update files
 	refresh_device()
 
+	# get visible device parameters
+	device = json_filter(settings['__device'].items())
+
+	# add 'recovery' flag depends on how config.py
+	# loaded (i.e., the presence of a recovery flag file)
+	device['recovery'] = app.config['RECOVERY']
+
 	if item == 'device':
-		return json_response({ 'device': json_filter(settings['__device'].items()) })
+		# request all device parameters
+		res = device
 	else:
-		return json_response({ item: settings['__device'][item] })
+		# else just a specific item
+		res = device[item]
+
+	return json_response({ item: res })
 
 
-# update firmware (POST file or path to /device/update)
 @router.route('/device/update', methods=['GET', 'POST'])
 @require_auth
 def device_update():
-	filename = settings['__device']['__update']
+	# update firmware (POST file or path to /device/update)
+	
+	filename = ''
 
 	if request.method == 'POST':
 		# handle upload new firmware
@@ -38,22 +52,34 @@ def device_update():
 
 		if file and allowed_file(file.filename):
 			filename = secure_filename(file.filename)
-			p = os.path.join(app.config['UPLOADS'], filename)
-			file.save(p)
+			path = os.path.join(app.config['UPLOADS'], filename)
+			file.save(path)
 
 			logger = logging.getLogger('cme')
 			logger.info("File uploaded: {0}".format(p))
 
-	refresh_device()
+	else:
+		refresh_device()
+		filename = settings['__device']['__update']
 
 	return json_response({ 'update': filename })
 
 
-# trigger a firmware update
-@router.route('/device/updateTrigger', methods=['POST'])
+@router.route('/device/restart', methods=['GET'])
 @require_auth
-def device_trigger_update():
-	return json_error([ 'Not implemented' ])
+def device_restart():
+	# Triggers a device reboot.  If there is an update available
+	# it will be attempted to be used to replace the current
+	# image (if any).  If all else, the reboot will drop into
+	# recovery mode.
+
+	# Factory reset deletes the settings.json file and performs a 
+	# reboot.
+	t = threading.Thread(target=restart, args=(5, ))
+	t.setDaemon(True)
+	t.start()
+
+	return json_response(None)
 
 
 # DEBUGGING
