@@ -130,6 +130,17 @@ header #title {
 header #model {
   font-size: 16px;
 }
+header #recovery {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 10px;
+  z-index: 9;
+  text-align: center;
+  font-size: 18px;
+  font-style: italic;
+  color: #f22;
+}
 header #tab {
   position: absolute;
   top: -3px;

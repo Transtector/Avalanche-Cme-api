@@ -38,6 +38,7 @@ var Header = React.createClass({
 				<div id="branding">
 					<div id="title">CME</div>
 					<div id="model">{this.props.device.modelNumber}</div>
+					{this.props.device.recovery ? <div id="recovery">RECOVERY MODE</div> : null}
 				</div>
 
 				<div id="tab">&nbsp;</div>
@@ -45,7 +46,7 @@ var Header = React.createClass({
 				<div id="buttons">
 					{this.props.isLoggedIn ? <button className="btn icon-home" onClick={this._showHome} /> : null}
 					{this.props.isLoggedIn ? <button className="btn icon-settings" onClick={this._showSettings} /> : null}
-					{this.props.isLoggedIn ? <button className="btn icon-logout" onClick={this._logout} />: null}
+					{this.props.isLoggedIn ? <button className="btn icon-logout" onClick={this._logout} /> : null}
 				</div>
 
 				<div id="info">
