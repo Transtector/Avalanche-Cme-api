@@ -19,6 +19,8 @@ var NetConfig = require('./NetConfig');
 var UserConfig = require('./UserConfig');
 var LogsConfig = require('./LogsConfig');
 
+var Updates = require('./UpdatesPanel');
+
 var utils = require('../CmeApiUtils');
 var moment = require('moment');
 
@@ -80,6 +82,8 @@ var ConfigPanel = React.createClass({
 					*/}
 
 					<LogsConfig />
+
+					<Updates />
 
 					<div className="input-group">
 						<button id="factory-reset"
