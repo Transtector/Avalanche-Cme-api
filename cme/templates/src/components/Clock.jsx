@@ -280,7 +280,7 @@ var Clock = React.createClass({
 					</div>
 				</div>
 
-				<div className="input-group-cluster">
+				<div className="input-group-cluster no-border">
 					<label htmlFor="ntpGroup">NTP</label>
 					<div id="ntpGroup">
 						<label htmlFor="ntp">

@@ -51,6 +51,7 @@ var UserConfig = React.createClass({
 
 				<TextInput id="pc" caption="Re-enter password"
 						   type="password"
+						   className='no-border'
 						   placeholder="Must match password"
 						   value={this.state.pc} 
 						   onChange={this._inputChange} />

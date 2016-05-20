@@ -46,7 +46,8 @@ var NetConfig = React.createClass({
 					value={this.state.gateway} onChange={this._requestChange} disabled={this.state.dhcp} />
 				<TextInput id="primary"	placeholder="Primary DNS" 
 					value={this.state.primary} onChange={this._requestChange} disabled={this.state.dhcp} />
-				<TextInput id="secondary" placeholder="Secondary DNS" 
+				<TextInput id="secondary" placeholder="Secondary DNS"
+					className='no-border' 
 					value={this.state.secondary} onChange={this._requestChange} disabled={this.state.dhcp} />
 
 				<div className="input-group-buttons">
