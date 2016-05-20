@@ -211,7 +211,7 @@ var UpdatesPanel = React.createClass({
 
 	_startUpdatesPoll: function () {
 		if (!this._updatesPollStartTime) {
-		//	this._pollUpdates();
+			this._pollUpdates();
 		}
 	},
 
