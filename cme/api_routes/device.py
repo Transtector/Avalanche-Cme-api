@@ -1,6 +1,10 @@
 # api/device routes
 
-import os, threading
+import os, shutil, glob, threading, logging, fnmatch
+
+import urllib.request
+from xml.dom.minidom import parseString
+import xml.dom.minidom
 
 from . import (router, app, settings, request, path_parse, secure_filename, refresh_device,
 	allowed_file, json_response, json_error, json_filter, require_auth)
@@ -39,42 +43,186 @@ def device_read_only_settings():
 	return json_response({ item: res })
 
 
-@router.route('/device/update', methods=['GET', 'POST'])
+@router.route('/device/updates', methods=['GET', 'DELETE', 'PUT', 'POST'])
 @require_auth
-def device_update():
-	# update firmware (POST file or path to /device/update)
-	
-	filename = ''
+def device_updates():
+	''' Firmware image update handling.  Works with HTTP verbs to act upon
+		and/or return the available software updates and update status.
 
+		GET: returns result object with current updates status:
+	     	updates: {
+				pending: false
+				usb: [ < image filenames found on usb storage > ],
+				web: [ < image urls found on web site > ],
+				uploads: [ < image filenames found in uploads folder > ]
+	     	}
+
+	     DELETE: removes a pending update (NOP if no pending update)
+
+	     POST: uploads a update image file which will replace any current uploaded image
+
+	     PUT: move the indentified update to pending status (move file into pending update location)
+	'''
+
+	# result object
+	result = { 
+		'pending': False,  
+		# Cme software image files can be placed in a special location to make them 'pending' updates.
+		# The update location is checked after every Cme restart, and if a valid image is found it
+		# will be used.  The 'pending' item will be either False or the image file name if one is
+		# found.
+
+		'usb': [],
+		# Software images may be placed on external (USB) drive.  Any matching Cme images found
+		# will have their base filenames listed in the 'usb' item list.
+
+		'web': [],
+		# Software images can be provided by our company web site.  We'll list available Cme
+		# image base filenames in the 'web' item list.
+
+		'uploads': []
+		# Finally, users may upload Cme software images they might have on their device.  Only
+		# one software image at a time may be uploaded, so new uploads will replace any current
+		# one (for now at least, in order to minimize disk usage).  The 'uploads' item will
+		# hold any base filename found.
+	}
+
+	# read configurable items into local variables
+	update_dir = app.config['UPDATE']
+	upload_dir = app.config['UPLOAD_FOLDER']
+	usb_dir = app.config['USB']
+	update_glob = app.config['UPDATE_GLOB']
+	pub_url = app.config['PUBLIC_UPDATES_URL']
+
+	logger = logging.getLogger('cme')
+
+	# find pending updates (should be only one or none)
+	pending_files = glob.glob(os.path.join(update_dir, update_glob))
+
+	if len(pending_files) > 0:
+		result['pending'] = os.path.basename(pending_files[0])
+		pending = True
+	else:
+		pending = False
+
+	if pending and request.method == 'DELETE':
+		os.remove(pending_files[0])
+		logger.info("Update `{0}` was removed.".format(os.path.basename(pending_files[0])))
+		result['pending'] = False
+
+	
+	# from USB drive
+	result['usb'] = [os.path.basename(path) for path in glob.glob(os.path.join(usb_dir, update_glob))]
+
+	# from web (our distribution URL)
+	# TODO: get official web repo for Cme updates set up
+	try:
+		with urllib.request.urlopen(pub_url) as response:
+			web_listing_raw = response.read()
+
+		web_listing_xml = xml.dom.minidom.parseString(web_listing_raw)
+		ListBucketResult = web_listing_xml.documentElement
+
+		# Get all the items in the S3 bucket
+		items = ListBucketResult.getElementsByTagName('Contents')
+
+		# Now filter for Cme items - these will have a Key property
+		# that starts with 'Cme/' and the top-level Cme 'folder' will
+		# just have Key = 'Cme/', so it can also be discarded.
+		for item in items:
+			key = item.getElementsByTagName('Key')[0].childNodes[0].data
+			if key.startswith('Cme/') and key != 'Cme/' and fnmatch.fnmatch(key.split('/')[1], update_glob):
+				result['web'].append(key.split('/')[1])
+	except:
+		logger.error("Error listing updates from web {0}".format(pub_url))
+
+
+	# are we handling an upload (POST)?
 	if request.method == 'POST':
+
 		# handle upload new firmware
-		file = request.files['file']
+		file = request.files['files[]']
 
 		if file and allowed_file(file.filename):
+			
 			filename = secure_filename(file.filename)
-			path = os.path.join(app.config['UPLOADS'], filename)
+			path = os.path.join(upload_dir, filename)
+
+			# clear UPLOAD_FOLDER before saving any new files
+			# as these images can be big, and we've only got
+			# so much space
+			for old_file in os.listdir(upload_dir):
+				old_path = os.path.join(upload_dir, old_file)
+				try:
+					if os.path.isfile(old_path):
+						os.unlink(old_path)
+				except:
+					logger.error("Failed to clear uploads folder")
+
 			file.save(path)
+			logger.info("File uploaded: {0}".format(path))
 
-			logger = logging.getLogger('cme')
-			logger.info("File uploaded: {0}".format(p))
+		else:
+			logger.error("File upload failed: {0}".format(file.filename))
 
-	else:
-		refresh_device()
-		filename = settings['__device']['__update']
 
-	return json_response({ 'update': filename })
+	# finally, allow PUT to install an image to update folder
+	error = False
+	if request.method == 'PUT':
+		source = request.get_json()['source']
+		name = request.get_json()['name']
+
+		
+		# just copy USB source images
+		if source.lower() == 'usb':
+			src = os.path.join(usb_dir, name)
+			if os.path.isfile(src):
+				shutil.copy2(src, update_dir)
+			else:
+				error = True
+
+		
+		# copy web updates
+		if source.lower() == 'web':
+			try:
+				# Download the file from `url` and save it locally under update_dir:
+				with urllib.request.urlopen(pub_url + 'Cme/' + name) as src, open(os.path.join(update_dir, name), 'wb') as dst:
+				    shutil.copyfileobj(src, dst)
+			except:
+				error = True
+
+
+		# move uploaded updates
+		if source.lower() == 'upload':
+			src = os.path.join(upload_dir, name)
+			if os.path.isfile(src):
+				shutil.move(src, update_dir)
+			else:
+				error = True
+
+		if error:
+			logger.error("Failed to install {0}::{1}".format(source, name))
+		else:
+			logger.info("Update installed: {0}::{1}".format(source, name))
+			result['pending'] = name
+
+
+	# refresh the uploads listing after installs (PUT) because
+	# any uploaded files are moved (not copied) on install
+	result['uploads'] = [os.path.basename(path) for path in glob.glob(os.path.join(upload_dir, update_glob))]
+
+	return json_response({ 'updates': result })
+
 
 
 @router.route('/device/restart', methods=['GET'])
 @require_auth
 def device_restart():
-	# Triggers a device reboot.  If there is an update available
-	# it will be attempted to be used to replace the current
-	# image (if any).  If all else, the reboot will drop into
-	# recovery mode.
-
-	# Factory reset deletes the settings.json file and performs a 
-	# reboot.
+	# Triggers a device reboot.  If there is an update image available
+	# it will be attempted to be used in place of the current image,
+	# if there is a current image. If the new image load fails for any
+	# reason, the prior image will be used, or failing that, the Cme
+	# will startup in recovery mode.
 	t = threading.Thread(target=restart, args=(5, ))
 	t.setDaemon(True)
 	t.start()
@@ -92,7 +240,7 @@ def upload_file():
 		if file and allowed_file(file.filename):
 			filename = secure_filename(file.filename)
 
-			p = os.path.join(app.config['UPLOADS'], filename)
+			p = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
 			print ("Saved upload to `", p, "`")
 			file.save(p)

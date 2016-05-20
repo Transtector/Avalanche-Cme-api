@@ -23,7 +23,20 @@ HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /root/Cme-hw
 USERDATA = os.path.abspath('/data') # Cme user data is stored here
 
 # uploads go to temp folder above app
-UPLOADS = os.path.abspath(os.path.join(USERDATA, 'tmp')) # /data/tmp
+# this name is used by Flask as well
+UPLOAD_FOLDER = os.path.abspath(os.path.join(USERDATA, 'tmp')) # /data/tmp
+
+# updates are pending until restart, then removed if successful
+UPDATE = os.path.abspath(os.path.join(USERDATA, 'update')) # /data/update
+
+# updates can be put on USB (removable) media
+USB = os.path.abspath('/media/usb')
+
+
+# globbing pattern for update image files
+UPDATE_GLOB = '1500-???-v*-SWARE-CME.tgz'
+PUBLIC_UPDATES_URL = 'https://s3.amazonaws.com/transtectorpublicdownloads/'
+
 
 # logging to files in parent foldr
 LOGDIR = os.path.abspath(os.path.join(USERDATA, 'log')) # /data/log
@@ -40,18 +53,16 @@ SETTINGS = os.path.join(USERDATA, 'settings.json')
 # recovery flag is signaled by presence of this file
 RECOVERY = os.path.isfile(os.path.join(APPROOT, 'recovery.txt'))
 
-# create uploads and log folders if they don't yet exist
-if not os.path.exists(UPLOADS):
-	os.makedirs(UPLOADS)
-
-if not os.path.exists(LOGDIR):
-	os.makedirs(LOGDIR)
+# create USERDATA folders if they don't yet exist
+for p in [ UPLOAD_FOLDER, UPDATE, LOGDIR ]:
+	if not os.path.exists(p):
+		os.makedirs(p)
 
 
 # this for uploading files (ostensibly firmware files)
 # TODO: figure out size/extension for actual firmware files
 ALLOWED_EXTENSIONS = ['tgz', 'tar.gz']
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024 #  16MB
+MAX_CONTENT_LENGTH = 500 * 1024 * 1024 #  500 MB
 
 SESSION_COOKIE_NAME = 'cmeSession'
 SESSION_EXPIRATION = 86400 # 24 hours

@@ -96,7 +96,7 @@ def refresh_device():
 		be at most a single file which will be used if an update
 		is triggered.
 	'''
-	files = [fn for fn in os.listdir(app.config['UPLOADS'])
+	files = [fn for fn in os.listdir(app.config['UPLOAD_FOLDER'])
 			if any(fn.endswith(ext) for ext in app.config['ALLOWED_EXTENSIONS'])]
 
 	# choose the first one, if any

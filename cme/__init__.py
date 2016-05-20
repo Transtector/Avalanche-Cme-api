@@ -58,7 +58,7 @@ logger.info("\tSERVER_PORT:\t{0}".format(app.config['SERVER_PORT']))
 logger.info("\tDEBUG:\t\t{0}".format(app.config['DEBUG']))
 logger.info("\tDOCROOT:\t{0}".format(app.config['DOCROOT']))
 logger.info("\tPUBLIC:\t\t{0}".format(app.static_folder))
-logger.info("\tUPLOADS:\t{0}".format(app.config['UPLOADS']))
+logger.info("\tUPLOADS:\t{0}".format(app.config['UPLOAD_FOLDER']))
 
 
 # log network status
