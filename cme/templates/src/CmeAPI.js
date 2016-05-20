@@ -21,6 +21,8 @@ var API_ROOT = '/api/';
 // use enumeration for API routes
 var API = {
 	device: API_ROOT + 'device/',
+	updates: API_ROOT + 'device/updates',
+	restart: API_ROOT + 'device/restart',
 	config: API_ROOT + 'config/',
 	user: API_ROOT + 'user/',
 	login: API_ROOT + 'login',
@@ -103,6 +105,97 @@ var CmeAPI = {
 			error: function(jqXHR, textStatus, errorThrown) {
 				var msg = jqXhrErrorMessage(jqXHR);
 				debug('CmeAPI.device error: ', msg);
+				failure([ msg ]);
+			}
+		});
+	},
+
+	getUpdates: function(success, failure) {
+		return $.ajax({
+			url: API.updates,
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.getUpdates error: ', msg);
+				failure([ msg ]);
+			}
+		});
+	},
+
+	deleteUpdate: function(success, failure) {
+		return $.ajax({
+			url: API.updates,
+			type: 'DELETE',
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.deleteUpdate error: ', msg);
+				failure([ msg ]);
+			}
+		});
+	},
+
+	uploadUpdate: function(formData, progressHandler, success, failure) {
+
+		return $.ajax({
+			url: API.updates,
+			type: 'POST',
+
+			data: formData,
+
+			cache: false,
+			contentType: false,
+			processData: false,
+
+			xhr: function() {
+				var x = $.ajaxSettings.xhr();
+				if (progressHandler && x.upload) {
+					x.upload.addEventListener('progress', progressHandler, false);
+				}
+				return x;
+			},
+
+			dataType: 'json',
+			success: success,
+
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.uploadUpdate error: ', msg);
+				failure([ msg ]);
+			}
+		});
+	},
+
+	installUpdate: function(source, name, success, failure) {
+
+		return $.ajax({
+			url: API.updates,
+			type: 'PUT',
+
+			contentType: 'application/json; charset=UTF-8',
+			data: JSON.stringify({ source: source, name: name }),
+
+			dataType: 'json',
+			success: success,
+
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.installUpdate error: ', msg);
+				failure([ msg ]);
+			}
+		});
+	},
+
+	restart: function(success, failure) {
+		return $.ajax({
+			url: API.restart,
+			dataType: 'json',
+			success: success,
+			error: function(jqXHR, textStatus, errorThrown) {
+				var msg = jqXhrErrorMessage(jqXHR);
+				debug('CmeAPI.restart error: ', msg);
 				failure([ msg ]);
 			}
 		});

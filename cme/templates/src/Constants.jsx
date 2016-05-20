@@ -19,6 +19,9 @@ module.exports = keyMirror({
 
 	CLOCK: null,
 	TEMPERATURE: null,
+	LOGS: null,
+	UPDATES: null,
+
 	CHANNELS: null,
 	CHANNEL: null,
 	CONTROL: null,
@@ -35,6 +38,7 @@ module.exports.ChangeTypes = keyMirror({
 	CLOCK: null,
 	TEMPERATURE: null,
 	LOGS: null,
+	UPDATES: null,
 	CHANNELS: null,
 	CHANNEL: null,
 	CONTROL: null
