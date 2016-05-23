@@ -24,7 +24,7 @@ var _config = {};
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
-var _isConfigVisible = false;
+var _ui_panel = 'home';
 
 var Store = assign({}, EventEmitter.prototype, {
 
@@ -38,19 +38,22 @@ var Store = assign({}, EventEmitter.prototype, {
 
 			isLoggedIn: _isLoggedIn, // set via CmeAPI.session(callback(<bool>)); true if valid session
 			isSubmitting: _isSubmitting, // Actions that make server requests set this true before request
-			isConfigVisible: _isConfigVisible // show/hide the main configuration panel
+			ui_panel: _ui_panel // what's displayed in the main page body
 		}
 	},
 
 	emitChange: function() {
+
 		this.emit(CHANGE_EVENT);
 	},
 
 	addChangeListener: function(callback) {
+
 		this.on(CHANGE_EVENT, callback);
 	},
 
 	removeChangeListener: function(callback) {
+
 		this.removeListener(CHANGE_EVENT, callback);
 	},
 
@@ -79,14 +82,6 @@ var Store = assign({}, EventEmitter.prototype, {
 				_errors = [];
 				break;
 
-			case Constants.SHOW_HOME:
-				_isConfigVisible = false;
-				break;
-
-			case Constants.SHOW_CONFIG:
-				_isConfigVisible = true;
-				break;
-
 			case Constants.CONFIG:
 				// item key name:
 				var item = Object.keys(action.data)[0];
@@ -113,6 +108,11 @@ var Store = assign({}, EventEmitter.prototype, {
 					}
 
 				}
+				break;
+
+			case Constants.UI_PANEL:
+
+				_ui_panel = action.data.toLowerCase();
 				break;
 
 			default: // unknown action

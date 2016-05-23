@@ -42,11 +42,15 @@ var CmeApp = React.createClass({
 			if (Object.keys(state.config).length == 0)
 				return null;
 
-			if (state.isConfigVisible)
-				return <ConfigPanel config={state.config} />
+			switch (state.ui_panel.toLowerCase()) {
+				case 'config':
+					return <ConfigPanel config={state.config} />
 
-			return <HomePanel clockConfig={state.config.clock}
-							  temperatureConfig={state.config.temperature} />
+				default: // 'home'
+					return <HomePanel clockConfig={state.config.clock}
+									  temperatureConfig={state.config.temperature} />
+			}
+
 		}
 
 		function renderErrorPanel(state) {

@@ -17,6 +17,7 @@ module.exports = keyMirror({
 	ERROR: null, // somebody said "errors!" - [ <string> ]
 	CLEAR_ERRORS: null,
 
+	CONFIG: null,
 	CLOCK: null,
 	TEMPERATURE: null,
 	LOGS: null,
@@ -26,10 +27,7 @@ module.exports = keyMirror({
 	CHANNEL: null,
 	CONTROL: null,
 
-	SHOW_HOME: null,
-	SHOW_CONFIG: null,
-	CONFIG: null
-
+	UI_PANEL: null,
 });
 
 // Change Types for PollingStore event registration
