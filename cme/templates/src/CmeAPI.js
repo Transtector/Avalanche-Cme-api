@@ -76,7 +76,7 @@ var CmeAPI = {
 			method = 'GET';
 			payload = null;
 		} else { // called w/obj - POST update
-			url = API.config + configItemToUrl(item);
+			url = API.config + configItemToUrl(Object.keys(obj)[0]);
 			payload = JSON.stringify(obj);
 			method = 'POST';
 		}
