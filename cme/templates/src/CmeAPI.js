@@ -5,6 +5,7 @@
  * Client side AJAX wrapper library for Cme API.
  */
 'use strict';
+
 var DEBUG = true; // turn API console logging on/off
 function debug(/* arguments */) {
 	if (!DEBUG) return;
@@ -14,11 +15,8 @@ function debug(/* arguments */) {
 var $ = require('jquery');
 $.md5 = require('js-md5');
 
-var Store = require('./Store'); // to get the CME config object
-
+// API routes
 var API_ROOT = '/api/';
-
-// use enumeration for API routes
 var API = {
 	device: API_ROOT + 'device/',
 	updates: API_ROOT + 'device/updates',
@@ -34,12 +32,8 @@ var API = {
 	channel: API_ROOT + 'ch/'
 }
 
-function jqXhrErrorMessage(jqXHR) {
-	if (jqXHR.responseJSON)
-		return jqXHR.responseJSON.join(',\n') + ' (status: ' + jqXHR.status + ')';
-	return jqXHR.responseText;
-}
-
+// Use Store to get the CME config object
+var Store = require('./Store');
 function configItemToUrl(item) {
 	var config = Store.getState().config,
 		itemUrl = '';
@@ -67,238 +61,84 @@ function configItemToUrl(item) {
 
 var CmeAPI = {
 
-	reset: function(success, failure, reset_network, reset_clock) {
+	device: function() {
+		return $.ajax({
+			url: API.device,
+			dataType: 'json'
+		});
+	},
 
-		function onError(jqXHR, textStatus, errorThrown) {
-			failure("Error performing factory reset:\nstatus: " + jqXHR.status + " - " + textStatus);
+	config: function(obj) {
+		var url, payload, method;
+
+		if (!obj) { // just GET config
+			url = API.config;
+			method = 'GET';
+			payload = null;
+		} else { // called w/obj - POST update
+			url = API.config + configItemToUrl(item);
+			payload = JSON.stringify(obj);
+			method = 'POST';
 		}
 
 		return $.ajax({
+			type: method,
+			url: url,
+			contentType: 'application/json; charset=UTF-8',
+			data: payload,
+			dataType: 'json'
+		});
+	},
+
+	reset: function(reset_network, reset_clock) {
+		return $.ajax({
 			url: API.config + 'reset',
 			data: JSON.stringify({ reset_network: reset_network, reset_clock: reset_clock }),
-			dataType: 'json',
-			success: function(data, textStatus, jqXHR) {
-				if (jqXHR.status !== 200) {
-					debug('CMEAPI.reset error: ', data);
-					onError(jqXHR, textStatus, data);
-				} else {
-					success();
-				}
-			},
-			error: onError
-
+			dataType: 'json'
 		});
 	},
 
-	device: function(success, failure) {
-		return $.ajax({
-			url: API.device,
-			dataType: 'json',
-			success: function(data) {
-				// we got something back - check to see if it's
-				// the CME device data else call the failure callback.
-				if (!data.device)
-					failure([ "Device data not readable." ]);
-				else
-					success(data.device);
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.device error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	getUpdates: function(success, failure) {
-		return $.ajax({
-			url: API.updates,
-			dataType: 'json',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.getUpdates error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	deleteUpdate: function(success, failure) {
-		return $.ajax({
-			url: API.updates,
-			type: 'DELETE',
-			dataType: 'json',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.deleteUpdate error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	uploadUpdate: function(formData, progressHandler, success, failure) {
-
-		return $.ajax({
-			url: API.updates,
-			type: 'POST',
-
-			data: formData,
-
-			cache: false,
-			contentType: false,
-			processData: false,
-
-			xhr: function() {
-				var x = $.ajaxSettings.xhr();
-				if (progressHandler && x.upload) {
-					x.upload.addEventListener('progress', progressHandler, false);
-				}
-				return x;
-			},
-
-			dataType: 'json',
-			success: success,
-
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.uploadUpdate error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	installUpdate: function(source, name, success, failure) {
-
-		return $.ajax({
-			url: API.updates,
-			type: 'PUT',
-
-			contentType: 'application/json; charset=UTF-8',
-			data: JSON.stringify({ source: source, name: name }),
-
-			dataType: 'json',
-			success: success,
-
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.installUpdate error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	restart: function(success, failure) {
+	restart: function() {
 		return $.ajax({
 			url: API.restart,
-			dataType: 'json',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.restart error: ', msg);
-				failure([ msg ]);
-			}
+			dataType: 'json'
 		});
 	},
 
 	// login with CME username, password credentials
-	login: function(credentials, success, failure) {
-		var u = credentials.u,
-			p = $.md5(credentials.p);
-
+	login: function(u, p) {
 		return $.ajax({
 			url: API.login,
-			data: { u: u, p: p },
-			dataType: 'json',
-			success: function(data) {
-
-				if (!data.timestamp) {
-					debug('Login failure: ', data);
-					failure(data);
-				} else {
-					success(true);
-				}
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.login error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	// update username, password credentials
-	user: function(u, p, success, failure) {
-		return $.ajax({
-			type: 'POST',
-			url: API.user,
-			data: JSON.stringify({ user: { username: u, password: $.md5(p) }}),
-			dataType: 'json',
-			contentType: 'application/json; charset=UTF-8',
-			success: function(data, textStatus, jqXHR) {
-				if (jqXHR.status !== 200) {
-					debug('CmeAPI.user error: ', data);
-					failure(data);
-				} else {
-					success(data);
-				}
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.user error: ', msg);
-				failure([ msg ]);
-			}
-
+			data: { u: u, p: $.md5(p) }, // send MD5 hash of p
+			dataType: 'json'
 		});
 	},
 
 	// just remove the session - ignore return value
 	logout: function() { return $.ajax({ url: API.logout }); },
 
-	clock: function(success, failure) {
+	// update username, password credentials
+	user: function(u, p) {
 		return $.ajax({
-			url: API.clock,
-			contentType: 'application/json; charset=UTF-8',
+			type: 'POST',
+			url: API.user,
+			data: JSON.stringify({ user: { username: u, password: $.md5(p) }}),
 			dataType: 'json',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.clock error: ', msg);
-				failure([ msg ]);
-			}			
+			contentType: 'application/json; charset=UTF-8'
 		});
 	},
 
-	temperature: function(success, failure) {
-		return $.ajax({
-			url: API.temperature,
-			contentType: 'application/json; charset=UTF-8',
-			dataType: 'json',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.temperature error: ', msg);
-				failure([ msg ]);
-			}			
-		});
-	},
+	logs: function(retrieve) {
 
-	logs: function(retrieve, success, failure) {
 		if (!retrieve) {
+
 			return $.ajax({
 				url: API.logs,
-				contentType: 'application/json; charset=UTF-8',
-				dataType: 'json',
-				success: success,
-				error: function(jqXHR, textStatus, errorThrown) {
-					var msg = jqXhrErrorMessage(jqXHR);
-					debug('CmeAPI.logs error: ', msg);
-					failure([ msg ]);
-				}
+				dataType: 'json'
 			});
 		}
 
-		// else we can retrieve the identified log file
+		// else retrieve the identified log file
 		var name = retrieve.name;
 		var download = retrieve.download;
 		var clear = retrieve.clear;
@@ -323,22 +163,80 @@ var CmeAPI = {
 		window.open(url, (!download ? "_blank" : null));
 	},
 
-	channels: function(success, failure) {
+	getUpdates: function() {
 		return $.ajax({
-			url: API.channels,
-			data: null,
+			url: API.updates,
+			dataType: 'json'
+		});
+	},
+
+	deleteUpdate: function(s) {
+		return $.ajax({
+			url: API.updates,
+			type: 'DELETE',
+			dataType: 'json'
+		});
+	},
+
+	uploadUpdate: function(formData, progressHandler) {
+
+		return $.ajax({
+			url: API.updates,
+			type: 'POST',
+
+			data: formData,
+
+			cache: false,
+			contentType: false,
+			processData: false,
+
 			dataType: 'json',
-			contentType: 'application/json; charset=UTF-8',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.channels error: ', msg);
-				failure([ msg ]);
+
+			xhr: function() {
+				var x = $.ajaxSettings.xhr();
+				if (progressHandler && x.upload) {
+					x.upload.addEventListener('progress', progressHandler, false);
+				}
+				return x;
 			}
 		});
 	},
 
-	channel: function(chId, ch_read_config, obj, success, failure) {
+	installUpdate: function(source, name) {
+
+		return $.ajax({
+			url: API.updates,
+			type: 'PUT',
+
+			contentType: 'application/json; charset=UTF-8',
+			data: JSON.stringify({ source: source, name: name }),
+
+			dataType: 'json'
+		});
+	},
+
+	clock: function() {
+		return $.ajax({
+			url: API.clock,
+			dataType: 'json'
+		});
+	},
+
+	temperature: function() {
+		return $.ajax({
+			url: API.temperature,
+			dataType: 'json'
+		});
+	},
+
+	channels: function() {
+		return $.ajax({
+			url: API.channels,
+			dataType: 'json'
+		});
+	},
+
+	channel: function(chId, ch_read_config, obj) {
 		var chIndex = parseInt(chId.slice(2)),
 			method = obj ? 'POST' : 'GET',
 			payload = obj 
@@ -352,17 +250,11 @@ var CmeAPI = {
 			url: API.channel + chIndex, // /api/ch/0
 			data: payload,
 			dataType: 'json',
-			contentType: 'application/json; charset=UTF-8',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.channel error: ', msg);
-				failure([ msg ]);
-			}
+			contentType: 'application/json; charset=UTF-8'
 		});
 	},
 
-	control: function(chId, controlId, obj, success, failure) {
+	control: function(chId, controlId, obj) {
 		var chIndex = parseInt(chId.slice(2)), // chId: "chX"
 			ctrlIndex = parseInt(controlId.slice(1)); // controlId: "cY"
 
@@ -371,48 +263,7 @@ var CmeAPI = {
 			url: API.channels + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
 			contentType: 'application/json; charset=UTF-8',
 			data: JSON.stringify(obj),
-			dataType: 'json',
-			success: success,
-			error: function(jqXHR, textStatus, errorThrown) {
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.channelControl error: ', msg);
-				failure([ msg ]);
-			}
-		});
-	},
-
-	config: function(obj, success, failure) {
-		var item, url, payload, method;
-
-		if (!obj) { // just GET config
-			url = API.config;
-			item = 'config';
-			method = 'GET';
-			payload = null;
-		} else { // called w/ (obj, success, failure)...POST update
-			item = Object.keys(obj)[0];
-			url = API.config + configItemToUrl(item);
-			payload = JSON.stringify(obj);
-			method = 'POST';
-		}
-
-		return $.ajax({
-			type: method,
-			url: url,
-			contentType: 'application/json; charset=UTF-8',
-			data: payload,
-			dataType: 'json',
-			success: function(data) {
-				if (Object.keys(data)[0] === item) // did we get back what we requested?
-					success(data);
-				else
-					failure([ "Config error with: " + item ]);
-			},
-			error: function(jqXHR, textStatus, errorThrown) {				
-				var msg = jqXhrErrorMessage(jqXHR);
-				debug('CmeAPI.config error: ', msg);
-				failure([ msg ]);
-			}
+			dataType: 'json'
 		});
 	}
 };

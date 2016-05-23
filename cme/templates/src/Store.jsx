@@ -75,7 +75,7 @@ var Store = assign({}, EventEmitter.prototype, {
 				break;
 
 			case Constants.ERROR:
-				_errors = Array.isArray(action.data) ? action.data : [action.data];
+				_errors.push(action.data);
 				break;
 
 			case Constants.CLEAR_ERRORS:

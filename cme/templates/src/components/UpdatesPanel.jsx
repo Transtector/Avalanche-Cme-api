@@ -206,7 +206,7 @@ var UpdatesPanel = React.createClass({
 
 	_pollUpdates: function () {
 		this._updatesPollStartTime = moment().valueOf();
-		Actions.updates('get');
+		Actions.getUpdates();
 	},
 
 	_startUpdatesPoll: function () {
@@ -228,8 +228,8 @@ var UpdatesPanel = React.createClass({
 
 	_onCancel: function() {
 
-		if (confirm("The pending update will be deleted.\n\nOk to continue?\n\n")) {
-			Actions.updates('delete');
+		if (confirm("The pending update will be removed.\n\nOk to continue?\n\n")) {
+			Actions.deleteUpdate();
 		}
 	},
 
@@ -293,7 +293,7 @@ var UpdatesPanel = React.createClass({
 			setTimeout(function () { self.setState({ progress: null })}, 1000);
 		}
 
-		Actions.updates('upload', formData, onProgress, onComplete);
+		Actions.uploadUpdate(formData, onProgress, onComplete);
 	},
 
 	_onInstall: function() {
@@ -302,7 +302,7 @@ var UpdatesPanel = React.createClass({
 		this.setState({ installing: true });
 		var source_name = this.state.install.split('_');
 
-		Actions.updates('install', source_name[0], source_name[1]);
+		Actions.installUpdate(source_name[0], source_name[1]);
 	}
 
 });
