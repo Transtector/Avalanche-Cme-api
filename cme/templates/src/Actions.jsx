@@ -74,7 +74,13 @@ var Actions = {
 
 	config: function(obj) {
 		// obj is _cme['config'] or an object on _cme['config']
-		dispatchRequest('reading config');
+		var key = Object.keys(obj)[0];
+
+		if (obj) {
+			dispatchRequest('writing {' + key + ': ' + obj[key] + '}');
+		} else {
+			dispatchRequest('reading ' + key);
+		}
 
 		return CmeAPI.config(obj)
 			.done(function(data) {

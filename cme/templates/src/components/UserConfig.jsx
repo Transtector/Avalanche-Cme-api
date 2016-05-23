@@ -38,23 +38,23 @@ var UserConfig = React.createClass({
 				<input style={{display:'none'}} />
 				<input type="password" style={{display:'none'}} />
 
-				<TextInput id="u" caption="Username"
+				<TextInput id="u" name="Username"
 						   placeholder={placeholder}
-						   value={this.state.u} 
-						   onChange={this._inputChange} />
+						   defaultValue={this.state.u} 
+						   onBlur={this._inputChange} />
 
-				<TextInput id="p" caption="Password"
+				<TextInput id="p" name="Password"
 						   type="password"
 						   placeholder={placeholder}
-						   value={this.state.p} 
-						   onChange={this._inputChange} />
+						   defaultValue={this.state.p} 
+						   onBlur={this._inputChange} />
 
-				<TextInput id="pc" caption="Re-enter password"
+				<TextInput id="pc" name="Re-enter password"
 						   type="password"
 						   className='no-border'
 						   placeholder="Must match password"
-						   value={this.state.pc} 
-						   onChange={this._inputChange} />
+						   defaultValue={this.state.pc} 
+						   onBlur={this._inputChange} />
 
 				<div className="input-group-buttons">
 					<button className='btn full-width' 

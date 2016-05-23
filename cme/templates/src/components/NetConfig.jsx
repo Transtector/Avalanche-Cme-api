@@ -24,7 +24,7 @@ var NetConfig = React.createClass({
 
 		return (
 			<InputGroup id="network" ref="_InputGroup">
-				<TextInput id="mac" placeholder="MAC" value={this.state.mac} />
+				<TextInput id="mac" name="MAC" defaultValue={this.state.mac} />
 
 				<div className="input-group-cluster">
 					<label htmlFor="dhcp">DHCP</label>
@@ -38,17 +38,16 @@ var NetConfig = React.createClass({
 					/>
 				</div>
 
-				<TextInput id="address" placeholder="IP address" 
-					value={this.state.address} onChange={this._requestChange} disabled={this.state.dhcp} />
-				<TextInput id="netmask" placeholder="Subnet mask" 
-					value={this.state.netmask} onChange={this._requestChange} disabled={this.state.dhcp} />
-				<TextInput id="gateway" placeholder="Gateway" 
-					value={this.state.gateway} onChange={this._requestChange} disabled={this.state.dhcp} />
-				<TextInput id="primary"	placeholder="Primary DNS" 
-					value={this.state.primary} onChange={this._requestChange} disabled={this.state.dhcp} />
-				<TextInput id="secondary" placeholder="Secondary DNS"
-					className='no-border' 
-					value={this.state.secondary} onChange={this._requestChange} disabled={this.state.dhcp} />
+				<TextInput id="address" name="IP address" 
+					defaultValue={this.state.address} onBlur={this._requestChange} disabled={this.state.dhcp} />
+				<TextInput id="netmask" name="Subnet mask" 
+					defaultValue={this.state.netmask} onBlur={this._requestChange} disabled={this.state.dhcp} />
+				<TextInput id="gateway" name="Gateway" 
+					defaultValue={this.state.gateway} onBlur={this._requestChange} disabled={this.state.dhcp} />
+				<TextInput id="primary"	name="Primary DNS" 
+					defaultValue={this.state.primary} onBlur={this._requestChange} disabled={this.state.dhcp} />
+				<TextInput id="secondary" name="Secondary DNS" className='no-border' 
+					defaultValue={this.state.secondary} onBlur={this._requestChange} disabled={this.state.dhcp} />
 
 				<div className="input-group-buttons">
 					<button className='btn' 

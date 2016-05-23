@@ -45,15 +45,15 @@ var ConfigPanel = React.createClass({
 					<UserConfig />
 
 					<InputGroup id="general">
-						<TextInput id="name" value={config.general.name} onChange={this._requestChange} />
-						<TextInput id="description" value={config.general.description} onChange={this._requestChange} />
-						<TextInput id="location" value={config.general.location} onChange={this._requestChange} />
+						<TextInput id="general.name" name='name' defaultValue={config.general.name} onBlur={this._requestChange} />
+						<TextInput id="general.description" name='description' defaultValue={config.general.description} onBlur={this._requestChange} />
+						<TextInput id="general.location" name='location' defaultValue={config.general.location} onBlur={this._requestChange} />
 					</InputGroup>
 
 					<InputGroup id="support">
-						<TextInput id="contact" value={config.support.contact} onChange={this._requestChange} />
-						<TextInput id="email" value={config.support.email} onChange={this._requestChange} />
-						<TextInput id="phone"  value={config.support.phone} onChange={this._requestChange} />
+						<TextInput id="support.contact" name='contact' defaultVvalue={config.support.contact} onBlur={this._requestChange} />
+						<TextInput id="support.email" name='email' defaultVvalue={config.support.email} onBlur={this._requestChange} />
+						<TextInput id="support.phone"  name='phone' defaultVvalue={config.support.phone} onBlur={this._requestChange} />
 					</InputGroup>
 
 					<NetConfig config={config.network} />
@@ -100,9 +100,19 @@ var ConfigPanel = React.createClass({
 	},
 
 	_requestChange: function(e) {
-		var obj = {};
-		obj[e.target.name] = e.target.value;
-		Actions.config(obj);
+
+		var id = e.target.id.split('.'), // id='general.name' -> [ 'general', 'name' ]
+			group = id[0], // 'general'
+			key = id[1], // 'name'
+			val = e.target.value;
+
+		// console.log(group + '.' + key + ': ' + this.props.config[group][key] + ' --> ' + val);
+
+		if (this.props.config[group][key] == val) return; // skip if no change
+
+		obj = {};
+		obj[key] = val;
+		Actions.config(obj); // config() just takes the key and will search config groups (for now)
 	},
 
 	_factoryReset: function() {

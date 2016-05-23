@@ -4,6 +4,8 @@
  *
  * Generic text input field wrapper.
  */
+'use strict';
+
 var React = require('react');
 
 var classNames = require('classnames');
@@ -11,36 +13,45 @@ var classNames = require('classnames');
 var TextInput = React.createClass({
 
 	propTypes: {
-		id: React.PropTypes.string.isRequired
+		id: React.PropTypes.string.isRequired,
+		name: React.PropTypes.string.isRequired
 	},
 
 	render: function() {
 		var id = this.props.id,
-			value = this.props.value,
-			placeholder = this.props.placeholder || id.charAt(0).toUpperCase() + id.slice(1),
-			caption = this.props.caption || placeholder,
 			type = this.props.type || "text",
-			onChange = this.props.onChange,
+			name = this.props.name.charAt(0).toUpperCase() + this.props.name.slice(1),
+
 			onBlur = this.props.onBlur,
-			readonly = !(onChange || onBlur),
+			readonly = !onBlur,
+
 			cn = classNames('input-group-cluster', this.props.className);
 
 		return (
 			<div className={cn}>
-				<label htmlFor={id}>{caption}</label>
-				<input
-					type={type}
-					name={id}
+				<label htmlFor={id}>{name}</label>
+				<input ref='_input'
 					id={id}
-					placeholder={placeholder}
-					value={value}
+					type={type}
+					name={name}
+					placeholder={this.props.placeholder || name}
+
+					defaultValue={this.props.defaultValue}
 					disabled={this.props.disabled}
-					onChange={onChange}
+
 					onBlur={onBlur}
 					readOnly={readonly}
+
+					onKeyUp={this._blurOnEnter}
 				/>
 			</div>
 		);
+	},
+
+	_blurOnEnter: function(e) {
+		if (e.keyCode == 13) {
+			this.refs['_input'].blur()
+		}
 	}
 });
 
