@@ -2,7 +2,7 @@
 # Provide access to API session token (cookie)
 # given matching username and passhash
 
-from . import settings, router, request, require_auth, json_response
+from . import settings, router, request, require_auth, json_response, json_error
 from .status import timestamp
 
 @router.route('/login')
@@ -11,10 +11,10 @@ def login():
 	p = request.args.get('p')
 
 	if u.lower() != settings['__username'].lower():
-		return json_response([ 'Login failed - unknown user.' ])
+		return json_error('Login failed - unknown user.', 403)
 
 	if p != settings['__passhash']:
-		return json_response([ 'Login failed - invalid password.' ]),
+		return json_error('Login failed - invalid password.', 403),
 
 	# else we've got valid login send response and force set session
 	return json_response({ 'timestamp': timestamp() }, True)

@@ -37,8 +37,8 @@ def json_response(obj, force_session=False):
 
 
 # JSON reponse on errors
-def json_error(obj, code=500):
-	return Response(json_serialize(obj), status=code, mimetype='application/json')
+def json_error(err, code=500):
+	return Response(err, status=code, mimetype='text/plain')
 
 
 # Filter out items named with double underscore "__" prefix
