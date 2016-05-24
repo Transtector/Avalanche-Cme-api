@@ -1,14 +1,14 @@
 
 
-.panel#error
+#error.panel
+	position fixed
 	text-align center
-	position absolute
 	z-index 10
 	left 0
 	top 0
 	right 0
 	bottom 0	
-	background rgba(0,0,0,0.1)
+	background rgba(0,0,0,0.2)
 	.popup
 		position absolute
 		width 380px
@@ -20,14 +20,19 @@
 		overflow hidden
 		background #fff
 		box-shadow 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)
-	.message
+	.title
+		padding 5px
+		font-size 140%
+		background error-color
+		color #fff
+	.errors
+		list-style none
 		text-align left
 		font-size 120%
-		color #aaa
-		height 84px
-		padding 24px
 	.buttons
-		text-align right
+		position absolute
+		bottom 0
+		right 0
 	.btn
 		font-size 18px
 		width 120px

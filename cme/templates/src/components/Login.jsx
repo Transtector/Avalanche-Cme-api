@@ -44,7 +44,7 @@ var Login = React.createClass({
 					Please sign in with the CME username and password.
 
 					<div className={cn}>
-						{this.props.errors}&nbsp;
+						{this.props.errors.map(function(err){ return err.source; })}&nbsp;
 					</div>
 				</div>
 

@@ -77,7 +77,7 @@ var UserConfig = React.createClass({
 	_inputChange: function(e) {
 		var obj = {};
 
-		obj[e.target.name] = e.target.value.trim();
+		obj[e.target.id] = e.target.value.trim();
 		this.setState(obj);
 	}
 });

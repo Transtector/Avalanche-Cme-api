@@ -20,9 +20,7 @@ var CmeAPI = require('./CmeAPI');
 function onError(jqXHR, status, error) {
 
 	var code = jqXHR.status;
-	var source = jqXHR.responseJSON
-		? jqXHR.responseJSON.join(',\n') + ' [' + code + ']'
-		: jqXHR.responseText + ' [' + code + ']';
+	var source = jqXHR.responseText;
 
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
@@ -135,11 +133,10 @@ var Actions = {
 
 			return CmeAPI.login(u, p)
 				.done(function(data) {
-					AppDispatcher.dispatch({ actionType: Constants.SESSION, data: true });
-
 					dispatchRequest('config');
 					CmeAPI.config(null)
 						.done(function(data) {
+							AppDispatcher.dispatch({ actionType: Constants.SESSION, data: true });
 							AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
 						})
 						.fail(onError);

@@ -20,35 +20,84 @@ header-gradient-bottom-stop = 45%
 
 @import mixins
 @import icons
-@import core
+
+// core html tag styles
+html,
+body
+	font 14px 'Helvetica Neue', Helvetica, Arial, sans-serif
+	line-height 1.4em
+	background bg-color
+	color fg-color
+	margin 0
+	padding 0
+	overflow-x hidden
+	font-smoothing antialiased
+		
+a
+	color link-color
+	
+input[type="text"]
+	outline 0
+
+.hidden
+	display none !important
+
+// default .btn (button) styles 
+.btn
+	background-color button-bg-color
+	background-repeat no-repeat
+	background-position center center
+	background-size 32px 32px
+	color #fff
+	font-size 20px
+	height 48px
+	width 64px
+	border 0
+	outline 0
+	transition all 0.3s ease 0s
+
+.btn.icon-left
+	position relative
+	padding-left 64px
+	background-position-x 16px
+	background-color transparent
+	width auto
+	> div
+		text-align left
+		color fg-color
+	> div:last-child
+		font-size 70%
+		color lighten(fg-color, 30%)
+
+.btn.icon-left > span.btn-icon
+	position absolute
+	width 48px
+	height 48px
+	left 8px
+	top 0
+	border-radius 100%
+	background-color button-bg-color
+	background-repeat no-repeat
+	background-position center center	
+	background-size 32px 32px
+
+.btn:hover
+	opacity 0.75
+	cursor pointer
+
+.btn:disabled
+	opacity 1
+	background-color grayscale(button-bg-color)
+	cursor default
+
+
+
 @import header
 @import login
-
-#cmeapp > div
-	position relative
-		
-.panel-header
-	position relative
-	padding 10px
-	background-color header-bg-color
-	border-bottom 1px solid #ccc
-	.title
-		font-size 150%
-	.subtitle
-		margin 0.5em 0 0 0.5em
-		font-style italic
-
-.panel-content::after
-	content ''
-	display block
-	clear both
-
 @import errorPanel
 @import configPanel
 @import homePanel
 
-.hidden
-	display none !important
 	
 div#test-buttons
 	display none

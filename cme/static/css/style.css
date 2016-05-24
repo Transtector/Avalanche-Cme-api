@@ -40,7 +40,13 @@ body {
 a {
   color: #00b7ff;
 }
-button.btn {
+input[type="text"] {
+  outline: 0;
+}
+.hidden {
+  display: none !important;
+}
+.btn {
   background-color: #3ea4e1;
   background-repeat: no-repeat;
   background-position: center center;
@@ -57,22 +63,22 @@ button.btn {
   -o-transition: all 0.3s ease 0s;
   transition: all 0.3s ease 0s;
 }
-button.btn.icon-left {
+.btn.icon-left {
   position: relative;
   padding-left: 64px;
   background-position-x: 16px;
   background-color: transparent;
   width: auto;
 }
-button.btn.icon-left > div {
+.btn.icon-left > div {
   text-align: left;
   color: #4d4d4d;
 }
-button.btn.icon-left > div:last-child {
+.btn.icon-left > div:last-child {
   font-size: 70%;
   color: #828282;
 }
-button.btn.icon-left > span.btn-icon {
+.btn.icon-left > span.btn-icon {
   position: absolute;
   width: 48px;
   height: 48px;
@@ -88,17 +94,14 @@ button.btn.icon-left > span.btn-icon {
   background-position: center center;
   background-size: 32px 32px;
 }
-button.btn:hover {
+.btn:hover {
   opacity: 0.75;
   cursor: pointer;
 }
-button.btn:disabled {
+.btn:disabled {
   opacity: 1;
   background-color: #909090;
   cursor: default;
-}
-input[type="text"] {
-  outline: 0;
 }
 header {
   position: relative;
@@ -235,6 +238,24 @@ header #buttons {
 header #buttons button {
   margin: 26px 16px;
 }
+.panel-header {
+  position: relative;
+  padding: 10px;
+  background-color: #eee;
+  border-bottom: 1px solid #ccc;
+}
+.panel-header .title {
+  font-size: 150%;
+}
+.panel-header .subtitle {
+  margin: 0.5em 0 0 0.5em;
+  font-style: italic;
+}
+.panel-content::after {
+  content: '';
+  display: block;
+  clear: both;
+}
 @media only screen and (min-width: 1400px) {
   header #buttons {
     min-width: 1024px;
@@ -331,38 +352,17 @@ header #buttons button {
   background: transparent;
   outline: none;
 }
-#cmeapp > div {
-  position: relative;
-}
-.panel-header {
-  position: relative;
-  padding: 10px;
-  background-color: #eee;
-  border-bottom: 1px solid #ccc;
-}
-.panel-header .title {
-  font-size: 150%;
-}
-.panel-header .subtitle {
-  margin: 0.5em 0 0 0.5em;
-  font-style: italic;
-}
-.panel-content::after {
-  content: '';
-  display: block;
-  clear: both;
-}
-.panel#error {
+#error.panel {
+  position: fixed;
   text-align: center;
-  position: absolute;
   z-index: 10;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.2);
 }
-.panel#error .popup {
+#error.panel .popup {
   position: absolute;
   width: 380px;
   height: 180px;
@@ -378,17 +378,23 @@ header #buttons button {
   -o-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
   box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
-.panel#error .message {
+#error.panel .title {
+  padding: 5px;
+  font-size: 140%;
+  background: #f22;
+  color: #fff;
+}
+#error.panel .errors {
+  list-style: none;
   text-align: left;
   font-size: 120%;
-  color: #aaa;
-  height: 84px;
-  padding: 24px;
 }
-.panel#error .buttons {
-  text-align: right;
+#error.panel .buttons {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
-.panel#error .btn {
+#error.panel .btn {
   font-size: 18px;
   width: 120px;
   color: #3ea4e1;
@@ -1275,9 +1281,6 @@ li.input-group-cluster > .btn:disabled {
   position: absolute;
   left: -20px;
   color: #4d4d4d;
-}
-.hidden {
-  display: none !important;
 }
 div#test-buttons {
   display: none;

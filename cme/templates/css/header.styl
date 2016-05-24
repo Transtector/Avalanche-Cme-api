@@ -89,6 +89,23 @@ header // 100px height, vertically center logo w/24px padding
 		button
 			margin 26px 16px
 
+.panel-header
+	position relative
+	padding 10px
+	background-color header-bg-color
+	border-bottom 1px solid #ccc
+	.title
+		font-size 150%
+	.subtitle
+		margin 0.5em 0 0 0.5em
+		font-style italic
+
+.panel-content::after
+	content ''
+	display block
+	clear both
+
+
 // for very wide layouts, open up the buttons min-width
 @media only screen and (min-width: 1400px)
 	header #buttons

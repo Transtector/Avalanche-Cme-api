@@ -86,5 +86,5 @@ var CmeApp = React.createClass({
 		Actions.injectError('This is a test');
 	}
 });
-
+window.testError = function() { Actions.injectError('Manual error test');}
 module.exports = CmeApp;
