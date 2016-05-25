@@ -47,10 +47,17 @@ APPLOG = os.path.join(LOGDIR, 'cme.log')
 SERVERLOG = os.path.join(LOGDIR, 'server.log')
 ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 
+# Generally uses the same IP (127.0.0.1) for memcache
+# transfer between Cme and Cme-hw, but you can set this
+# for another machine if you enable it to accept external
+# connections (comment out the appropriate line in its
+# /etc/memcached.conf file).
+MEMCACHE = '127.0.0.1:11211'
+
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')
 
-# recovery flag is signaled by presence of this file
+# recovery mode flag is signaled by presence of this file
 RECOVERY = os.path.isfile(os.path.join(APPROOT, 'recovery.txt'))
 
 # create USERDATA folders if they don't yet exist

@@ -4,14 +4,14 @@ from datetime import datetime, timezone
 import subprocess, json
 import memcache
 
-from . import settings, router, request, path_parse, json_response, json_error, require_auth
+from . import app, settings, router, request, path_parse, json_response, json_error, require_auth
 from .Channel import Channel
 
 # Note you can use the memcache server on another machine
 # if you allow access.  Comment the approppriate line in
 # the /etc/memcached.conf on the other machine and restart
 # the memcached service.
-mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+mc = memcache.Client([app.config['MEMCACHE']], debug=0)
 
 def get_request_param(key):
 	''' Searches the request args (i.e., query string of the request URL)
