@@ -136,13 +136,13 @@ header #model {
 header #recovery {
   position: absolute;
   width: 100%;
-  left: 0;
-  top: 10px;
+  top: 80px;
   z-index: 9;
   text-align: center;
-  font-size: 18px;
-  font-style: italic;
-  color: #f22;
+  font-size: 40px;
+  color: #eee;
+  opacity: 0.4;
+  text-shadow: -1px -1px 0 #f22, -1px 1px 0 #f22, 1px -1px 0 #f22, 1px 1px 0 #f22;
 }
 header #tab {
   position: absolute;

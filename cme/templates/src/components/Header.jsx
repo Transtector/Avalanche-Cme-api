@@ -35,10 +35,10 @@ var Header = React.createClass({
 
 		return (
 			<header>
+				{this.props.device.recovery ? <div id="recovery">RECOVERY MODE</div> : null}
 				<div id="branding">
 					<div id="title">CME</div>
 					<div id="model">{this.props.device.modelNumber}</div>
-					{this.props.device.recovery ? <div id="recovery">RECOVERY MODE</div> : null}
 				</div>
 
 				<div id="tab">&nbsp;</div>
