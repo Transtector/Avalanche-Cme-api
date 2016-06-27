@@ -2,16 +2,13 @@
 
 from datetime import datetime, timezone
 import subprocess, json
-import memcache
 
-from . import app, settings, router, request, path_parse, json_response, json_error, require_auth
-from .Channel import Channel
+from . import settings, router, request, path_parse, json_response, json_error, require_auth
+from .Models import ChannelManager
 
-# Note you can use the memcache server on another machine
-# if you allow access.  Comment the approppriate line in
-# the /etc/memcached.conf on the other machine and restart
-# the memcached service.
-mc = memcache.Client([app.config['MEMCACHE']], debug=0)
+
+ch_mgr = ChannelManager()
+
 
 def get_request_param(key):
 	''' Searches the request args (i.e., query string of the request URL)
@@ -46,75 +43,23 @@ def get_request_param(key):
 	except:
 		return []
 
-def update_ch_pubs(channels):
-	''' Reqests for all channels can provide query string parameters to
-		set the publishing configuration for the channels.  So, for all
-		available channels we convert "expand" and "reset" (or other)
-		into channel publishing configuration and write them to the
-		memcache.
-		channels is a list of channel id's for which to update
-		publishing configuration.
-	'''
-	for ch in channels:
-		# channel publishing configs are stored 
-		# in memcache by 'chX_pub' naming convention
-		ch_pub_key = ch + "_pub"
-
-		# get the current ch_pub if any
-		ch_pub = json.loads(mc.get(ch_pub_key) or '{}')
-		
-		# strip channel index to filter query parameters
-		# if they're provided as comma-separated list
-		# of indices (e.g., 'reset=0,1,2')
-		index = int(ch[2:])
-
-		# Add or remove the config parameters from ch_pub
-		# as determined by the query request parameters.
-		# See get_request_param() above.
-		for k, v in [(p, get_request_param(p))for p in ['reset', 'expand']]:
-
-			if v == True or index in v:
-				ch_pub[k] = True
-			else:
-				try:
-					del ch_pub[k]
-				except:
-					pass
-		
-		# send the publish config for the channel to memcache
-		# if we've filled it, otherwise remove it
-		if ch_pub:
-			mc.set(ch_pub_key, json.dumps(ch_pub))
-		else:
-			mc.delete(ch_pub_key)
-
 
 def status(ch_index=-1):
 	''' Top-level CME status object
 
 		Returns a single channel identified with integer ch_index
-		from the channels in the memcache status['channels'] list
 		or all channels if ch_index < 0 (the default).
 	'''	
 
 	# get list of available channels
-	channels = json.loads(mc.get('channels') or '[]') # [ 'ch0', ..., 'chN' ]
+	channels = ch_mgr.channels # [ 'ch0', ..., 'chN' ]
 
 	# select all channels (ch_index < 0)
 	if ch_index < 0:
-
-		update_ch_pubs(channels) # update all channels' pub config
-
-		return { 'channels': [ Channel(json.loads(mc.get(ch))) for ch in channels ] }
+		return { 'channels': [ ch_mgr.get_channel(ch) for ch in channels ] }
 
 	# select specific channel 'chX'
-	ch_id = 'ch' + str(ch_index)
-	if not ch_id in channels:
-		return None
-
-	update_ch_pubs([ ch_id ]) # just update this channel's pub config
-
-	return Channel(json.loads(mc.get(ch_id)))
+	return ch_mgr.get_channel('ch' + str(ch_index))
 
 
 # CME channels request
@@ -127,7 +72,7 @@ def channels():
 @router.route('/channels/')
 @require_auth
 def channels_list():
-	return json_response({ 'channels': json.loads(mc.get('channels') or '[]') })
+	return json_response({ 'channels': ch_mgr.channels })
 
 
 # CME channel update

@@ -5,10 +5,7 @@
 # configuration values herein may be overridden.  To reset all config
 # values to defaults, simply delete settings.json.
 
-import os
-import uuid
-import platform
-import json
+import os, uuid, platform, json
 
 DEBUG = True
 
@@ -34,7 +31,7 @@ USB = os.path.abspath('/media/usb')
 
 
 # globbing pattern for update image files
-UPDATE_GLOB = '1500-???-v*-SWARE-CME.tgz'
+UPDATE_GLOB = '1500-???-v*-SWARE-CME*.tgz'
 PUBLIC_UPDATES_URL = 'https://s3.amazonaws.com/transtectorpublicdownloads/'
 
 
@@ -52,7 +49,7 @@ ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 # for another machine if you enable it to accept external
 # connections (comment out the appropriate line in its
 # /etc/memcached.conf file).
-MEMCACHE = '127.0.0.1:11211'
+MEMCACHE = '10.16.120.159:11211'
 
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')

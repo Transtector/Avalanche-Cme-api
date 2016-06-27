@@ -6,8 +6,9 @@ import urllib.request
 from xml.dom.minidom import parseString
 import xml.dom.minidom
 
-from . import (router, app, settings, request, path_parse, secure_filename, refresh_device,
+from . import (router, settings, request, path_parse, secure_filename, refresh_device,
 	allowed_file, json_response, json_error, json_filter, require_auth)
+from .. import Config
 from ..util.Reboot import restart
 
 @router.route('/device/')
@@ -29,9 +30,9 @@ def device_read_only_settings():
 	# get visible device parameters
 	device = json_filter(settings['__device'].items())
 
-	# add 'recovery' flag depends on how config.py
+	# add 'recovery' flag depends on how Config.py
 	# loaded (i.e., the presence of a recovery flag file)
-	device['recovery'] = app.config['RECOVERY']
+	device['recovery'] = Config.RECOVERY
 
 	if item == 'device':
 		# request all device parameters
@@ -88,11 +89,11 @@ def device_updates():
 	}
 
 	# read configurable items into local variables
-	update_dir = app.config['UPDATE']
-	upload_dir = app.config['UPLOAD_FOLDER']
-	usb_dir = app.config['USB']
-	update_glob = app.config['UPDATE_GLOB']
-	pub_url = app.config['PUBLIC_UPDATES_URL']
+	update_dir = Config.UPDATE
+	upload_dir = Config.UPLOAD_FOLDER
+	usb_dir = Config.USB
+	update_glob = Config.UPDATE_GLOB
+	pub_url = Config.PUBLIC_UPDATES_URL
 
 	logger = logging.getLogger('cme')
 
@@ -240,7 +241,7 @@ def upload_file():
 		if file and allowed_file(file.filename):
 			filename = secure_filename(file.filename)
 
-			p = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+			p = os.path.join(Config.UPLOAD_FOLDER, filename)
 
 			print ("Saved upload to `", p, "`")
 			file.save(p)

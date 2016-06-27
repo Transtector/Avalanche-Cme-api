@@ -1,7 +1,8 @@
-import os
+import os, glob
 import tempfile
 
-from . import app, router, request, send_from_directory, send_file, json_response, json_error, require_auth
+from . import router, request, send_from_directory, send_file, json_response, json_error, require_auth
+from .. import Config
 
 def bool_arg(name, request):
 	''' Convert query string arguments to boolean values.
@@ -26,26 +27,27 @@ def logs(filename=None):
 			download (bool) - download identified log file (as opposed to stream content)
 			clear (bool) - clear the identified log file (content returned before clear)
 	'''
-	logdir = app.config['LOGDIR']
+	logdir = Config.LOGDIR
 
 	if not filename:
 		# return the list of logs available if no name requested
 	
 		logs = [] # array of { filename, file size }
 
-		for f in os.listdir(logdir):
+		for f in glob.glob(os.path.join(logdir, '*.log*' )):
 			path = os.path.join(logdir, f)
 
 			if os.path.isfile(path):
-				logs.append({ f: os.path.getsize(path) })
+				logs.append({ os.path.basename(f): os.path.getsize(path) })
 
 		return json_response({ "logs": logs })
 
 	# see if requested log is available
 	path = os.path.join(logdir, filename)
 
-	if os.path.isfile(path):
-		# good file - check the query params for processing options
+	if os.path.isfile(path) and path in glob.glob(os.path.join(logdir, '*.log*')):
+		# check that file exists and matches the log file globbing pattern
+		# then check the query params for processing options
 
 		download = bool_arg('download', request)
 		clear = bool_arg('clear', request)

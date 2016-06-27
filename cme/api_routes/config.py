@@ -2,7 +2,7 @@
 
 import os, threading
 
-from . import (app, router, settings, request, json_response, 
+from . import (router, settings, request, json_response, 
 	json_error, json_filter, require_auth, refresh_device)
 
 from ..util.ClockUtils import refresh_time
@@ -35,6 +35,4 @@ def reset():
 
 	# Return nothing (but status = 200) to let 'em know we're resetting
 	return json_response(None)
-
-
 

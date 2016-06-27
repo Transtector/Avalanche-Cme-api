@@ -1,13 +1,15 @@
 # api routes
 
-import os
-import json
+import os, json
 from datetime import datetime, timedelta
 
 from flask import Blueprint, Response, request, send_from_directory, send_file
 from werkzeug import secure_filename
 
-from .. import app, settings, require_auth, path_parse, Serializer
+from ..util.Auth import require_auth, Serializer
+from ..util.UriParse import path_parse
+from ..Settings import settings
+from .. import Config
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)
@@ -18,20 +20,20 @@ def json_response(obj, force_session=False):
 	res = Response(json_serialize(obj), status=200, mimetype='application/json')
 
 	try:
-		prev_cookie = request.cookies[app.config['SESSION_COOKIE_NAME']]
+		prev_cookie = request.cookies[Config.SESSION_COOKIE_NAME]
 	
 	except KeyError:
 		prev_cookie = None
 
 	if force_session or prev_cookie is not None:
 		# generate a signed session cookie
-		session_cookie = Serializer(app.config['SECRET_KEY'],
-					   				expires_in = app.config['SESSION_EXPIRATION'])
+		session_cookie = Serializer(Config.SECRET_KEY,
+					   				expires_in = Config.SESSION_EXPIRATION)
 
-		res.set_cookie(app.config['SESSION_COOKIE_NAME'],
+		res.set_cookie(Config.SESSION_COOKIE_NAME,
 					   session_cookie.dumps(settings['__username']),
 					   expires=datetime.utcnow() + 
-					   		timedelta(seconds=app.config['SESSION_EXPIRATION']))
+					   		timedelta(seconds=Config.SESSION_EXPIRATION))
 
 	return res
 
@@ -88,7 +90,7 @@ def allowed_file(filename):
 	''' Check passed filename extension to see if it's allowed upload.
 	'''
 	return '.' in filename and \
-			filename.rsplit('.', 1)[1].lower() in [x.lower() for x in app.config['ALLOWED_EXTENSIONS']]
+			filename.rsplit('.', 1)[1].lower() in [x.lower() for x in Config.ALLOWED_EXTENSIONS]
 
 
 def refresh_device():
@@ -96,8 +98,8 @@ def refresh_device():
 		be at most a single file which will be used if an update
 		is triggered.
 	'''
-	files = [fn for fn in os.listdir(app.config['UPLOAD_FOLDER'])
-			if any(fn.endswith(ext) for ext in app.config['ALLOWED_EXTENSIONS'])]
+	files = [fn for fn in os.listdir(Config.UPLOAD_FOLDER)
+			if any(fn.endswith(ext) for ext in Config.ALLOWED_EXTENSIONS)]
 
 	# choose the first one, if any
 	settings['__device']['__update'] = '' if len(files) == 0 else files[0]

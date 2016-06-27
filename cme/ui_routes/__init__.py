@@ -1,8 +1,8 @@
 # ui routes
 
 from flask import Blueprint, render_template
-
-from .. import app, settings, require_auth
+from ..util.Auth import require_auth
+from ..Settings import settings
 
 router = Blueprint('uiroutes', __name__)
 

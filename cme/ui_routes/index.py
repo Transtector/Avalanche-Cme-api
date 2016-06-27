@@ -1,5 +1,5 @@
 
-from . import app, settings, router, render_template, APIError, require_auth
+from . import require_auth, settings, router, render_template
 
 @router.route('/')
 @router.route('/index')
