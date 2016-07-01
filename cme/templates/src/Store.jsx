@@ -17,14 +17,18 @@ var EventEmitter = require('events').EventEmitter;
 
 var assign = require('object-assign'); // ES6 polyfill
 
-var CHANGE_EVENT = 'change';
-
 var _device = {};
 var _config = {};
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
 var _ui_panel = 'home';
+var _logs = [];
+var _updates = { pending: false, usb: [], web: [], uploads: [] };
+var _channels = [];
+var _channel_objs = {};
+var _clock;
+var _temperature;
 
 var Store = assign({}, EventEmitter.prototype, {
 
@@ -34,6 +38,15 @@ var Store = assign({}, EventEmitter.prototype, {
 			config: _config, // { <cme_config> }
 			errors: _errors, // [ <string> ]
 
+			// UI-polled states:
+
+			channels: _channels, // [ <channel_id> ], list of active channels
+			channel_objs: _channel_objs, // holds the actual channel objects by channel id { chX: <channel_object> }
+			logs: _logs, // [ { filename <string>: size <int> } ]
+			updates: _updates, // hash of available updates and their sources
+			clock: _clock, // <ISO-8601 string>, CPU datetime, UTC
+			temperature: _temperature, // <float>, CPU temperature degree C
+
 			// generally UI-specific states follow:
 
 			isLoggedIn: _isLoggedIn, // set via CmeAPI.session(callback(<bool>)); true if valid session
@@ -42,24 +55,26 @@ var Store = assign({}, EventEmitter.prototype, {
 		}
 	},
 
-	emitChange: function() {
-
-		this.emit(CHANGE_EVENT);
+	emitChange: function(eventName) {
+		console.log("Store: firing emitChange(" + eventName + ")!")		
+		this.emit(eventName);
 	},
 
-	addChangeListener: function(callback) {
+	addChangeListener: function(eventName, callback) {
 
-		this.on(CHANGE_EVENT, callback);
+		this.on(eventName, callback);
 	},
 
-	removeChangeListener: function(callback) {
+	removeChangeListener: function(eventName, callback) {
 
-		this.removeListener(CHANGE_EVENT, callback);
+		this.removeListener(eventName, callback);
 	},
 
 	dispatcherIndex: AppDispatcher.register(function(action) {
+		
+		var event = action.actionType;
 
-		switch(action.actionType) {
+		switch(event) {
 
 			case Constants.REQUEST: // a request has been submitted to server
 				_isSubmitting = true;
@@ -80,6 +95,7 @@ var Store = assign({}, EventEmitter.prototype, {
 
 			case Constants.CLEAR_ERRORS:
 				_errors = [];
+				event = Constants.ERROR; // trigger listeners to update errors state
 				break;
 
 			case Constants.CONFIG:
@@ -115,16 +131,59 @@ var Store = assign({}, EventEmitter.prototype, {
 				_ui_panel = action.data.toLowerCase();
 				break;
 
+			case Constants.CLOCK: // clock response
+				_clock = action.data.clock;
+				break;
+
+			case Constants.TEMPERATURE: // cpu temperature response
+				_temperature = action.data.temperature;
+				break;
+
+			case Constants.LOGS: // cme log files
+				_logs = action.data.logs;
+				break;
+
+			case Constants.UPDATES: // cme update images
+				_updates = action.data.updates;
+				break;
+
+			case Constants.CHANNELS: // status/channels response
+				_channels = action.data.channels;
+				break;
+
+			case Constants.CHANNEL:
+				// action.data = { chX: <channelX> }
+				var ch_id = Object.keys(action.data)[0];
+
+				_channel_objs[ch_id] = action.data[ch_id];
+
+				// add the channel id to the event
+				event += ch_id.toUpperCase()
+
+				break;
+
+			case Constants.CONTROL:
+				// action.data = { 'chX:cY': <controlY> }
+				var id = Object.keys(action.data)[0],
+					keys = id.split(':'),
+					ch_index = parseInt(keys[0].slice(2)),
+					c_index = parseInt(keys[1].slice(1));
+
+				assign(_channels[ch_index].controls[c_index], action.data[id]);
+				break;
+
 			default: // unknown action
+				event = null;
 				// ignore
 		}
 
 		// explicitly check here for REQUEST action
 		// to reset the _isSubmitting bool
-		if (action.actionType !== Constants.REQUEST)
+		if (event && event !== Constants.REQUEST)
 			_isSubmitting = false;
 
-		Store.emitChange(); // notify store changes
+		if (event)
+			Store.emitChange(event); // notify store changes
 
 		return true; // No errors. Needed by promise in Dispatcher.
 	})

@@ -274,10 +274,10 @@ var Actions = {
 			.fail(onError);
 	},
 
-	channel: function(chId, ch_pub, ch_config) {
-		dispatchRequest(chId + ' ' + JSON.stringify(ch_pub));
+	channel: function(ch_id, ch_config, ch_history) {
+		dispatchRequest('reading ' + ch_id + '( ' + ch_config + ', ' + ch_history + ' )');
 
-		CmeAPI.channel(chId, ch_pub, ch_config)
+		CmeAPI.channel(ch_id, ch_config, ch_history)
 			.done(function(data) {
 				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 			})

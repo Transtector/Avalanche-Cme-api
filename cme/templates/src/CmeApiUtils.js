@@ -8,6 +8,8 @@ module.exports = exports = {
 	},
 
 	formatTemperatureDisplay: function(celsius, units, digits) {
+		if (!celsius) return -40;
+
 		var value = (units == this.TEMPERATURE_UNITS.CELSIUS) 
 			? celsius 
 			: celsius * (9/5) + 32,

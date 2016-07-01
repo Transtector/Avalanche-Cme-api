@@ -236,18 +236,20 @@ var CmeAPI = {
 		});
 	},
 
-	channel: function(chId, ch_read_config, obj) {
-		var chIndex = parseInt(chId.slice(2)),
-			method = obj ? 'POST' : 'GET',
-			payload = obj 
-				? JSON.stringify(obj) 
-				: ch_read_config
-					? ch_read_config
-					: null;
+	channel: function(ch_id, ch_config, ch_history) {
+		var ch_index = parseInt(ch_id.slice(2)),
+			method = (ch_config && !ch_history) ? 'POST' : 'GET',
+			payload = (ch_config && !ch_history) ? JSON.stringify(ch_config) : null,
+			url = API.channel + ch_index;
+
+		// add query string to get history
+		if (method == 'GET' && ch_history) {
+			url += '?h=' + ch_history;
+		}
 
 		return $.ajax({
 			type: method,
-			url: API.channel + chIndex, // /api/ch/0
+			url: url,
 			data: payload,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'

@@ -3,6 +3,28 @@
  * james.brunner@kaelus.com
  *
  * Component to group all the Cme clock configuration.
+ *
+ * This component will render as either a widget (basically
+ * a simple clock display) or as a configuration panel (in
+ * order to update the CME clock configuration settings).
+ * Pass flavor="config" to use the configuration view, the
+ * default flavor if missing is flavor="widget".
+ *
+ * For clock configuration editing, the component stores an
+ * internal copy of the clock configuration passed in on the
+ * (required) config property.  Local changes are updated in
+ * the UI panel, but changes are not persisted to the system
+ * unless/until they are applied (see the _onApply function).
+ *
+ * Once system clock configuration settings are applied, they
+ * are flowed down through the component hierarchy back to
+ * the Clock component via the updated config prop.  At some
+ * point a parent component must be listening for a CONFIG
+ * update from the Store in order to pass the clock config
+ * changes down to the component.
+ *
+ * Clock polling is handled in _onClockChange().
+ *
  */
  'use strict';
 
@@ -10,7 +32,7 @@ var React = require('react');
 
 var Constants = require('../Constants');
 var Actions = require('../Actions');
-var PollingStore = require('../PollingStore');
+var Store = require('../Store');
 
 var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
@@ -21,29 +43,6 @@ var Datetime = require('react-datetime');
 
 var classNames = require('classnames');
 var assign = require('object-assign'); // ES6 polyfill
-
-function formatPropsToState(props) {
-
-	var state = assign({}, props);
-
-	state.status = [];
-	props.status.forEach(function(s) {
-		// s _must_ conform to ISO 8601 otherwise invalid...
-		var m = moment.utc(s, moment.ISO_8601);
-		state.status.push(m.isValid() ? m : moment.invalid());
-	});
-
-	if (props.servers)
-		state.serversCSV = props.servers.length > 0 ? props.servers.join(', ') : '';
-	else
-		state.serversCSV = '';
-
-	if (!state.ntp) {
-		state.current = moment.utc()
-	}
-
-	return state;
-}
 
 var utils = require('../CmeApiUtils');
 
@@ -73,6 +72,7 @@ var NtpStatus = React.createClass({
 			statusColor = 'grey';
 
 		} else {
+
 			if (!this.props.value[1]) {
 				statusTime = this.props.value[0];
 				statusColor = 'red';
@@ -102,16 +102,43 @@ var NtpStatus = React.createClass({
 	}
 });
 
+var formatServersCSV = function (servers) {
+	return (servers && servers.length > 0)
+			? servers.join(', ')
+			: '';
+}
+
+var configPropToState = function (config) {
+
+	if (!config) return;
+
+	var state = assign({}, config);
+
+	// add a serversCSV for editing the NTP servers
+	// in the clock configuration
+	state.serversCSV = formatServersCSV(config.servers);
+
+	// force the NTP status entries to conform to
+	// ISO 8601
+	state.status = []
+	config.status.forEach(function(s, i) {
+		// s _must_ conform to ISO 8601 otherwise invalid...
+		var m = moment.utc(s, moment.ISO_8601);
+		state.status.push(m.isValid() ? m : moment.invalid());
+	});
+
+	return state;
+}
+
 var Clock = React.createClass({
 
-	_clockPollTimeout: null,
-	_clockPollStartTime: 0,
-	_clockPollPeriod: 1000,
+	_pollTimeout: null,
+	_pollTime: 0,
 
 	propTypes: {
 		flavor: React.PropTypes.string, // 'config' or 'widget'
 		pollPeriod: React.PropTypes.number, // how fast to poll in milliseconds
-		config: React.PropTypes.object.isRequired // CME clock configuration object
+		config: React.PropTypes.object.isRequired // clock configuration
 	},
 
 	getDefaultProps: function() {
@@ -122,56 +149,32 @@ var Clock = React.createClass({
 	},
 
 	getInitialState: function() {
-
-		return assign({ clock: PollingStore.getState().clock }, formatPropsToState(this.props.config));
+		
+		return { 
+			clock: Store.getState().clock, // CME current date/time
+			config: configPropToState(this.props.config),
+			current: moment.utc()
+		}
 	},
 
 	componentWillReceiveProps: function(nextProps) {
 
-		// only update our internal state with those props that
-		// are different from our current props.
-		var updateState = {},
-			oldprops = formatPropsToState(this.props.config),
-			newprops = formatPropsToState(nextProps.config);
-
-		Object.keys(newprops).forEach(function(key){
-			if (key !== 'servers' && oldprops[key] !== newprops[key]) {
-				updateState[key] = newprops[key];
-			}
-		}, this);
-
-		this.setState(updateState);
-
-		// If we're waiting for clock poll response there will be a time
-		// in the _clockPollStartTime.  Start a new Timeout based on the
-		// _clockPollPeriod.  Because we might hit this code many times,
-		// not just for clock updates, we clear previous timeouts so we
-		// only get at most a single pending clock request.
-		if (this._clockPollStartTime) {
-
-			var age = moment().valueOf() - this._clockPollStartTime,
-				period = (age >= this._clockPollPeriod)
-							? 0
-							: this._clockPollPeriod - (age % this._clockPollPeriod)
-
-			clearTimeout(this._clockPollTimeout);
-			this._clockPollTimeout = null;
-			this._clockPollTimeout = setTimeout(this._pollClock, period);
-		}
+		this.setState({ config: configPropToState(nextProps.config) });
 	},
 
 	componentDidMount: function() {
-		PollingStore.addChangeListener(Constants.ChangeTypes.CLOCK, this._onClockChange);
-		this._clockPollPeriod = this.props.pollPeriod;
+
+		Store.addChangeListener(Constants.CLOCK, this._onClockChange);
 
 		if (this.props.flavor === 'widget')
-			this._startClockPoll();
+			this._startPoll();
 	},
 
 	componentWillUnmount: function() {
 
-		this._stopClockPoll();
-		PollingStore.removeChangeListener(Constants.ChangeTypes.CLOCK, this._onClockChange);
+		this._stopPoll();
+
+		Store.removeChangeListener(Constants.CLOCK, this._onClockChange);
 	},
 
 	render: function() {
@@ -184,45 +187,50 @@ var Clock = React.createClass({
 
 	_renderAsConfig: function() {
 
-		// Changes are pending if certain states !== props.  These are the states the user may
-		// want to apply.  Other state items will always be changing (e.g., the current time and
-		// ntp status).  We don't track these changes because they're read-only as far as the
-		// clock is concerned.  We also don't compare the ntp servers array.  We use serversCSV
-		// string internally and format and submit new servers array based on serversCSV in _onApply.
-		var currentProps = formatPropsToState(this.props.config);
-		var changesPending = Object.keys(currentProps)
+		var clock = moment.utc(this.state.clock);
+		
+		var config = this.state.config;
+
+		var datetime = utils.formatRelativeMoment(config.ntp ? clock : this.state.current, 
+			config.displayRelativeTo, config.zone);
+
+		var ntpStatusFormat = config.display12HourTime
+								? config.displayTimeFormat12Hour
+								: config.displayTimeFormat24Hour;
+
+		// Changes are pending only if certain state config keys don't equal current 
+		// CME clock config.  We'll enable the "Apply" and "Reset" actions in this
+		// case.  We have to add in the serversCSV key to check for changes with it.
+		var clockConfig = configPropToState(this.props.config);
+
+		// ignore the servers and status keys when we check if local config state
+		// matches the CME clock config state.
+		var changesPending = Object.keys(clockConfig)
 			.filter(function (key) {
 				return ['servers', 'status'].indexOf(key) == -1;
-			}, this)
+			})
 			.some(function(key) {
-				return currentProps[key] !== this.state[key];
-			}, this);
+				return clockConfig[key] !== config[key];
+			});
 
-		var clock = moment.utc(this.state.clock);
-		var datetime = utils.formatRelativeMoment(clock, 
-			this.state.displayRelativeTo, this.state.zone);
-
-		var ntpStatusFormat = this.state.display12HourTime
-								? this.state.displayTimeFormat12Hour
-								: this.state.displayTimeFormat24Hour;
 
 		return (
-			<InputGroup id="clock" ref="_InputGroup" onExpand={this._startClockPoll} onCollapse={this._stopClockPoll}>
+			<InputGroup id="clock" ref="_InputGroup" onExpand={this._startPoll} onCollapse={this._stopPoll}>
 				<div className="input-group-cluster">
 					<label htmlFor="current">Current</label>
 					<div id="current">
 						<Datetime 
 							timeFormat={false} 
-							dateFormat={this.state.displayDateFormat} 
-							inputProps={{ disabled: this.state.ntp }} 
+							dateFormat={config.displayDateFormat} 
+							inputProps={{ disabled: config.ntp }} 
 							onChange={this._requestDateChange} 
 							value={moment(datetime)} />
 						<Datetime 
 							dateFormat={false} 
-							timeFormat={this.state.display12HourTime 
-								? this.state.displayTimeFormat12Hour 
-								: this.state.displayTimeFormat24Hour} 
-							inputProps={{ disabled: this.state.ntp }} 
+							timeFormat={config.display12HourTime 
+								? config.displayTimeFormat12Hour 
+								: config.displayTimeFormat24Hour} 
+							inputProps={{ disabled: config.ntp }} 
 							onChange={this._requestTimeChange} 
 							value={moment(datetime)} 
 							className="shifted" />
@@ -234,7 +242,7 @@ var Clock = React.createClass({
 					<ZoneInput id="zone" 
 						placeholder="Time zone offset" 
 						onChange={this._requestZoneChange} 
-						value={this.state.zone} />
+						value={config.zone} />
 				</div>
 
 				<div className="input-group-cluster">
@@ -245,7 +253,7 @@ var Clock = React.createClass({
 								id="displayAs_utc" 
 								name="displayAs" 
 								onChange={this._requestDisplayAsChange}
-								checked={this.state.displayRelativeTo === utils.TIME_DISPLAY.UTC} />
+								checked={config.displayRelativeTo === utils.TIME_DISPLAY.UTC} />
 							UTC
 						</label>
 
@@ -254,7 +262,7 @@ var Clock = React.createClass({
 								id="displayAs_cmelocal" 
 								name="displayAs" 
 								onChange={this._requestDisplayAsChange}
-								checked={this.state.displayRelativeTo === utils.TIME_DISPLAY.CME_LOCAL} />
+								checked={config.displayRelativeTo === utils.TIME_DISPLAY.CME_LOCAL} />
 							Cme local
 						</label>
 
@@ -263,7 +271,7 @@ var Clock = React.createClass({
 								id="displayAs_local" 
 								name="displayAs" 
 								onChange={this._requestDisplayAsChange}
-								checked={this.state.displayRelativeTo === utils.TIME_DISPLAY.LOCAL} />
+								checked={config.displayRelativeTo === utils.TIME_DISPLAY.LOCAL} />
 							Local
 						</label>
 
@@ -273,7 +281,7 @@ var Clock = React.createClass({
 									id="display_12Hour"
 									name="display12hour"
 									onChange={this._requestDisplay12HourChange}
-									checked={this.state.display12HourTime} />
+									checked={config.display12HourTime} />
 								12-Hour
 							</label>
 						</div>
@@ -289,16 +297,16 @@ var Clock = React.createClass({
 								name="ntp"
 								id="ntp"
 								placeholder="NTP"
-								checked={this.state.ntp}
+								checked={config.ntp}
 								onChange={this._requestNtpChange}
 							/>
 						Use NTP
 						</label>
 
 						<NtpStatus id="status" placeholder="Status" 
-							value={this.state.status}
-							zone={this.state.zone}
-							relativeTo={this.state.displayRelativeTo}
+							value={config.status}
+							zone={config.zone}
+							relativeTo={config.displayRelativeTo}
 							format={ntpStatusFormat} />
 
 						<div id="ta-wrapper">
@@ -307,8 +315,8 @@ var Clock = React.createClass({
 								name="tainput"
 								id="servers"
 								placeholder="NTP servers"
-								value={this.state.serversCSV}
-								disabled={!this.state.ntp}
+								value={config.serversCSV}
+								disabled={!config.ntp}
 								onChange={this._requestServersChange}
 							/>
 						</div>
@@ -328,12 +336,12 @@ var Clock = React.createClass({
 	},
 
 	_renderAsWidget: function () {
-		var config = this.props.config,
+		var config = this.state.config,
 			clock = this.state.clock,
 			date, time, timeformat, 
 			clockClasses = 'hidden';
 
-		if (clock) {
+		if (clock && config) {
 
 			clock = utils.formatRelativeMoment(
 				moment.utc(clock),
@@ -365,59 +373,62 @@ var Clock = React.createClass({
 	},
 
 	_onClockChange: function() {
-		this.setState({
-			clock: PollingStore.getState().clock
-		})
+		var _this = this;
+
+		// Set the state and set up next clock poll
+		this.setState({ clock: Store.getState().clock }, function () {
+
+			if (!_this._pollTime) return;
+
+			var age = moment().valueOf() - _this._pollTime,
+				period = _this.props.pollPeriod - (age % _this.props.pollPeriod);
+
+			clearTimeout(_this._pollTimeout);
+			_this._pollTimeout = setTimeout(_this._startPoll, period);
+		});
 	},
 
-	_pollClock: function() {
-		this._clockPollStartTime = moment().valueOf();
+	_startPoll: function() {
+		this._pollTime = moment().valueOf();
 		Actions.clock();
 	},
 
-	_startClockPoll: function() {
-		if (!this._clockPollStartTime && this.state.ntp) {
-			this._pollClock();
-		}
-	},
-
-	_stopClockPoll: function() {
-
-		this._clockPollStartTime = 0;
-		clearTimeout(this._clockPollTimeout);
-		this._clockPollTimeout = null;
+	_stopPoll: function() {
+		this._pollTime = 0;
+		clearTimeout(this._pollTimeout);
+		this._pollTimeout = null;
 	},
 
 	_onApply: function() {
 
 		// convert the serversCSV to arrays and remove the
 		// property from the submitted object
-		var clock = this.state;
-		clock.servers = clock.serversCSV.trim() != '' 
-			? clock.serversCSV.split(',').map(function(s) { return s.trim(); }) 
+		var config = this.state.config;
+		config.servers = config.serversCSV.trim() != '' 
+			? config.serversCSV.split(',').map(function(s) { return s.trim(); }) 
 			: [];
 
-		if (clock.ntp) {
-			delete clock.current;
+		if (config.ntp) {
+			delete config.current;
 		}
 
-		Actions.config({ clock: clock });
+		Actions.config({ clock: config });
 		this.refs['_InputGroup'].collapse();
 	},
 
 	_onReset: function() {
 
-		this.setState(formatPropsToState(this.props.config));
+		this.setState({ config: configPropToState(this.props.config) });
 	},
 
 	_requestServersChange: function(e) {
 
-		this.setState({ serversCSV: e.target.value });
+		this.setState({ config: assign(this.state.config, { serversCSV: e.target.value }) });
 	},
 
 	_requestZoneChange: function(z) {
 
-		this.setState({ zone: z });
+		this.setState({ config: assign(this.state.config, { zone: z }) });
 	},
 
 	_requestDateChange: function(m) {
@@ -449,12 +460,12 @@ var Clock = React.createClass({
 				break;
 		}
 
-		this.setState({ displayRelativeTo: td });
+		this.setState({ config: assign(this.state.config, { displayRelativeTo: td }) });
 	},
 
 	_requestDisplay12HourChange: function(e) {
 
-		this.setState({ display12HourTime: e.target.checked });
+		this.setState({ config: assign(this.state.config, { display12HourTime: e.target.checked }) });
 	},
 
 	_requestNtpChange: function(event) {
@@ -462,14 +473,13 @@ var Clock = React.createClass({
 
 		// start polling for current time
 		// and reset Ntp servers and status to current config
-		this.setState({
-			ntp: ntp,
-			status: ntp ? this.props.config.status : [],
-			current: ntp ? this.state.current : moment.utc()
-		}, (ntp
-			? this._startClockPoll
-			: this._stopClockPoll)
-		);
+		this.setState({ 
+			current: ntp ? this.state.current : moment.utc(),
+			config: assign(this.state.config, {
+				ntp: ntp,
+				status: ntp ? this.state.config.status : []
+			})},
+			(ntp ? this._startPoll : this._stopPoll));
 	}
 });
 
