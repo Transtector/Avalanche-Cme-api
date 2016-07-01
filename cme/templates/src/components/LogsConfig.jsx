@@ -10,7 +10,7 @@ var React = require('react');
 
 var Constants = require('../Constants');
 var Actions = require('../Actions');
-var PollingStore = require('../PollingStore');
+var Store = require('../Store');
 
 var InputGroup = require('./InputGroup');
 
@@ -34,43 +34,38 @@ function formatLogsList(logslist) {
 
 var LogsConfig = React.createClass({
 
-	_logsPollTimeout: null,
-	_logsPollStartTime: 0,
-	_logsPollPeriod: 5000,
+	_pollTimeout: null,
+	_pollStartTime: 0,
+
+	propTypes: {
+		pollPeriod: React.PropTypes.number // how fast to poll in milliseconds
+	},
+
+	getDefaultProps: function() {
+		return {
+			pollPeriod: 10000
+		}
+	},
 
 	getInitialState: function () {
 
-		return { logs: formatLogsList(PollingStore.getState().logs) };
+		return { logs: formatLogsList(Store.getState().logs) };
 	},
 
 	componentDidMount: function() {
-		PollingStore.addChangeListener(Constants.ChangeTypes.LOGS, this._onLogsChange);
-		this._startLogsPoll(); // poll initially to fill list first time through
+		Store.addChangeListener(Constants.LOGS, this._onLogsChange);
+		Actions.logs(); // fill list first time through
 	},
 
 	componentWillUnmount: function() {
-		this._stopLogsPoll();
-		PollingStore.removeChangeListener(Constants.ChangeTypes.LOGS, this._onLogsChange);
+		this._stopPoll();
+		Store.removeChangeListener(Constants.LOGS, this._onLogsChange);
 	},	
 
 	render: function() {
-		// Upon render, if we're polling, we'll start a new Logs request after the
-		// appropriate period has elapsed.  We clear any pending request so as to
-		// keep only one at a time active.
-		if (this._logsPollStartTime) {
-
-			var age = moment().valueOf() - this._logsPollStartTime,
-				period = (age >= this._logsPollPeriod)
-							? 0
-							: this._logsPollPeriod - (age % this._logsPollPeriod)
-
-			clearTimeout(this._logsPollTimeout);
-			this._logsPollTimeout = null;
-			this._logsPollTimeout = setTimeout(this._pollLogs, period);
-		}
 
 		return (
-			<InputGroup id="logs" onExpand={this._startLogsPoll} onCollapse={this._stopLogsPoll}>
+			<InputGroup id="logs" onExpand={this._startPoll} onCollapse={this._stopPoll}>
 				<ul>
 					{this.state.logs.map(function(log) {
 						return (
@@ -98,10 +93,12 @@ var LogsConfig = React.createClass({
 	},
 
 	_viewLog: function(name) {
+
 		Actions.logs(name); // call logs w/actual log file name to view (in a new tab)
 	},
 
 	_downloadLog: function(name) {
+
 		Actions.logs(name, true); // just download the log file
 	},
 
@@ -121,25 +118,33 @@ var LogsConfig = React.createClass({
 	},
 
 	_onLogsChange: function () {
+		var _this = this;
 
-		this.setState({	logs: formatLogsList(PollingStore.getState().logs) });
+		this.setState({	logs: formatLogsList(Store.getState().logs) }, function (){
+			if (_this._pollStartTime) {
+
+				var age = moment().valueOf() - _this._pollStartTime,
+					period = (age >= _this.props.pollPeriod)
+								? 0
+								: _this.props.pollPeriod - (age % _this.props.pollPeriod)
+
+				clearTimeout(_this._pollTimeout);
+				_this._pollTimeout = null;
+				_this._pollTimeout = setTimeout(_this._startPoll, period);
+			}
+
+		});
 	},
 
-	_pollLogs: function () {
-		this._logsPollStartTime = moment().valueOf();
+	_startPoll: function () {
+		this._pollStartTime = moment().valueOf();
 		Actions.logs();
 	},
 
-	_startLogsPoll: function () {
-		if (!this._logsPollStartTime) {
-			this._pollLogs();
-		}
-	},
-
-	_stopLogsPoll: function () {
-		this._logsPollStartTime = 0;
-		clearTimeout(this._logsPollTimeout);
-		this._logsPollTimeout = null;
+	_stopPoll: function () {
+		this._pollStartTime = 0;
+		clearTimeout(this._pollTimeout);
+		this._pollTimeout = null;
 	}
 });
 

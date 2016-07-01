@@ -9,7 +9,7 @@
 var React = require('react');
 var Actions = require('../Actions');
 var Constants = require('../Constants');
-var PollingStore = require('../PollingStore');
+var Store = require('../Store');
 
 var InputGroup = require('./InputGroup');
 
@@ -18,57 +18,39 @@ var classNames = require('classnames');
 var utils = require('../CmeApiUtils');
 
 var Thermometer = React.createClass({
-	_tempPollTimeout: null,
-	_tempPollStartTime: 0,
-	_tempPollPeriod: 30000,
+	_pollTimeout: null,
+	_pollStartTime: 0,
 
 	propTypes: {
 		flavor: React.PropTypes.string, // 'config' or 'widget'
 		pollPeriod: React.PropTypes.number, // how fast to poll in milliseconds
-		config: React.PropTypes.object.isRequired // CME temperature configuration object
+		config: React.PropTypes.object.isRequired // CME temperature configuration
 	},
 	
 	getInitialState: function() {
 		return {
-			temperature: PollingStore.getState().temperature || -100
+			temperature: Store.getState().temperature
 		}
 	},
 
 	getDefaultProps: function() {
 		return {
 			flavor: 'widget',
-			pollPeriod: 30000
+			pollPeriod: 10000
 		}
 	},
 
 	componentDidMount: function() {
-		PollingStore.addChangeListener(Constants.ChangeTypes.TEMPERATURE, this._onTempChange);
-
-		this._tempPollPeriod = this.props.pollPeriod;
+		Store.addChangeListener(Constants.TEMPERATURE, this._onTempChange);
 
 		if (this.props.flavor === 'widget')
-			this._startTempPoll();
+			this._startPoll();
 	},
 
 	componentWillUnmount: function() {
 
-		this._stopTempPoll();
-		PollingStore.removeChangeListener(Constants.ChangeTypes.TEMPERATURE, this._onTempChange);
-	},
-
-
-	componentWillReceiveProps: function(nextProps) {
-		if (this._tempPollStartTime) {
-
-			var age = moment().valueOf() - this._tempPollStartTime,
-				period = (age >= this._tempPollPeriod)
-							? 0
-							: this._tempPollPeriod - (age % this._tempPollPeriod)
-
-			clearTimeout(this._tempPollTimeout);
-			this._tempPollTimeout = null;
-			this._tempPollTimeout = setTimeout(this._pollTemp, period);
-		}
+		this._stopPoll();
+		Store.removeChangeListener(Constants.TEMPERATURE, this._onTempChange);
 	},
 
 	render: function() {
@@ -108,7 +90,7 @@ var Thermometer = React.createClass({
 		var display_alarm = utils.formatTemperatureDisplay(this.props.config.alarmTemp, this.props.config.displayUnits, 0);
 
 		return (
-			<InputGroup id="temperature" ref="_InputGroup" onExpand={this._startTempPoll} onCollapse={this._stopTempPoll}>
+			<InputGroup id="temperature" ref="_InputGroup" onExpand={this._startPoll} onCollapse={this._stopPoll}>
 				<div className="input-group-cluster">
 					<label htmlFor="tempGroup">CPU Temperature</label>
 					<div id="tempGroup">
@@ -188,27 +170,31 @@ var Thermometer = React.createClass({
 	},
 
 	_onTempChange: function() {
-		this.setState({
-			temperature: PollingStore.getState().temperature
-		})
+		var _this = this;
+		this.setState({ temperature: Store.getState().temperature }, function () {
+			if (_this._pollStartTime) {
+
+				var age = moment().valueOf() - _this._pollStartTime,
+					period = (age >= _this.props.pollPeriod)
+								? 0
+								: _this.props.pollPeriod - (age % _this.props.pollPeriod)
+
+				clearTimeout(_this._pollTimeout);
+				_this._pollTimeout = null;
+				_this._pollTimeout = setTimeout(_this._startPoll, period);
+			}
+		});
 	},
 
-	_pollTemp: function() {
-		this._tempPollStartTime = moment().valueOf();
+	_startPoll: function() {
+		this._pollStartTime = moment().valueOf();
 		Actions.temperature();
 	},
 
-	_startTempPoll: function() {
-		if (!this._tempPollStartTime) {
-			this._pollTemp();
-		}
-	},
-
-	_stopTempPoll: function() {
-
-		this._tempPollStartTime = 0;
-		clearTimeout(this._tempPollTimeout);
-		this._tempPollTimeout = null;
+	_stopPoll: function() {
+		this._pollStartTime = 0;
+		clearTimeout(this._pollTimeout);
+		this._pollTimeout = null;
 	},
 
 	_requestDisplayUnitsChange: function(e) {

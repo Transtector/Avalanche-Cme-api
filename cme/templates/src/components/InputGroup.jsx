@@ -4,11 +4,11 @@
  *
  * Component to group controls and show/hide them.
  */
+'use strict';
+
 var React = require('react');
 
 var classNames = require('classnames');
-
-var _initialRender = true;
 
 var InputGroup = React.createClass({
 
@@ -25,23 +25,24 @@ var InputGroup = React.createClass({
 	},
 
 	collapse: function() {
-		this.setState({ collapsed: true });
+		var _this = this;
+		this.setState({ collapsed: true }, function () {
+			if (_this.props.onCollapse)
+				_this.props.onCollapse();
+		});
 	},
 
 	expand: function() {
-		this.setState({ collapsed: false });
+		var _this = this;
+		this.setState({ collapsed: false }, function () {
+			if (_this.props.onExpand)
+				_this.props.onExpand();
+		});
 	},
 
 	render: function() {
 		var capitalizedId = this.props.id.charAt(0).toUpperCase() + this.props.id.slice(1);
 		var cn = classNames({'input-group': true, 'collapsed': this.state.collapsed});
-
-		if (!_initialRender && this.state.collapsed && typeof this.props.onCollapse == 'function')
-			this.props.onCollapse();
-		else if (!_initialRender && typeof this.props.onExpand == 'function')
-			this.props.onExpand();
-
-		_initialRender = false;
 
 		return (
 			<div className={cn} id={this.props.id}>
@@ -58,7 +59,10 @@ var InputGroup = React.createClass({
 	},
 
 	_onClick: function() {
-		this.setState({ collapsed: !this.state.collapsed });
+		if (this.state.collapsed)
+			this.expand();
+		else
+			this.collapse();
 	}
 });
 

@@ -9,7 +9,9 @@
 
 var React = require('react');
 
+var Constants = require('../Constants');
 var Actions = require('../Actions');
+var Store = require('../Store');
 
 var classNames = require('classnames');
 
@@ -17,24 +19,36 @@ var ENTER_KEY_CODE = 13;
 
 var Login = React.createClass({
 
-	propTypes: {
-		errors: React.PropTypes.array.isRequired,
-		isSubmitting: React.PropTypes.bool.isRequired
-	},
-
 	getInitialState: function () {
+		var cmeState = Store.getState();
 		return {
+			isLoggedIn: cmeState.isLoggedIn,
+			errors: cmeState.errors,
 			u: '',
 			p: '',
 			isValid: false
 		};
 	},
 
+	componentDidMount: function() {
+		Store.addChangeListener(Constants.SESSION, this._onSessionChange);
+		Store.addChangeListener(Constants.ERROR, this._onErrorChange);
+	},
+
+	componentWillUnmount: function() {
+		Store.removeChangeListener(Constants.SESSION, this._onSessionChange);
+		Store.removeChangeListener(Constants.ERROR, this._onErrorChange);
+	},
+
 	render: function () {
-		if (this.props.errors.length > 0)
+
+		if (this.state.isLoggedIn)
+			return null;
+
+		if (this.state.errors.length > 0)
 			setTimeout(Actions.clearErrors, 3000);
 		
-		var cn = classNames('login-error', {'isVisible': this.props.errors.length > 0});
+		var cn = classNames('login-error', {'isVisible': this.state.errors.length > 0});
 
 		return (
 			<div id="login">
@@ -44,7 +58,7 @@ var Login = React.createClass({
 					Please sign in with the CME username and password.
 
 					<div className={cn}>
-						{this.props.errors.map(function(err){ return err.source; })}&nbsp;
+						{this.state.errors.map(function(err){ return err.source; })}&nbsp;
 					</div>
 				</div>
 
@@ -78,6 +92,14 @@ var Login = React.createClass({
 				</button>
 			</div>
 		);
+	},
+
+	_onSessionChange: function() {
+		this.setState({ isLoggedIn: Store.getState().isLoggedIn })
+	},
+
+	_onErrorChange: function() {
+		this.setState({ errors: Store.getState().errors })
 	},
 
 	_onChangeUsername: function(event) {

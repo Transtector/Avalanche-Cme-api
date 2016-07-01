@@ -10,50 +10,54 @@ var React = require('react');
 
 var Constants = require('../Constants');
 var Actions = require('../Actions');
-var PollingStore = require('../PollingStore');
+var Store = require('../Store');
 
 var moment = require('moment');
 var classNames = require('classnames');
 var utils = require('../CmeApiUtils');
 
 var ChannelPanel = require('./ChannelPanel');
-var ClockWidget = require('./Clock');
-var ThermometerWidget = require('./Thermometer');
+var Clock = require('./Clock');
+var Thermometer = require('./Thermometer');
 
 var HomePanel = React.createClass({
+
 	getInitialState: function() {
 		return {
-			channels: PollingStore.getState().channels
+			channels: Store.getState().channels,
+			config: Store.getState().config
 		}
 	},
 
 	componentDidMount: function() {
+		Store.addChangeListener(Constants.CHANNELS, this._onChannelsChange);
+		Store.addChangeListener(Constants.CONFIG, this._onConfigChange);
+
 		// request hw channels update to get all available channels
-		PollingStore.addChangeListener(Constants.ChangeTypes.CHANNELS, this._onChannelsChange);
 		Actions.channels();
 	},
 
 	componentWillUnmount: function() {
-
-		PollingStore.removeChangeListener(Constants.ChangeTypes.CHANNELS, this._onChannelsChange);
+		Store.removeChangeListener(Constants.CHANNELS, this._onChannelsChange);
+		Store.removeChangeListener(Constants.CONFIG, this._onConfigChange);
 	},
 
 	render: function() {
-
 		return (
 			<div className="panel" id="home">
 				<div className="panel-header">
 					<div className="title">
 						Status
 					</div>
+
 					<div className="subtitle">
 						CME device channels status
 					</div>
+
 					<div className='widgets'>
+						<Clock config={this.state.config.clock} flavor='widget' pollPeriod={1000} />
 
-						<ClockWidget config={this.props.clockConfig} />
-
-						<ThermometerWidget config={this.props.temperatureConfig} />
+						<Thermometer config={this.state.config.temperature} flavor='widget' pollPeriod={10000} />
 					</div>
 				</div>
 
@@ -69,10 +73,14 @@ var HomePanel = React.createClass({
 	},
 
 	_onChannelsChange: function() {
-		this.setState({
-			channels: PollingStore.getState().channels
-		});
+
+		this.setState({	channels: Store.getState().channels	});
 	},
+
+	_onConfigChange: function() {
+
+		this.setState({ config: Store.getState().config });
+	}
 });
 
 module.exports = HomePanel;

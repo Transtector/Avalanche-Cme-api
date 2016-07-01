@@ -763,6 +763,7 @@ td.rdtYear:hover {
 }
 .drop-target h1 {
   margin-top: 100px;
+  font-size: 170%;
 }
 .drop-target h2 {
   margin-bottom: 5px;
@@ -1190,43 +1191,38 @@ li.input-group-cluster > .btn:disabled {
   background-color: #fff;
   text-align: center;
 }
-.ch-history > .btn {
-  position: absolute;
-  padding: 0;
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-  top: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-}
-.ch-history > .btn.glyph_reset {
-  top: 30px;
-  background-color: #f00;
-}
 .ch-history.open {
   z-index: 1;
 }
+.ch-history-header {
+  position: relative;
+  text-align: right;
+}
+.ch-history-header .glyph {
+  margin: 2px 2px 2px 0;
+  width: 20px;
+  height: 20px;
+  background-size: 20px 20px;
+  line-height: 100%;
+  font-size: 100%;
+}
+.ch-history-header .btn.glyph.reset {
+  position: absolute;
+  left: 2px;
+  background-color: #f22;
+}
 .ch-history .plot-wrapper {
-  width: 90%;
-  height: 100%;
+  width: 100%;
+  height: 177px;
 }
 .ch-history .plot {
   width: 100%;
   height: 100%;
   margin: 0;
 }
-.debug-info {
-  display: none;
-  position: absolute;
-  z-index: 2;
-  background: #00f;
-  color: #ff0;
-  text-align: left;
-  padding: 5px;
-  top: 50px;
-  left: 30px;
+.ch-history-footer {
+  position: relative;
+  height: 24px;
 }
 .ch-config {
   position: absolute;

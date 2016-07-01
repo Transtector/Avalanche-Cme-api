@@ -10,7 +10,7 @@ var React = require('react');
 
 var Constants = require('../Constants');
 var Actions = require('../Actions');
-var PollingStore = require('../PollingStore');
+var Store = require('../Store');
 
 var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
@@ -21,14 +21,23 @@ var assign = require('object-assign'); // ES6 polyfill
 
 var UpdatesPanel = React.createClass({
 
-	_updatesPollTimeout: null,
-	_updatesPollStartTime: 0,
-	_updatesPollPeriod: 5000,
+	_pollTimeout: null,
+	_pollStartTime: 0,
+	
+	propTypes: {
+		pollPeriod: React.PropTypes.number // how fast to poll in milliseconds
+	},
 
+	getDefaultProps: function() {
+		return {
+			pollPeriod: 10000
+		}
+	},
+	
 	getInitialState: function () {
 
 		return { 
-			updates: PollingStore.getState().updates,
+			updates: Store.getState().updates,
 			progress: null,
 			install: null,
 			installing: false
@@ -36,13 +45,13 @@ var UpdatesPanel = React.createClass({
 	},
 
 	componentDidMount: function() {
-		this._pollUpdates();
-		PollingStore.addChangeListener(Constants.ChangeTypes.UPDATES, this._onUpdatesChange);
+		Store.addChangeListener(Constants.UPDATES, this._onUpdatesChange);
+		//this._startPoll();
 	},
 
 	componentWillUnmount: function() {
-		this._stopUpdatesPoll();
-		PollingStore.removeChangeListener(Constants.ChangeTypes.UPDATES, this._onUpdatesChange);
+		this._stopPoll();
+		Store.removeChangeListener(Constants.UPDATES, this._onUpdatesChange);
 	},	
 
 	render: function() {
@@ -51,20 +60,7 @@ var UpdatesPanel = React.createClass({
 
 		// reset installing flag if we're rendering w/pending update
 		if (pending && this.state.installing)
-			this.state.installing = false;
-
-		// Kee polling if we don't have pending update
-		if (!pending  && this._updatesPollStartTime) {
-
-			var age = moment().valueOf() - this._updatesPollStartTime,
-				period = (age >= this._updatesPollPeriod)
-					? 0
-					: this._updatesPollPeriod - (age % this._updatesPollPeriod)
-
-			clearTimeout(this._updatesPollTimeout);
-			this._updatesPollTimeout = null;
-			this._updatesPollTimeout = setTimeout(this._pollUpdates, period);
-		}
+			this.setState({ installing: false });
 
 		function renderUpdateRadioItem(self, id) {
 
@@ -186,8 +182,8 @@ var UpdatesPanel = React.createClass({
 
 		return (
 			<InputGroup id="updates" 
-				onExpand={this._startUpdatesPoll} 
-				onCollapse={this._stopUpdatesPoll}>
+				onExpand={this._startPoll} 
+				onCollapse={this._stopPoll}>
 
 				{updateContent}
 
@@ -200,25 +196,33 @@ var UpdatesPanel = React.createClass({
 	},
 
 	_onUpdatesChange: function () {
+		var _this = this;
 
-		this.setState({ updates: PollingStore.getState().updates });
+		this.setState({ updates: Store.getState().updates }, function () {
+			// Keep polling if we don't have pending update
+			if (!_this.state.updates.pending  && _this._pollStartTime) {
+
+				var age = moment().valueOf() - this._pollStartTime,
+					period = (age >= _this.props.pollPeriod)
+						? 0
+						: _this.props.pollPeriod - (age % _this.props.pollPeriod)
+
+				clearTimeout(_this._pollTimeout);
+				_this._pollTimeout = null;
+				_this._pollTimeout = setTimeout(_this._startPoll, period);
+			}
+		});
 	},
 
-	_pollUpdates: function () {
-		this._updatesPollStartTime = moment().valueOf();
+	_startPoll: function () {
+		this._pollStartTime = moment().valueOf();
 		Actions.getUpdates();
 	},
 
-	_startUpdatesPoll: function () {
-		if (!this._updatesPollStartTime) {
-			this._pollUpdates();
-		}
-	},
-
-	_stopUpdatesPoll: function () {
-		this._updatesPollStartTime = 0;
-		clearTimeout(this._updatesPollTimeout);
-		this._updatesPollTimeout = null;
+	_stopPoll: function () {
+		this._pollStartTime = 0;
+		clearTimeout(this._pollTimeout);
+		this._pollTimeout = null;
 	},
 
 	_selectUpdate: function(e) {

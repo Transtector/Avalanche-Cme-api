@@ -8,12 +8,33 @@
 
 var React = require('react');
 
+var Constants = require('../Constants');
 var Actions = require('../Actions');
+var Store = require('../Store');
 
 var ErrorPanel = React.createClass({
+	
+	getInitialState: function () {
+		var cmeState = Store.getState();
+		return {
+			isLoggedIn: cmeState.isLoggedIn,
+			errors: cmeState.errors
+		};
+	},
+
+	componentDidMount: function() {
+		Store.addChangeListener(Constants.SESSION, this._onSessionChange);
+		Store.addChangeListener(Constants.ERROR, this._onErrorChange);
+	},
+
+	componentWillUnmount: function() {
+		Store.removeChangeListener(Constants.SESSION, this._onSessionChange);
+		Store.removeChangeListener(Constants.ERROR, this._onErrorChange);
+	},
 
 	render: function() {
-		if (this.props.errors && this.props.errors.length > 0) {
+
+		if (this.state.isLoggedIn && this.state.errors && this.state.errors.length > 0) {
 
 			return (
 				<div id="error" className="panel">
@@ -21,7 +42,7 @@ var ErrorPanel = React.createClass({
 						<div className="title">Error</div>
 						
 						<ul className="errors">
-							{this.props.errors.map(function(err, i) { 
+							{this.state.errors.map(function(err, i) { 
 								var msg = err.source + ' [' + err.code + ']';
 								return (
 									<li key={i + 1}>{msg}</li>
@@ -36,8 +57,17 @@ var ErrorPanel = React.createClass({
 				</div>
 			)
 		}
+
 		return null;
 	},
+	
+	_onSessionChange: function() {
+		this.setState({ isLoggedIn: Store.getState().isLoggedIn })
+	},
+
+	_onErrorChange: function() {
+		this.setState({ errors: Store.getState().errors })
+	},	
 
 	_onClearErrors: function() {
 		Actions.clearErrors();

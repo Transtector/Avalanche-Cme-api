@@ -8,6 +8,7 @@ var React = require('react');
 
 var Constants = require('../Constants');
 var Actions = require('../Actions');
+var Store = require('../Store');
 
 var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
@@ -30,8 +31,29 @@ var assign = require('object-assign'); // ES6 polyfill
 
 var ConfigPanel = React.createClass({
 
+	getInitialState: function () {
+		return {
+			config: Store.getState().config
+		};
+	},
+
+	componentDidMount: function() {
+		Store.addChangeListener(Constants.CONFIG, this._onConfigChange);
+	},
+
+	componentWillUnmount: function() {
+		Store.removeChangeListener(Constants.CONFIG, this._onConfigChange);
+	},
+
 	render: function () {
-		var config = this.props.config;
+		
+		// nothing to configure if config is empty
+		if (Object.keys(this.state.config).length <= 0)
+			return null;
+
+		console.log("ConfigPanel rendering...");
+
+		var config = this.state.config;
 
 		return (
 			<div className="panel" id="config">
@@ -58,13 +80,9 @@ var ConfigPanel = React.createClass({
 
 					<NetConfig config={config.network} />
 					
-					<ClockConfig
-						flavor="config"
-						config={config.clock} />
-
-					<TempConfig
-						flavor="config"
-						config={config.temperature} />
+					<ClockConfig config={config.clock} flavor="config" pollPeriod={1000} />
+					
+					<TempConfig config={config.temperature} flavor="config" pollPeriod={10000} />
 
 					<InputGroup id="snmp">
 						<div className="input-group-cluster">
@@ -81,9 +99,9 @@ var ConfigPanel = React.createClass({
 					</InputGroup>
 					*/}
 
-					<LogsConfig />
+					<LogsConfig pollPeriod={5000} />
 
-					<Updates />
+					<Updates pollPeriod={5000} />
 
 					<div className="input-group">
 						<button id="factory-reset"
@@ -97,6 +115,10 @@ var ConfigPanel = React.createClass({
 
 			</div>
 		);
+	},
+
+	_onConfigChange: function() {
+		this.setState({ config: Store.getState().config });
 	},
 
 	_requestChange: function(e) {

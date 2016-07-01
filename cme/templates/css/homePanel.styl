@@ -157,46 +157,38 @@ error-badge-size = 30px
 	z-index -1 // hides plot under layers (needed for flot to render plot correctly)
 	color fg-color
 	background-color #fff
-	text-align center
-	> .btn
-		position absolute
-		padding 0
-		color #fff
-		font-size 14px
-		font-weight bold
-		top 5px
-		right 5px
-		width 20px
-		height 20px
-	> .btn.glyph_reset
-		top 30px
-		background-color red
-		
+	text-align center		
 
 .ch-history.open
 	z-index 1
 
-.ch-history .plot-wrapper
-	width 90%
-	height 100%
+.ch-history-header
+	position relative
+	text-align right
+	.glyph
+		margin 2px 2px 2px 0
+		width 20px
+		height 20px
+		background-size 20px 20px
+		line-height 100%
+		font-size 100%
+	.btn.glyph.reset
+		position absolute
+		left 2px
+		background-color error-color
 		
+.ch-history .plot-wrapper
+	width 100%
+	height 177px
+	
 .ch-history .plot
 	width 100%
 	height 100%
 	margin 0
 
-.debug-info
-	display none
-	position absolute
-	z-index 2
-	background blue
-	color yellow
-	text-align left
-	padding 5px
-	top 50px
-	left 30px
-	
-
+.ch-history-footer
+	position relative
+	height 24px
 			
 .ch-config
 	position absolute
