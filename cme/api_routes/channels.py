@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import subprocess, json
 
 from . import settings, router, request, path_parse, json_response, json_error, require_auth
+from ..util.Switch import switch
 from .Models import ChannelManager
 
 
@@ -76,6 +77,9 @@ def channels_list():
 
 
 # CME channel update
+# GET a complete channel or bits of it (name, description, error, controls, or sensors)
+# POST updates to the name or description (or both at the same time)
+# Supply an optional query string 'h=[RESOLUTION]' to GET 
 @router.route('/ch/<int:ch_index>', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/name', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/description', methods=['GET', 'POST'])
@@ -94,9 +98,11 @@ def channel(ch_index):
 	segments = path_parse(request.path)
 	item = segments[-1].lower()
 
-	# update name or description (or both) from POST data
 	if request.method == 'POST':
+		# update name or description (or both) from POST data
+		
 		ch_update = request.get_json()
+
 		if item == 'name':
 			ch.name = ch_update.get('name', ch.name)
 		elif item == 'description':
@@ -104,6 +110,26 @@ def channel(ch_index):
 		else:
 			ch.name = ch_update.get('name', ch.name)
 			ch.description = ch_update.get('description', ch.description)
+	
+	else:
+		# GET request - see if we need to read ch history
+		# check query string for h(istory) = RESOLUTION 
+		h = request.args.get('h')
+		h = h.lower() if h else None
+		for case in switch(h):
+			if case('realtime'): pass
+			if case('daily'): pass
+			if case('weekly'): pass
+			if case('monthly'): pass
+			if case('yearly'):
+				ch.load_history(h)
+				break
+
+			if case():
+				# no h or unknown - clear ch.data
+				ch.clear_history()
+				pass
+
 
 	# figure out what to return
 	if item == 'name':

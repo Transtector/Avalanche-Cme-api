@@ -44,12 +44,11 @@ APPLOG = os.path.join(LOGDIR, 'cme.log')
 SERVERLOG = os.path.join(LOGDIR, 'server.log')
 ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 
-# Generally uses the same IP (127.0.0.1) for memcache
-# transfer between Cme and Cme-hw, but you can set this
-# for another machine if you enable it to accept external
-# connections (comment out the appropriate line in its
-# /etc/memcached.conf file).
-MEMCACHE = '10.16.120.159:11211'
+# rrdcached is a cache service wrapping the rrd tool
+# See rrdtool.org for details.  Default address is
+# the name of the docker running the rrdcached service
+# "cme-md".  The default port is 42217.
+RRDCACHED_ADDRESS = 'cme-mc'
 
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')
