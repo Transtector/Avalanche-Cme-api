@@ -47,7 +47,7 @@ ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 # rrdcached is a cache service wrapping the rrd tool
 # See rrdtool.org for details.  Default address is
 # the name of the docker running the rrdcached service
-# "cme-md".  The default port is 42217.
+# "cme-mc".  The default port is 42217.
 RRDCACHED_ADDRESS = 'cme-mc'
 
 # user-defined API layer settings are kept here
