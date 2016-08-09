@@ -17,6 +17,8 @@ var InputGroup = require('./InputGroup');
 var classNames = require('classnames');
 var assign = require('object-assign'); // ES6 polyfill
 
+var moment = require('moment');
+
 function formatLogsList(logslist) {
 	// create a log item with log's name, size and a 'delete' flag
 	// that will be used when a log has been deleted but the list
