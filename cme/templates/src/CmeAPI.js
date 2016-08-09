@@ -256,6 +256,18 @@ var CmeAPI = {
 		});
 	},
 
+	deleteChannel: function(ch_id) {
+		var ch_index = parseInt(ch_id.slice(2));
+
+		return $.ajax({
+			type: 'DELETE',
+			url: API.channel + ch_index,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+
+	},
+
 	control: function(chId, controlId, obj) {
 		var chIndex = parseInt(chId.slice(2)), // chId: "chX"
 			ctrlIndex = parseInt(controlId.slice(1)); // controlId: "cY"

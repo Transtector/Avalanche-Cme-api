@@ -162,16 +162,6 @@ var Actions = {
 			.fail(onError);
 	},
 
-	/*	Updates uses the 'action' string parameter to
-		determine how the underlying API gets called.
-	
-		Supported actions are:
-	 		null (w/null 2nd parameter) - just read current update status
-	 		'delete' - removes any pending updates, NOP if no pending updates
-			'upload' - uploads a file described by the formData object and has optional progress handler function
-			'install' - moves an available update into pending update status
-				(which means the update can get used on next Cme restart). */
-
 	// Read available software updates
 	getUpdates: function() {
 		dispatchRequest('reading update status');
@@ -194,6 +184,7 @@ var Actions = {
 			.fail(onError);
 	},
 
+	// Upload an update to make it available for install
 	uploadUpdate: function(formData, onProgress, onComplete) {
 		dispatchRequest('uploading update');
 
@@ -205,6 +196,7 @@ var Actions = {
 			.fail(onError);
 	},
 
+	// Move an update to pending (so it will be used at next restart)
 	installUpdate: function(installSource, installName) {
 		dispatchRequest('installing update');
 
@@ -222,7 +214,7 @@ var Actions = {
 	},
 
 	clock: function() {
-		dispatchRequest('reading clock');
+		// dispatchRequest('reading clock');
 
 		CmeAPI.clock()
 			.done(function(data) {
@@ -232,7 +224,7 @@ var Actions = {
 	},
 
 	temperature: function() {
-		dispatchRequest('reading temperature');
+		//dispatchRequest('reading temperature');
 
 		CmeAPI.temperature()
 			.done(function(data) {
@@ -275,9 +267,19 @@ var Actions = {
 	},
 
 	channel: function(ch_id, ch_config, ch_history) {
-		dispatchRequest('reading ' + ch_id + '( ' + ch_config + ', ' + ch_history + ' )');
+		//dispatchRequest('reading ' + ch_id + '( ' + ch_config + ', ' + ch_history + ' )');
 
 		CmeAPI.channel(ch_id, ch_config, ch_history)
+			.done(function(data) {
+				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
+			})
+			.fail(onError);
+	},
+
+	deleteChannel: function(ch_id) {
+		dispatchRequest('clearing ' + ch_id + ' history');
+
+		CmeAPI.deleteChannel(ch_id)
 			.done(function(data) {
 				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 			})

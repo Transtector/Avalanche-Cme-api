@@ -76,11 +76,12 @@ def channels_list():
 	return json_response({ 'channels': ch_mgr.channels })
 
 
-# CME channel update
+# CME channel updates
+# DELETE a channel will clear its RRD database history
 # GET a complete channel or bits of it (name, description, error, controls, or sensors)
 # POST updates to the name or description (or both at the same time)
-# Supply an optional query string 'h=[RESOLUTION]' to GET 
-@router.route('/ch/<int:ch_index>', methods=['GET', 'POST'])
+# Supply an optional query string 'h=[RESOLUTION]' to GET  channel history (RRD) data
+@router.route('/ch/<int:ch_index>', methods=['GET', 'POST', 'DELETE'])
 @router.route('/ch/<int:ch_index>/name', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/description', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/error')
@@ -97,6 +98,17 @@ def channel(ch_index):
 	# parse out the item name (last element of request path)
 	segments = path_parse(request.path)
 	item = segments[-1].lower()
+
+	if request.method == 'DELETE':
+
+		# clear any history in ch buffer
+		ch.clear_history()
+
+		# clear the channel's historic data
+		ch_mgr.clear_channel(ch.id)
+
+		return json_response({ ch.id: ch })
+
 
 	if request.method == 'POST':
 		# update name or description (or both) from POST data
@@ -146,6 +158,7 @@ def channel(ch_index):
 		return json_response({ ch.id: ch })
 
 
+# GET/POST sensors or controls on specified channel individually
 @router.route('/ch/<int:ch_index>/sensors/<int:sc_index>')
 @router.route('/ch/<int:ch_index>/controls/<int:sc_index>', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/sensors/<int:sc_index>/name', methods=['GET', 'POST'])
