@@ -56,7 +56,7 @@ var Store = assign({}, EventEmitter.prototype, {
 	},
 
 	emitChange: function(eventName) {
-		console.log("Store: firing emitChange(" + eventName + ")!")		
+		//console.log("Store: firing emitChange(" + eventName + ")!")		
 		this.emit(eventName);
 	},
 
