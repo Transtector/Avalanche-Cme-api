@@ -17,12 +17,13 @@ PYVER=3.5.1
 # Download and extract Python source
 wget -qO- https://www.python.org/ftp/python/$PYVER/Python-$PYVER.tar.xz | tar --xz -xv
 
-# Configure, make, then install
+# Configure, make, then install; remove source to clean up
 cd Python-$PYVER
 ./configure --enable-shared --prefix=/usr/local
 make
 make install
 cd ..
+rm -rf Python-$PYVER
 
 # Create a symlink to the new python binary from a generic 'python' name
 ln -sf /usr/local/bin/python3.5 /usr/local/bin/python
