@@ -1,0 +1,34 @@
+# An Alpine Linux v3.2 OS distro for the Raspberry Pi
+# that uses a bash script to build a Python 3.5 binary package
+# from source files retrieved from the web.
+#
+#    - uses alpine-base to start
+#    - adds a build environment
+#    - requires the companion script located in the context
+#
+# Note that to retrieve the python binary archive that this docker
+# creates, map a volume from the host to /root when you run it:
+#
+#    $ docker run --rm -ti -v $(pwd):/root \
+#        build-alpine-python3
+
+# Start from small Alpine Linux
+FROM base-alpine
+
+MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
+
+# Add a build environment - tools, headers, etc.
+RUN apk add --update \
+	linux-headers \
+	build-base \
+	xz \
+	gcc \
+	openssl \
+	openssl-dev
+
+# Copy the script file that retrieves, builds, installs, and archives
+# the python binary.  Script file must be in the dockerfile context.
+COPY build-alpine-python3.sh build-alpine-python3.sh
+
+# Execute the script that does the heavy lifting
+CMD ["./build-alpine-python3.sh"]

@@ -1,0 +1,19 @@
+# An Alpine Linux v3.2 OS distro for the Raspberry Pi
+# with Python 3.5 installed.
+#
+#    - uses alpine-base to start
+#    - adds python (3.5) from binary distribution (.tgz) in Docker build context
+
+# Start from small Alpine Linux
+FROM base-alpine
+
+MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
+
+# The docker ADD command will extract recognized archives (.tgz).  The archived
+# Python binary distribution must be in the Docker build context, i.e., the archive
+# should be in the same directory as this dockerfile.  The archive should be setup
+# to install to the "normal" python binary location (e.g., '/usr/local/...').
+ADD python-3.5.1-binary-dist.tgz
+
+# bash prompt for default command
+CMD ["/bin/bash"]
