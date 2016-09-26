@@ -157,6 +157,12 @@ def channel(ch_index):
 	else:
 		return json_response({ ch.id: ch })
 
+# GET (download) history database dump for the indicated channel
+@router.route('/ch/<int:ch_index>/data')
+@require_auth
+def channelDump(ch_index):
+	return json_response({ 'channels': ch_mgr.channels })
+
 
 # GET/POST sensors or controls on specified channel individually
 @router.route('/ch/<int:ch_index>/sensors/<int:sc_index>')
