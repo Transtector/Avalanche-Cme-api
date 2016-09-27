@@ -13,8 +13,12 @@ MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 # Get python3 from Alpine package repository and upgrade pip.
 # Clear the cache when we're done.
 RUN apk --update add python3 && \
-	pip install --upgrade pip && \
-	rm /var/cache/apk/*
+	rm /var/cache/apk/* && \
+	pushd /usr/bin && \
+	ln -s python3.5 python && \
+	ln -s pip3.5 pip && \
+	popd && \
+	pip install --upgrade pip
 
 # bash prompt for default command
 CMD ["/bin/bash"]
