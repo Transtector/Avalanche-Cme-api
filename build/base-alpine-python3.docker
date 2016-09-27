@@ -2,18 +2,19 @@
 # with Python 3.5 installed.
 #
 #    - uses alpine-base to start
-#    - adds python (3.5) from binary distribution (.tgz) in Docker build context
+#    - adds python (3.5) from Alipine package repo (3.4 branch)
+#    - pip/pvenv are included in python 3.5
 
 # Start from small Alpine Linux
 FROM base-alpine
 
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 
-# The docker ADD command will extract recognized archives (.tgz).  The archived
-# Python binary distribution must be in the Docker build context, i.e., the archive
-# should be in the same directory as this dockerfile.  The archive should be setup
-# to install to the "normal" python binary location (e.g., '/usr/local/...').
-ADD python-3.5.1-binary-dist.tgz
+# Get python3 from Alpine package repository and upgrade pip.
+# Clear the cache when we're done.
+RUN apk --update add python3 && \
+	pip install --upgrade pip && \
+	rm /var/cache/apk/*
 
 # bash prompt for default command
 CMD ["/bin/bash"]
