@@ -14,10 +14,10 @@ MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 # Clear the cache when we're done.
 RUN apk --update add python3 && \
 	rm /var/cache/apk/* && \
-	pushd /usr/bin && \
+	cd /usr/bin && \
 	ln -s python3.5 python && \
 	ln -s pip3.5 pip && \
-	popd && \
+	cd && \
 	pip install --upgrade pip
 
 # bash prompt for default command
