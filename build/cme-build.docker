@@ -24,8 +24,9 @@ RUN apk add --update \
 		linux-headers \
 		rrdtool-dev \
 		python3-dev && \
+		pip install --upgrade pip && \
+		pip install wheel && \
 		pyvenv /appenv
-
 
 # Set up the environment for pip to built wheels location
 ENV WHEELHOUSE=/wheelhouse
