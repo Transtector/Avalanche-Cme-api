@@ -17,13 +17,15 @@
 # Uses the base-alpine-python3 (3.5) image
 FROM base-alpine-python3
 
-# Create a Python virtual environment
-RUN pyvenv /appenv && \
-	apk add --update \
+# Add development/building tools
+# and create python virtual environment
+RUN apk add --update \
 		build-base \
 		linux-headers \
 		rrdtool-dev \
-		python3-dev
+		python3-dev && \
+		pyvenv /appenv
+
 
 # Set up the environment for pip to built wheels location
 ENV WHEELHOUSE=/wheelhouse
@@ -39,6 +41,4 @@ VOLUME /application
 # application folder and build the wheels.
 ENTRYPOINT source /appenv/bin/activate; \
 	cd /application; \
-	pip install --upgrade pip; \
-	pip install wheel; \
 	pip wheel .
