@@ -24,8 +24,6 @@ RUN apk add --update \
 		linux-headers \
 		rrdtool-dev \
 		python3-dev && \
-		pip install --upgrade pip && \
-		pip install wheel && \
 		pyvenv /appenv
 
 # Set up the environment for pip to built wheels location
@@ -41,5 +39,7 @@ VOLUME /application
 # Activate the virtual environment, move into the
 # application folder and build the wheels.
 ENTRYPOINT source /appenv/bin/activate; \
+	pip install --upgrade pip; \
+	pip install wheel; \
 	cd /application; \
 	pip wheel .
