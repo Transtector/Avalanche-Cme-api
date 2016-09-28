@@ -1,0 +1,29 @@
+# This docker is used to run the cme application API layer.
+#
+# Requires the cme binary Python wheels are built into
+# /wheelhouse folder in the dockerfile context.
+#
+# The Cme application requires root access and the shared
+# /data volume on the docker host.  To provide them,
+# run the container with the following command:
+#
+#	$ docker run --rm \
+#		-v /data:/data \
+#		--privileged -ti --name cme \
+#		cme-run
+
+# Uses our base bare-bones Alpine Linux and Python 3.5
+FROM base-alpine-python3
+
+# cme also requires rrdtool be installed
+RUN apk --update add rrdtool && \
+	rm /var/cache/apk/*
+
+# Application wheels should be built into wheelhouse folder
+COPY wheelhouse wheelhouse/
+
+# Install cme app using pip and built wheels
+RUN pip install --no-index -f wheelhouse cme
+
+# Run the cme application 
+ENTRYPOINT cme
