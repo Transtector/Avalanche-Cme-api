@@ -17,6 +17,8 @@
 # Uses the base-alpine-python3 (3.5) image
 FROM base-alpine-python3
 
+MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
+
 # Add development/building tools
 # and create python virtual environment
 RUN apk add --update \
