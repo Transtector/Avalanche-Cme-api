@@ -9,8 +9,9 @@
 #
 #	$ docker run --rm \
 #		-v /data:/data \
-#		--privileged -ti --name cme \
-#		cme-run
+#       --link cme-mc:cme-mc \
+#		--privileged --name cme \
+#		cme
 
 # Uses our base bare-bones Alpine Linux and Python 3.5
 FROM base-alpine-python3
