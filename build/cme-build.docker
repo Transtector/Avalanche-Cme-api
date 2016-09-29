@@ -39,4 +39,13 @@ VOLUME /wheelhouse
 VOLUME /application
 
 # Move into the application folder and build the wheels.
-ENTRYPOINT cd /application; pip wheel .
+#ENTRYPOINT cd /application; pip wheel .
+
+# Currently using a srcdist/ for the build because wheel
+# is adding in extraneous folders (node_modules, cme_venv,
+# and .git for example).
+ENTRYPOINT mkdir /srcdist; \
+	cd /srcdist; \
+	cp -R /application/cme .; \
+	cp /application/setup.py .; \ 
+	pip wheel .
