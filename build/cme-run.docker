@@ -3,14 +3,21 @@
 # Requires the cme binary Python wheels are built into
 # /wheelhouse folder in the dockerfile context.
 #
-# The Cme application requires root access and the shared
-# /data volume on the docker host.  To provide them,
-# run the container with the following command:
+# The cme application layer needs some extra attention
+# to implement API commands that affect the host system.
+# In particular, networking, time, and system reboot
+# calls are required.
+#
+# Mostly this is accommodated via switches when the docker
+# container is run:
 #
 #	$ docker run --rm \
+#		--net="host" \
+#		--privileged \
+#		--name cme \
 #		-v /data:/data \
-#       --link cme-mc:cme-mc \
-#		--privileged --name cme \
+#       -v /etc/network:/etc/network \
+#		-v /etc/ntp.conf:/etc/ntp.conf \
 #		cme
 
 # Uses our base bare-bones Alpine Linux and Python 3.5
@@ -25,8 +32,13 @@ RUN apk --update add rrdtool && \
 # Application wheels should be built into wheelhouse folder
 COPY wheelhouse wheelhouse/
 
+# Copy an entrypoint script
+COPY cme-entrypoint.sh cme-entrypoint.sh
+
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cme
 
-# Run the cme application 
-ENTRYPOINT cme
+# Run the cme application using an entrypoint script 
+ENTRYPOINT ["./cme-entrypoint.sh"]
+
+CMD ["cme"]

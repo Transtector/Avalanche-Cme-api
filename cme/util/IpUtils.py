@@ -1,7 +1,6 @@
 import os
 import platform
 import logging
-import subprocess
 import uuid
 import socket
 import fcntl
@@ -16,10 +15,16 @@ iface = b'eth0'
 
 def mac():
 	''' Return the network interface MAC address.
-	
-		NOTE - only works if there's a single addressed interface.
+
+		Note: requires Linux OS.
 	'''
-	return str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
+	# old way (didn't work well under docker container)
+	#return str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
+
+	with open('/sys/class/net/' + iface.decode() + '/address') as f:
+		mac = f.read().strip().upper()
+
+	return mac
 
 
 def dhcp():
@@ -31,8 +36,14 @@ def dhcp():
 	if not is_a_cme():
 		return True
 
-	cmd = subprocess.run(["cat", "/etc/network/interfaces"], stdout=subprocess.PIPE)
-	return cmd.stdout.decode().find('dhcp') > -1
+	# old way (didn't play well under a docker container)
+	#cmd = subprocess.run(["cat", "/etc/network/interfaces"], stdout=subprocess.PIPE)
+	#return cmd.stdout.decode().find('dhcp') > -1
+
+	with open('/etc/network/interfaces') as f:
+		ifaces = f.read()
+
+	return ifaces.find('dhcp') > -1
 
 
 def address():
@@ -60,7 +71,11 @@ def netmask():
 	if not is_a_cme():
 		return '255.255.255.0'
 
-	return socket.inet_ntoa(fcntl.ioctl(socket.socket(socket.AF_INET, socket.SOCK_DGRAM), 35099, struct.pack('256s', iface))[20:24])
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s = struct.pack('256s', iface)
+	res = fcntl.ioctl(sock, 0x891B, s)[20:24]
+
+	return socket.inet_ntoa(res)
 
 
 def gateway():
@@ -71,13 +86,13 @@ def gateway():
 	if not is_a_cme():
 		return '127.0.0.1'
 
-	with open("/proc/net/route") as fh:
-		for line in fh:
+	with open('/proc/net/route') as f:
+		for line in f:
 			fields = line.strip().split()
 			if fields[1] != '00000000' or not int(fields[3], 16) & 2:
 				continue
 
-			return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
+	return socket.inet_ntoa(struct.pack('<L', int(fields[2], 16)))
 
 
 def set_dhcp(on=True):
