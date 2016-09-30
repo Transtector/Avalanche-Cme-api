@@ -5,9 +5,8 @@ import rrdtool
 from . import settings, Config
 from ..util.Switch import switch
 
-# Override Config RRDCACHED_ADDRESS here.
-# No need to specify the port if the default (42217)
-# is used.
+# Override Config RRDCACHED_ADDRESS here for DEBUG.
+# No need to specify the port if the default (42217) is used.
 rrdcached_address = "cme-dev.local" # Config.RRDCACHED_ADDRESS
 
 
