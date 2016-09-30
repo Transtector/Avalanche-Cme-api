@@ -32,7 +32,8 @@ RUN apk --update add rrdtool && \
 # Application wheels should be built into wheelhouse folder
 COPY wheelhouse wheelhouse/
 
-# Copy an entrypoint script
+# Copy an entrypoint script and the cme-host-output monitor
+COPY cme-host-output cme-host-output
 COPY cme-entrypoint cme-entrypoint
 
 # Install cme app using pip and built wheels

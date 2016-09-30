@@ -1,6 +1,8 @@
 #!/bin/bash
 
 if [ "$1" = 'cme' ]; then
+	# launch the cme-host-output monitor
+	./cme-host-output &
 	exec "$@"
 fi
 
