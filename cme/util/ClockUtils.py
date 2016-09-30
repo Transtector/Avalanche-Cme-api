@@ -33,8 +33,8 @@ def check_ntp():
 	if not is_a_cme():
 		return True
 
-	cmd = subprocess.run(["systemctl", "status", "ntp"], stdout=subprocess.PIPE)
-	return cmd.stdout.decode().find('inactive') == -1
+	cmd = subprocess.run(["systemctl", "is-active", "ntp"], stdout=subprocess.PIPE)
+	return cmd.stdout.decode().lower() == 'active'
 
 
 def manage_clock(clock_settings):
