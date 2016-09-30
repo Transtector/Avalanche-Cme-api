@@ -1,0 +1,14 @@
+#!/bin/bash
+
+PIPE=/tmp/cmehostoutput
+
+while true
+do
+	if [[ -p $PIPE ]]; then
+		output="$(<$PIPE)"
+		printf "$output\n"
+	fi
+	if  [[ ( ! -p $PIPE ) || ( $output == *"goodbye"* ) ]]; then
+		break
+	fi
+done

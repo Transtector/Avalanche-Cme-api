@@ -1,5 +1,4 @@
-#!/bin/sh
-set -e
+#!/bin/bash
 
 if [ "$1" = 'cme' ]; then
 	exec "$@"

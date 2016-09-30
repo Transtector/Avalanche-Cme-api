@@ -33,12 +33,12 @@ RUN apk --update add rrdtool && \
 COPY wheelhouse wheelhouse/
 
 # Copy an entrypoint script
-COPY cme-entrypoint.sh cme-entrypoint.sh
+COPY cme-entrypoint cme-entrypoint
 
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cme
 
 # Run the cme application using an entrypoint script 
-ENTRYPOINT ["./cme-entrypoint.sh"]
+ENTRYPOINT ["./cme-entrypoint"]
 
 CMD ["cme"]

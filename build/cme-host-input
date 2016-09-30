@@ -1,0 +1,57 @@
+#!/bin/bash
+
+IN=/tmp/cmehostinput
+OUT=/tmp/cmehostoutput
+
+function cleanup {
+	rm -f $IN
+	rm -f $OUT
+}
+trap cleanup EXIT
+
+if [[ ! -p $IN ]]; then
+	mkfifo $IN
+fi
+
+if [[ ! -p $OUT ]]; then
+	mkfifo $OUT
+fi
+
+while true
+do
+	if read line <$IN; then
+		args=(${line})
+		printf "$ %s\n" "${args[*]}" >$OUT
+
+		case ${args[0]} in
+
+			'quit') break
+				  	;;
+
+			'ping') if [[ ! -z ${args[1]} ]]; then
+						printf " %s\n" "${args[@]:1}" >$OUT
+					else
+						printf " pong\n" >$OUT
+					fi
+				  	;;
+
+			'date') ${args[@]} >$OUT
+					;;
+
+			'reboot') printf " reboot\n" >$OUT
+					  ;;
+
+			'systemctl') ${args[@]} >$OUT
+					     ;;
+
+			'ntpq') ntpq -pn >$OUT
+					;;
+
+			*) printf " unknown command\n" >$OUT
+			   ;;
+		esac
+	fi
+done
+
+printf "goodbye" >$OUT
+
