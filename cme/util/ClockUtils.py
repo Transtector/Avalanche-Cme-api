@@ -8,7 +8,7 @@ import re
 from datetime import datetime, timedelta
 from .Switch import switch
 
-from . import is_a_cme
+from . import is_a_cme, is_a_docker, 
 
 def set_clock(newtime):
 	''' use the system 'date' command to set it
@@ -21,7 +21,13 @@ def set_clock(newtime):
 	if not is_a_cme():
 		return
 
-	os.system('date -s "{0}"'.format(newtime))
+	cmd = ['date', '-s', newtime]
+
+	if is_a_docker():
+		docker_run(cmd)
+	else:
+		subprocess.run(cmd)
+
 
 def check_ntp():
 	''' Requests ntpd status from the system.  
@@ -33,8 +39,14 @@ def check_ntp():
 	if not is_a_cme():
 		return True
 
-	cmd = subprocess.run(["systemctl", "is-active", "ntp"], stdout=subprocess.PIPE)
-	return cmd.stdout.decode().lower() == 'active'
+	cmd = ['systemctl', 'is-active', 'ntp']
+
+	if is_a_docker():
+		result = docker_run(cmd)
+	else:
+		result = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode().rstrip()
+
+	return result.lower() == 'active'
 
 
 def manage_clock(clock_settings):
@@ -68,15 +80,31 @@ def manage_clock(clock_settings):
 
 	if update_ntp or (new_use_ntp != current_ntp):
 
+		ntp_enable = ['systemctl', 'enable', 'ntp']
+		ntp_start = ['systemctl', 'start', 'ntp']
+
+		ntp_disable = ['systemctl', 'disable', 'ntp']
+		ntp_stop = ['systemctl', 'stop', 'ntp']
+
 		if new_use_ntp:
 			logger.info("Starting NTP service.")
-			os.system('systemctl enable ntp')
-			os.system('systemctl start ntp')
+
+			if is_a_docker():
+				docker_run(ntp_enable)
+				docker_run(ntp_start)
+			else:
+				subprocess.run(ntp_enable)
+				subprocess.run(ntp_start)
 
 		else:
 			logger.info("Stopping NTP service.")
-			os.system('systemctl stop ntp')
-			os.system('systemctl disable ntp')
+
+			if is_a_docker():
+				docker_run(ntp_stop)
+				docker_run(ntp_disable)
+			else:
+				subproces.run(ntp_stop)
+				subprocess.run(ntp_disable)
 
 
 def refresh_time(clock_settings):
@@ -86,8 +114,14 @@ def refresh_time(clock_settings):
 	'''
 	# if useNTP, we'll update the NTP status
 	if clock_settings['ntp'] and is_a_cme():
-		cmd = subprocess.run(["ntpq", "-pn"], stdout=subprocess.PIPE)
-		last_request, last_success = __parse_ntpq(cmd.stdout.decode())
+		cmd = ['ntpq', '-pn']
+
+		if is_a_docker():
+			result = docker_run(cmd)
+		else:
+			result = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode().rstrip()
+
+		last_request, last_success = __parse_ntpq(result)
 		clock_settings['status'] = [ last_request, last_success ]
 	else:
 		clock_settings['status'] = [ '-', '-' ]
@@ -253,7 +287,6 @@ def __parse_ntpq(ntpq_result):
 		last_success_time = (datetime.utcnow() - timedelta(seconds=(last_success_s))).isoformat() + 'Z'
 
 	return last_poll_time, last_success_time
-
 
 
 # find the lowest bit set in an int

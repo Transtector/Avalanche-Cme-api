@@ -1,9 +1,9 @@
-import os, time, logging
+import os, subprocess, time, logging
 
 from .ClockUtils import ntp_servers
 from .IpUtils import set_dhcp, write_network_addresses
 
-from . import is_a_cme
+from . import is_a_cme, is_a_docker, docker_run
 
 
 def reset(delay=5, reset_network=False, reset_clock=False):
@@ -48,7 +48,13 @@ def reset(delay=5, reset_network=False, reset_clock=False):
 			'2.debian.ntp.pool.org', 
 			'3.debian.ntp.pool.org' 
 		])
-		os.system('systemctl enable ntp')
+
+		ntp_enable = ['systemctl', 'enable', 'ntp']
+
+		if is_a_docker():
+			docker_run(ntp_enable)
+		else:
+			subprocess.call(ntp_enable)
 
 	logger = logging.getLogger('cme')
 	logger.info("Factory reset (network reset: {0}, clock reset: {1})".format(reset_network, reset_clock))	
@@ -65,5 +71,9 @@ def restart(delay=5):
 
 	# reboot system
 	if is_a_cme():
-		os.system("reboot")
+
+		if is_a_docker():
+			docker_run(['reboot'])
+		else:
+			subprocess.call(['reboot'])
 

@@ -7,7 +7,7 @@ import fcntl
 import struct
 import fileinput
 
-from . import is_a_cme
+from . import is_a_cme, is_a_docker, docker_run
 
 # RPi uses only single network interface, 'eth0'
 iface = b'eth0'
@@ -165,7 +165,12 @@ def manage_network(network_settings):
 			write_network_addresses(network_settings)
 
 		# restarts/reloads the network
-		os.system('systemctl restart networking')
+		cmd = ['systemctl', 'restart', 'networking']
+
+		if is_a_docker():
+			docker_run(cmd)
+		else:
+			subprocess.run(cmd)
 
 
 def write_network_addresses(net_settings):
