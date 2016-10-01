@@ -21,37 +21,15 @@ while true
 do
 	if read line <$IN; then
 		args=(${line})
-		printf "$ %s\n" "${args[*]}" >$OUT
 
 		case ${args[0]} in
 
-			'quit') break
-				  	;;
+			quit) break ;;
 
-			'ping') if [[ ! -z ${args[1]} ]]; then
-						printf " %s\n" "${args[@]:1}" >$OUT
-					else
-						printf " pong\n" >$OUT
-					fi
-				  	;;
+			date|reboot|systemctl|ntpq) ${args[@]} | tee $OUT ;;
 
-			'date') ${args[@]} >$OUT
-					;;
-
-			'reboot') printf " reboot\n" >$OUT
-					  ;;
-
-			'systemctl') ${args[@]} >$OUT
-					     ;;
-
-			'ntpq') ntpq -pn >$OUT
-					;;
-
-			*) printf " unknown command\n" >$OUT
-			   ;;
+			*) printf "unknown" | tee $OUT ;;
 		esac
 	fi
 done
-
-printf "goodbye" >$OUT
 

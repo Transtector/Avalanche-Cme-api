@@ -1,8 +1,10 @@
 #!/bin/bash
 
+# Set DOCKER to let cme Python code know
+# when it's running inside of a container
+export DOCKER=1
+
 if [ "$1" = 'cme' ]; then
-	# launch the cme-host-output monitor
-	./cme-host-output &
 	exec "$@"
 fi
 
