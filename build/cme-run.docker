@@ -18,7 +18,19 @@
 #		-v /data:/data \
 #       -v /etc/network:/etc/network \
 #		-v /etc/ntp.conf:/etc/ntp.conf \
+#		-v /etc/localtime:/etc/localtime \
+#		-v /tmp/cmehostinput \
+#		-v /tmp/cmehostoutput \
 #		cme
+#
+# Note: you _must_ run the host command FIFO listener
+# before running this container! Like this:
+#
+#	$ ./cme-host-input &
+#
+# This sets up the input and output FIFO's and listens
+# for system call requests coming from the container
+# over the input FIFO.
 
 # Uses our base bare-bones Alpine Linux and Python 3.5
 FROM base-alpine-python3
@@ -33,7 +45,6 @@ RUN apk --update add rrdtool && \
 COPY wheelhouse wheelhouse/
 
 # Copy an entrypoint script and the cme-host-output monitor
-COPY cme-host-output cme-host-output
 COPY cme-entrypoint cme-entrypoint
 
 # Install cme app using pip and built wheels
