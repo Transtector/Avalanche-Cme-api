@@ -47,5 +47,6 @@ VOLUME /application
 ENTRYPOINT mkdir /srcdist; \
 	cd /srcdist; \
 	cp -R /application/cme .; \
-	cp /application/setup.py .; \ 
+	cp /application/setup.py .; \
+	cp /application/MANIFEST.in .; \ 
 	pip wheel .
