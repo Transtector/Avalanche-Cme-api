@@ -19,8 +19,9 @@
 #       -v /etc/network:/etc/network \
 #		-v /etc/ntp.conf:/etc/ntp.conf \
 #		-v /etc/localtime:/etc/localtime \
-#		-v /tmp/cmehostinput \
-#		-v /tmp/cmehostoutput \
+#		-v /tmp/cmehostinput:/tmp/cmehostinput \
+#		-v /tmp/cmehostoutput:/tmp/cmehostoutput \
+#		-v /media/usb:/media/usb \
 #		cme
 #
 # Note: you _must_ run the host command FIFO listener
