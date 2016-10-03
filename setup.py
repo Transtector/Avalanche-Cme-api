@@ -4,7 +4,7 @@ setup (
 	name			= "cme",
 	version			= "0.1",
 	description 		= "CME API and web UI",
-	packages		= ['cme', 'cme.api_routes', 'cme.util'],
+	packages		= ['cme', 'cme.api_routes', 'cme.ui_routes', 'cme.util'],
 	install_requires	= ["CherryPy",
 					"Paste",
 					"Flask",
