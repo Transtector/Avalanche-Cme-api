@@ -56,8 +56,11 @@ def main(args=None):
 	app_logger.info("\tSERVER_IP:\t{0}".format(Config.ADDRESS))
 	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.SERVER_PORT))
 	app_logger.info("\tDEBUG:\t\t{0}".format(Config.DEBUG))
-	app_logger.info("\tDOCROOT:\t{0}".format(Config.DOCROOT))
-	app_logger.info("\tPUBLIC:\t\t{0}".format(app.static_folder))
+
+	app_logger.info("\tAPPROOT:\t{0}".format(Config.root_path))
+	app_logger.info("\tSTATIC:\t\t{0}".format(app.static_folder))
+	app_logger.info("\tTEMPLATE:\t\t{0}".format(app.template_folder))
+
 	app_logger.info("\tUPLOADS:\t{0}".format(Config.UPLOAD_FOLDER))
 
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy

@@ -12,10 +12,11 @@ DEBUG = True
 HOSTNAME = platform.node()
 SYSTEM = platform.uname()
 
-APPROOT = os.path.abspath(os.getcwd()) # /root/Cme
-DOCROOT = os.path.join(APPROOT, 'cme') # /root/Cme/cme
-SNMPDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-snmp')) # /root/Cme-snmp
-HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /root/Cme-hw
+APPROOT = os.path.abspath(os.getcwd()) # /root
+
+#DOCROOT = os.path.join(APPROOT, 'cme') # /root/cme
+#SNMPDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-snmp')) # /root/Cme-snmp
+#HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /root/Cme-hw
 
 USERDATA = os.path.abspath('/data') # Cme user data is stored here
 
