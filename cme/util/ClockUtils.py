@@ -8,7 +8,7 @@ import re
 from datetime import datetime, timedelta
 from .Switch import switch
 
-from . import is_a_cme, is_a_docker, 
+from . import is_a_cme, is_a_docker
 
 def set_clock(newtime):
 	''' use the system 'date' command to set it
