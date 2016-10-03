@@ -1,0 +1,2 @@
+recursive-include cme/static *
+include cme/templates/index.html
