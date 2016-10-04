@@ -3,18 +3,15 @@ import platform, os
 def is_a_cme():
 	''' Quick means to determine if we're on a cme device.  Many of
 		the system calls within util will not work unless we're on
-		the cme device platform.
+		a valid cme device platform.
 	'''
 	return platform.node().startswith('cme')
 
 def is_a_docker():
-	''' Check the ENV for the DOCKER flag.
-
+	''' Check for existence of /.dockerenv to see if we're inside a
+		a docker conainer.
 	'''
-	if os.environ.get('DOCKER'):
-		return True
-
-	return False
+	return os.path.isfile('/.dockerenv'):
 
 FIFO_IN = '/tmp/cmehostinput'
 FIFO_OUT = '/tmp/cmehostoutput'

@@ -1,8 +1,10 @@
 #!/bin/bash
+set -ex
 
-# Set DOCKER to let cme Python code know
-# when it's running inside of a container
-export DOCKER=1
+if ! [ -f /.dockerenv ] ; then
+  echo "ERROR: This script must run inside a docker container." >&2
+  exit 1
+fi
 
 if [ "$1" = 'cme' ]; then
 	exec "$@"
