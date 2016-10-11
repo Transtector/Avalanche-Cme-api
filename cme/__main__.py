@@ -40,6 +40,9 @@ def main(args=None):
 	app = Flask('cme', static_url_path='')
 	app.config.from_object('cme.Config')
 
+	# set up the application layer logging
+	app_logger = App_Logger(app.logger)
+
 	# log the network and clock states at init
 	manage_network(settings['network'])
 	manage_clock(settings['clock'])
@@ -47,8 +50,6 @@ def main(args=None):
 	# register route blueprints
 	app.register_blueprint(ui_routes.router)
 	app.register_blueprint(api_routes.router, url_prefix='/api')
-
-	app_logger = App_Logger(app.logger)
 	
 	app_logger.info("Avalanche (Cme) is rumbling...")
 	app_logger.info("\tHOSTNAME:\t{0}".format(Config.HOSTNAME))
