@@ -28,7 +28,7 @@ do
 
 			date|reboot|systemctl|ntpq) ${args[@]} | tee $OUT ;;
 
-			*) printf "unknown" | tee $OUT ;;
+			*) printf "unknown: %s" "${args[0]}" | tee $OUT ;;
 		esac
 	fi
 done
