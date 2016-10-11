@@ -11,7 +11,7 @@ def is_a_docker():
 	''' Check for existence of /.dockerenv to see if we're inside a
 		a docker conainer.
 	'''
-	return os.path.isfile('/.dockerenv'):
+	return os.path.isfile('/.dockerenv')
 
 FIFO_IN = '/tmp/cmehostinput'
 FIFO_OUT = '/tmp/cmehostoutput'
