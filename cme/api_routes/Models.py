@@ -194,7 +194,8 @@ class Channel:
 		self.__dict__['description'] = self.description
 
 		# TODO: carry Cme-hw channel errors over?  Not sure how...
-		self.__dict__['error'] = False
+		self.error = False
+		self.__dict__['error'] = self.error
 
 		self.last_update = 0
 		self.first_update = 0
@@ -234,7 +235,7 @@ class Channel:
 
 			if case():
 				# default - "realtime"
-				args = ("LAST", "-a", "-s", "-15m")				
+				args = ("LAST", "-a", "-s", "-15m")
 
 		self.__dict__['data'] = rrdtool.fetch(self.rrd, "-d", rrdcached_address, *args)
 
@@ -265,10 +266,25 @@ class Channel:
 		settings['__channels'] = chs
 		self.__dict__['description'] = value # this is the attr that gets serialized to json - keep in sync
 
+	@property
+	def error(self):
+		return self.__dict__['error']
+
+	@error.setter
+	def error(self, value):
+		self.__dict__['error'] = value
 	
 	def _update_rrd_info(self):
+
+		# reading _channel_info can encounter errors
+		# so we reset them here, read, then check error status
+		self.error = False
+
 		# Get most recent RRD info (flush first)
 		ch_info = self._channel_info(True)
+
+		if self.error:
+			return
 
 		# Most recent timestamp is in ch_info header
 		self.last_update = ch_info['last_update']
@@ -295,11 +311,22 @@ class Channel:
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
+		args = (self.rrd, "-d", rrdcached_address)
 
 		if flush_first:
-			return rrdtool.info(self.rrd, "-d", rrdcached_address)
+			args = args + ("-F", )
 
-		return rrtdool.info(self.rrd, "-d", rrdcached_address, "-F")
+		result = None
+
+		# Wrap the rrdtool call in try/except as something bad
+		# may be going on with the RRD cache daemon.  We'll set
+		# the channel error flag.
+		try:
+			result = rrtdool.info(*args)
+		except:
+			self.error = "Error reading channel information from {0}".format(rrdcached_address)
+
+		return result
 
 
 
