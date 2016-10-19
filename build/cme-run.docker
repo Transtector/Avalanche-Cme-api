@@ -3,16 +3,24 @@
 # Requires the cme binary Python wheels are built into
 # /wheelhouse folder in the dockerfile context.
 #
+# Note: you _must_ run the host command FIFO listener
+# before running this container! Like this:
+#
+#	$ ./cme-host-input &
+#
+# This sets up the input and output FIFO's and listens
+# for system call requests coming from the container
+# over the input FIFO.
+#
 # The cme application layer needs some extra attention
 # to implement API commands that affect the host system.
 # In particular, networking, time, and system reboot
-# calls are required.
+# calls are required. Mostly this is accommodated via
+# switches when the docker container is run:
 #
-# Mostly this is accommodated via switches when the docker
-# container is run:
-#
-#	$ docker run --rm \
-#		--net="host" \
+#	$ docker run \
+#		--rm \
+#		--net=host \
 #		--privileged \
 #		--name cme \
 #		-v /data:/data \
@@ -22,16 +30,7 @@
 #		-v /tmp/cmehostinput:/tmp/cmehostinput \
 #		-v /tmp/cmehostoutput:/tmp/cmehostoutput \
 #		-v /media/usb:/media/usb \
-#		cme
-#
-# Note: you _must_ run the host command FIFO listener
-# before running this container! Like this:
-#
-#	$ ./cme-host-input &
-#
-# This sets up the input and output FIFO's and listens
-# for system call requests coming from the container
-# over the input FIFO.
+#		[<private_docker_registry>:5000/]cme
 
 # Uses our base bare-bones Alpine Linux and Python 3.5
 FROM base-alpine-python3
