@@ -4,6 +4,9 @@ __pycache__
 *.pyc
 ._*
 
+# built wheels
+wheelhouse/
+
 # Client code that gets built
 #cme/static/css
 #cme/static/src
