@@ -336,8 +336,8 @@ class Channel:
 		# the channel error flag.
 		try:
 			result = rrtdool.info(*args)
-		except:
-			self.error = "Error reading channel information from {0}".format(rrdcached_address)
+		except Exception as e:
+			self.error = "Error reading {0} information from {1}: {2}".format(self.rrd, rrdcached_address, e)
 
 		return result
 
