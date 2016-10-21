@@ -337,7 +337,7 @@ class Channel:
 		# may be going on with the RRD cache daemon.  We'll set
 		# the channel error flag.
 		try:
-			result = rrtdool.info(*args)
+			result = rrdtool.info(*args)
 		except Exception as e:
 			self.error = "Error reading {0} information: {1}".format(self.rrd, e)
 
