@@ -324,10 +324,12 @@ class Channel:
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
-		args = ('/data/log/' + self.rrd)
+		rrd = "/data/log/" + self.rrd
 
 		if flush_first:
-			args = args + ("-F", )
+			args = (rrd, "-F")
+		else:
+			args = (rrd)
 
 		result = None
 
