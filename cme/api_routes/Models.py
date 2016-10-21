@@ -4,10 +4,17 @@ import rrdtool
 
 from . import settings, Config
 from ..util.Switch import switch
+from ..util import is_a_docker
 
 # Override Config RRDCACHED_ADDRESS here for DEBUG.
 # No need to specify the port if the default (42217) is used.
 rrdcached_address = Config.RRDCACHED_ADDRESS
+
+# Finally, if we're running in a docker container, then
+# we're using the host network (e.g. docker run ... --net=host ...)
+# and we can access the cme-mc under locahost.
+if is_a_docker():
+	rrdcached_address = "localhost"
 
 
 class ChannelManager:
@@ -237,7 +244,13 @@ class Channel:
 				# default - "realtime"
 				args = ("LAST", "-a", "-s", "-15m")
 
-		self.__dict__['data'] = rrdtool.fetch(self.rrd, "-d", rrdcached_address, *args)
+		# Wrap the rrdtool call in try/except as something bad
+		# may be going on with the RRD cache daemon.  We'll set
+		# the channel error flag.
+		try:
+			self.__dict__['data'] = rrdtool.fetch(self.rrd, "-d", rrdcached_address, *args)
+		except:
+			self.error = "Error reading channel history from {0}".format(rrdcached_address)		
 
 
 	def clear_history(self):
