@@ -5,6 +5,6 @@ itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 Paste==2.0.3
-rrdtool==0.1.4
+rrdtool>=0.1.6
 six==1.10.0
 Werkzeug==0.11.10
