@@ -6,16 +6,11 @@ from . import settings, Config
 from ..util.Switch import switch
 from ..util import is_a_docker
 
-# Override Config RRDCACHED_ADDRESS here for DEBUG.
-# No need to specify the port if the default (42217) is used.
-rrdcached_address = Config.RRDCACHED_ADDRESS
-
-# Finally, if we're running in a docker container, then
-# we're using the host network (e.g. docker run ... --net=host ...)
-# and we can access the cme-mc under locahost.
-if is_a_docker():
-	rrdcached_address = "localhost"
-
+# cme layer _always_ runs as if the cme-mc is sitting on localhost
+# at the default port (42217).  This is because the cme-mc layer
+# maps the port to the host system at runtime, and the cme layer uses
+# the host's network (--net=host) at runtime.
+rrdcached_address = "localhost"
 
 class ChannelManager:
 
@@ -320,13 +315,13 @@ class Channel:
 			self.ch_ds.setdefault(ds_name, {}).update({ ds_attr: v })
 
 
-	def _channel_info(self, flush_first=False):
+	def _channel_info(self, flush_first=True):
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
 		rrd = "/data/log/" + self.rrd
 
-		if flush_first:
+		if not flush_first:
 			args = (rrd, "-F")
 		else:
 			args = (rrd)
