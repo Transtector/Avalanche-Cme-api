@@ -237,15 +237,17 @@ class Channel:
 
 			if case():
 				# default - "realtime"
-				args = ("LAST", "-a", "-s", "-15m")
+				args = ('LAST', '-a', '-s', '-15m')
+
+		args = ('/data/log/' + self.rrd, ) + args
 
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  We'll set
 		# the channel error flag.
 		try:
-			self.__dict__['data'] = rrdtool.fetch('/data/log/' + self.rrd, *args)
-		except:
-			self.error = "Error reading {0} history".format(self.rrd)		
+			self.__dict__['data'] = rrdtool.fetch(*args)
+		except Exception as e:
+			self.error = "Error reading channel history [{0}]: {1}".format(self.rrd, e)		
 
 
 	def clear_history(self):
@@ -319,12 +321,12 @@ class Channel:
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
-		rrd = "/data/log/" + self.rrd
+		rrd = '/data/log/' + self.rrd
 
 		if not flush_first:
-			args = (rrd, "-F")
+			args = (rrd, '-F')
 		else:
-			args = (rrd)
+			args = (rrd, )
 
 		result = None
 
@@ -334,7 +336,7 @@ class Channel:
 		try:
 			result = rrdtool.info(*args)
 		except Exception as e:
-			self.error = "Error reading {0} information: {1}".format(self.rrd, e)
+			self.error = "Error reading channel information [{0}]: {1}".format(self.rrd, e)
 
 		return result
 
