@@ -13,8 +13,9 @@ class DictPersistJSON(dict):
 				self.update(json.load(fh))
 
 	def _dump(self):
-		with open(self.filename, 'w') as fh:
+		with open(self.filename + '_tmp', 'w') as fh:
 			json.dump(self, fh)
+		os.rename(self.filename + '_tmp', self.filename)
 
 	def __getitem__(self, key):
 		return dict.__getitem__(self, key)

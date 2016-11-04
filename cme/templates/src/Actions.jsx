@@ -17,10 +17,18 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
-function onError(jqXHR, status, error) {
+
+/* jQuery AJAX errors return using this function
+   signature.  Note that the jqXHR oject properties
+   can override the textStatus and errorThrown arguments. */
+function onError(jqXHR, textStatus, errorThrown) {
 
 	var code = jqXHR.status;
-	var source = jqXHR.responseText;
+	var source = jqXHR.responseText || errorThrown;
+
+	if (!jqXHR || code === 0 || source === '') {
+		source = 'Error: device disconnected'
+	} 
 
 	AppDispatcher.dispatch({
 		actionType: Constants.ERROR,
@@ -45,9 +53,11 @@ var Actions = {
 		AppDispatcher.dispatch({ actionType: Constants.CLEAR_ERRORS });
 	},
 
+	/* used for error troubleshooting or injecting an error
+	   from the client */ 
 	injectError: function(err) {
-		
-		onError({ status: 600, responseText: err });
+
+		onError({ status: 600 }, 'error', err);
 	},
 
 	device: function() {
@@ -59,7 +69,7 @@ var Actions = {
 				// the CME device data else call error.
 				if (!data.device) {
 
-					onError(500, 'Cme device not found.');
+					onError({ status: 500 }, 'error', 'Cme device not found.');
 				
 				} else {
 
