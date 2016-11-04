@@ -27,7 +27,7 @@ function onError(jqXHR, textStatus, errorThrown) {
 	var source = jqXHR.responseText || errorThrown;
 
 	if (!jqXHR || code === 0 || source === '') {
-		source = 'Error: device disconnected'
+		source = 'Device disconnected or not running.'
 	} 
 
 	AppDispatcher.dispatch({
