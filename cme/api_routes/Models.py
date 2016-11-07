@@ -10,7 +10,7 @@ from ..util import is_a_docker
 # at the default port (42217).  This is because the cme-mc layer
 # maps the port to the host system at runtime, and the cme layer uses
 # the host's network (--net=host) at runtime.
-rrdcached_address = Config.RRDCACHED_ADDRESS
+RRDCACHED_ADDRESS = Config.RRDCACHED_ADDRESS
 
 class ChannelManager:
 
@@ -228,6 +228,12 @@ class Channel:
 
 	def load_history(self, resolution='realtime'):
 
+		# RRDCACHED_ADDRESS is set to a flag value if there
+		# is no service.  We can still run cme layer however
+		# and just return.
+		if RRDCACHED_ADDRESS.find('fail') > 0:
+			return 
+
 		for case in switch(resolution.lower()):
 			if case('daily'): pass
 			if case('weekly'): pass
@@ -239,7 +245,7 @@ class Channel:
 				# default - "realtime"
 				args = ('LAST', '-a', '-s', '-15m')
 
-		args = (self.rrd, '-d', rrdcached_address, ) + args
+		args = (self.rrd, '-d', RRDCACHED_ADDRESS, ) + args
 
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  We'll set
@@ -322,12 +328,19 @@ class Channel:
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
-		args = (self.rrd, '-d', rrdcached_address)
+
+		result = None
+
+		# RRDCACHED_ADDRESS is set to a flag value if there
+		# is no service.  We can still run cme layer however
+		# and just return.
+		if RRDCACHED_ADDRESS.find('fail') > 0:
+			return result
+
+		args = (self.rrd, '-d', RRDCACHED_ADDRESS)
 
 		if not flush_first:
 			args = args + ('-F', )
-
-		result = None
 
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  We'll set

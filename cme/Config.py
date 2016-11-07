@@ -6,6 +6,7 @@
 # values to defaults, simply delete settings.json.
 
 import os, uuid, platform, json
+import rrdtool
 
 DEBUG = True
 
@@ -46,6 +47,16 @@ ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 # "localhost" and the default port is 42217.
 RRDCACHED_ADDRESS = 'localhost'
 
+# Try to read the "test.rrd" channel via the rrdcached (at localhost).
+# If no problems, then things are fine and we can move on.  If not,
+# we still want to allow the cme layer to run, so we set the address
+# to flag it to downstream code so they may bypass rrdcached calls.
+try:
+	rrdtool.info('test.rrd', '-d', RRDCACHED_ADDRESS)
+
+except Exception as e:
+	RRDCACHED_ADDRESS = 'rrdcached_failure'
+
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')
 
@@ -56,7 +67,6 @@ RECOVERY = os.path.isfile(os.path.join(APPROOT, 'recovery.txt'))
 for p in [ UPLOAD_FOLDER, UPDATE, LOGDIR ]:
 	if not os.path.exists(p):
 		os.makedirs(p)
-
 
 # this for uploading files (ostensibly firmware files)
 # TODO: figure out size/extension for actual firmware files
