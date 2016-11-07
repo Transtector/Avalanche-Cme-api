@@ -14,10 +14,6 @@ SYSTEM = platform.uname()
 
 APPROOT = os.path.abspath(os.getcwd()) # /root
 
-#DOCROOT = os.path.join(APPROOT, 'cme') # /root/cme
-#SNMPDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-snmp')) # /root/Cme-snmp
-#HWDIR = os.path.abspath(os.path.join(APPROOT, '../Cme-hw')) # /root/Cme-hw
-
 USERDATA = os.path.abspath('/data') # Cme user data is stored here
 
 # uploads go to temp folder above app
@@ -47,9 +43,8 @@ ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 
 # rrdcached is a cache service wrapping the rrd tool
 # See rrdtool.org for details.  Default address is
-# the name of the docker running the rrdcached service
-# "cme-mc".  The default port is 42217.
-RRDCACHED_ADDRESS = 'cme-mc'
+# "localhost" and the default port is 42217.
+RRDCACHED_ADDRESS = 'localhost'
 
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')
