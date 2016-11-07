@@ -95,4 +95,16 @@ def main(args=None):
 	cherrypy.engine.block()
 
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+
+	except KeyboardInterrupt:
+		Logger.info("Avalanche (Cme) shutdown requested ... exiting")
+
+	except Exception as e:
+		Logger.info("Avalanche (Cme) has STOPPED on exception {0}".format(e))
+
+		# re-raise to print stack trace here (useful for debugging the problem)
+		raise
+
+	sys.exit(0)
