@@ -10,7 +10,7 @@ from ..util import is_a_docker
 # at the default port (42217).  This is because the cme-mc layer
 # maps the port to the host system at runtime, and the cme layer uses
 # the host's network (--net=host) at runtime.
-rrdcached_address = "localhost"
+rrdcached_address = Config.RRDCACHED_ADDRESS
 
 class ChannelManager:
 
@@ -239,13 +239,14 @@ class Channel:
 				# default - "realtime"
 				args = ('LAST', '-a', '-s', '-15m')
 
-		args = ('/data/log/' + self.rrd, ) + args
+		args = (self.rrd, '-d', rrdcached_address, ) + args
 
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  We'll set
 		# the channel error flag.
 		try:
 			self.__dict__['data'] = rrdtool.fetch(*args)
+
 		except Exception as e:
 			self.error = "Error reading channel history [{0}]: {1}".format(self.rrd, e)		
 
@@ -321,12 +322,10 @@ class Channel:
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
-		rrd = '/data/log/' + self.rrd
+		args = (self.rrd, '-d', rrdcached_address)
 
 		if not flush_first:
-			args = (rrd, '-F')
-		else:
-			args = (rrd, )
+			args = args + ('-F', )
 
 		result = None
 
@@ -335,6 +334,7 @@ class Channel:
 		# the channel error flag.
 		try:
 			result = rrdtool.info(*args)
+
 		except Exception as e:
 			self.error = "Error reading channel information [{0}]: {1}".format(self.rrd, e)
 
