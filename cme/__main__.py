@@ -64,6 +64,8 @@ def main(args=None):
 
 	app_logger.info("\tUPLOADS:\t{0}".format(Config.UPLOAD_FOLDER))
 
+	app_logger.info("\tRRDCACHED:\t{0}".format(Config.RRDCACHED_ADDRESS))
+
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
 	cherrypy.tree.graft(TransLogger(app, logger=server_logger), "/")
 
