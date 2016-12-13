@@ -1,7 +1,10 @@
 import os
+import fcntl
+import tempfile
 import json
 
 class DictPersistJSON(dict):
+
 	def __init__(self, filename, *args, **kwargs):
 		self.filename = filename
 		self._load();
@@ -13,9 +16,12 @@ class DictPersistJSON(dict):
 				self.update(json.load(fh))
 
 	def _dump(self):
-		with open(self.filename + '_tmp', 'w') as fh:
-			json.dump(self, fh)
-		os.rename(self.filename + '_tmp', self.filename)
+		with LockedOpen(self.filename, 'a') as fh:
+			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.filename), delete=False) as tf:
+				json.dump(self, tf, indent=2)
+				tempname = tf.name
+
+			os.replace(tempname, self.filename)
 
 	def __getitem__(self, key):
 		return dict.__getitem__(self, key)
@@ -32,3 +38,31 @@ class DictPersistJSON(dict):
 		for k, v in dict(*args, **kwargs).items():
 			self[k] = v
 		self._dump()
+
+''' see https://blog.gocept.com/2013/07/15/reliable-file-updates-with-python/
+    for details regarding this class and isolating file updates.
+'''
+class LockedOpen(object):
+
+	def __init__(self, filename, *args, **kwargs):
+		self.filename = filename
+		self.open_args = args
+		self.open_kwargs = kwargs
+		self.fileobj = None
+
+	def __enter__(self):
+		f = open(self.filename, *self.open_args, **self.open_kwargs)
+		while True:
+			fcntl.flock(f, fcntl.LOCK_EX)
+			fnew = open(self.filename, *self.open_args, **self.open_kwargs)
+			if os.path.sameopenfile(f.fileno(), fnew.fileno()):
+				fnew.close()
+				break
+			else:
+				f.close()
+				f = fnew
+		self.fileobj = f
+		return f
+
+	def __exit__(self, _exc_type, _exc_value, _traceback):
+		self.fileobj.close()
