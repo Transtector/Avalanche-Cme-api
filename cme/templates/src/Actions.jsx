@@ -17,11 +17,15 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
+/* track error state */
+var ERROR = false;
 
 /* jQuery AJAX errors return using this function
    signature.  Note that the jqXHR oject properties
    can override the textStatus and errorThrown arguments. */
 function onError(jqXHR, textStatus, errorThrown) {
+
+	ERROR = true;
 
 	var code = jqXHR.status;
 	var source = jqXHR.responseText || errorThrown;
@@ -38,18 +42,24 @@ function onError(jqXHR, textStatus, errorThrown) {
 
 // alert that server request is going out
 function dispatchRequest(action) {
+	if (ERROR) {
+		debug("Error prevented server request: " + action);
+		return false;
+	}
 	debug("Server request: " + action);
 	
 	// kind of hacky for now, but enforces serialized dispatching...
 	setTimeout(function () {
 		AppDispatcher.dispatch({ actionType: Constants.REQUEST });
 	}, 0);
+
+	return true;
 }
 
 var Actions = {
 
 	clearErrors: function() {
-
+		ERROR = false;
 		AppDispatcher.dispatch({ actionType: Constants.CLEAR_ERRORS });
 	},
 
@@ -61,7 +71,7 @@ var Actions = {
 	},
 
 	device: function() {
-		dispatchRequest('device');
+		if (!dispatchRequest('device')) return;
 
 		return CmeAPI.device()
 			.done(function(data) {
@@ -83,12 +93,15 @@ var Actions = {
 	config: function(obj) {
 		// obj is _cme['config'] or an object on _cme['config']
 		var key = Object.keys(obj)[0];
+		var ready;
 
 		if (obj) {
-			dispatchRequest('writing {' + key + ': ' + obj[key] + '}');
+			ready = dispatchRequest('writing {' + key + ': ' + obj[key] + '}');
 		} else {
-			dispatchRequest('reading ' + key);
+			ready = dispatchRequest('reading ' + key);
 		}
+
+		if (!ready) return;
 
 		return CmeAPI.config(obj)
 			.done(function(data) {
@@ -98,7 +111,7 @@ var Actions = {
 	},
 
 	reset: function(reset_network, reset_clock) {
-		dispatchRequest("factory reset");
+		if (!dispatchRequest("factory reset")) return;
 
 		CmeAPI.reset(reset_network, reset_clock)
 			.fail(onError)
@@ -106,7 +119,7 @@ var Actions = {
 	},
 
 	restart: function() {
-		dispatchRequest('restarting device');
+		if (!dispatchRequest('restarting device')) return;
 
 		CmeAPI.restart()
 			.fail(onError)
@@ -127,7 +140,7 @@ var Actions = {
 
 		if (arguments.length == 0) {
 
-			dispatchRequest('config');
+			if (!dispatchRequest('config')) return;
 
 			return CmeAPI.config()
 				.done(function(data) {
@@ -139,7 +152,7 @@ var Actions = {
 
 		} else {
 
-			dispatchRequest('login');
+			if (!dispatchRequest('login')) return;
 
 			return CmeAPI.login(u, p)
 				.done(function(data) {
@@ -163,7 +176,7 @@ var Actions = {
 	},
 
 	profile: function(u, p, success) {
-		dispatchRequest("user profile");
+		if (!dispatchRequest("user profile")) return;
 
 		// Note here the application state will not change -
 		// so no need to dispatch an update to the Store.
@@ -174,7 +187,7 @@ var Actions = {
 
 	// Read available software updates
 	getUpdates: function() {
-		dispatchRequest('reading update status');
+		if (!dispatchRequest('reading update status')) return;
 
 		CmeAPI.getUpdates()
 			.done(function(data) {
@@ -185,7 +198,7 @@ var Actions = {
 
 	// Removes a pending update (so it won't be used at next restart)
 	deleteUpdate: function() {
-		dispatchRequest('deleting pending update');
+		if (!dispatchRequest('deleting pending update')) return;
 
 		CmeAPI.deleteUpdate()
 			.done(function(data) {
@@ -196,7 +209,7 @@ var Actions = {
 
 	// Upload an update to make it available for install
 	uploadUpdate: function(formData, onProgress, onComplete) {
-		dispatchRequest('uploading update');
+		if (!dispatchRequest('uploading update')) return;
 
 		CmeAPI.uploadUpdate(formData, onProgress, onComplete)
 			.done(function(data) { 
@@ -208,7 +221,7 @@ var Actions = {
 
 	// Move an update to pending (so it will be used at next restart)
 	installUpdate: function(installSource, installName) {
-		dispatchRequest('installing update');
+		if (!dispatchRequest('installing update')) return;
 
 		CmeAPI.installUpdate(installSource, installName)
 			.done(function(data) { 
@@ -224,7 +237,7 @@ var Actions = {
 	},
 
 	clock: function() {
-		// dispatchRequest('reading clock');
+		if (!dispatchRequest('reading clock')) return;
 
 		CmeAPI.clock()
 			.done(function(data) {
@@ -234,7 +247,7 @@ var Actions = {
 	},
 
 	temperature: function() {
-		//dispatchRequest('reading temperature');
+		if (!dispatchRequest('reading temperature')) return;
 
 		CmeAPI.temperature()
 			.done(function(data) {
@@ -244,11 +257,10 @@ var Actions = {
 	},
 
 	logs: function(filename, download, clear) {
-
+		if (!dispatchRequest('reading logs')) return;
+		
 		// if no filename, just read the current logs list
 		if (!filename) {
-			dispatchRequest('reading logs');
-
 			CmeAPI.logs()
 				.done(function(data) {
 					AppDispatcher.dispatch({ actionType: Constants.LOGS, data: data });
@@ -267,7 +279,7 @@ var Actions = {
 	},
 
 	channels: function() {
-		dispatchRequest('reading channels');
+		if (!dispatchRequest('reading channels')) return;
 
 		CmeAPI.channels()
 			.done(function(data) {
@@ -277,7 +289,7 @@ var Actions = {
 	},
 
 	channel: function(ch_id, ch_config, ch_history) {
-		//dispatchRequest('reading ' + ch_id + '( ' + ch_config + ', ' + ch_history + ' )');
+		if (!dispatchRequest('reading ' + ch_id + '( ' + ch_config + ', ' + ch_history + ' )')) return;
 
 		CmeAPI.channel(ch_id, ch_config, ch_history)
 			.done(function(data) {
@@ -287,7 +299,7 @@ var Actions = {
 	},
 
 	deleteChannel: function(ch_id) {
-		dispatchRequest('clearing ' + ch_id + ' history');
+		if (!dispatchRequest('clearing ' + ch_id + ' history')) return;
 
 		CmeAPI.deleteChannel(ch_id)
 			.done(function(data) {
@@ -297,7 +309,7 @@ var Actions = {
 	},
 
 	control: function(chId, controlId, control) {
-		dispatchRequest(chId + ':' + controlId + ': ' + JSON.stringify(control));
+		if (!dispatchRequest(chId + ':' + controlId + ': ' + JSON.stringify(control))) return;
 
 		CmeAPI.control(chId, controlId, control)
 			.done(function(data) {
