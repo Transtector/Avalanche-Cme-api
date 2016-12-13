@@ -62,6 +62,11 @@ def status(ch_index=-1):
 	# select specific channel 'chX'
 	return ch_mgr.get_channel('ch' + str(ch_index))
 
+@router.route('/channels/')
+@require_auth
+def channels_list():
+	return json_response({ 'channels': ch_mgr.channels })
+
 
 # CME channels request
 @router.route('/ch/')
@@ -69,11 +74,6 @@ def status(ch_index=-1):
 def channels():
 	return json_response(status(-1))
 
-
-@router.route('/channels/')
-@require_auth
-def channels_list():
-	return json_response({ 'channels': ch_mgr.channels })
 
 
 # CME channel updates
@@ -85,8 +85,6 @@ def channels_list():
 @router.route('/ch/<int:ch_index>/name', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/description', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/error')
-@router.route('/ch/<int:ch_index>/controls/')
-@router.route('/ch/<int:ch_index>/sensors/')
 @require_auth
 def channel(ch_index):
 
@@ -99,130 +97,169 @@ def channel(ch_index):
 	segments = path_parse(request.path)
 	item = segments[-1].lower()
 
-	if request.method == 'DELETE':
+	isFullChannel = item not in ['name', 'description', 'error']
 
-		# clear any history in ch buffer
-		ch.clear_history()
+	for method in switch(request.method):
+		if method('DELETE'): 
+			# clear any history in ch buffer
+			ch.clear_history()
 
-		# clear the channel's historic data
-		ch_mgr.clear_channel(ch.id)
+			# clear the channel's historic data
+			ch_mgr.clear_channel(ch.id)
 
-		return json_response({ ch.id: ch })
+			return json_response({ ch.id: ch })
 
+		if method('POST'):
+			# update name or description (or both) from POST data
+			ch_update = request.get_json()
 
-	if request.method == 'POST':
-		# update name or description (or both) from POST data
-		
-		ch_update = request.get_json()
+			if isFullChannel:
+				# try update all attributes
+				for attr in ['name', 'description']:
+					ch.__dict__[attr] = ch_update.get(attr, ch.__dict__[attr])
 
-		if item == 'name':
-			ch.name = ch_update.get('name', ch.name)
-		elif item == 'description':
-			ch.description = ch_update.get('description', ch.description)
-		else:
-			ch.name = ch_update.get('name', ch.name)
-			ch.description = ch_update.get('description', ch.description)
+			else:
+				ch.__dict__[item] = ch_update.get(item, ch.__dict__[item])
+
+			break
 	
-	else:
-		# GET request - see if we need to read ch history
-		# check query string for h(istory) = RESOLUTION 
-		h = request.args.get('h')
-		h = h.lower() if h else None
-		for case in switch(h):
-			if case('realtime'): pass
-			if case('daily'): pass
-			if case('weekly'): pass
-			if case('monthly'): pass
-			if case('yearly'):
-				ch.load_history(h)
-				break
+		if method():
+			# default GET request - see if we need to read ch history
+			# check query string for h(istory) = RESOLUTION 
+			h = request.args.get('h')
+			h = h.lower() if h else None
 
-			if case():
-				# no h or unknown - clear ch.data
-				ch.clear_history()
-				pass
+			#TODO: implement remaining history cases
+			for case in switch(h):
+				if case('live'): pass
+				if case('daily'): pass
+				if case('weekly'): pass
+				if case('monthly'): pass
+				if case('yearly'):
+					ch.load_history(h)
+					break
 
+				if case():
+					# no h or unknown - clear ch.data
+					ch.clear_history()
+					pass
 
-	# figure out what to return
-	if item == 'name':
-		return json_response({ ch.id: { 'name': ch.name }})
-	elif item == 'description':
-		return json_response({ ch.id: { 'description': ch.description }})
-	elif item == 'error':
-		return json_response({ ch.id: { 'error': ch.error }})
-	elif item == 'controls':
-		return json_response({ ch.id + ':controls': ch.controls })
-	elif item == 'sensors':
-		return json_response({ ch.id + ':sensors': ch.sensors })
-	else:
+	if isFullChannel:
 		return json_response({ ch.id: ch })
 
-# GET (download) history database dump for the indicated channel
-@router.route('/ch/<int:ch_index>/data')
-@require_auth
-def channelDump(ch_index):
-	return json_response({ 'channels': ch_mgr.channels })
+	return json_response({ ch.id: { item: ch.__dict__[item] }})
 
 
-# GET/POST sensors or controls on specified channel individually
-@router.route('/ch/<int:ch_index>/sensors/<int:sc_index>')
-@router.route('/ch/<int:ch_index>/controls/<int:sc_index>', methods=['GET', 'POST'])
-@router.route('/ch/<int:ch_index>/sensors/<int:sc_index>/name', methods=['GET', 'POST'])
-@router.route('/ch/<int:ch_index>/controls/<int:sc_index>/name', methods=['GET', 'POST'])
-@router.route('/ch/<int:ch_index>/controls/<int:sc_index>/state', methods=['GET', 'POST'])
-@router.route('/ch/<int:ch_index>/sensors/<int:sc_index>/data')
-@router.route('/ch/<int:ch_index>/controls/<int:sc_index>/data')
+# CME channel sensors request
+@router.route('/ch/<int:ch_index>/sensors/')
 @require_auth
-def sensor_control(ch_index, sc_index):
+def sensors(ch_index):
 	ch = status(ch_index)
 
 	if not ch:
 		return json_error('Channel not found', 404)
 
-	# parse out the item (name, state) and the item type (sensor or control)
+	return json_response({ ch.id + ':sensors': sorted(ch.sensors, key=lambda s: s.id) })
+
+
+
+# GET/POST sensors on specified channel individually
+@router.route('/ch/<int:ch_index>/sensors/<int:s_index>')
+@router.route('/ch/<int:ch_index>/sensors/<int:s_index>/name', methods=['GET', 'POST'])
+@require_auth
+def sensor(ch_index, s_index):
+	ch = status(ch_index)
+
+	if not ch:
+		return json_error('Channel not found', 404)
+
+	if not (s_index >= 0 and s_index < len(ch.sensors)):
+		return json_error('Sensor not found', 404)
+
+	sensor = sorted(ch.sensors, key=lambda s: s.id)[s_index]
+
+	# parse out the item (last key in request)
+	# it will be either the sensor index or a sensor attribute name
 	segments = path_parse(request.path)
 	item = segments[-1].lower()
 
-	if item == 'name' or item == 'state' or item == 'data':
-		typename = segments[-3].lower()		
-	else:
-		typename = segments[-2].lower()
+	isFullSensor = item not in ['name']
 
-	# retrieve the object by type and index
-	if typename == 'sensors':
-		if not (sc_index >= 0 and sc_index < len(ch.sensors)):
-			return json_error('Sensor not found', 404)
+	if isFullSensor:
+		return json_response({ ch.id + ':' + sensor.id : sensor })
 
-		obj = ch.sensors[sc_index]
-	
-	elif typename == 'controls':
-		if not (sc_index >= 0 and sc_index < len(ch.controls)):
-			return json_error('Control not found', 404)
-
-		obj = ch.controls[sc_index]
-
-
-	# update name or state (or both) from POST data
+	# update from POST data (item will only match POST method names)
 	if request.method == 'POST':
 		update = request.get_json()
+		sensor.__dict__[item] = update.get(item, sensor.__dict__[item])
 
-		if item == 'name':
-			obj.name = update.get('name', obj.name)
-		elif item == 'state':
-			obj.state = update.get('state', obj.state)
-			set_control_state(ch_index, sc_index, obj.state)
-		else:
-			obj.name = update.get('name', obj.name)
-			if typename == 'control':
-				obj.state = update.get('state', obj.state)
-				set_control_state(ch_index, sc_index, obj.state)
+	# return item attribute
+	return json_response({ ch.id + ':' + sensor.id: { item: sensor.__dict__[item] }})
 
-	# figure out what to return
-	if item == 'name':
-		return json_response({ ch.id + ':' + obj.id: { 'name': obj.name }})
-	elif item == 'state':
-		return json_response({ ch.id + ':' + obj.id: { 'state': obj.state }})
-	elif item == 'data':
-		return json_response({ ch.id + ':' + obj.id: { 'data': obj.data }})
-	else:
-		return json_response({ ch.id + ':' + obj.id: obj })
+
+# CME sensor thresholds request
+# GET - list current thresholds
+# DELETE - remove all thresholds
+# POST - add a new threshold: { value, direction, classification }
+@router.route('/ch/<int:ch_index>/sensors/<int:s_index>/thresholds/', methods=['GET', 'POST', 'DELETE'])
+@require_auth
+def thresholds(ch_index, s_index):
+	ch = status(ch_index)
+
+	if not ch:
+		return json_error('Channel not found', 404)
+
+	if not (s_index >= 0 and s_index < len(ch.sensors)):
+		return json_error('Sensor not found', 404)
+
+	s = sorted(ch.sensors, key=lambda s: s.id)[s_index]
+
+	if request.method == 'GET':
+		return json_response({ ch.id + ':' + s.id + ':thresholds': s.thresholds })
+
+	if request.method == 'DELETE':
+		s.removeAllThresholds()
+		return json_response({ ch.id + ':' + s.id + ':thresholds': s.thresholds })
+
+	# else POST - add new threshold
+	#try:
+	th = s.addThreshold(request.get_json())
+	return json_response(th, 201)
+	#except:
+	#	return json_error('Bad request', 400)
+
+
+
+# GET/POST thresholds on specified channel/sensor individually
+@router.route('/ch/<int:ch_index>/sensors/<int:s_index>/thresholds/<th_id>', methods=['GET', 'POST', 'DELETE'])
+@require_auth
+def threshold(ch_index, s_index, th_id):
+	ch = status(ch_index)
+
+	if not ch:
+		return json_error('Channel not found', 404)
+
+	if not (s_index >= 0 and s_index < len(ch.sensors)):
+		return json_error('Sensor not found', 404)
+
+	s = sorted(ch.sensors, key=lambda s: s.id)[s_index]
+
+	th = next((th for th in s.thresholds if th.id == th_id), None)
+
+	if not th:
+		return json_error('Threshold not found', 404)
+
+	for case in switch(request.method):
+		if case('POST'):
+			s.modifyThreshold(th, request.get_json())
+			return json_response({ ch.id + ':' + s.id + ':' + th.id: th })
+
+		if case('DELETE'): 
+			# DELETE the identified threshold
+			s.removeThreshold(th)
+			return json_response(th)
+
+		if case():
+			# GET is default
+			return json_response({ ch.id + ':' + s.id + ':' + th.id: th })
+
