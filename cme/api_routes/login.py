@@ -17,7 +17,7 @@ def login():
 		return json_error('Login failed - invalid password.', 403),
 
 	# else we've got valid login send response and force set session
-	return json_response({ 'timestamp': timestamp() }, True)
+	return json_response({ 'timestamp': timestamp() }, force_session=True)
 
 # CME root (index) request
 @router.route('/')

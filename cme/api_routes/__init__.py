@@ -16,8 +16,8 @@ router = Blueprint('apiroutes', __name__)
 
 
 # JSON repsonse wrapper w/session cookie support
-def json_response(obj, force_session=False):
-	res = Response(json_serialize(obj), status=200, mimetype='application/json')
+def json_response(obj, status=200, force_session=False):
+	res = Response(json_serialize(obj), status, mimetype='application/json')
 
 	try:
 		prev_cookie = request.cookies[Config.SESSION_COOKIE_NAME]
