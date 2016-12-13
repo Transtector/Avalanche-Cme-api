@@ -997,6 +997,64 @@ li.input-group-cluster > .btn:disabled {
 .togglebutton label input[type=checkbox]:checked + .toggle::after {
   left: 15px;
 }
+.th-gauge {
+  position: relative;
+  background-color: #f00;
+  width: 50%;
+  height: 5px;
+  margin-left: 25%;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -o-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-shadow: 0 0 0 1px rgba(255,255,255,0.24);
+  -moz-box-shadow: 0 0 0 1px rgba(255,255,255,0.24);
+  -ms-box-shadow: 0 0 0 1px rgba(255,255,255,0.24);
+  -o-box-shadow: 0 0 0 1px rgba(255,255,255,0.24);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.24);
+}
+.th-gauge .warning,
+.th-gauge .nominal {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+}
+.th-gauge .warning {
+  width: 25%;
+  margin-left: -12.5%;
+  background-color: #ff0;
+}
+.th-gauge .nominal {
+  width: 10%;
+  margin-left: -5%;
+  background-color: #008000;
+}
+.th-gauge .pointer {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: 50%;
+  top: 50%;
+  margin-left: -4px;
+  background-color: #fff;
+  -webkit-border-radius: 80% 0 55% 50%/55% 0 80% 50%;
+  -moz-border-radius: 80% 0 55% 50%/55% 0 80% 50%;
+  -ms-border-radius: 80% 0 55% 50%/55% 0 80% 50%;
+  -o-border-radius: 80% 0 55% 50%/55% 0 80% 50%;
+  border-radius: 80% 0 55% 50%/55% 0 80% 50%;
+  -webkit-box-shadow: 0 1px 1px 1px rgba(0,0,0,0.24);
+  -moz-box-shadow: 0 1px 1px 1px rgba(0,0,0,0.24);
+  -ms-box-shadow: 0 1px 1px 1px rgba(0,0,0,0.24);
+  -o-box-shadow: 0 1px 1px 1px rgba(0,0,0,0.24);
+  box-shadow: 0 1px 1px 1px rgba(0,0,0,0.24);
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
 .panel-header .widgets {
   position: absolute;
   right: 16px;
@@ -1071,7 +1129,7 @@ li.input-group-cluster > .btn:disabled {
   position: relative;
   margin: 10px;
   width: 380px;
-  height: 225px;
+  height: 245px;
   overflow: hidden;
   color: #fff;
   background: #3ea4e1;
@@ -1103,43 +1161,32 @@ li.input-group-cluster > .btn:disabled {
 .ch-header input#description {
   width: 234px;
 }
-.ch-primary,
-.ch-secondary {
+.ch-readout {
   position: relative;
   text-align: center;
+  line-height: normal;
+  margin-top: 1em;
 }
-.ch-primary > div,
-.ch-secondary > div {
-  display: inline-block;
+.ch-readout .UNIT {
+  margin-left: 0.5em;
 }
-.ch-primary {
-  height: 80px;
-  line-height: 80px;
-}
-.ch-primary .sensor-value {
+.ch-readout.primary .value {
   font-size: 48px;
 }
-.ch-primary .sensor-unit .U {
+.ch-readout.primary .UNIT {
   font-size: 38px;
 }
-.ch-primary .sensor-unit .u {
+.ch-readout.primary .unit {
   font-size: 19px;
 }
-.ch-secondary {
-  height: 60px;
-  line-height: 60px;
-}
-.ch-secondary .sensor-value {
+.ch-readout.secondary .value {
   font-size: 34px;
 }
-.ch-secondary .sensor-unit .U {
+.ch-readout.secondary .UNIT {
   font-size: 27px;
 }
-.ch-secondary .sensor-unit .u {
+.ch-readout.secondary .unit {
   font-size: 13px;
-}
-.sensor-unit {
-  margin-left: 0.5em;
 }
 .ch-controls {
   background: #2297dd;
@@ -1158,7 +1205,7 @@ li.input-group-cluster > .btn:disabled {
   height: auto;
   font-weight: bold;
   padding: 6px 8px 6px 46px;
-  bottom: 33px;
+  bottom: 20px;
   right: 20px;
   background-color: #ea9338;
   -webkit-box-shadow: 0 1px 1.5px 0 rgba(0,0,0,0.12), 0 1px 1px 0 rgba(0,0,0,0.24);
@@ -1280,7 +1327,7 @@ li.input-group-cluster > .btn:disabled {
 }
 .ch-history .plot-wrapper {
   width: 100%;
-  height: 177px;
+  height: 197px;
 }
 .ch-history .plot {
   width: 100%;

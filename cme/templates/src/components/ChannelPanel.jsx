@@ -11,6 +11,9 @@ var Actions = require('../Actions');
 var Constants = require('../Constants');
 var Store = require('../Store');
 
+var ThresholdBadge = require('./ThresholdBadge');
+var ThresholdGauge = require('./ThresholdGauge');
+
 var moment = require('moment');
 var classNames = require('classnames');
 
@@ -40,7 +43,7 @@ var ChannelPanel = React.createClass({
 			name: '',
 			description: '',
 			configOpen: false,
-			history: 'realtime',
+			history: 'live',
 			historyVisible: false,
 			historyPrimaryTraceVisible: true,
 			historySecondaryTraceVisible: true
@@ -238,6 +241,8 @@ var ChannelPanel = React.createClass({
 		var history_disabled = this.state.ch.error;
 		var error_title = this.state.ch.error ? this.state.ch.error : '';
 
+		var secondary_digits = secondary.value > 1 ? (secondary.value > 10 ? 1 : 2) : (secondary.value < 0.1 ? 1 : 3); 
+
 		return (
 			<div className={chWrapperClass}>
 				<div className="ch">
@@ -254,32 +259,20 @@ var ChannelPanel = React.createClass({
 							   onKeyDown={this._onKeyDown} />
 					</div>
 
-					<div className="ch-primary">
-						<div className="sensor-value">
-							{primary.value.toFixed(1)}
-						</div>
-						<div className="sensor-unit">
-							<span className="U">
-								{primary.unit.substr(0, 1)}
-							</span>
-							<span className="u">
-								{primary.unit.substr(1)}
-							</span>
-						</div>
+					<div className="ch-readout primary">
+						<span className="value">{primary.value.toFixed(1)}</span>
+						<span className="UNIT">{primary.unit.substr(0, 1)}</span>
+						<span className="unit">{primary.unit.substr(1).toUpperCase()}</span>
+						<ThresholdBadge />
+						<ThresholdGauge />
 					</div>
 
-					<div className="ch-secondary">
-						<div className="sensor-value">
-							{secondary.value.toFixed(3)}
-						</div>
-						<div className="sensor-unit">
-							<span className="U">
-								{secondary.unit.substr(0, 1)}
-							</span>
-							<span className="u">
-								{secondary.unit.substr(1)}
-							</span>
-						</div>
+					<div className="ch-readout secondary">
+						<span className="value">{secondary.value.toFixed(secondary_digits)}</span>
+						<span className="UNIT">{secondary.unit.substr(0, 1)}</span>
+						<span className="unit">{secondary.unit.substr(1).toUpperCase()}</span>
+						<ThresholdBadge />
+						<ThresholdGauge />
 					</div>
 
 					{/*<div className="ch-controls">
@@ -312,8 +305,8 @@ var ChannelPanel = React.createClass({
 							</button>
 
 							<div className="select-wrapper">
-								<select className="icon-chevron-down" value="realtime" onChange={this._setHistoryUpdate} >
-	    							<option value="realtime">Real-time</option>
+								<select className="icon-chevron-down" value="live" onChange={this._setHistoryUpdate} >
+	    							<option value="live">Live</option>
 	    							<option value="daily">Daily</option>
 	    							<option value="weekly">Weekly</option>
 	    							<option value="monthly">Monthly</option>
@@ -428,7 +421,7 @@ var ChannelPanel = React.createClass({
 	_clearHistory: function() {
 		if (confirm("Are you sure?  This action cannot be undone.")) {
 
-			this.setState({ history: 'realtime', historyVisible: false });
+			this.setState({ history: 'live', historyVisible: false });
 			Actions.deleteChannel(this.props.id);
 		}
 	},
