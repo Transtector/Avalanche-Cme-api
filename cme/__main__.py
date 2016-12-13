@@ -1,5 +1,6 @@
 # cme application main entry
-import sys
+import sys, getopt, rrdtool
+
 
 # CherryPy is the wsgi application server
 # and we use the TransLogger from Paste to
@@ -29,12 +30,8 @@ from .util.ClockUtils import manage_clock
 from . import ui_routes
 from . import api_routes
 
-def main(args=None):
 
-	if args is None:
-		args = sys.argv[1:]
-
-	server_logger = Server_Logger()
+def main(argv=None):
 
 	# initialize the Flask application
 	app = Flask('cme', static_url_path='')
@@ -42,6 +39,34 @@ def main(args=None):
 
 	# set up the application layer logging
 	app_logger = App_Logger(app.logger)
+	server_logger = Server_Logger()
+
+	# parse command-line options
+	if argv is None:
+		argv = sys.argv[1:]
+
+	try:
+		opts, args = getopt.getopt(argv, "", ["rrdcached="])
+	except getopt.GetoptError:
+		print("Invalid command line arguments are ignored")
+		opts = []
+		args = []
+
+	for opt, arg in opts:
+		# override the RRDCACHED_ADDRESS
+		if opt == '--rrdcached':
+			Config.RRDCACHED_ADDRESS = arg
+
+
+	# Now that RRDCACHED is set up, try to read the "test.rrd" channel
+	# If no problems, then things are fine and we can move on.  If not,
+	# we still want to allow the cme layer to run, so we set the address
+	# to flag it to downstream code so they may bypass rrdcached calls.
+	try:
+		rrdtool.info('test.rrd', '-d', Config.RRDCACHED_ADDRESS)
+	except rrdtool.OperationalError:
+		Config.RRDCACHED_ADDRESS = 'rrdcached_failure'
+
 
 	# log the network and clock states at init
 	manage_network(settings['network'])

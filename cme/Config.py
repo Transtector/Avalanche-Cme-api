@@ -4,9 +4,7 @@
 # settings.json.  When settings.json is loaded during startup, the
 # configuration values herein may be overridden.  To reset all config
 # values to defaults, simply delete settings.json.
-
 import os, uuid, platform, json
-import rrdtool
 
 DEBUG = True
 
@@ -27,16 +25,18 @@ UPDATE = os.path.abspath(os.path.join(USERDATA, 'update')) # /data/update
 # updates can be put on USB (removable) media
 USB = os.path.abspath('/media/usb')
 
-
 # globbing pattern for update image files
 UPDATE_GLOB = '1500-???-v*-SWARE-CME*.tgz'
 PUBLIC_UPDATES_URL = 'https://s3.amazonaws.com/transtectorpublicdownloads/'
 
 
-# logging to files in parent foldr
+# logging to files in parent folder
 LOGDIR = os.path.abspath(os.path.join(USERDATA, 'log')) # /data/log
-LOGBYTES = 1024 * 10
-LOGCOUNT = 5
+LOGBYTES = 1024 * 50
+LOGCOUNT = 1
+
+# channel data and configuration are stored here
+CHDIR = os.path.abspath(os.path.join(USERDATA, 'channels')) # /data/channels
 
 APPLOG = os.path.join(LOGDIR, 'cme.log')
 SERVERLOG = os.path.join(LOGDIR, 'server.log')
@@ -44,27 +44,20 @@ ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 
 # rrdcached is a cache service wrapping the rrd tool
 # See rrdtool.org for details.  Default address is
-# "localhost" and the default port is 42217.
+# "localhost" and the default port is 42217.  You can
+# override this by passing a command line option as:
+#	$ python -m cme --rrdcached 'server'
 RRDCACHED_ADDRESS = 'localhost'
-
-# Try to read the "test.rrd" channel via the rrdcached (at localhost).
-# If no problems, then things are fine and we can move on.  If not,
-# we still want to allow the cme layer to run, so we set the address
-# to flag it to downstream code so they may bypass rrdcached calls.
-try:
-	rrdtool.info('test.rrd', '-d', RRDCACHED_ADDRESS)
-
-except Exception as e:
-	RRDCACHED_ADDRESS = 'rrdcached_failure'
 
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')
 
-# recovery mode flag is signaled by presence of this file
-RECOVERY = os.path.isfile(os.path.join(APPROOT, 'recovery.txt'))
+# recovery mode if we're not running inside a docker container
+from cme.util import is_a_docker
+RECOVERY = not is_a_docker()
 
 # create USERDATA folders if they don't yet exist
-for p in [ UPLOAD_FOLDER, UPDATE, LOGDIR ]:
+for p in [ UPLOAD_FOLDER, UPDATE, LOGDIR, CHDIR ]:
 	if not os.path.exists(p):
 		os.makedirs(p)
 
@@ -94,7 +87,10 @@ except:
 DEVICE_MODEL_NUMBER = device_data['modelNumber']
 DEVICE_SERIAL_NUMBER = device_data['serialNumber']
 
-# The firmware version is stored right here (for now)
+# The "firmware" version is stored right here - here "firmware" is the
+# base layer OS and software installed to the CME device.  Normally
+# additional layers (e.g., API, hw) run on top of the base layer and
+# will be independently versioned.
 DEVICE_FIRMWARE = "0.1.0"
 
 GENERAL_NAME = "My CME"
@@ -106,7 +102,6 @@ SUPPORT_EMAIL = ""
 SUPPORT_PHONE = ""
 
 # CME Temperature configuration
-
 class TemperatureUnits:
 	CELSIUS = 0
 	FAHRENHEIT = 1
