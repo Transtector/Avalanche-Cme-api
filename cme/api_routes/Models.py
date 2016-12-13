@@ -1,8 +1,8 @@
-import os, glob, time
+import os, glob, fcntl, tempfile, json, uuid
 
 import rrdtool
 
-from . import settings, Config
+from . import Config
 from ..util.Switch import switch
 from ..util import is_a_docker
 
@@ -12,60 +12,45 @@ from ..util import is_a_docker
 # the host's network (--net=host) at runtime.
 RRDCACHED_ADDRESS = Config.RRDCACHED_ADDRESS
 
+# Channel data and configuration are stored here (typically /data/channels/)
+CHDIR = Config.CHDIR
+
 class ChannelManager:
 
 	def __init__(self):
 		''' The ChannelManager uses a hybrid approach between the 'rrdcached' daemon process 
-			and the (shared) LOGDIR location.
+			and the (shared) CHDIR location.
 
-			Normally, all the CME system containers have the LOGDIR (/data/log by default)
+			Normally, all the CME system containers have the DATA (/data by default)
 			mounted as a shared volume.  The CME host system maintains this directory,
-			and it provides the central repository for all things CME logging related
+			and it provides the central repository for all things CME related
 			including channel data logging to round-robin databases (i.e., RRD's).
+
+			Channel data and configuration is shared in a subdirectory of the DATA
+			volume (typically /data/channels/) called CHDIR.
 
 			The rrdcached daemon manages the channel RRD's and is used by Cme-hw to create
 			and update the channel RRD's.  The ChannelManager ideally just reads the data
 			captured in the channel RRD's, but it must also support additional methods
-			like clearing the RRD's (basically a reset) and listing the available RRD's.
+			like clearing the RRD's (basically a reset), listing the available RRD's, and
+			providing channel configuration.
 
-			Since the rrdcached doesn't support these additional functions (clearing, listing)
-			the ChannelManager just works with the LOGDIR folder contents directly.
+			Since the rrdcached doesn't support these additional functions (clearing, listing,
+			configuration) the ChannelManager just works with the CHDIR folder contents directly.
 
 			To clear an RRD, ChannelManager places a "chX.rrd.reset" file to be detected
 			by the Cme-hw update.  The channel RRD will be created and the .reset file
 			will be deleted.
 
-			To get a list of available channel RRD's, ChannelManager just globs the LOGDIR
+			To get a list of available channel RRD's, ChannelManager just globs the CHDIR
 			against the pattern 'ch*.rrd'.
 
 			This all works fine on the typical deployment platform (i.e., the CME RPi), but
 			is not easily checked if you're working from e.g. a Mac laptop.  The rrdcached
 			calls work fine just by changing the RRDCACHED_ADDRESS config to the machine
-			running the Cme-mc container, but the direct manipulations of the LOGDIR will
-			not work properly unless you do something fancy to access the LOGDIR on the
+			running the Cme-mc container, but the direct manipulations of the CHDIR will
+			not work properly unless you do something fancy to access the CHDIR on the
 			machine hosting the actual volume. 
-
-			I can run the Cme API layer on my Mac while using the Cme-hw and Cme-mc running
-			on my development Pi (cme-dev.local) by mounting the Pi's Data/ shared folder
-			to my Mac's under /Volumes/Data and creating a symlink to it from /data.
-
-			This requires my cme-dev to have been setup with avahi/netatalk properly with
-			the /data folder shared with the pi user.  Edit /etc/netatalk/AppleVolumes.default
-			and add the following line at the bottom:
-
-			/data	"Data"	allow:pi	options:upriv,usedots
-
-			and restart netatalk:
-
-			(cme-dev) $ service netatalk restart
-
-			Then, mount the cme-dev.local Data/ share from Finder.  Just connect to it
-			using the pi:raspberry user and double-click the Data share to mount it.
-
-			Finally, if it's not already there, create a symbolic link to the new Data
-			mount as:
-
-			(mac) $ sudo ln -sf /Volumes/Data /data
 		'''
 
 		# cache channels for quick subsequent retrieval as only the 
@@ -88,7 +73,7 @@ class ChannelManager:
 		ch_rrd_reset = ch_id + '.rrd.reset'
 
 		# create or overwrite any existing chX.rrd.reset file
-		open(os.path.join(Config.LOGDIR, ch_rrd_reset), 'w').close()
+		open(os.path.join(CHDIR, ch_rrd_reset), 'w').close()
 
 
 	def get_channel(self, ch_id):
@@ -114,24 +99,10 @@ class ChannelManager:
 		# else return newly created/added channel
 		return self._Channels.setdefault(ch_id, Channel(ch_id, self._get_channel_rrd(ch_id)))
 
-
-	def debug_channels(self, count=10):
-		i = 0
-
-		while (i < count):
-			i = i + 1
-			time.sleep(1)
-
-			for ch in self.channels:
-				ch_obj = self.get_channel(ch)
-				print("Channel {0} ---".format(ch_obj.id))
-				print("\t".join([ "{0}: {1}".format(s.id, s.value) for s in ch_obj.sensors ]))
-
-
 	@property
 	def channels(self):
 		''' Returns a list of available channels by listing
-			the channel RRD's found in the LOGDIR.
+			the channel RRD's found in the CHDIR.
 		'''
 		return sorted(self._list_channels())
 
@@ -140,7 +111,7 @@ class ChannelManager:
 		''' private function to poll the /data/log folder for channel RRD's '''
 
 		# will glob for all ch RRD reset files
-		rrd_reset_pattern = os.path.join(Config.LOGDIR, 'ch*.rrd.reset')
+		rrd_reset_pattern = os.path.join(CHDIR, 'ch*.rrd.reset')
 
 		# lists all channel id's for which a reset file exists: [ 'ch0', 'ch1', 'chx(y)', ... ]
 		rrd_reset_list = [ os.path.basename(p).split('.')[0] for p in glob.glob(rrd_reset_pattern)]
@@ -149,7 +120,7 @@ class ChannelManager:
 		#rrd_reset_list = [ 'ch0' ]
 
 		# will glob for all channel RRD files (they are named like 'ch7_456789321.rrd')
-		rrd_pattern = os.path.join(Config.LOGDIR, 'ch*.rrd')
+		rrd_pattern = os.path.join(CHDIR, 'ch*.rrd')
 
 		# skips channel RRD's if pending reset 
 		rrd_list = [ os.path.basename(p).split('_')[0]
@@ -162,7 +133,7 @@ class ChannelManager:
 	def _get_channel_rrd(self, ch_id):
 		''' glob for channel rrd filename '''
 		
-		rrd_pattern = os.path.join(Config.LOGDIR, ch_id + '_*.rrd')
+		rrd_pattern = os.path.join(CHDIR, ch_id + '_*.rrd')
 		rrd = glob.glob(rrd_pattern)
 
 		if rrd:
@@ -171,33 +142,14 @@ class ChannelManager:
 		return None
 
 
-class Channel:
+class Channel():
 
 	def __init__(self, id, rrd): 
 
 		self.id = id # e.g., 'ch0'
 		self.rrd = rrd # e.g., 'ch0_1466802992.rrd'
 
-		''' user-settable channel settings are cached in settings['__channels'] by channel id '''
-		if not self.id in settings['__channels']:
-			chs = settings['__channels']
-			chs[self.id] = {}
-			settings['__channels'] = chs
-
-			# give a 1-based channel name (e.g., 'Ch 1' see issue RD20160280-11)
-			self.name = 'Ch ' + str(int(self.id[2:]) + 1)
-			self.description = self.name + ' description'
-
-		self.sensors = []
-		self.controls = []
-
-		# Add __dict__ properties to this instance for serialization
-		self.__dict__['name'] = self.name
-		self.__dict__['description'] = self.description
-
-		# TODO: carry Cme-hw channel errors over?  Not sure how...
-		self.error = False
-		self.__dict__['error'] = self.error
+		self.error = False # add 'error' dict item for serialized object
 
 		self.last_update = 0
 		self.first_update = 0
@@ -208,10 +160,17 @@ class Channel:
 		self._update_rrd_info()
 
 		# push the ch_ds into new Sensor objects
-		for ds_id, ds_obj in self.ch_ds.items():
-			self.sensors.append(Sensor(id, ds_id, ds_obj))
+		self.sensors = [ Sensor(self, ds_id, ds_obj) for ds_id, ds_obj in self.ch_ds.items() ]
+
+		# load config from file or defaults into self.config
+		self.configpath = os.path.join(CHDIR, id + '_config.json') # e.g., 'ch0_config.json'
+		self.load_config()
 
 		# TODO: Add channel controls...
+		#self.controls = []
+		
+		# save any new default channel user data back to disk
+		self.save_config()
 
 
 	def update(self):
@@ -226,7 +185,7 @@ class Channel:
 		return self
 
 
-	def load_history(self, resolution='realtime'):
+	def load_history(self, resolution='live'):
 
 		# RRDCACHED_ADDRESS is set to a flag value if there
 		# is no service.  We can still run cme layer however
@@ -242,55 +201,94 @@ class Channel:
 				break
 
 			if case():
-				# default - "realtime"
+				# default - "live"
 				args = ('LAST', '-a', '-s', '-15m')
 
 		args = (self.rrd, '-d', RRDCACHED_ADDRESS, ) + args
 
 		# Wrap the rrdtool call in try/except as something bad
-		# may be going on with the RRD cache daemon.  We'll set
+		# may be going on with the RRD cache daemon.  If so we'll set
 		# the channel error flag.
 		try:
-			self.__dict__['data'] = rrdtool.fetch(*args)
+			self.data = rrdtool.fetch(*args)
 
 		except Exception as e:
 			self.error = "Error reading channel history [{0}]: {1}".format(self.rrd, e)		
 
 
 	def clear_history(self):
-		if 'data' in self.__dict__:
-			del self.__dict__['data']
+
+		self.data = None
+
+
+	def load_config(self):
+		# Load user-configurable attributes for the channel.  Channel's sensors
+		# have been detected and are in the sensors attribute.
+		if os.path.isfile(self.configpath):
+			with open(self.configpath, 'r') as f:
+				cfg = json.load(f)
+				self.__dict__['name'] = cfg['name']
+				self.__dict__['description'] = cfg['description']
+				
+				# add any sensor configuration for attached sensors
+				for s in self.sensors:
+
+					# find matching sensor id, if any
+					found_sensor = next((cs for cs in cfg['sensors'] if cs['id'] == s.id), None)
+
+					if found_sensor:
+						# sensor name is user-configurable
+						s.name = found_sensor.get('name', s.name)
+
+						# load up sensor thresholds 
+						s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
+
+
+
+		else:
+			# load default values
+			self.__dict__['name'] = 'Ch ' + str(int(self.id[2:]) + 1)
+			self.__dict__['description'] = self.name + ' description'
+
+			for s in self.sensors:
+				s.__dict__['name'] = s.id
+				s.__dict__['thresholds'] = []
+
+
+	def save_config(self):
+		# create a dict to hold the channel configuration
+		cfg = {
+			"name": self.name,
+			"description": self.description,
+			"sensors": [ { 'id': s.id, 'name': s.name, 'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification} for th in s.thresholds ] } for s in self.sensors ]
+		}
+
+		with LockedOpen(self.configpath, 'a') as f:
+			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.configpath), delete=False) as tf:
+				json.dump(cfg, tf, indent=2)
+				tempname = tf.name
+			os.replace(tempname, self.configpath)
+
 
 	@property
 	def name(self):
-		return settings['__channels'][self.id]['name']
+		return self.__dict__['name']
 
 	@name.setter
 	def name(self, value):
-		chs = settings['__channels']
-		chs[self.id]['name'] = value
-		settings['__channels'] = chs
 		self.__dict__['name'] = value # this is the attr that gets serialized to json - keep in sync
+		self.save_config()
 
 	@property
 	def description(self):
-		return settings['__channels'][self.id]['description']
+		return self.__dict__['description']
 	
 	@description.setter
 	def description(self, value):
-		chs = settings['__channels']
-		chs[self.id]['description'] = value
-		settings['__channels'] = chs
 		self.__dict__['description'] = value # this is the attr that gets serialized to json - keep in sync
+		self.save_config()
 
-	@property
-	def error(self):
-		return self.__dict__['error']
 
-	@error.setter
-	def error(self, value):
-		self.__dict__['error'] = value
-	
 	def _update_rrd_info(self):
 
 		# reading _channel_info can encounter errors
@@ -328,7 +326,6 @@ class Channel:
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
-
 		result = None
 
 		# RRDCACHED_ADDRESS is set to a flag value if there
@@ -354,13 +351,15 @@ class Channel:
 		return result
 
 
+class Sensor():
+	''' Sensor objects provide read-only values depending on sensor type.
 
-class Sensor:
-	''' Sensor objects provide read-only values depending on sensor type '''
-
-	def __init__(self, ch_id, ds_id, ds_values):
+		Channel configuration (which includes sensor config) has been
+		loaded at the point of Sensor object creation.
+	'''
+	def __init__(self, ch, ds_id, ds_values):
 	
-		self.channel_id = ch_id # track which channel we belong to for settings and data lookups
+		self.save_config = ch.save_config # track which channel we belong to for settings and data lookups
 
 		# split ds_id into id, type, and unit (e.g., s0_VAC_Vrms)
 		self.ds_id = ds_id
@@ -372,69 +371,95 @@ class Sensor:
 		
 		self.value = float(ds_values['last_ds'])
 
-		''' user-settable Sensor data stored in settings '''
-		if not 'sensors' in settings['__channels'][ch_id]:
-			chs = settings['__channels']
-			chs[ch_id]['sensors'] = {}
-			settings['__channels'] = chs
+		# look for previous sensor config and load it
+		found = False
 
-		if not self.id in settings['__channels'][ch_id]['sensors']:
-			chs = settings['__channels']
-			chs[ch_id]['sensors'][self.id] = {}
-			settings['__channels'] = chs
-			self.name = self.id
+		for s in getattr(ch, 'sensors', []): # use getattr in case sensors hasn't been added to ch yet...
+			found = False
+			if s['id'] == self.id:
+				found = True
+				break
 
-		# Add class properties to this instance to get __dict__ serialization
-		self.__dict__['name'] = self.name
+		# use __dict__ here to avoid triggering unnecessary save to disk
+		if not found:
+			# load defaults
+			self.__dict__['name'] = self.id
+			self.thresholds = []
 
+		else:
+			# load from file
+			self.__dict__['name'] = s['name']
+			self.thresholds = [ Threshold(th['value'], th['direction'], th['classification'], th['id']) for th in s['thresholds'] ]
 
-	@property
-	def name(self):
-		return settings['__channels'][self.channel_id]['sensors'][self.id]['name']
+	def addThreshold(self, th_obj):
+		th = Threshold(th_obj['value'], th_obj['direction'], th_obj['classification'])
+		self.thresholds.append(th)
+		self.save_config()
+		return th
 
-	@name.setter
-	def name(self, value):
-		chs = settings['__channels']
-		chs[self.channel_id]['sensors'][self.id]['name'] = value
-		settings['__channels'] = chs
-		self.__dict__['name'] = value
+	def removeThreshold(self, th):
+		try:
+			self.thresholds.remove(th)
+			self.save_config()
+		except:
+			pass
 
-
-class Control:
-	''' Control objects provide read-write access to control state '''
-
-	def __init__(self, ch_id, hw_control):
+	def modifyThreshold(self, th, th_obj):
 		
-		self.channel_id = ch_id # track which channel we belong to for settings lookups
+		th.value = th_obj.get('value', th.value)
+		th.direction = th_obj.get('direction', th.direction)
+		th.classification = th_obj.get('classification', th.classification)
+		self.save_config()
 
-		self.id = hw_control['id'] # e.g., 'c0'
-
-		''' user-settable Control data stored in settings '''
-		if not 'controls' in settings['__channels'][ch_id]:
-			chs = settings['__channels']
-			chs[ch_id]['controls'] = {}
-			settings['__channels'] = chs
-
-		if not self.id in settings['__channels'][ch_id]['controls']:
-			chs = settings['__channels']
-			chs[ch_id]['controls'][self.id] = {}
-			settings['__channels'] = chs
-			self.name = self.id
-
-		self.type = hw_control['type']
-		self.state = hw_control['state']
-
-		# Add class properties to this instance to get __dict__ serialization
-		self.__dict__['name'] = self.name
+		return th
 
 
 	@property
 	def name(self):
-		return settings['__channels'][self.channel_id]['controls'][self.id]['name']
+		return self.__dict__['name']
 
 	@name.setter
 	def name(self, value):
-		chs = settings['__channels']
-		chs[self.channel_id]['controls'][self.id]['name'] = value
-		settings['__channels'] = chs
+		self.__dict__['name'] = value
+		self.save_config()
 
+
+class Threshold():
+	''' Threshold object holds scalar values and properties to allow setting
+		and acting upon sensor value comparisons.  These objects are created
+		by the user and persisted within the channel configuration files.
+	'''
+	def __init__(self, value, direction, classification, id=None):
+		self.id = id if id else str(uuid.uuid4())
+		self.value = value
+		self.direction = direction
+		self.classification = classification
+
+
+
+class LockedOpen(object):
+	''' see https://blog.gocept.com/2013/07/15/reliable-file-updates-with-python/
+	    for details regarding this class and isolating file updates.
+	s'''
+	def __init__(self, filename, *args, **kwargs):
+		self.filename = filename
+		self.open_args = args
+		self.open_kwargs = kwargs
+		self.fileobj = None
+
+	def __enter__(self):
+		f = open(self.filename, *self.open_args, **self.open_kwargs)
+		while True:
+			fcntl.flock(f, fcntl.LOCK_EX)
+			fnew = open(self.filename, *self.open_args, **self.open_kwargs)
+			if os.path.sameopenfile(f.fileno(), fnew.fileno()):
+				fnew.close()
+				break
+			else:
+				f.close()
+				f = fnew
+		self.fileobj = f
+		return f
+
+	def __exit__(self, _exc_type, _exc_value, _traceback):
+		self.fileobj.close()
