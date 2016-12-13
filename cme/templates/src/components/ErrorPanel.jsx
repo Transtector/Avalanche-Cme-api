@@ -66,7 +66,13 @@ var ErrorPanel = React.createClass({
 	},
 
 	_onErrorChange: function() {
-		this.setState({ errors: Store.getState().errors })
+		var newErrors = Store.getState().errors;
+		var clearingErrors = !newErrors || newErrors.length == 0 && this.state.errors && this.state.errors.length > 0;
+
+		this.setState({ errors: newErrors });
+
+		// refresh page if clearing errors
+		if (clearingErrors) setTimeout(function () { location.reload(); }, 10);
 	},	
 
 	_onClearErrors: function() {
