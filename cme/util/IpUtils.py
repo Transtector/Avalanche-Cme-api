@@ -21,6 +21,9 @@ def mac():
 	# old way (didn't work well under docker container)
 	#return str(':'.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1])).upper()
 
+	if not is_a_cme():
+		return "00:12:34:AB:CD:EF"
+
 	with open('/sys/class/net/' + iface.decode() + '/address') as f:
 		mac = f.read().strip().upper()
 
