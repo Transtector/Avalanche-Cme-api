@@ -1,16 +1,11 @@
 # cme application main entry
 import sys, getopt, rrdtool
 
-
 # CherryPy is the wsgi application server
 # and we use the TransLogger from Paste to
 # reformat the Flask (wsgi application) logs
 import cherrypy
 from paste.translogger import TransLogger
-
-# Flask is the wsgi application that sits
-# behind the CherryPy server
-from flask import Flask
 
 # Set up server and application logging
 from .Logging import Server_Logger, App_Logger
@@ -22,20 +17,15 @@ from . import Config
 # CME configuration values
 from .Settings import settings
 
-# network and ntp/clock status
-from .util.IpUtils import manage_network
-from .util.ClockUtils import manage_clock
+# Flask is the wsgi application that sits
+# behind the CherryPy server
+from flask import Flask
 
-# import ui, api routes
-from . import ui_routes
-from . import api_routes
-
+# initialize the Flask application
+app = Flask('cme', static_url_path='')
+app.config.from_object(Config)
 
 def main(argv=None):
-
-	# initialize the Flask application
-	app = Flask('cme', static_url_path='')
-	app.config.from_object('cme.Config')
 
 	# set up the application layer logging
 	app_logger = App_Logger(app.logger)
@@ -67,6 +57,14 @@ def main(argv=None):
 	except rrdtool.OperationalError:
 		Config.RRDCACHED_ADDRESS = 'rrdcached_failure'
 
+
+	# network and ntp/clock status
+	from .util.IpUtils import manage_network
+	from .util.ClockUtils import manage_clock
+
+	# import ui, api routes
+	from . import ui_routes
+	from . import api_routes
 
 	# log the network and clock states at init
 	manage_network(settings['network'])
