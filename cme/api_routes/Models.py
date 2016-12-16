@@ -108,7 +108,7 @@ class ChannelManager:
 
 
 	def _list_channels(self):
-		''' private function to poll the /data/log folder for channel RRD's '''
+		''' private function to poll the channels folder for channel RRD's '''
 
 		# will glob for all ch RRD reset files
 		rrd_reset_pattern = os.path.join(CHDIR, 'ch*.rrd.reset')
@@ -227,23 +227,25 @@ class Channel():
 		if os.path.isfile(self.configpath):
 			with open(self.configpath, 'r') as f:
 				cfg = json.load(f)
-				self.__dict__['name'] = cfg['name']
-				self.__dict__['description'] = cfg['description']
-				
-				# add any sensor configuration for attached sensors
-				for s in self.sensors:
 
-					# find matching sensor id, if any
-					found_sensor = next((cs for cs in cfg['sensors'] if cs['id'] == s.id), None)
+			self.__dict__['name'] = cfg['name']
+			self.__dict__['description'] = cfg['description']
+			
+			# add any sensor configuration for attached sensors
+			for s in self.sensors:
 
-					if found_sensor:
-						# sensor name is user-configurable
-						s.name = found_sensor.get('name', s.name)
+				# find matching sensor id, if any
+				found_sensor = next((cs for cs in cfg['sensors'] if cs['id'] == s.id), None)
 
-						# load up sensor thresholds 
-						s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
+				if found_sensor:
+					# sensor name is user-configurable
+					s.name = found_sensor.get('name', s.name)
 
+					# sensor range is set in hardware configuration
+					s.range = found_sensor['_config'].get('range', [])
 
+					# load up sensor thresholds 
+					s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
 
 		else:
 			# load default values
@@ -256,16 +258,37 @@ class Channel():
 
 
 	def save_config(self):
-		# create a dict to hold the channel configuration
-		cfg = {
-			"name": self.name,
-			"description": self.description,
-			"sensors": [ { 'id': s.id, 'name': s.name, 'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification} for th in s.thresholds ] } for s in self.sensors ]
-		}
+		# load current config, if any
+		if os.path.isfile(self.configpath):
+			with open(self.configpath, 'r') as f:
+				cfg = json.load(f)
+		else:
+				cfg = {}
+				
+		# merge new settings
+		new_cfg = cfg.copy()
 
+		new_cfg.update({
+			"name": self.name,
+			"description": self.description
+		})
+
+		# for each configured sensor
+		for s in new_cfg['sensors']:
+			# find matching sensor id from channel sensors model
+			found_s = next((cs for cs in self.sensors if cs.id == s['id']), None)
+
+			if found_s:
+				# update name and thresholds attributes in config
+				s.update({ 
+					'name': found_s.name,
+					'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification } for th in found_s.thresholds ]
+				})
+
+		# save to disk
 		with LockedOpen(self.configpath, 'a') as f:
 			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.configpath), delete=False) as tf:
-				json.dump(cfg, tf, indent=2)
+				json.dump(new_cfg, tf, indent="\t")
 				tempname = tf.name
 			os.replace(tempname, self.configpath)
 
@@ -332,6 +355,8 @@ class Channel():
 		# is no service.  We can still run cme layer however
 		# and just return.
 		if RRDCACHED_ADDRESS.find('fail') > 0:
+			if not self.error:
+				self.error = "Error reading channel information [{0}]: RRD cache server not running.".format(self.rrd)
 			return result
 
 		args = (self.rrd, '-d', RRDCACHED_ADDRESS)
@@ -359,7 +384,7 @@ class Sensor():
 	'''
 	def __init__(self, ch, ds_id, ds_values):
 	
-		self.save_config = ch.save_config # track which channel we belong to for settings and data lookups
+		self.__save_config = ch.save_config # track which channel we belong to for settings and data lookups
 
 		# split ds_id into id, type, and unit (e.g., s0_VAC_Vrms)
 		self.ds_id = ds_id
@@ -368,6 +393,8 @@ class Sensor():
 		self.id = split[0]
 		self.type = split[1]
 		self.unit = split[2]
+
+		self.range = [] # sensor range is a read-only list of [min, max] and may be empty
 		
 		self.value = float(ds_values['last_ds'])
 
@@ -394,13 +421,20 @@ class Sensor():
 	def addThreshold(self, th_obj):
 		th = Threshold(th_obj['value'], th_obj['direction'], th_obj['classification'])
 		self.thresholds.append(th)
-		self.save_config()
+		self.__save_config()
 		return th
 
 	def removeThreshold(self, th):
 		try:
 			self.thresholds.remove(th)
-			self.save_config()
+			self.__save_config()
+		except:
+			pass
+
+	def removeAllThresholds(self):
+		try:
+			self.thresholds = []
+			self.__save_config()
 		except:
 			pass
 
@@ -409,7 +443,7 @@ class Sensor():
 		th.value = th_obj.get('value', th.value)
 		th.direction = th_obj.get('direction', th.direction)
 		th.classification = th_obj.get('classification', th.classification)
-		self.save_config()
+		self.__save_config()
 
 		return th
 
@@ -421,7 +455,7 @@ class Sensor():
 	@name.setter
 	def name(self, value):
 		self.__dict__['name'] = value
-		self.save_config()
+		self.__save_config()
 
 
 class Threshold():
