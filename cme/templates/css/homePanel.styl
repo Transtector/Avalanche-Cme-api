@@ -87,7 +87,7 @@ error-badge-size = 30px
 	position relative // for z-index layering
 	text-align center
 	line-height normal
-	margin-top 1em
+	margin-top 18px
 	.UNIT
 		margin-left 0.5em
 
@@ -174,13 +174,17 @@ error-badge-size = 30px
 		background-color transparent
 		background-repeat no-repeat
 		background-position-x 100%
-		font-size 100%
+		font-size 80%
+		font-weight bold
+		text-transform uppercase	
 		border 0
 		border-radius 0
 		cursor pointer
 		outline none
-	> button
-		font-size 100%
+	.btn
+		font-size 80%
+		font-weight bold
+		text-transform uppercase	
 		line-height 100%
 		color #fff
 		background-color transparent
@@ -192,10 +196,6 @@ error-badge-size = 30px
 		left 0
 		padding-left 30px
 		background-position-x 0
-	.btn.reset
-		font-size 80%
-		font-weight bold
-		text-transform uppercase
 	.btn.export
 		position absolute
 		right 0
@@ -203,6 +203,7 @@ error-badge-size = 30px
 		position absolute
 		padding-left 15px
 		background-color transparent
+		text-transform none
 	.btn.trace.pri
 		left 0
 	.btn.trace.sec
