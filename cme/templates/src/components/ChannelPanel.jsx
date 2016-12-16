@@ -64,49 +64,81 @@ var ChannelPanel = React.createClass({
 
 		if (!this.state.ch) return null;
 
-		// class names for ch configuation div
-		var configClass = classNames({
-			'ch-config': true,
-			'open': this.state.configOpen
-		});
-
-		// class names for ch history div 
-		var historyClass = classNames({
-			'ch-history': true,
-			'open': this.state.historyVisible
-		});
-
 		// ch primary/secondary sensor display values
-		var primary, secondary,
+		var primary = this.state.ch.sensors[0];
+		var secondary = this.state.ch.sensors[1];
+
+		// ch error classes, formatting and messages
+		var chWrapperClass = classNames({
+			'ch-wrapper': true,
+			'error': this.state.ch.error.length > 0
+		});
+
+		return (
+			<div className={chWrapperClass}>
+				<div className="ch">
+					<div className="ch-header">
+						<input type="text" id="name" name="name" 
+							   value={this.state.name}
+							   placeholder="name"
+							   onChange={this._requestChange}
+							   onKeyDown={this._onKeyDown} />
+						<input type="text" id="description" name="description"
+							   value={this.state.description}
+							   placeholder="description"
+							   onChange={this._requestChange}
+							   onKeyDown={this._onKeyDown} />
+					</div>
+
+					{this._renderReadout(primary, 'primary')}
+
+					{this._renderReadout(secondary, 'secondary')}
+
+					<button className="btn ch-history-badge" disabled={this.state.ch.error} onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>				
+
+					{this._renderHistory(primary.unit, secondary.unit)}
+	
+					{this._renderConfig()}
+				</div>
+
+				<div className="ch-error-badge" title={this.state.ch.error ? this.state.ch.error : ''}>!</div>
+
+			</div>
+		);
+	},
+
+	_renderReadout: function(sensor, sensorClass) {
+
+		if (!sensor) return null;
+
+		var c = "ch-readout " + sensorClass;
+
+		var digits = sensor.value > 1 ? (sensor.value > 10 ? 1 : 2) : (sensor.value < 0.1 ? 1 : 3);
+
+		return (
+			<div className={c}>
+				<span className="value">{sensor.value.toFixed(digits)}</span>
+				<span className="UNIT">{sensor.unit.substr(0, 1)}</span>
+				<span className="unit">{sensor.unit.substr(1).toUpperCase()}</span>
+				<ThresholdBadge sensor={sensor} />
+				<ThresholdGauge sensor={sensor} />
+			</div>
+		);
+	},
+
+	_renderHistory: function(primarySensorUnit, secondarySensorUnit) {
+
+		// data[0] = [ t_start, t_end, t_step ]
+		// data[1] = [ DS0, DS1, ..., DSN ]; DSx = "sx_stype_sunit" (e.g., "s0_VAC_Vrms")
+		// data[2] = [ [ s0_value, s1_value, ..., sN_value ], [ s0_value, s1_value, ..., sN_value ], ... , [ s0_value, s1_value, sN_value ] ]
+
+		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
+		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
+		var primarySeries = [], secondarySeries = [],
 			primaryTraceColor, secondaryTraceColor,
 			primaryTraceDisabled, secondaryTraceDisabled;
 
-		this.state.ch.sensors.forEach(function (s) {
-			if (s.id == 's0') {
-				primary = s;
-			} else {
-				secondary = s;
-			}
-		});
-
-		// Display channel time range in plain terms on the history button.
-		var timestamps = [], ts_start, ts_end;
-
-		timestamps.push(this.state.ch.first_update * 1000);
-		timestamps.push(this.state.ch.last_update * 1000);
-
-
 		if (this.state.historyVisible && this.state.ch.data) {
-
-			// data[0] = [ t_start, t_end, t_step ]
-			// data[1] = [ DS0, DS1, ..., DSN ]; DSx = "sx_stype_sunit" (e.g., "s0_VAC_Vrms")
-			// data[2] = [ [ s0_value, s1_value, ..., sN_value ], [ s0_value, s1_value, ..., sN_value ], ... , [ s0_value, s1_value, sN_value ] ]
-
-			// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
-			// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-
-			var primarySeries = [],
-				secondarySeries = [];
 
 			var t_start = this.state.ch.data[0][0] * 1000,
 				t_end = this.state.ch.data[0][1] * 1000,
@@ -142,19 +174,6 @@ var ChannelPanel = React.createClass({
 				}
 			}, this);
 
-			/*
-			var dataPoints = this.state.ch.data[2].length;
-
-			if (dataPoints) {
-				y1avg = y1sum / dataPoints;
-				y2avg = y2sum / dataPoints;
-
-				console.log('Y1: [ ' + y1min + ', ' + y1avg + ', ' + y1max + ']');
-				console.log('Y2: [ ' + y2min + ', ' + y2avg + ', ' + y2max + ']');
-			
-			}
-			*/
-
 			var y1Axis = { }, y2Axis = { position: 'right' };
 
 			if (Math.abs(y1max - y1min) < 0.1)
@@ -166,26 +185,18 @@ var ChannelPanel = React.createClass({
 			// Hide the y-axis labels if the traces are hidden
 			// otherwise try to align the y-axes ticks
 			if (this.state.historyPrimaryTraceVisible) {
-
 				primaryTraceDisabled = !this.state.historySecondaryTraceVisible;
 				y2Axis.alignTicksWithAxis = 1;
-
 			} else {
-
 				y1Axis.show = false;
-
 			}
 
 			if (this.state.historySecondaryTraceVisible) {
-
 				secondaryTraceDisabled = !this.state.historyPrimaryTraceVisible;
-			
 			} else {
 			
 				y2Axis.show = false; 
-
 			}
-
 
 			// this generates the plot
 			var plot = $.plot($(this._sensorsPlot()), 
@@ -204,33 +215,70 @@ var ChannelPanel = React.createClass({
 					yaxes: [ y1Axis, y2Axis ]
 				});
 
-
 			// get flot series colors
 			var series = plot.getData();
+
 			primaryTraceColor = series[0].color;
 			secondaryTraceColor = series[1].color;
 		}
 
+		// class names for ch history div 
+		var historyClass = classNames({
+			'ch-history': true,
+			'open': this.state.historyVisible
+		});
 
-		ts_start = moment.utc(Math.min.apply(null, timestamps));
-		ts_end = moment.utc(Math.max.apply(null, timestamps));
+		return (
+			<div className={historyClass}>
 
-		var duration = ts_end.from(ts_start, true);
+				<div className="ch-history-header">
+					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}>History</button>
+					<button className="btn reset" onClick={this._clearHistory}>Clear</button>
+					<button className="btn export icon-download" onClick={this._exportHistory} />
+				</div>
 
-		// Ch errors
-		if (this.state.ch) {
+				<div className="plot-wrapper">
+					<div className="plot sensorPlot" ref="_sensorsPlot"></div>
+				</div>
 
-			var chWrapperClass = classNames({
-				'ch-wrapper': true,
-				'error': this.state.ch.error.length > 0
+				<div className="ch-history-footer">
+					<button className="btn trace pri" disabled={primaryTraceDisabled} onClick={this._togglePrimaryTraceVisibility}>
+						<span style={{background: primaryTraceColor}}></span>
+						{primarySensorUnit}
+					</button>
+
+					<div className="select-wrapper">
+						<select className="icon-chevron-down" value="live" onChange={this._setHistoryUpdate} >
+							<option value="live">Live</option>
+							<option value="daily">Daily</option>
+							<option value="weekly">Weekly</option>
+							<option value="monthly">Monthly</option>
+							<option value="yearly">Yearly</option>
+							</select>
+						</div>
+
+					<button className="btn trace sec" disabled={secondaryTraceDisabled} onClick={this._toggleSecondaryTraceVisibility}>
+						<span style={{background: secondaryTraceColor }}></span>
+						{secondarySensorUnit}
+					</button>
+				</div>
+			</div>
+		);
+	},
+
+	_renderConfig: function() {
+
+		// class names for ch configuation div
+		var configClass = classNames({
+			'ch-config': true,
+			'open': this.state.configOpen
+		});
+
+		var errorMessages = null;
+		if (this.state.ch.error) {
+			errorMessages = this.state.ch.error.split(', ').map(function(err, i) {
+				return <div key={i}>{err}</div>
 			});
-
-			var errorMessages = null;
-			if (this.state.ch.error) {
-				errorMessages = this.state.ch.error.split(', ').map(function(err, i) {
-					return <div key={i}>{err}</div>
-				});
-			}
 		}
 
 		var errorMessagesClass = classNames({
@@ -238,116 +286,36 @@ var ChannelPanel = React.createClass({
 			'hidden': errorMessages == null
 		});
 
-		var history_disabled = this.state.ch.error;
-		var error_title = this.state.ch.error ? this.state.ch.error : '';
-
-		var secondary_digits = secondary.value > 1 ? (secondary.value > 10 ? 1 : 2) : (secondary.value < 0.1 ? 1 : 3); 
-
 		return (
-			<div className={chWrapperClass}>
-				<div className="ch">
-					<div className="ch-header">
-						<input type="text" id="name" name="name" 
-							   value={this.state.name}
-							   placeholder="name"
-							   onChange={this._requestChange}
-							   onKeyDown={this._onKeyDown} />
-						<input type="text" id="description" name="description"
-							   value={this.state.description}
-							   placeholder="description"
-							   onChange={this._requestChange}
-							   onKeyDown={this._onKeyDown} />
-					</div>
+			<div className={configClass}>
+				<div className='ch-config-content'>
+					<button className='btn'
+							onClick={this._toggleConfigVisibility}>&laquo;
+					</button>
+					<div className='title'>Channel Configuration</div>
 
-					<div className="ch-readout primary">
-						<span className="value">{primary.value.toFixed(1)}</span>
-						<span className="UNIT">{primary.unit.substr(0, 1)}</span>
-						<span className="unit">{primary.unit.substr(1).toUpperCase()}</span>
-						<ThresholdBadge />
-						<ThresholdGauge />
-					</div>
-
-					<div className="ch-readout secondary">
-						<span className="value">{secondary.value.toFixed(secondary_digits)}</span>
-						<span className="UNIT">{secondary.unit.substr(0, 1)}</span>
-						<span className="unit">{secondary.unit.substr(1).toUpperCase()}</span>
-						<ThresholdBadge />
-						<ThresholdGauge />
-					</div>
-
-					{/*<div className="ch-controls">
-						<div className="togglebutton">
-							<label>
-								<input type="checkbox"
-									   id={c.id}
-									   checked={cState} 
-									   onChange={this._requestControlChange} />
-								<span className="toggle"></span>
-								{c.name}
-							</label>	
-						</div>
-					</div>*/}
-					
-					<button className="btn ch-history-badge" disabled={history_disabled} onClick={this._toggleHistoryVisibility}>{duration}</button>
-					<div className={historyClass}>
-						<div className="ch-history-header">
-							<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}>History</button>
-							<button className="btn reset" onClick={this._clearHistory}>Clear</button>
-							<button className="btn export icon-download" onClick={this._exportHistory} />
-						</div>
-						<div className="plot-wrapper">
-							<div className="plot sensorPlot" ref="_sensorsPlot"></div>
-						</div>
-						<div className="ch-history-footer">
-							<button className="btn trace pri" disabled={primaryTraceDisabled} onClick={this._togglePrimaryTraceVisibility}>
-								<span style={{background: primaryTraceColor}}></span>
-								{primary.unit}
-							</button>
-
-							<div className="select-wrapper">
-								<select className="icon-chevron-down" value="live" onChange={this._setHistoryUpdate} >
-	    							<option value="live">Live</option>
-	    							<option value="daily">Daily</option>
-	    							<option value="weekly">Weekly</option>
-	    							<option value="monthly">Monthly</option>
-	    							<option value="yearly">Yearly</option>
-	  							</select>
-	  						</div>
-
-							<button className="btn trace sec" disabled={secondaryTraceDisabled} onClick={this._toggleSecondaryTraceVisibility}>
-								<span style={{background: secondaryTraceColor }}></span>
-								{secondary.unit}
-							</button>
-						</div>
-
-						{/*<div className="plot-wrapper">
-
-							<div className="plot controlPlot" ref="_controlsPlot"></div>
-						</div>*/}
-
-					</div>
-
-					<div className={configClass}>
-						<div className='ch-config-content'>
-							<button className='btn'
-									onClick={this._toggleConfigVisibility}>&laquo;
-							</button>
-							<div className='title'>Channel Configuration</div>
-
-							<div className={errorMessagesClass}>
-								<div className='title'>Errors</div>
-								{errorMessages}
-							</div>
-						</div>
-
-						<button className='btn' onClick={this._toggleConfigVisibility}>&raquo;</button>
+					<div className={errorMessagesClass}>
+						<div className='title'>Errors</div>
+						{errorMessages}
 					</div>
 				</div>
 
-				<div className="ch-error-badge" title={error_title}>!</div>
-
+				<button className='btn' onClick={this._toggleConfigVisibility}>&raquo;</button>
 			</div>
 		);
+	},
+
+	_historyDuration: function() {
+		// Display channel time range in plain terms on the history button.
+		var timestamps = [], ts_start, ts_end;
+
+		timestamps.push(this.state.ch.first_update * 1000);
+		timestamps.push(this.state.ch.last_update * 1000);
+
+		// Calculate the duration of the data
+		ts_start = moment.utc(Math.min.apply(null, timestamps));
+		ts_end = moment.utc(Math.max.apply(null, timestamps));
+		return ts_end.from(ts_start, true);
 	},
 
 	_onChannelChange: function() {
