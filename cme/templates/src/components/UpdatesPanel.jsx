@@ -16,6 +16,7 @@ var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
 var DropTarget = require('./DropTarget');
 
+var moment = require('moment');
 var classNames = require('classnames');
 var assign = require('object-assign'); // ES6 polyfill
 
