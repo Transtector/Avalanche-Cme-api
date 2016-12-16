@@ -18,7 +18,7 @@ class DictPersistJSON(dict):
 	def _dump(self):
 		with LockedOpen(self.filename, 'a') as fh:
 			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.filename), delete=False) as tf:
-				json.dump(self, tf, indent=2)
+				json.dump(self, tf, indent="\t")
 				tempname = tf.name
 
 			os.replace(tempname, self.filename)
