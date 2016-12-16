@@ -64,7 +64,7 @@ def json_serialize(obj):
 			return obj
 
 		elif isinstance(obj, dict):
-			obj = obj.copy()
+			obj = { k: obj[k] for k in obj if not k.startswith("_") } # leave out "_" and "__" prefixed attributes (they're private)
 			for key in obj:
 				obj[key] = serialize(obj[key])
 			return obj
