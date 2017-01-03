@@ -49,6 +49,67 @@
 	opacity 1
 	background-image url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><path id='triangle' fill-opacity='0' stroke='" + error-color + "' stroke-width='4' stroke-linejoin='round' d='m10.03833,62.02504c-0.41624,0.80152 -0.90672,1.55295 -0.90672,2.43189l0.0041,0.36888c0,1.89906 1.48737,3.04669 3.19698,3.04669l55.25034,0c1.71234,0 3.18332,-1.42088 3.18332,-3.31994l-0.01822,-0.36888c0,-0.8835 -0.43264,-1.64858 -0.90627,-2.43644l-27.36285,-49.08409c-1.20911,-1.34155 -3.1692,-1.34155 -4.37831,0.00182l-28.06191,49.36189l-0.00046,-0.00182z'/><path id='exclaim-bar' fill='" + error-color + "' d='m40.573,26.833c1.713,0 4.371,1.365 4.371,3.06l-1.279,17.615c0,1.695 -1.379,3.06 -3.092,3.06s-3.091,-1.365 -3.091,-3.06l-1.493,-17.615c0,-1.695 2.871,-3.06 4.584,-3.06z'/><circle id='exclaim-dot' fill='" + error-color + "' r='4.3' cy='57.1' cx='40.6'/></svg>")
 	
-// <svg width='80' height='80' xmlns='http://www.w3.org/2000/svg' xmlns:svg='http://www.w3.org/2000/svg'>
-//<path id='triangle' fill-opacity='0' stroke='#ffd42a' stroke-width='4' stroke-linejoin='round' d='m10.03833,62.02504c-0.41624,0.80152 -0.90672,1.55295 -0.90672,2.43189l0.0041,0.36888c0,1.89906 1.48737,3.04669 3.19698,3.04669l55.25034,0c1.71234,0 3.18332,-1.42088 3.18332,-3.31994l-0.01822,-0.36888c0,-0.8835 -0.43264,-1.64858 -0.90627,-2.43644l-27.36285,-49.08409c-1.20911,-1.34155 -3.1692,-1.34155 -4.37831,0.00182l-28.06191,49.36189l-0.00046,-0.00182z'/><path id='exclaim-bar' fill='#ffd42a' d='m40.573,26.833c1.713,0 4.371,1.365 4.371,3.06l-1.279,17.615c0,1.695 -1.379,3.06 -3.092,3.06s-3.091,-1.365 -3.091,-3.06l-1.493,-17.615c0,-1.695 2.871,-3.06 4.584,-3.06z'/><circle id='exclaim-dot' fill='#ffd42a' r='4.3' cy='57.1' cx='40.6'/>
-//</svg>
+
+	
+.th-config 
+	table
+		border-collapse collapse
+		margin-left 1%
+		width 98%
+	tbody
+		border-top 2px solid #eee
+	td
+		width 11.1%
+		vertical-align middle
+		text-align center
+		border 0px solid #ccc
+	tbody td
+		height 11px
+	tr.gauge
+		.alarm
+			height 5px
+			background-color error-color
+		.warning
+			background-color warning-color
+		.nominal
+			background-color green
+	td.input
+		padding-left 2px
+		padding-right 2px
+	input[type='text']
+		width 100%
+		text-align center
+		box-sizing border-box
+		&.error
+			border-width 1px
+			border-color error-color
+			padding 2px
+		&.active
+			font-size 100%
+			font-weight bold
+	thead input[type='text']
+		font-style italic
+		border 0
+		background-color #eee
+	.r
+		border-right-width 1px
+	.b
+		border-bottom-width 1px
+	.percent
+		position absolute
+		margin-left -1.3em
+		font-size 80%
+	.unit
+		font-size 18px
+	.subunit
+		font-size 12px
+	.th-nominal 
+		text-align center
+		input[type='text']
+			width 20%
+		.nominal-unit
+			position absolute
+			margin-left 5px
+			span
+				font-size 80%
+		

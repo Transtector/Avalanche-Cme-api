@@ -62,6 +62,7 @@ def status(ch_index=-1):
 	# select specific channel 'chX'
 	return ch_mgr.get_channel('ch' + str(ch_index))
 
+
 @router.route('/channels/')
 @require_auth
 def channels_list():

@@ -13,9 +13,11 @@ var Store = require('../Store');
 
 var ThresholdBadge = require('./ThresholdBadge');
 var ThresholdGauge = require('./ThresholdGauge');
+var ThresholdConfig = require('./ThresholdConfig');
 
 var moment = require('moment');
 var classNames = require('classnames');
+var assign = require('object-assign'); 
 
 // flot charting requires global jQuery
 window.jQuery = require('jquery');
@@ -43,6 +45,7 @@ var ChannelPanel = React.createClass({
 			name: '',
 			description: '',
 			configOpen: false,
+			activeId: '',
 			history: 'live',
 			historyVisible: false,
 			historyPrimaryTraceVisible: true,
@@ -65,44 +68,44 @@ var ChannelPanel = React.createClass({
 		if (!this.state.ch) return null;
 
 		// ch primary/secondary sensor display values
-		var primary = this.state.ch.sensors[0];
-		var secondary = this.state.ch.sensors[1];
-
-		// ch error classes, formatting and messages
-		var chWrapperClass = classNames({
-			'ch-wrapper': true,
-			'error': this.state.ch.error.length > 0
-		});
+		var primary = this.state.ch.sensors.filter(function(s) { return s.id === 's0' })[0];
+		var secondary = this.state.ch.sensors.filter(function(s) { return s.id === 's1' })[0];
 
 		return (
-			<div className={chWrapperClass}>
+			<div className='ch-wrapper'>
 				<div className="ch">
 					<div className="ch-header">
 						<input type="text" id="name" name="name" 
 							   value={this.state.name}
-							   placeholder="name"
+							   className={this.state.activeId === 'name' ? 'active': ''}
+							   placeholder="Name"
 							   onChange={this._requestChange}
-							   onKeyDown={this._onKeyDown} />
+							   onKeyDown={this._onKeyDown}
+							   onBlur={this._onBlur} />
 						<input type="text" id="description" name="description"
 							   value={this.state.description}
-							   placeholder="description"
+							   className={this.state.activeId === 'description' ? 'active': ''}
+							   placeholder="Description"
 							   onChange={this._requestChange}
-							   onKeyDown={this._onKeyDown} />
+							   onKeyDown={this._onKeyDown}
+							   onBlur={this._onBlur} />
 					</div>
 
 					{this._renderReadout(primary, 'primary')}
 
 					{this._renderReadout(secondary, 'secondary')}
 
-					<button className="btn ch-history-badge" disabled={this.state.ch.error} onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>				
+					<button className="btn ch-history-badge" disabled={this.state.ch.error}
+						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>				
 
 					{this._renderHistory(primary.unit, secondary.unit)}
 	
-					{this._renderConfig()}
+					{this._renderConfig(primary, secondary)}
 				</div>
 
-				<div className="ch-error-badge" title={this.state.ch.error ? this.state.ch.error : ''}>!</div>
+				{this._renderErrors()}
 
+				<div className={'ch-error-badge' + (this.state.ch.error ? ' error' : '')} title={this.state.ch.error}>!</div>
 			</div>
 		);
 	},
@@ -248,7 +251,7 @@ var ChannelPanel = React.createClass({
 					</button>
 
 					<div className="select-wrapper">
-						<select className="icon-chevron-down" value="live" onChange={this._setHistoryUpdate} >
+						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistoryUpdate} >
 							<option value="live">Live</option>
 							<option value="daily">Daily</option>
 							<option value="weekly">Weekly</option>
@@ -266,7 +269,7 @@ var ChannelPanel = React.createClass({
 		);
 	},
 
-	_renderConfig: function() {
+	_renderConfig: function(primarySensor, secondarySensor) {
 
 		// class names for ch configuation div
 		var configClass = classNames({
@@ -274,33 +277,31 @@ var ChannelPanel = React.createClass({
 			'open': this.state.configOpen
 		});
 
-		var errorMessages = null;
-		if (this.state.ch.error) {
-			errorMessages = this.state.ch.error.split(', ').map(function(err, i) {
-				return <div key={i}>{err}</div>
-			});
-		}
-
-		var errorMessagesClass = classNames({
-			'errors': true,
-			'hidden': errorMessages == null
-		});
-
 		return (
 			<div className={configClass}>
 				<div className='ch-config-content'>
-					<button className='btn'
-							onClick={this._toggleConfigVisibility}>&laquo;
-					</button>
-					<div className='title'>Channel Configuration</div>
+					<button className='btn'	onClick={this._toggleConfigVisibility}>&laquo;</button>
 
-					<div className={errorMessagesClass}>
-						<div className='title'>Errors</div>
-						{errorMessages}
-					</div>
+					<ThresholdConfig channel={this.props.id} sensor={primarySensor} />
+
 				</div>
-
 				<button className='btn' onClick={this._toggleConfigVisibility}>&raquo;</button>
+			</div>
+		);
+	},
+
+	_renderErrors: function () {
+		if (!this.state.ch.error) return null;
+
+		var errorMessages = this.state.ch.error.split(', ').map(function(err, i) {
+			return <li key={i}>{err}</li>
+		});
+
+		return (
+			<div className='ch-error'>
+				<div className='title errors'>The channel has errors:</div>
+				
+				<ul className={errorMessages == null ? 'hidden' : ''}>{errorMessages}</ul>
 			</div>
 		);
 	},
@@ -382,8 +383,8 @@ var ChannelPanel = React.createClass({
 		this.setState({ historyVisible: !this.state.historyVisible });
 	},
 
-	_setHistoryUpdate: function() {
-
+	_setHistoryUpdate: function(e) {
+		this.setState({ history: e.target.value });
 	},
 
 	_clearHistory: function() {
@@ -419,7 +420,7 @@ var ChannelPanel = React.createClass({
 			obj = {};
 		obj[n] = v;
 
-		this.setState(obj);
+		this.setState(assign({ activeId: e.target.id }, obj));
 	},
 
 	// ENTER to persist changes to server
@@ -435,13 +436,25 @@ var ChannelPanel = React.createClass({
 		if (e.keyCode !== ENTER_KEY_CODE)
 			return;
 
+		// ENTER pressed - let blur handle update
+		e.target.blur();
+	},
+
+	_onBlur: function(e) {
 		var v = e.target.value.trim(),
 			n = e.target.name,
 			obj = {};
+
+		var _this = this;
+		this.setState({ activeId: '' });
+
 		obj[n] = v;
 
 		this._chAttrInit = false;
-		Actions.channel(this.props.id, obj);
+		this.setState(obj, function () {
+			console.log('You want to update: ', obj);
+			Actions.channel(_this.props.id, obj);
+		});
 	},
 
 	_requestControlChange: function(e) {
@@ -449,7 +462,5 @@ var ChannelPanel = React.createClass({
 		Actions.control(this.props.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
 	}
 });
-
-//window.moment = moment;
 
 module.exports = ChannelPanel;

@@ -12,16 +12,6 @@ var classNames = require('classnames');
 
 var ThresholdGauge = React.createClass({
 
-	getInitialState: function() {
-		return {}
-	},
-
-	componentDidMount: function() {
-	},
-
-	componentWillUnmount: function() {
-	},
-
 	render: function() {
 
 		if (!this.props.sensor) return null; // no sensor

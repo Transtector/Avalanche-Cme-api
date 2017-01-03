@@ -1076,6 +1076,90 @@ li.input-group-cluster > .btn:disabled {
   opacity: 1;
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><path id='triangle' fill-opacity='0' stroke='#f22' stroke-width='4' stroke-linejoin='round' d='m10.03833,62.02504c-0.41624,0.80152 -0.90672,1.55295 -0.90672,2.43189l0.0041,0.36888c0,1.89906 1.48737,3.04669 3.19698,3.04669l55.25034,0c1.71234,0 3.18332,-1.42088 3.18332,-3.31994l-0.01822,-0.36888c0,-0.8835 -0.43264,-1.64858 -0.90627,-2.43644l-27.36285,-49.08409c-1.20911,-1.34155 -3.1692,-1.34155 -4.37831,0.00182l-28.06191,49.36189l-0.00046,-0.00182z'/><path id='exclaim-bar' fill='#f22' d='m40.573,26.833c1.713,0 4.371,1.365 4.371,3.06l-1.279,17.615c0,1.695 -1.379,3.06 -3.092,3.06s-3.091,-1.365 -3.091,-3.06l-1.493,-17.615c0,-1.695 2.871,-3.06 4.584,-3.06z'/><circle id='exclaim-dot' fill='#f22' r='4.3' cy='57.1' cx='40.6'/></svg>");
 }
+.th-config table {
+  border-collapse: collapse;
+  margin-left: 1%;
+  width: 98%;
+}
+.th-config tbody {
+  border-top: 2px solid #eee;
+}
+.th-config td {
+  width: 11.1%;
+  vertical-align: middle;
+  text-align: center;
+  border: 0px solid #ccc;
+}
+.th-config tbody td {
+  height: 11px;
+}
+.th-config tr.gauge .alarm {
+  height: 5px;
+  background-color: #f22;
+}
+.th-config tr.gauge .warning {
+  background-color: #ffd42a;
+}
+.th-config tr.gauge .nominal {
+  background-color: #008000;
+}
+.th-config td.input {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.th-config input[type='text'] {
+  width: 100%;
+  text-align: center;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.th-config input[type='text'].error {
+  border-width: 1px;
+  border-color: #f22;
+  padding: 2px;
+}
+.th-config input[type='text'].active {
+  font-size: 100%;
+  font-weight: bold;
+}
+.th-config thead input[type='text'] {
+  font-style: italic;
+  border: 0;
+  background-color: #eee;
+}
+.th-config .r {
+  border-right-width: 1px;
+}
+.th-config .b {
+  border-bottom-width: 1px;
+}
+.th-config .percent {
+  position: absolute;
+  margin-left: -1.3em;
+  font-size: 80%;
+}
+.th-config .unit {
+  font-size: 18px;
+}
+.th-config .subunit {
+  font-size: 12px;
+}
+.th-config .th-nominal {
+  text-align: center;
+}
+.th-config .th-nominal input[type='text'] {
+  width: 20%;
+}
+.th-config .th-nominal .nominal-unit {
+  position: absolute;
+  margin-left: 5px;
+}
+.th-config .th-nominal .nominal-unit span {
+  font-size: 80%;
+}
 .panel-header .widgets {
   position: absolute;
   right: 16px;
@@ -1143,7 +1227,7 @@ li.input-group-cluster > .btn:disabled {
   opacity: 0;
   cursor: default;
 }
-.ch-wrapper.error .ch-error-badge {
+.ch-error-badge.error {
   opacity: 1;
 }
 .ch {
@@ -1170,17 +1254,42 @@ li.input-group-cluster > .btn:disabled {
   color: #fff;
   text-align: left;
   background: transparent;
-  border: 1px solid transparent;
+  border: 0px solid transparent;
+  border-bottom-width: 1px;
 }
 .ch-header input[type=text]:hover,
 .ch-header input[type=text]:focus {
-  border-bottom-color: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.25);
 }
-.ch-header input#name {
+.ch-header input[type=text].active {
+  font-weight: bold;
+}
+.ch-header input[type=text]::-webkit-input-placeholder {
+  color: #aaa;
+  font-style: italic;
+  font-weight: normal;
+}
+.ch-header input[type=text]:-moz-placeholder {
+  color: #aaa;
+  font-style: italic;
+  font-weight: normal;
+}
+.ch-header input[type=text]::-moz-placeholder {
+  color: #aaa;
+  font-style: italic;
+  font-weight: normal;
+}
+.ch-header input[type=text]:-ms-input-placeholder {
+  color: #aaa;
+  font-style: italic;
+  font-weight: normal;
+}
+.ch-header input[type=text]#name {
   width: 98px;
 }
-.ch-header input#description {
-  width: 234px;
+.ch-header input[type=text]#description {
+  margin-left: 10px;
+  width: 224px;
 }
 .ch-readout {
   position: relative;
@@ -1369,6 +1478,16 @@ li.input-group-cluster > .btn:disabled {
 .ch .icon-cross {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-512 -512 2048 2048'><path fill='#fff' d='M548.203 537.6l289.099-289.098c9.998-9.998 9.998-26.206 0-36.205-9.997-9.997-26.206-9.997-36.203 0l-289.099 289.099-289.098-289.099c-9.998-9.997-26.206-9.997-36.205 0-9.997 9.998-9.997 26.206 0 36.205l289.099 289.098-289.099 289.099c-9.997 9.997-9.997 26.206 0 36.203 5 4.998 11.55 7.498 18.102 7.498s13.102-2.499 18.102-7.499l289.098-289.098 289.099 289.099c4.998 4.998 11.549 7.498 18.101 7.498s13.102-2.499 18.101-7.499c9.998-9.997 9.998-26.206 0-36.203l-289.098-289.098z'/></svg>");
 }
+.ch-error {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 10px;
+  background-color: #fff;
+  opacity: 0.9;
+}
 .ch-config {
   position: absolute;
   height: 100%;
@@ -1401,7 +1520,7 @@ li.input-group-cluster > .btn:disabled {
   margin-right: 20px;
   margin-left: -20px;
   padding: 10px;
-  background-color: #fff;
+  background-color: #eee;
   color: #4d4d4d;
 }
 .ch-config-content .title {

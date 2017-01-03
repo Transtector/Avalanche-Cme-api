@@ -51,10 +51,8 @@ error-badge-size = 30px
 	box-shadow 0 2px 9px 0 rgba(0,0,0,0.2)	
 	opacity 0
 	cursor default
-
-.ch-wrapper.error .ch-error-badge
-	opacity 1
-
+	&.error
+		opacity 1
 
 .ch
 	position relative
@@ -75,14 +73,22 @@ error-badge-size = 30px
 		color #fff
 		text-align left
 		background transparent
-		border 1px solid transparent
-		&:hover, &:focus	
-			border-bottom-color rgba(255,255,255,0.2)
-	input#name
-		width 98px
-	input#description
-		width 234px
-
+		border 0px solid transparent
+		border-bottom-width 1px
+		&:hover, &:focus
+			border-color rgba(255,255,255, 0.25)
+		&.active
+			font-weight bold
+		+placeholder()
+			color #aaa
+			font-style italic
+			font-weight normal
+		&#name
+			width 98px
+		&#description
+			margin-left 10px
+			width 224px
+		
 .ch-readout
 	position relative // for z-index layering
 	text-align center
@@ -240,8 +246,15 @@ icon-small-viewport = '-512 -512 2048 2048'
 	.icon-cross
 		background-image svg('cross', icon-small-viewport)
 	
-
-
+.ch-error
+	position absolute
+	top	10px
+	left 10px
+	right 10px
+	bottom 10px
+	padding 10px
+	background-color white
+	opacity 0.9
 			
 .ch-config
 	position absolute
@@ -269,7 +282,7 @@ icon-small-viewport = '-512 -512 2048 2048'
 	margin-right 20px
 	margin-left -20px
 	padding 10px
-	background-color #fff
+	background-color header-bg-color
 	color fg-color
 	.title
 		font-weight bold

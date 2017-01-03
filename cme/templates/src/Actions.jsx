@@ -41,12 +41,13 @@ function onError(jqXHR, textStatus, errorThrown) {
 }
 
 // alert that server request is going out
-function dispatchRequest(action) {
+function dispatchRequest(action, silent) {
 	if (ERROR) {
 		debug("Error prevented server request: " + action);
 		return false;
 	}
-	debug("Server request: " + action);
+	if (!silent)
+		debug("Server request: " + action);
 	
 	// kind of hacky for now, but enforces serialized dispatching...
 	setTimeout(function () {
@@ -57,6 +58,9 @@ function dispatchRequest(action) {
 }
 
 var Actions = {
+	setDebug: function(d) {
+		DEBUG = d;
+	},
 
 	clearErrors: function() {
 		ERROR = false;
@@ -237,7 +241,7 @@ var Actions = {
 	},
 
 	clock: function() {
-		if (!dispatchRequest('reading clock')) return;
+		if (!dispatchRequest('reading clock', true)) return;
 
 		CmeAPI.clock()
 			.done(function(data) {
@@ -247,7 +251,7 @@ var Actions = {
 	},
 
 	temperature: function() {
-		if (!dispatchRequest('reading temperature')) return;
+		if (!dispatchRequest('reading temperature', true)) return;
 
 		CmeAPI.temperature()
 			.done(function(data) {
@@ -289,7 +293,7 @@ var Actions = {
 	},
 
 	channel: function(ch_id, ch_config, ch_history) {
-		if (!dispatchRequest('reading ' + ch_id + '( ' + ch_config + ', ' + ch_history + ' )')) return;
+		if (!dispatchRequest('reading ' + ch_id + ' (' + JSON.stringify(ch_config) + ', ' + ch_history + ')')) return;
 
 		CmeAPI.channel(ch_id, ch_config, ch_history)
 			.done(function(data) {
@@ -308,15 +312,19 @@ var Actions = {
 			.fail(onError);
 	},
 
-	control: function(chId, controlId, control) {
-		if (!dispatchRequest(chId + ':' + controlId + ': ' + JSON.stringify(control))) return;
+	thresholds: function(ch_id, sensor_id, thresholds) {
+		if (!dispatchRequest('posting thresholds for ' + ch_id + ':' + sensor_id)) return;
 
-		CmeAPI.control(chId, controlId, control)
+		console.log("You're trying to update these thresholds:\n", thresholds);
+
+		// when CmeAPI thresholds calls finishes, it returns the entire channel in data
+		CmeAPI.thresholds(ch_id, sensor_id, thresholds)
 			.done(function(data) {
-				AppDispatcher.dispatch({ actionType: Constants.CONTROL, data: data });
+				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 			})
 			.fail(onError);
 	}
 };
 
+window.Actions = Actions;
 module.exports = Actions;

@@ -155,21 +155,14 @@ var Store = assign({}, EventEmitter.prototype, {
 				// action.data = { chX: <channelX> }
 				var ch_id = Object.keys(action.data)[0];
 
+				// TESTING CH ERROR
+				//action.data[ch_id].error = "This is a test.";
+
 				_channel_objs[ch_id] = action.data[ch_id];
 
 				// add the channel id to the event
 				event += ch_id.toUpperCase()
 
-				break;
-
-			case Constants.CONTROL:
-				// action.data = { 'chX:cY': <controlY> }
-				var id = Object.keys(action.data)[0],
-					keys = id.split(':'),
-					ch_index = parseInt(keys[0].slice(2)),
-					c_index = parseInt(keys[1].slice(1));
-
-				assign(_channels[ch_index].controls[c_index], action.data[id]);
 				break;
 
 			default: // unknown action

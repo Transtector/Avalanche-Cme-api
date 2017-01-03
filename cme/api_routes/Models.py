@@ -3,8 +3,9 @@ import os, glob, fcntl, tempfile, json, uuid
 import rrdtool
 
 from . import Config
-from ..util.Switch import switch
 from ..util import is_a_docker
+from ..util.Switch import switch
+from ..util.LockedOpen import LockedOpen
 
 # cme layer _always_ runs as if the cme-mc is sitting on localhost
 # at the default port (42217).  This is because the cme-mc layer
@@ -194,14 +195,25 @@ class Channel():
 			return 
 
 		for case in switch(resolution.lower()):
-			if case('daily'): pass
-			if case('weekly'): pass
-			if case('monthly'): pass
+			if case('daily'):
+				args = ('AVERAGE', '-a', '-s', '-1d')
+				break
+
+			if case('weekly'):
+				args = ('LAST', '-a', '-s', '-15m')
+				break
+
+			if case('monthly'):
+				args = ('LAST', '-a', '-s', '-15m')
+				break
+
 			if case('yearly'):
+				args = ('LAST', '-a', '-s', '-15m')
 				break
 
 			if case():
-				# default - "live"
+				# default - "live"; see http://oss.oetiker.ch/rrdtool/doc/rrdfetch.en.html
+				# for an explanation of these parameters.
 				args = ('LAST', '-a', '-s', '-15m')
 
 		args = (self.rrd, '-d', RRDCACHED_ADDRESS, ) + args
@@ -273,24 +285,31 @@ class Channel():
 			"description": self.description
 		})
 
-		# for each configured sensor
-		for s in new_cfg['sensors']:
-			# find matching sensor id from channel sensors model
-			found_s = next((cs for cs in self.sensors if cs.id == s['id']), None)
+		# for each configured sensor (if there are any)
+		if new_cfg.get('sensors', None):
+			for s in new_cfg['sensors']:
+				# find matching sensor id from channel sensors model
+				found_s = next((cs for cs in self.sensors if cs.id == s['id']), None)
 
-			if found_s:
-				# update name and thresholds attributes in config
-				s.update({ 
-					'name': found_s.name,
-					'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification } for th in found_s.thresholds ]
-				})
+				if found_s:
+					# update name and thresholds attributes in config
+					s.update({ 
+						'name': found_s.name,
+						'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification } for th in found_s.thresholds ]
+					})
 
 		# save to disk
 		with LockedOpen(self.configpath, 'a') as f:
 			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.configpath), delete=False) as tf:
 				json.dump(new_cfg, tf, indent="\t")
 				tempname = tf.name
-			os.replace(tempname, self.configpath)
+
+			try:
+				os.replace(tempname, self.configpath)
+			except OSError:
+				os.remove(tempname)
+
+
 
 
 	@property
@@ -419,7 +438,7 @@ class Sensor():
 			self.thresholds = [ Threshold(th['value'], th['direction'], th['classification'], th['id']) for th in s['thresholds'] ]
 
 	def addThreshold(self, th_obj):
-		th = Threshold(th_obj['value'], th_obj['direction'], th_obj['classification'])
+		th = Threshold(float(th_obj['value']), th_obj['direction'], th_obj['classification'])
 		self.thresholds.append(th)
 		self.__save_config()
 		return th
@@ -440,7 +459,7 @@ class Sensor():
 
 	def modifyThreshold(self, th, th_obj):
 		
-		th.value = th_obj.get('value', th.value)
+		th.value = float(th_obj.get('value', th.value))
 		th.direction = th_obj.get('direction', th.direction)
 		th.classification = th_obj.get('classification', th.classification)
 		self.__save_config()
@@ -470,30 +489,3 @@ class Threshold():
 		self.classification = classification
 
 
-
-class LockedOpen(object):
-	''' see https://blog.gocept.com/2013/07/15/reliable-file-updates-with-python/
-	    for details regarding this class and isolating file updates.
-	s'''
-	def __init__(self, filename, *args, **kwargs):
-		self.filename = filename
-		self.open_args = args
-		self.open_kwargs = kwargs
-		self.fileobj = None
-
-	def __enter__(self):
-		f = open(self.filename, *self.open_args, **self.open_kwargs)
-		while True:
-			fcntl.flock(f, fcntl.LOCK_EX)
-			fnew = open(self.filename, *self.open_args, **self.open_kwargs)
-			if os.path.sameopenfile(f.fileno(), fnew.fileno()):
-				fnew.close()
-				break
-			else:
-				f.close()
-				f = fnew
-		self.fileobj = f
-		return f
-
-	def __exit__(self, _exc_type, _exc_value, _traceback):
-		self.fileobj.close()

@@ -34,30 +34,6 @@ var API = {
 
 // Use Store to get the CME config object
 var Store = require('./Store');
-function configItemToUrl(item) {
-	var config = Store.getState().config,
-		itemUrl = '';
-
-	if (item === 'config') // top-level config object
-		return '';
-
-	if (config[item] !== undefined) // first level config group
-		return item + '/';
-
-	// else we have to search for the item in the config groups
-	// (note: this needs to change if we want to support deeper config object)
-	for (var group in config) {
-		if (config[group][item] !== undefined) {
-			itemUrl = group + '/' + item;
-			break;
-		}
-	}
-
-	if (itemUrl === '')
-		debug("Developer error (should never get here).  Converting config url for ", item);
-
-	return itemUrl;
-}
 
 var CmeAPI = {
 
@@ -69,6 +45,32 @@ var CmeAPI = {
 	},
 
 	config: function(obj) {
+		
+		function configItemToUrl(item) {
+			var config = Store.getState().config,
+				itemUrl = '';
+
+			if (item === 'config') // top-level config object
+				return '';
+
+			if (config[item] !== undefined) // first level config group
+				return item + '/';
+
+			// else we have to search for the item in the config groups
+			// (note: this needs to change if we want to support deeper config object)
+			for (var group in config) {
+				if (config[group][item] !== undefined) {
+					itemUrl = group + '/' + item;
+					break;
+				}
+			}
+
+			if (itemUrl === '')
+				debug("Developer error (should never get here).  Converting config url for ", item);
+
+			return itemUrl;
+		}
+
 		var url, payload, method;
 
 		if (!obj) { // just GET config
@@ -265,20 +267,75 @@ var CmeAPI = {
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});
-
 	},
 
-	control: function(chId, controlId, obj) {
-		var chIndex = parseInt(chId.slice(2)), // chId: "chX"
-			ctrlIndex = parseInt(controlId.slice(1)); // controlId: "cY"
+	thresholds: function(ch_id, sensor_id, thresholds) {
+		var ch_index = parseInt(ch_id.slice(2)),
+			s_index = parseInt(sensor_id.slice(1)),
+		
+			url = API.channel + ch_index + '/sensors/' + s_index + '/thresholds/';
 
-		return $.ajax({
-			type: 'POST',
-			url: API.channels + chIndex + '/controls/' + ctrlIndex, // /api/ch/0/controls/0
-			contentType: 'application/json; charset=UTF-8',
-			data: JSON.stringify(obj),
-			dataType: 'json'
+		// if thresholds is empty or null, just DELETE to /thresholds/ to remove all
+		if (!thresholds || thresholds.length == 0) {
+			// remove all thresholds
+			debug("Removing all thresholds from " + ch_id + ":" + sensor_id);
+
+			return $.ajax({
+				type: 'DELETE',
+				url: url,
+				dataType: 'json',
+				contentType: 'application/json; charset=UTF-8'
+			});
+		}
+
+
+		// else loop through each threshold and POST or DELETE as necessary
+		var ajaxCalls = [];
+		thresholds.forEach(function (th) {
+			// blank id with a value means create (POST) new threshold
+			if (!th.id && th.value) {
+				debug("Adding new threshold to " + ch_id + ":" + sensor_id);
+
+				ajaxCalls.push($.ajax({
+					type: 'POST',
+					url: url,
+					dataType: 'json',
+					data: JSON.stringify(th),
+					contentType: 'application/json; charset=UTF-8'
+				}));
+			
+			} else {
+
+				// non-blank id with empty value means remove (DELETE) the threshold
+				if (th.id && !th.value) {
+					debug("Removing existing threshold from " + ch_id + ":" + sensor_id);
+
+					ajaxCalls.push($.ajax({
+						type: 'DELETE',
+						url: url + th.id,
+						dataType: 'json',
+						contentType: 'application/json; charset=UTF-8'
+					}));
+				
+				} else {
+					// non-blank id with non-empty (valid) value means update (POST)
+					debug("Modifying existing threshold on " + ch_id + ":" + sensor_id);
+
+					ajaxCalls.push($.ajax({
+						type: 'POST',
+						url: url + th.id,
+						dataType: 'json',
+						data: JSON.stringify(th),
+						contentType: 'application/json; charset=UTF-8'
+					}));
+				}
+			}
 		});
+
+		// refresh entire channel when done processing Thresholds
+		return $.when(ajaxCalls).done(function() {
+			CmeAPI.channel(ch_id);
+		});		
 	}
 };
 
