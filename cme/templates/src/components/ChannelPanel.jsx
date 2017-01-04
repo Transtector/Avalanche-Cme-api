@@ -46,7 +46,7 @@ var ChannelPanel = React.createClass({
 			description: '',
 			configOpen: false,
 			activeId: '',
-			history: 'live',
+			history: null,
 			historyVisible: false,
 			historyPrimaryTraceVisible: true,
 			historySecondaryTraceVisible: true
@@ -372,25 +372,29 @@ var ChannelPanel = React.createClass({
 
 	_toggleHistoryVisibility: function() {
 
+		var h = null;
+
 		if (this.state.historyVisible) {
 			this._stopPoll();
 			this._pollPeriod = FAST_POLL_PERIOD;
 			this._startPoll();
 		} else {
+			h = 'live';
 			this._pollPeriod = SLOW_POLL_PERIOD;
 		}
 
-		this.setState({ historyVisible: !this.state.historyVisible });
+		this.setState({ history: h, historyVisible: !this.state.historyVisible });
 	},
 
 	_setHistoryUpdate: function(e) {
+
 		this.setState({ history: e.target.value });
 	},
 
 	_clearHistory: function() {
 		if (confirm("Are you sure?  This action cannot be undone.")) {
 
-			this.setState({ history: 'live', historyVisible: false });
+			this.setState({ history: null, historyVisible: false });
 			Actions.deleteChannel(this.props.id);
 		}
 	},

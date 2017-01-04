@@ -130,18 +130,14 @@ def channel(ch_index):
 			h = request.args.get('h')
 			h = h.lower() if h else None
 
-			#TODO: implement remaining history cases
 			for case in switch(h):
-				if case('live'): pass
-				if case('daily'): pass
-				if case('weekly'): pass
-				if case('monthly'): pass
-				if case('yearly'):
+				if case('live', 'daily', 'weekly', 'monthly', 'yearly'):
 					ch.load_history(h)
 					break
 
 				if case():
-					# no h or unknown - clear ch.data
+					# default (no or unknown 'h' param - clear ch.data)
+					# this case runs when no plot is needed
 					ch.clear_history()
 					pass
 
