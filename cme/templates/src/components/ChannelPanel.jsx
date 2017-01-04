@@ -46,7 +46,7 @@ var ChannelPanel = React.createClass({
 			description: '',
 			configOpen: false,
 			activeId: '',
-			history: null,
+			history: '',
 			historyVisible: false,
 			historyPrimaryTraceVisible: true,
 			historySecondaryTraceVisible: true
@@ -257,8 +257,8 @@ var ChannelPanel = React.createClass({
 							<option value="weekly">Weekly</option>
 							<option value="monthly">Monthly</option>
 							<option value="yearly">Yearly</option>
-							</select>
-						</div>
+						</select>
+					</div>
 
 					<button className="btn trace sec" disabled={secondaryTraceDisabled} onClick={this._toggleSecondaryTraceVisibility}>
 						<span style={{background: secondaryTraceColor }}></span>
@@ -372,7 +372,7 @@ var ChannelPanel = React.createClass({
 
 	_toggleHistoryVisibility: function() {
 
-		var h = null;
+		var h = ''; // to clear the history selector
 
 		if (this.state.historyVisible) {
 			this._stopPoll();
@@ -393,9 +393,8 @@ var ChannelPanel = React.createClass({
 
 	_clearHistory: function() {
 		if (confirm("Are you sure?  This action cannot be undone.")) {
-
-			this.setState({ history: null, historyVisible: false });
 			Actions.deleteChannel(this.props.id);
+			this._toggleHistoryVisibility();
 		}
 	},
 
