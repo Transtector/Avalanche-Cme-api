@@ -66,7 +66,7 @@ var ThresholdConfig = React.createClass({
 		// min/max "warning" and min/max "alarm".  We can
 		// parse and load the initial values from the sensor
 		// passed in component props.
-		var ths = Thresholds(this.props.sensor.thresholds || []);
+		var ths = Thresholds(this.props.sensor && this.props.sensor.thresholds || []);
 
 		this._initial = ths; // save a copy of the initial threshold values
 
@@ -85,7 +85,7 @@ var ThresholdConfig = React.createClass({
 	// of this component.
 	componentWillReceiveProps: function(nextProps) {
 
-		var ths = nextProps.sensor.thresholds || [];
+		var ths = nextProps.sensor && nextProps.sensor.thresholds || [];
 		var nextThs = Thresholds(ths);
 		var _this = this;
 

@@ -137,8 +137,7 @@ var Clock = React.createClass({
 
 	propTypes: {
 		flavor: React.PropTypes.string, // 'config' or 'widget'
-		pollPeriod: React.PropTypes.number, // how fast to poll in milliseconds
-		config: React.PropTypes.object.isRequired // clock configuration
+		pollPeriod: React.PropTypes.number // how fast to poll in milliseconds
 	},
 
 	getDefaultProps: function() {
@@ -178,6 +177,9 @@ var Clock = React.createClass({
 	},
 
 	render: function() {
+
+		if (!this.props.config) return null;
+
 		if (this.props.flavor === 'config') {
 			return this._renderAsConfig();
 		} else {

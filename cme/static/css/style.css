@@ -1486,7 +1486,6 @@ li.input-group-cluster > .btn:disabled {
   bottom: 10px;
   padding: 10px;
   background-color: #fff;
-  opacity: 0.9;
 }
 .ch-config {
   position: absolute;

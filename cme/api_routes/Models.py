@@ -7,14 +7,16 @@ from ..util import is_a_docker
 from ..util.Switch import switch
 from ..util.LockedOpen import LockedOpen
 
+
+# Channel data and configuration are stored here (typically /data/channels/)
+CHDIR = Config.CHDIR
+
 # cme layer _always_ runs as if the cme-mc is sitting on localhost
 # at the default port (42217).  This is because the cme-mc layer
 # maps the port to the host system at runtime, and the cme layer uses
 # the host's network (--net=host) at runtime.
 RRDCACHED_ADDRESS = Config.RRDCACHED_ADDRESS
 
-# Channel data and configuration are stored here (typically /data/channels/)
-CHDIR = Config.CHDIR
 
 class ChannelManager:
 
@@ -191,8 +193,8 @@ class Channel():
 		# RRDCACHED_ADDRESS is set to a flag value if there
 		# is no service.  We can still run cme layer however
 		# and just return.
-		if RRDCACHED_ADDRESS.find('fail') > 0:
-			return 
+		#if RRDCACHED_ADDRESS.find('fail') > 0:
+		#	return 
 
 		for case in switch(resolution.lower()):
 			if case('daily'):
@@ -216,7 +218,8 @@ class Channel():
 				# for an explanation of these parameters.
 				args = ('LAST', '-a', '-s', '-15m')
 
-		args = (self.rrd, '-d', RRDCACHED_ADDRESS, ) + args
+		#args = (self.rrd, '-d', RRDCACHED_ADDRESS, ) + args
+		args = (os.path.join(CHDIR, self.rrd), ) + args
 
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  If so we'll set
@@ -310,8 +313,6 @@ class Channel():
 				os.remove(tempname)
 
 
-
-
 	@property
 	def name(self):
 		return self.__dict__['name']
@@ -373,6 +374,7 @@ class Channel():
 		# RRDCACHED_ADDRESS is set to a flag value if there
 		# is no service.  We can still run cme layer however
 		# and just return.
+		'''  JJB:  commented out for use w/o RRDCached
 		if RRDCACHED_ADDRESS.find('fail') > 0:
 			if not self.error:
 				self.error = "Error reading channel information [{0}]: RRD cache server not running.".format(self.rrd)
@@ -383,11 +385,13 @@ class Channel():
 		if not flush_first:
 			args = args + ('-F', )
 
+		'''
+
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  We'll set
 		# the channel error flag.
 		try:
-			result = rrdtool.info(*args)
+			result = rrdtool.info(os.path.join(CHDIR, self.rrd))
 
 		except Exception as e:
 			self.error = "Error reading channel information [{0}]: {1}".format(self.rrd, e)

@@ -23,8 +23,7 @@ var Thermometer = React.createClass({
 
 	propTypes: {
 		flavor: React.PropTypes.string, // 'config' or 'widget'
-		pollPeriod: React.PropTypes.number, // how fast to poll in milliseconds
-		config: React.PropTypes.object.isRequired // CME temperature configuration
+		pollPeriod: React.PropTypes.number // how fast to poll in milliseconds
 	},
 	
 	getInitialState: function() {
@@ -54,6 +53,8 @@ var Thermometer = React.createClass({
 	},
 
 	render: function() {
+		if (!this.props.config) return null;
+
 		if (this.props.flavor === 'config') {
 			return this._renderAsConfig();
 		} else {

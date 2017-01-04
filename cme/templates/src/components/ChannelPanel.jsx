@@ -98,8 +98,8 @@ var ChannelPanel = React.createClass({
 					<button className="btn ch-history-badge" disabled={this.state.ch.error}
 						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>				
 
-					{this._renderHistory(primary.unit, secondary.unit)}
-	
+					{this._renderHistory(primary, secondary)}
+
 					{this._renderConfig(primary, secondary)}
 				</div>
 
@@ -129,7 +129,7 @@ var ChannelPanel = React.createClass({
 		);
 	},
 
-	_renderHistory: function(primarySensorUnit, secondarySensorUnit) {
+	_renderHistory: function(primarySensor, secondarySensor) {
 
 		// data[0] = [ t_start, t_end, t_step ]
 		// data[1] = [ DS0, DS1, ..., DSN ]; DSx = "sx_stype_sunit" (e.g., "s0_VAC_Vrms")
@@ -247,7 +247,7 @@ var ChannelPanel = React.createClass({
 				<div className="ch-history-footer">
 					<button className="btn trace pri" disabled={primaryTraceDisabled} onClick={this._togglePrimaryTraceVisibility}>
 						<span style={{background: primaryTraceColor}}></span>
-						{primarySensorUnit}
+						{primarySensor && primarySensor.unit ? primarySensor.unit : ''}
 					</button>
 
 					<div className="select-wrapper">
@@ -262,7 +262,7 @@ var ChannelPanel = React.createClass({
 
 					<button className="btn trace sec" disabled={secondaryTraceDisabled} onClick={this._toggleSecondaryTraceVisibility}>
 						<span style={{background: secondaryTraceColor }}></span>
-						{secondarySensorUnit}
+						{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
 					</button>
 				</div>
 			</div>
