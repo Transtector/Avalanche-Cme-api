@@ -47,7 +47,7 @@ ACCESSLOG = os.path.join(LOGDIR, 'access.log')
 # "localhost" and the default port is 42217.  You can
 # override this by passing a command line option as:
 #	$ python -m cme --rrdcached 'server'
-RRDCACHED_ADDRESS = 'localhost'
+RRDCACHED = None #'localhost'
 
 # user-defined API layer settings are kept here
 SETTINGS = os.path.join(USERDATA, 'settings.json')

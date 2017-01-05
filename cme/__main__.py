@@ -43,19 +43,20 @@ def main(argv=None):
 		args = []
 
 	for opt, arg in opts:
-		# override the RRDCACHED_ADDRESS
+		# override the Config.RRDCACHED
 		if opt == '--rrdcached':
-			Config.RRDCACHED_ADDRESS = arg
+			Config.RRDCACHED = arg
 
 
 	# Now that RRDCACHED is set up, try to read the "test.rrd" channel
 	# If no problems, then things are fine and we can move on.  If not,
 	# we still want to allow the cme layer to run, so we set the address
 	# to flag it to downstream code so they may bypass rrdcached calls.
-	try:
-		rrdtool.info('test.rrd', '-d', Config.RRDCACHED_ADDRESS)
-	except rrdtool.OperationalError:
-		Config.RRDCACHED_ADDRESS = 'rrdcached_failure'
+	if Config.RRDCACHED:
+		try:
+			rrdtool.info('test.rrd', '-d', Config.RRDCACHED)
+		except rrdtool.OperationalError:
+			Config.RRDCACHED = 'FAILED'
 
 
 	# network and ntp/clock status

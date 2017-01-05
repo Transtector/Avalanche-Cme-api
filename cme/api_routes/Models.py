@@ -15,7 +15,7 @@ CHDIR = Config.CHDIR
 # at the default port (42217).  This is because the cme-mc layer
 # maps the port to the host system at runtime, and the cme layer uses
 # the host's network (--net=host) at runtime.
-RRDCACHED_ADDRESS = Config.RRDCACHED_ADDRESS
+RRDCACHED = Config.RRDCACHED
 
 
 class ChannelManager:
@@ -50,7 +50,7 @@ class ChannelManager:
 
 			This all works fine on the typical deployment platform (i.e., the CME RPi), but
 			is not easily checked if you're working from e.g. a Mac laptop.  The rrdcached
-			calls work fine just by changing the RRDCACHED_ADDRESS config to the machine
+			calls work fine just by changing the RRDCACHED config to the machine
 			running the Cme-mc container, but the direct manipulations of the CHDIR will
 			not work properly unless you do something fancy to access the CHDIR on the
 			machine hosting the actual volume. 
@@ -190,10 +190,11 @@ class Channel():
 
 	def load_history(self, resolution='live'):
 
-		# RRDCACHED_ADDRESS is set to a flag value if there
+		# RRDCACHED is set to a flag value if there
 		# is no service.  We can still run cme layer however
 		# and just return.
-		#if RRDCACHED_ADDRESS.find('fail') > 0:
+
+		#if RRDCACHED.find('FAIL') > 0:
 		#	return 
 
 		for case in switch(resolution.lower()):
@@ -218,7 +219,8 @@ class Channel():
 				# for an explanation of these parameters.
 				args = ('LAST', '-a', '-s', '-15m')
 
-		#args = (self.rrd, '-d', RRDCACHED_ADDRESS, ) + args
+		#args = (self.rrd, '-d', RRDCACHED, ) + args
+		
 		args = (os.path.join(CHDIR, self.rrd), ) + args
 
 		# Wrap the rrdtool call in try/except as something bad
