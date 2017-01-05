@@ -103,7 +103,7 @@ def manage_clock(clock_settings):
 				docker_run(ntp_stop)
 				docker_run(ntp_disable)
 			else:
-				subproces.run(ntp_stop)
+				subprocess.run(ntp_stop)
 				subprocess.run(ntp_disable)
 
 
@@ -119,7 +119,7 @@ def refresh_time(clock_settings):
 		if is_a_docker():
 			result = docker_run(cmd)
 		else:
-			result = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode().rstrip()
+			result = subprocess.run(cmd, stdout=subprocess.PIPE).stdout.decode()
 
 		last_request, last_success = __parse_ntpq(result)
 		clock_settings['status'] = [ last_request, last_success ]
@@ -190,7 +190,7 @@ def __parse_ntpq(ntpq_result):
 	'''
 
 	# remove header lines
-	start = ntpq_result.find("===\n")
+	start = ntpq_result.find('===\n')
 
 	if not start:
 		return "-", "-"
