@@ -308,7 +308,8 @@ class Channel():
 				tempname = tf.name
 
 			try:
-				os.replace(tempname, self.configpath)
+				os.chmod(tempname, 0o666) # set rw for u, g, o
+				os.replace(tempname, self.configpath) # atomic on Linux
 			except OSError:
 				os.remove(tempname)
 
