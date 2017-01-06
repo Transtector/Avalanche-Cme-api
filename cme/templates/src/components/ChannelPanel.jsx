@@ -195,7 +195,7 @@ var ChannelPanel = React.createClass({
 					}
 				}
 
-				if (this.state.historyPrimaryTraceVisible) {
+				if (this.state.historyTraceVisible[0]) {
 					if (live) {
 						y1Series[0].push([ t, y1 ]);
 
@@ -212,7 +212,7 @@ var ChannelPanel = React.createClass({
 
 				}
 
-				if (this.state.historySecondaryTraceVisible) {
+				if (this.state.historyTraceVisible[1]) {
 					if (live) {
 						y2Series[0].push([ t, y2 ]);
 
