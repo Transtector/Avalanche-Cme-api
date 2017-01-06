@@ -147,10 +147,10 @@ var ChannelPanel = React.createClass({
 		if (this.state.historyVisible && this.state.ch.data) {
 
 			// get start, stop, and step timestamps
-			var times = this.state.ch.data[0] * 1000,
-				t_start = times[0], 
-				t_end = times[1],
-				t_step = times[2];
+			var times = this.state.ch.data[0],
+				t_start = times[0] * 1000, 
+				t_end = times[1] * 1000,
+				t_step = times[2] * 1000;
 
 			// track current, min and max y-values for y-axes scaling
 			var y1, y1min, y1max, y2, y2min, y2max;
