@@ -66,19 +66,26 @@ var NtpStatus = React.createClass({
 	render: function() {
 		var statusTime, statusColor, statusText;
 
+		// props.value is the /api/config/clock/status result.
+		// Generally this is an array of 2 Moments:
+		// [ <last_poll_time>, <last_success_time> ]
+
+		// if the value array is empty just leave the indicator grey
 		if (this.props.value.length == 0) {
 			statusTime = moment.invalid();
 			statusText = '';
 			statusColor = 'grey';
 
+		// else we've at least polled (value[0]) check the value times...
 		} else {
 
+			// if we DON'T have a successful poll give red indicator
 			if (!this.props.value[1]) {
 				statusTime = this.props.value[0];
 				statusColor = 'red';
 			} else {
 				statusTime = this.props.value[1];
-				statusColor = (this.props.value[0] == this.props.value[1])
+				statusColor = (this.props.value[0].isSame(this.props.value[1]))
 					? 'green'
 					: 'yellow';
 			}
