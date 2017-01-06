@@ -272,7 +272,7 @@ var ChannelPanel = React.createClass({
 				
 				// Add MAX, MIN, and AVG traces for each sensor
 
-				plotSeries.push({ data: primarySeries[0], yaxis: 1, color: '#ff0000', lines: { fill: 0.4, lineWidth: 1 }, shadowSize: 0 });
+				plotSeries.push({ data: primarySeries[0], yaxis: 1, color: '#ff0000', lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
 				plotSeries.push({ data: primarySeries[1], yaxis: 1, color: '#ff0000', lines: { lineWidth: 1 }, shadowSize: 0 });
 				//plotSeries.push({ data: primarySeries[2], yaxis: 1, color: '#ff0000' });
 
