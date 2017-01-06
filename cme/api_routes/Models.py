@@ -190,47 +190,37 @@ class Channel():
 
 	def load_history(self, resolution='live'):
 
-		# RRDCACHED is set to a flag value if there
-		# is no service.  We can still run cme layer however
-		# and just return.
-
-		#if RRDCACHED.find('FAIL') > 0:
-		#	return 
+		# Use average, minimum, and maximum consolidation functions (CFS)
+		# for any history resolution other than "live".
+		CFS = ['LAST'] if resolution.lower() == 'live' else ['AVERAGE', 'MIN', 'MAX']
 
 		for case in switch(resolution.lower()):
 			if case('daily'):
-				args = ('AVERAGE', '-a', '-s', '-1d')
+				s = '-30m' # last day
+				r = '5m' # at 5 minute resolution
 				break
 
 			if case('weekly'):
-				args = ('LAST', '-a', '-s', '-15m')
+				s = '-30m'
+				r = '5m'
 				break
 
 			if case('monthly'):
-				args = ('LAST', '-a', '-s', '-15m')
+				s = '-30m'
+				r = '5m'
 				break
 
 			if case('yearly'):
-				args = ('LAST', '-a', '-s', '-15m')
+				s = '-30m'
+				r = '5m'
 				break
 
-			if case():
-				# default - "live"; see http://oss.oetiker.ch/rrdtool/doc/rrdfetch.en.html
-				# for an explanation of these parameters.
-				args = ('LAST', '-a', '-s', '-15m')
+			if case(): # live
+				s = '-15m' # last 15 minutes
+				r = '1' # at 1 second resolution
 
-		#args = (self.rrd, '-d', RRDCACHED, ) + args
-		
-		args = (os.path.join(CHDIR, self.rrd), ) + args
-
-		# Wrap the rrdtool call in try/except as something bad
-		# may be going on with the RRD cache daemon.  If so we'll set
-		# the channel error flag.
-		try:
-			self.data = rrdtool.fetch(*args)
-
-		except Exception as e:
-			self.error = "Error reading channel history [{0}]: {1}".format(self.rrd, e)		
+		# this call will write to self.data (or self.error)
+		self._rrdfetch(CFS, s, r)
 
 
 	def clear_history(self):
@@ -400,6 +390,32 @@ class Channel():
 			self.error = "Error reading channel information [{0}]: {1}".format(self.rrd, e)
 
 		return result
+
+
+	def _rrdfetch(self, CFS, start, res):
+		''' Does the heavy lifting of calling rrdtool.fetch for each
+			CF in the CFS list and assembling the returned data
+			in the self.data attribute.
+
+				CFS:	list of RRD CF's ([str]) e.g., ['AVERAGE', 'MIN', 'MAX'], ['LAST']
+				start:	starting time reference (str) e.g., '-30m', '-1d', ...
+				res:	RRA resolution (str) e.g., '-5m', '1', '300', ...
+		'''
+		rrd = os.path.join(CHDIR, self.rrd)
+
+		for i, CF in enumerate(CFS):
+
+			# see http://oss.oetiker.ch/rrdtool/doc/rrdfetch.en.html
+			data = rrdtool.fetch(rrd, CF, '-a', '-s', start, '-r', res)
+
+			if i == 0:
+				# set initial fetch data
+				self.data = data
+			else:
+				# append new trace data
+				self.data += (data[2],)
+
+
 
 
 class Sensor():

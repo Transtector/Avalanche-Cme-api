@@ -152,9 +152,12 @@ var ChannelPanel = React.createClass({
 
 			//console.log("Plotting history: [ " + t_start + ", " + t_end + ", "  + t_step + " ]");
 
+			var history = this.state.history; // live, daily, weekly, monthly, yearly
+
 			this.state.ch.data[2].forEach(function(sensorDataValues, index) {
-				var x = t_start + t_step * index,
-					y1 = sensorDataValues[0], y2 = sensorDataValues[1];
+				var t = t_start + t_step * index,
+					y1 = sensorDataValues[0],
+					y2 = sensorDataValues[1];
 
 				if (y1) {
 					y1min = !y1min || y1min > y1 ? y1 : y1min;
@@ -169,15 +172,17 @@ var ChannelPanel = React.createClass({
 				}
 
 				if (this.state.historyPrimaryTraceVisible) {
-					primarySeries.push([ x, y1 ]);
+					primarySeries.push([ t, y1 ]);
 				}
 
 				if (this.state.historySecondaryTraceVisible) {
-					secondarySeries.push([ x, y2 ]);
+					secondarySeries.push([ t, y2 ]);
 				}
+
 			}, this);
 
-			var y1Axis = { }, y2Axis = { position: 'right' };
+			var y1Axis = { }, 
+				y2Axis = { position: 'right' };
 
 			if (Math.abs(y1max - y1min) < 0.1)
 				y1Axis.autoscaleMargin = 1;
@@ -187,19 +192,17 @@ var ChannelPanel = React.createClass({
 
 			// Hide the y-axis labels if the traces are hidden
 			// otherwise try to align the y-axes ticks
-			if (this.state.historyPrimaryTraceVisible) {
-				primaryTraceDisabled = !this.state.historySecondaryTraceVisible;
+			if (this.state.historyPrimaryTraceVisible)
 				y2Axis.alignTicksWithAxis = 1;
-			} else {
-				y1Axis.show = false;
-			}
 
-			if (this.state.historySecondaryTraceVisible) {
-				secondaryTraceDisabled = !this.state.historyPrimaryTraceVisible;
-			} else {
-			
-				y2Axis.show = false; 
-			}
+			y1Axis.show = this.state.historyPrimaryTraceVisible;
+			y2Axis.show = this.state.historySecondaryTraceVisible; 
+
+			primaryTraceDisabled = !this.state.historySecondaryTraceVisible;
+			secondaryTraceDisabled = !this.state.historyPrimaryTraceVisible;
+
+
+
 
 			// this generates the plot
 			var plot = $.plot($(this._sensorsPlot()), 
