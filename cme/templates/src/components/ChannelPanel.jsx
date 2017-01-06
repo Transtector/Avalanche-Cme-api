@@ -157,7 +157,7 @@ var ChannelPanel = React.createClass({
 
 			// live, daily, weekly, monthly, yearly history setting
 			var history = this.state.history,
-				live = history === 'live';
+				live = (history === 'live' || this.state.ch.data.length <= 3);
 
 			// additional data traces if not live
 			var MIN, MAX;  
