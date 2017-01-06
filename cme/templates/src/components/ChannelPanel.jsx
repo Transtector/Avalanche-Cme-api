@@ -141,7 +141,7 @@ var ChannelPanel = React.createClass({
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-		var y1Series, y2Series, traceDisabled;
+		var y1Series, y2Series, traceDisabled = [ false, false ];
 
 		if (this.state.historyVisible && this.state.ch.data) {
 
