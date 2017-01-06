@@ -39,6 +39,8 @@ var ChannelPanel = React.createClass({
 
 	_chAttrInit: false,
 
+	_historyTraceColors: [ '#ff0000', '#0000ff' ], // modified after first render
+
 	getInitialState: function() {
 		return {
 			ch: null,
@@ -48,8 +50,7 @@ var ChannelPanel = React.createClass({
 			activeId: '',
 			history: '',
 			historyVisible: false,
-			historyPrimaryTraceVisible: true,
-			historySecondaryTraceVisible: true
+			historyTraceVisible: [ true, true ]
 		}
 	},
 
@@ -140,9 +141,7 @@ var ChannelPanel = React.createClass({
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-		var primarySeries, secondarySeries,
-			primaryTraceColor, secondaryTraceColor,
-			primaryTraceDisabled, secondaryTraceDisabled;
+		var y1Series, y2Series, traceDisabled;
 
 		if (this.state.historyVisible && this.state.ch.data) {
 
@@ -175,11 +174,11 @@ var ChannelPanel = React.createClass({
 				// Intialize the series data arrays
 				if (index == 0) {
 					if (live) {
-						primarySeries = [ [] ]; // LIVE data
-						secondarySeries = [ [] ]; 
+						y1Series = [ [] ]; // LIVE data
+						y2Series = [ [] ]; 
 					} else {
-						primarySeries = [[], [], []]; // MAX, MIN, AVG data
-						secondarySeries = [[], [], []];
+						y1Series = [[], [], []]; // MAX, MIN, AVG data
+						y2Series = [[], [], []];
 					}
 				} 
 
@@ -198,7 +197,7 @@ var ChannelPanel = React.createClass({
 
 				if (this.state.historyPrimaryTraceVisible) {
 					if (live) {
-						primarySeries[0].push([ t, y1 ]);
+						y1Series[0].push([ t, y1 ]);
 
 					} else {
 						// Add the traces in order as AVG, MIN, MAX.
@@ -206,16 +205,16 @@ var ChannelPanel = React.createClass({
 						// to provide fill-to values.
 
 						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
-						primarySeries[0].push([ t, MAX[index][0], MIN[index][0] ]);  // MAX point w/MIN fill-to
-						primarySeries[1].push([ t, MIN[index][0] ]); // MIN point
-						primarySeries[2].push([ t, y1 ]); // AVG point
+						y1Series[0].push([ t, MAX[index][0], MIN[index][0] ]);  // MAX point w/MIN fill-to
+						y1Series[1].push([ t, MIN[index][0] ]); // MIN point
+						y1Series[2].push([ t, y1 ]); // AVG point
 					}
 
 				}
 
 				if (this.state.historySecondaryTraceVisible) {
 					if (live) {
-						secondarySeries[0].push([ t, y2 ]);
+						y2Series[0].push([ t, y2 ]);
 
 					} else {
 						// Add the traces in order as AVG, MIN, MAX.
@@ -223,9 +222,9 @@ var ChannelPanel = React.createClass({
 						// to provide fill-to values.
 
 						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
-						secondarySeries[0].push([ t, MAX[index][1], MIN[index][1] ]);  // MAX point w/MIN fill-to
-						secondarySeries[1].push([ t, MIN[index][1] ]); // MIN point
-						secondarySeries[2].push([ t, y1 ]); // AVG point
+						y2Series[0].push([ t, MAX[index][1], MIN[index][1] ]);  // MAX point w/MIN fill-to
+						y2Series[1].push([ t, MIN[index][1] ]); // MIN point
+						y2Series[2].push([ t, y1 ]); // AVG point
 					}
 				}
 
@@ -245,11 +244,10 @@ var ChannelPanel = React.createClass({
 			if (this.state.historyPrimaryTraceVisible)
 				y2Axis.alignTicksWithAxis = 1;
 
-			y1Axis.show = this.state.historyPrimaryTraceVisible;
-			y2Axis.show = this.state.historySecondaryTraceVisible; 
+			y1Axis.show = this.state.historyTraceVisible[0];
+			y2Axis.show = this.state.historyTraceVisible[1]; 
 
-			primaryTraceDisabled = !this.state.historySecondaryTraceVisible;
-			secondaryTraceDisabled = !this.state.historyPrimaryTraceVisible;
+			traceDisabled = [ !y1Axis.show, !y2Axis.show ];
 
 			var plotSeries = [], plotOptions;
 
@@ -265,21 +263,18 @@ var ChannelPanel = React.createClass({
 			};
 
 			if (history == 'live') {
-				plotSeries.push({ data: primarySeries[0], yaxis: 1 });
-				plotSeries.push({ data: secondarySeries[0], yaxis: 2 });
+				plotSeries.push({ data: y1Series[0], yaxis: 1 });
+				plotSeries.push({ data: y2Series[0], yaxis: 2 });
 
 			} else {
-				
 				// Add MAX, MIN, and AVG traces for each sensor
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: this._historyTraceColors[0], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
+				plotSeries.push({ data: y1Series[1], yaxis: 1, color: this._historyTraceColors[0], lines: { lineWidth: 1 }, shadowSize: 0 });
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: this._historyTraceColors[0] });
 
-				plotSeries.push({ data: primarySeries[0], yaxis: 1, color: '#ff0000', lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
-				plotSeries.push({ data: primarySeries[1], yaxis: 1, color: '#ff0000', lines: { lineWidth: 1 }, shadowSize: 0 });
-				//plotSeries.push({ data: primarySeries[2], yaxis: 1, color: '#ff0000' });
-
-				//plotSeries.push({ data: secondarySeries[0], yaxis: 2, color: '#ff0000', lines: { fill: 0.4, lineWidth: 1 }, shadowSize: 0 });
-				//plotSeries.push({ data: secondarySeries[1], yaxis: 2, color: '#ff0000', lines: { lineWidth: 1 }, shadowSize: 0 });
-				//plotSeries.push({ data: secondarySeries[2], yaxis: 2, color: '#ff0000' });
-
+				plotSeries.push({ data: y2Series[0], yaxis: 2, color: this._historyTraceColors[1], lines: { fill: 0.4, lineWidth: 1 }, shadowSize: 0 });
+				plotSeries.push({ data: y2Series[1], yaxis: 2, color: this._historyTraceColors[1], lines: { lineWidth: 1 }, shadowSize: 0 });
+				plotSeries.push({ data: y2Series[2], yaxis: 2, color: this._historyTraceColors[1] });
 			}
 
 			// this generates the plot
@@ -287,9 +282,7 @@ var ChannelPanel = React.createClass({
 
 			// get flot series colors
 			var series = plot.getData();
-
-			primaryTraceColor = series[0].color;
-			secondaryTraceColor = series[1].color;
+			this._historyTraceColors = [ series[0].color, series[1].color ];
 		}
 
 		return (
@@ -306,13 +299,13 @@ var ChannelPanel = React.createClass({
 				</div>
 
 				<div className="ch-history-footer">
-					<button className="btn trace pri" disabled={primaryTraceDisabled} onClick={this._togglePrimaryTraceVisibility}>
-						<span style={{background: primaryTraceColor}}></span>
+					<button className="btn trace pri" disabled={traceDisabled[0]} id="trace1" onClick={this._toggleTraceVisibility}>
+						<span style={{background: this._historyTraceColors[0]}}></span>
 						{primarySensor && primarySensor.unit ? primarySensor.unit : ''}
 					</button>
 
 					<div className="select-wrapper">
-						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistoryUpdate} >
+						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistory} >
 							<option value="live">Live</option>
 							<option value="daily">Daily</option>
 							<option value="weekly">Weekly</option>
@@ -321,8 +314,8 @@ var ChannelPanel = React.createClass({
 						</select>
 					</div>
 
-					<button className="btn trace sec" disabled={secondaryTraceDisabled} onClick={this._toggleSecondaryTraceVisibility}>
-						<span style={{background: secondaryTraceColor }}></span>
+					<button className="btn trace sec" disabled={traceDisabled[1]} id="trace2" onClick={this._toggleTraceVisibility}>
+						<span style={{background: this._historyTraceColors[1] }}></span>
 						{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
 					</button>
 				</div>
@@ -433,23 +426,24 @@ var ChannelPanel = React.createClass({
 
 	_toggleHistoryVisibility: function() {
 
-		var h = ''; // to clear the history selector
+		var h = this.state.history || 'live';
 
 		if (this.state.historyVisible) {
 			this._stopPoll();
 			this._pollPeriod = FAST_POLL_PERIOD;
 			this._startPoll();
 		} else {
-			h = 'live';
 			this._pollPeriod = SLOW_POLL_PERIOD;
 		}
 
 		this.setState({ history: h, historyVisible: !this.state.historyVisible });
 	},
 
-	_setHistoryUpdate: function(e) {
+	_setHistory: function(e) {
 
+		this._stopPoll();
 		this.setState({ history: e.target.value });
+		this._startPoll();
 	},
 
 	_clearHistory: function() {
@@ -464,14 +458,15 @@ var ChannelPanel = React.createClass({
 		alert("Sorry - this feature not yet implemented.");
 	},
 
-	_togglePrimaryTraceVisibility: function () {
+	_toggleTraceVisibility: function (e) {
 
-		this.setState({ historyPrimaryTraceVisible: !this.state.historyPrimaryTraceVisible });
-	},
+		var htv = [ !this.state.historyTraceVisible[0], this.state.historyTraceVisible[1] ];
 
-	_toggleSecondaryTraceVisibility: function () {
+		if (e.target.id != 'trace1') {
+			htv = [ !htv[0], !htv[1] ];
+		}
 
-		this.setState({ historySecondaryTraceVisible: !this.state.historySecondaryTraceVisible });
+		this.setState({ historyTraceVisible: htv });
 	},
 
 	// Making channel object changes just
@@ -519,12 +514,8 @@ var ChannelPanel = React.createClass({
 			console.log('You want to update: ', obj);
 			Actions.channel(_this.props.id, obj);
 		});
-	},
-
-	_requestControlChange: function(e) {
-		// control(chId, controlId, { name: name, state: state })
-		Actions.control(this.props.id, e.target.id, { name: 'Toggle switch', state: e.target.checked });
 	}
+
 });
 
 module.exports = ChannelPanel;
