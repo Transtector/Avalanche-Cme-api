@@ -247,7 +247,9 @@ var ChannelPanel = React.createClass({
 			y1Axis.show = this.state.historyTraceVisible[0];
 			y2Axis.show = this.state.historyTraceVisible[1]; 
 
-			traceDisabled = [ !y1Axis.show, !y2Axis.show ];
+			// Disable alternate trace visibility buttons
+			// so user can't turn both off at the same time.
+			traceDisabled = [ !y2Axis.show, !y1Axis.show ];
 
 			var plotSeries = [], plotOptions;
 
