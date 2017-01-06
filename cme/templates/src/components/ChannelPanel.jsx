@@ -140,7 +140,7 @@ var ChannelPanel = React.createClass({
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-		var primarySeries = [[]], secondarySeries = [[]],
+		var primarySeries, secondarySeries,
 			primaryTraceColor, secondaryTraceColor,
 			primaryTraceDisabled, secondaryTraceDisabled;
 
@@ -159,26 +159,41 @@ var ChannelPanel = React.createClass({
 			var history = this.state.history,
 				live = history === 'live';
 
+			// additional data traces if not live
+			var MIN, MAX;  
+			if (!live) {
+				MIN = this.state.ch.data[3]; // MIN data from channel
+				MAX = this.state.ch.data[4]; // MAX data from channel
+			}
+
 			// process each trace data point
 			this.state.ch.data[2].forEach(function(sensorDataValues, index) {
 				var t = t_start + t_step * index,
 					y1 = sensorDataValues[0],
 					y2 = sensorDataValues[1];
 
-				var MIN, MAX;  // additional data traces if not live
-				if (!live){
-					MIN = this.state.ch.data[3];
-					MAX = this.state.ch.data[4];
-				}
+				// Intialize the series data arrays
+				if (index == 0) {
+					if (live) {
+						primarySeries = [ [] ]; // LIVE data
+						secondarySeries = [ [] ]; 
+					} else {
+						primarySeries = [[], [], []]; // MAX, MIN, AVG data
+						secondarySeries = [[], [], []];
+					}
+				} 
 
-				if (live && y1) {
-					y1min = !y1min || y1min > y1 ? y1 : y1min;
-					y1max = !y1max || y1max < y1 ? y1 : y1max;
-				}
+				// Calculate 'live' min/max for y-axis scaling
+				if (live) {
+				   if (y1) {
+						y1min = !y1min || y1min > y1 ? y1 : y1min;
+						y1max = !y1max || y1max < y1 ? y1 : y1max;
+					}
 
-				if (live && y2) {
-					y2min = !y2min || y2min > y2 ? y2 : y2min;
-					y2max = !y2max || y2max < y2 ? y2 : y2max;
+					if (y2) {
+						y2min = !y2min || y2min > y2 ? y2 : y2min;
+						y2max = !y2max || y2max < y2 ? y2 : y2max;
+					}
 				}
 
 				if (this.state.historyPrimaryTraceVisible) {
