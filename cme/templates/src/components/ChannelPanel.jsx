@@ -282,9 +282,11 @@ var ChannelPanel = React.createClass({
 			// this generates the plot
 			var plot = $.plot($(this._sensorsPlot()), plotSeries, plotOptions);
 
-			// get flot series colors
-			var series = plot.getData();
-			this._historyTraceColors = [ series[0].color, series[1].color ];
+			// get/set flot series colors from 'live'
+			if (live) {
+				var series = plot.getData();
+				this._historyTraceColors = [ series[0].color, series[1].color ];
+			}
 		}
 
 		return (
