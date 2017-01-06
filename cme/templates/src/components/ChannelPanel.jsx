@@ -201,16 +201,13 @@ var ChannelPanel = React.createClass({
 			primaryTraceDisabled = !this.state.historySecondaryTraceVisible;
 			secondaryTraceDisabled = !this.state.historyPrimaryTraceVisible;
 
+			var plotSeries = [], plotOptions;
 
+			if (history == 'live') {
+				plotSeries.push({ data: primarySeries, yaxis: 1 });
+				plotSeries.push({ data: secondarySeries, yaxis: 2 });
 
-
-			// this generates the plot
-			var plot = $.plot($(this._sensorsPlot()), 
-				[
-					{ data: primarySeries,   yaxis: 1 },
-					{ data: secondarySeries, yaxis: 2 }
-				],
-				{
+				plotOptions = {
 					xaxes: [ { 
 						mode: "time",
 						timezone: "browser",
@@ -219,7 +216,15 @@ var ChannelPanel = React.createClass({
 						timeformat: "%I:%M:%S %P",
 					} ],
 					yaxes: [ y1Axis, y2Axis ]
-				});
+				};
+
+			} else {
+
+			}
+
+
+			// this generates the plot
+			var plot = $.plot($(this._sensorsPlot()), plotSeries, plotOptions);
 
 			// get flot series colors
 			var series = plot.getData();
