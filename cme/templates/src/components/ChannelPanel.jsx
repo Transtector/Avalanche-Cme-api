@@ -134,49 +134,84 @@ var ChannelPanel = React.createClass({
 		// data[0] = [ t_start, t_end, t_step ]
 		// data[1] = [ DS0, DS1, ..., DSN ]; DSx = "sx_stype_sunit" (e.g., "s0_VAC_Vrms")
 		// data[2] = [ [ s0_value, s1_value, ..., sN_value ], [ s0_value, s1_value, ..., sN_value ], ... , [ s0_value, s1_value, sN_value ] ]
+		// if not 'live', then data[2] is AVERAGE and there are more data...
+		// data[3] is MIN 
+		// data[4] is MAX.
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-		var primarySeries = [], secondarySeries = [],
+		var primarySeries = [[]], secondarySeries = [[]],
 			primaryTraceColor, secondaryTraceColor,
 			primaryTraceDisabled, secondaryTraceDisabled;
 
 		if (this.state.historyVisible && this.state.ch.data) {
 
-			var t_start = this.state.ch.data[0][0] * 1000,
-				t_end = this.state.ch.data[0][1] * 1000,
-				t_step = this.state.ch.data[0][2] * 1000,
+			// get start, stop, and step timestamps
+			var times = this.state.ch.data[0] * 1000,
+				t_start = times[0], 
+				t_end = times[1],
+				t_step = times[2];
 
-				y1, y1min, y1max, y1sum = 0, y1avg = 0,
-				y2, y2min, y2max, y2sum = 0, y2avg = 0;
+			// track current, min and max y-values for y-axes scaling
+			var y1, y1min, y1max, y2, y2min, y2max;
 
-			//console.log("Plotting history: [ " + t_start + ", " + t_end + ", "  + t_step + " ]");
+			// live, daily, weekly, monthly, yearly history setting
+			var history = this.state.history,
+				live = history === 'live';
 
-			var history = this.state.history; // live, daily, weekly, monthly, yearly
-
+			// process each trace data point
 			this.state.ch.data[2].forEach(function(sensorDataValues, index) {
 				var t = t_start + t_step * index,
 					y1 = sensorDataValues[0],
 					y2 = sensorDataValues[1];
 
-				if (y1) {
-					y1min = !y1min || y1min > y1 ? y1 : y1min;
-					y1max = !y1max || y1max < y1 ? y1 : y1max;
-					y1sum += y1;
+				var MIN, MAX;  // additional data traces if not live
+				if (!live){
+					MIN = this.state.ch.data[3];
+					MAX = this.state.ch.data[4];
 				}
 
-				if (y2) {
+				if (live && y1) {
+					y1min = !y1min || y1min > y1 ? y1 : y1min;
+					y1max = !y1max || y1max < y1 ? y1 : y1max;
+				}
+
+				if (live && y2) {
 					y2min = !y2min || y2min > y2 ? y2 : y2min;
 					y2max = !y2max || y2max < y2 ? y2 : y2max;
-					y2sum += y2;
 				}
 
 				if (this.state.historyPrimaryTraceVisible) {
-					primarySeries.push([ t, y1 ]);
+					if (live) {
+						primarySeries[0].push([ t, y1 ]);
+
+					} else {
+						// Add the traces in order as AVG, MIN, MAX.
+						// Add a third y-value to the AVG and MAX trace points
+						// to provide fill-to values.
+
+						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
+						primarySeries[0].push([ t, MAX[index][0], MIN[index][0] ]);  // MAX point w/MIN fill-to
+						primarySeries[1].push([ t, MIN[index][0] ]); // MIN point
+						primarySeries[2].push([ t, y1 ]); // AVG point
+					}
+
 				}
 
 				if (this.state.historySecondaryTraceVisible) {
-					secondarySeries.push([ t, y2 ]);
+					if (live) {
+						secondarySeries[0].push([ t, y2 ]);
+
+					} else {
+						// Add the traces in order as AVG, MIN, MAX.
+						// Add a third y-value to the AVG and MAX trace points
+						// to provide fill-to values.
+
+						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
+						secondarySeries[0].push([ t, MAX[index][1], MIN[index][1] ]);  // MAX point w/MIN fill-to
+						secondarySeries[1].push([ t, MIN[index][1] ]); // MIN point
+						secondarySeries[2].push([ t, y1 ]); // AVG point
+					}
 				}
 
 			}, this);
@@ -184,10 +219,10 @@ var ChannelPanel = React.createClass({
 			var y1Axis = { }, 
 				y2Axis = { position: 'right' };
 
-			if (Math.abs(y1max - y1min) < 0.1)
+			if (live && Math.abs(y1max - y1min) < 0.1)
 				y1Axis.autoscaleMargin = 1;
 
-			if (Math.abs(y2max - y2min) < 0.1)
+			if (live && Math.abs(y2max - y2min) < 0.1)
 				y2Axis.autoscaleMargin = 1;
 
 			// Hide the y-axis labels if the traces are hidden
@@ -203,25 +238,34 @@ var ChannelPanel = React.createClass({
 
 			var plotSeries = [], plotOptions;
 
-			if (history == 'live') {
-				plotSeries.push({ data: primarySeries, yaxis: 1 });
-				plotSeries.push({ data: secondarySeries, yaxis: 2 });
+			plotOptions = {
+				xaxes: [ { 
+					mode: "time",
+					timezone: "browser",
+					min: t_start, max: t_end,
+					ticks: [ t_start, t_end ],
+					timeformat: "%I:%M:%S %P",
+				} ],
+				yaxes: [ y1Axis, y2Axis ]
+			};
 
-				plotOptions = {
-					xaxes: [ { 
-						mode: "time",
-						timezone: "browser",
-						min: t_start, max: t_end,
-						ticks: [ t_start, t_end ],
-						timeformat: "%I:%M:%S %P",
-					} ],
-					yaxes: [ y1Axis, y2Axis ]
-				};
+			if (history == 'live') {
+				plotSeries.push({ data: primarySeries[0], yaxis: 1 });
+				plotSeries.push({ data: secondarySeries[0], yaxis: 2 });
 
 			} else {
+				
+				// Add MAX, MIN, and AVG traces for each sensor
+
+				plotSeries.push({ data: primarySeries[0], yaxis: 1 });
+				plotSeries.push({ data: primarySeries[1], yaxis: 1 });
+				plotSeries.push({ data: primarySeries[2], yaxis: 1 });
+
+				plotSeries.push({ data: secondarySeries[0], yaxis: 2 });
+				plotSeries.push({ data: secondarySeries[1], yaxis: 2 });
+				plotSeries.push({ data: secondarySeries[2], yaxis: 2 });
 
 			}
-
 
 			// this generates the plot
 			var plot = $.plot($(this._sensorsPlot()), plotSeries, plotOptions);
@@ -233,14 +277,8 @@ var ChannelPanel = React.createClass({
 			secondaryTraceColor = series[1].color;
 		}
 
-		// class names for ch history div 
-		var historyClass = classNames({
-			'ch-history': true,
-			'open': this.state.historyVisible
-		});
-
 		return (
-			<div className={historyClass}>
+			<div className={'ch-history' + (this.state.historyVisible ? ' open' : '')}>
 
 				<div className="ch-history-header">
 					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}>History</button>
