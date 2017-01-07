@@ -39,7 +39,7 @@ var ChannelPanel = React.createClass({
 
 	_chAttrInit: false,
 
-	_historyTraceColors: [ '#ff0000', '#0000ff' ], // modified after first render
+	_historyTraceColors: [ '#00000000', '#00000000' ], // modified after first render
 
 	getInitialState: function() {
 		return {
