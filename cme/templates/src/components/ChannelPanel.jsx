@@ -240,17 +240,16 @@ var ChannelPanel = React.createClass({
 			if (live && Math.abs(y2max - y2min) < 0.1)
 				y2Axis.autoscaleMargin = 1;
 
-			// Hide the y-axis labels if the traces are hidden
-			// otherwise try to align the y-axes ticks
-			if (this.state.historyPrimaryTraceVisible)
-				y2Axis.alignTicksWithAxis = 1;
-
 			y1Axis.show = this.state.historyTraceVisible[0];
 			y2Axis.show = this.state.historyTraceVisible[1]; 
 
 			// Disable alternate trace visibility buttons
 			// so user can't turn both off at the same time.
 			traceDisabled = [ !y2Axis.show, !y1Axis.show ];
+
+			// align y2 axis to y1 if it's visible
+			if (y1Axis.show)
+				y2Axis.alignTicksWithAxis = 1;
 
 			var plotSeries = [], plotOptions;
 
