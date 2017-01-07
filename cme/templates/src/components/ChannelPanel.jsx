@@ -225,7 +225,7 @@ var ChannelPanel = React.createClass({
 						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
 						y2Series[0].push([ t, MAX[index][1], MIN[index][1] ]);  // MAX point w/MIN fill-to
 						y2Series[1].push([ t, MIN[index][1] ]); // MIN point
-						y2Series[2].push([ t, y1 ]); // AVG point
+						y2Series[2].push([ t, y2 ]); // AVG point
 					}
 				}
 
