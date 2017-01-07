@@ -39,6 +39,7 @@ var ChannelPanel = React.createClass({
 
 	_chAttrInit: false,
 
+	_historyTraceColorsInit: false, // set colors after first plot generated
 	_historyTraceColors: [ '#00000000', '#00000000' ], // modified after first render
 
 	getInitialState: function() {
@@ -283,8 +284,9 @@ var ChannelPanel = React.createClass({
 			var plot = $.plot($(this._sensorsPlot()), plotSeries, plotOptions);
 
 			// get/set flot series colors from 'live'
-			if (live) {
+			if (live && !this._historyTraceColorsInit) {
 				var series = plot.getData();
+				this._historyTraceColorsInit = true;
 				this._historyTraceColors = [ series[0].color, series[1].color ];
 			}
 		}
