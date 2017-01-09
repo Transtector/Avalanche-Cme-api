@@ -24,6 +24,7 @@ var qs = (function(a) {
     return b;
 })(window.location.search.substr(1).split('&'));
 
+var moment = require('moment');
 
 var CmeExport = React.createClass({
 
@@ -57,18 +58,16 @@ var CmeExport = React.createClass({
 				<table>
 					<thead>
 						<tr><th>Channel</th><td>{this.state.ch_name || this.state.ch}</td></tr>
-						<tr><th>Start</th><td>{new Date()}</td></tr>
-						<tr><th>End</th><td>{new Date()}</td></tr>
-						<tr><th>Step</th><td>{300} seconds</td></tr>
-						<tr><th>Points</th><td>{300}</td></tr>
-						<tr><th>Duration</th><td>{300} 1 day</td></tr>
+						<tr><th>Start</th><td>{moment().format()}</td></tr>
+						<tr><th>End</th><td>{moment().format()}</td></tr>
+						<tr><th>Step</th><td>300 seconds</td></tr>
+						<tr><th>Points</th><td>300</td></tr>
+						<tr><th>Duration</th><td>1 day</td></tr>
 
 						<tr><th>Data</th></tr>
 					</thead>
 					<tbody>
-
-
-
+						<tr><th>Body</th></tr>
 					</tbody>
 				</table>
 				<div className={this.state.data.length > 0 ? 'hidden' : 'loader'}>Loading...</div>
