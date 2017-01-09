@@ -15,4 +15,17 @@ class APIError(object):
 
 
 # UI routes
-from . import index, export
+
+TITLE = 'CME'
+
+@router.route('/') # default page w/o explicit request
+@router.route('/index.html')
+def index():
+	return render_template('index.html', title=TITLE)
+
+
+@router.route('/export.html')
+def export():
+	return render_template('export.html', title=TITLE)
+
+
