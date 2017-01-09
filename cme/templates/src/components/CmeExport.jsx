@@ -31,6 +31,7 @@ var CmeExport = React.createClass({
 		return {
 			ch: qs['c'],
 			history: qs['h'],
+			ch_name: '',
 			data: []
 		};
 	},
@@ -42,7 +43,7 @@ var CmeExport = React.createClass({
 		// CmeAPI call directly, and process the return.
 		CmeAPI.channel(this.state.ch, null, this.state.history)
 			.done(function(ch) {
-				alert("Hey, you got mail!");
+				this.setState({ data: [ 1 ] });
 			})
 			.fail(function(e) {
 				alert("Something bad happened!");
@@ -52,13 +53,24 @@ var CmeExport = React.createClass({
 	render: function() {
 
 		return (
-			<div>
-				<div>
-					Channel: {this.state.ch}
-				</div>
-				<div>
-					History: {this.state.history}
-				</div>
+			<div className="export">
+				<table>
+					<thead>
+						<tr><th>Channel</th><td>{this.state.ch_name || this.state.ch}</td></tr>
+						<tr><th>Start</th><td>{new Date()}</td></tr>
+						<tr><th>End</th><td>{new Date()}</td></tr>
+						<tr><th>Step</th><td>{300} seconds</td></tr>
+						<tr><th>Points</th><td>{300}</td></tr>
+						<tr><th>Duration</th><td>{300} 1 day</td></tr>
+
+						<tr><th>Data</th></tr>
+					</thead>
+					<tbody>
+
+
+
+					</tbody>
+				</table>
 				<div className={this.state.data.length > 0 ? 'hidden' : 'loader'}>Loading...</div>
 			</div>
 		);
