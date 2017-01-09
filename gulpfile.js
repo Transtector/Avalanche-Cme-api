@@ -13,7 +13,7 @@ var stylus = require('gulp-stylus');
 //var streamify = require('gulp-streamify');
 
 var path = {
-	HTML: './cme/templates/index.html',
+	HTML: './cme/templates/*.html',
 	CSS_GLOB: './cme/templates/css/**/*.styl',
 	CSS: './cme/templates/css/style.styl',
 	CSS_OUT: './cme/static/css',
