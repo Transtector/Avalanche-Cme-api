@@ -1544,6 +1544,10 @@ li.input-group-cluster > .btn:disabled {
 .export {
   position: relative;
 }
+.export th,
+.export td {
+  border: 1px solid #ccc;
+}
 .loaderWrapper {
   background-color: rgba(0,0,0,0.2);
 }

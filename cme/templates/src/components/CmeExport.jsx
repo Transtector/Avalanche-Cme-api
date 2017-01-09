@@ -47,7 +47,7 @@ var CmeExport = React.createClass({
 		// CmeAPI call directly, and process the return.
 		CmeAPI.channel(this.state.ch, null, this.state.history)
 			.done(function(ch) {
-				_this.setState({ data: [ 1 ] });
+				//_this.setState({ data: [ 1 ] });
 			})
 			.fail(function(e) {
 				alert("Something bad happened!");
