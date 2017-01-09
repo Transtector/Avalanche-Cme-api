@@ -59,6 +59,7 @@ var CmeExport = React.createClass({
 				<div>
 					History: {this.state.history}
 				</div>
+				<div className={this.state.data.length > 0 ? 'hidden' : 'loader'}>Loading...</div>
 			</div>
 		);
 	}
