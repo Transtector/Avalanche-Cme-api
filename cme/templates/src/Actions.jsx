@@ -316,7 +316,7 @@ var Actions = {
 
 		// open a new window (tab) to the CME export page
 		// and add ch_id and ch_history to the query string
-		var url = 'export.html?' + encodeURIComponent(ch_id) + '&' + encodeURIComponent(ch_history);
+		var url = 'export.html?c=' + encodeURIComponent(ch_id) + '&h=' + encodeURIComponent(ch_history);
 		window.open(url, '_blank');
 	},
 

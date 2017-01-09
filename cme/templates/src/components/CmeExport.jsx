@@ -7,6 +7,7 @@
  */
 var React = require('react');
 
+var CmeAPI = require('../CmeAPI');
 
 // loads the page's query string into an object, qs
 var qs = (function(a) {
@@ -35,7 +36,17 @@ var CmeExport = React.createClass({
 	},
 	
 	componentDidMount: function() {
-		alert('Hey, I am mounted!');
+		// Send a request to populate the data array for the identified channel.
+		// We're not using the Action & Store to monitor channel data, however, as it
+		// will continue to update on the parent page.  Here we'll just use the
+		// CmeAPI call directly, and process the return.
+		CmeAPI.channel(this.state.ch, null, this.state.history)
+			.done(function(ch) {
+				alert("Hey, you got mail!");
+			})
+			.fail(function(e) {
+				alert("Something bad happened!");
+			});
 	},
 
 	render: function() {
