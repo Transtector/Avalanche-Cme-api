@@ -314,8 +314,16 @@ var Actions = {
 
 	exportChannel: function(ch_id, ch_history) {
 
-		// simple pass-through
-		CmeAPI.exportChannel(ch_id, ch_history);
+		// Uses the CmeAPI.channel call, but handles the response
+		// a little differently.  Parses out the data, formats it, and
+		// opens it in a new window (tab).
+		CmeAPI.channel(ch_id, null, ch_history)
+			.done(function(ch) {
+				// ch is the entire channel - filter out the channel data attribute
+				var data = ch[ch_id]['data'];
+				var w = window.open('data:text/html,' + encodeURIComponent(JSON.stringify(data, null, '\t')), '_blank');
+			})
+			.fail(onError);
 	},
 
 	thresholds: function(ch_id, sensor_id, thresholds) {

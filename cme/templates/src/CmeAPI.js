@@ -269,14 +269,6 @@ var CmeAPI = {
 		});
 	},
 
-	exportChannel: function(ch_id, ch_history) {
-
-		var ch_index = parseInt(ch_id.slice(2)),
-			url = window.location.protocol + '//' + window.location.host + API.channel + ch_index + '?h=' + ch_history;
-
-		window.open(url, "_blank");
-	},
-
 	thresholds: function(ch_id, sensor_id, thresholds) {
 		var ch_index = parseInt(ch_id.slice(2)),
 			s_index = parseInt(sensor_id.slice(1)),
