@@ -272,11 +272,11 @@ var ChannelPanel = React.createClass({
 				// Add MAX, MIN, and AVG traces for each sensor
 				plotSeries.push({ data: y1Series[0], yaxis: 1, color: this._historyTraceColors[0], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
 				plotSeries.push({ data: y1Series[1], yaxis: 1, color: this._historyTraceColors[0], lines: { lineWidth: 1 }, shadowSize: 0 });
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: this._historyTraceColors[0] });
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: this._historyTraceColors[0], shadowSize: 0 });
 
 				plotSeries.push({ data: y2Series[0], yaxis: 2, color: this._historyTraceColors[1], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
 				plotSeries.push({ data: y2Series[1], yaxis: 2, color: this._historyTraceColors[1], lines: { lineWidth: 1 }, shadowSize: 0 });
-				plotSeries.push({ data: y2Series[2], yaxis: 2, color: this._historyTraceColors[1] });
+				plotSeries.push({ data: y2Series[2], yaxis: 2, color: this._historyTraceColors[1], shadowSize: 0 });
 			}
 
 			// this generates the plot
@@ -294,7 +294,7 @@ var ChannelPanel = React.createClass({
 			<div className={'ch-history' + (this.state.historyVisible ? ' open' : '')}>
 
 				<div className="ch-history-header">
-					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}>History</button>
+					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}></button>
 					<button className="btn reset" onClick={this._clearHistory}>Clear</button>
 					<button className="btn export icon-download" onClick={this._exportHistory} />
 				</div>
