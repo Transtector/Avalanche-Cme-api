@@ -38,13 +38,16 @@ var CmeExport = React.createClass({
 	},
 	
 	componentDidMount: function() {
+
+		var _this = this;
+
 		// Send a request to populate the data array for the identified channel.
 		// We're not using the Action & Store to monitor channel data, however, as it
 		// will continue to update on the parent page.  Here we'll just use the
 		// CmeAPI call directly, and process the return.
 		CmeAPI.channel(this.state.ch, null, this.state.history)
 			.done(function(ch) {
-				this.setState({ data: [ 1 ] });
+				_this.setState({ data: [ 1 ] });
 			})
 			.fail(function(e) {
 				alert("Something bad happened!");
@@ -70,7 +73,9 @@ var CmeExport = React.createClass({
 						<tr><th>Body</th></tr>
 					</tbody>
 				</table>
-				<div className={this.state.data.length > 0 ? 'hidden' : 'loader'}>Loading...</div>
+				<div className={this.state.data.length > 0 ? 'hidden' : 'loaderWrapper'}>
+					<div className='loader'>Loading...</div>
+				</div>
 			</div>
 		);
 	}

@@ -1541,6 +1541,12 @@ li.input-group-cluster > .btn:disabled {
   left: -20px;
   color: #4d4d4d;
 }
+.export {
+  position: relative;
+}
+.loaderWrapper {
+  background-color: rgba(0,0,0,0.2);
+}
 .loader {
   margin: 100px auto;
   font-size: 25px;
