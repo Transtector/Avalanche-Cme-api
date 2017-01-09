@@ -196,7 +196,7 @@ class Channel():
 
 		for case in switch(resolution.lower()):
 			if case('daily'):
-				s = '-30m' # last day
+				s = '-1d' # last day
 				r = '5m' # at 5 minute resolution
 				break
 
