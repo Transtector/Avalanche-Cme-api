@@ -201,18 +201,18 @@ class Channel():
 				break
 
 			if case('weekly'):
-				s = '-30m'
-				r = '5m'
+				s = '-7d' # last week
+				r = '30m' # at 30 min resolution
 				break
 
 			if case('monthly'):
-				s = '-30m'
-				r = '5m'
+				s = '-31d' # last month (31 days)
+				r = '2h' # 2 hour resolution
 				break
 
 			if case('yearly'):
-				s = '-30m'
-				r = '5m'
+				s = '-365d' # last year (365 days)
+				r = '1d' # 1 day resolution
 				break
 
 			if case(): # live
