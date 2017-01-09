@@ -7,19 +7,13 @@
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-
 var Actions = require('./Actions');
 var CmeApp = require('./components/CmeApp');
+var CmeExport = require('./components/CmeExport');
 
-// This script is also called as the entry point for
-// the export.html page.  In that case there is nothing
-// really to do, so just return.
-if (document.getElementById('cme-export')) {
-
-	alert('This is the export page!');
-
-} else {
-
+// This script is the entry point for more than a single
+// top-level page.  
+if (document.getElementById('cmeapp')) {
 
 	// Initialize the CmeStore.  This is written to more easily support
 	// running the web app from a separate server than the Cme API.  Most
@@ -34,4 +28,12 @@ if (document.getElementById('cme-export')) {
 			})
 		);
 
+} else if (document.getElementById('cmeexport')) {
+ 
+	ReactDOM.render(<CmeExport />, document.getElementById('cmeexport'));
+
+} else {
+
+	alert('Something horrible went wrong!');
 }
+
