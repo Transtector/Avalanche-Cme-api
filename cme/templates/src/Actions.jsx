@@ -312,6 +312,12 @@ var Actions = {
 			.fail(onError);
 	},
 
+	exportChannel: function(ch_id, ch_history) {
+
+		// simple pass-through
+		CmeAPI.exportChannel(ch_id, ch_history);
+	},
+
 	thresholds: function(ch_id, sensor_id, thresholds) {
 		if (!dispatchRequest('posting thresholds for ' + ch_id + ':' + sensor_id)) return;
 

@@ -460,7 +460,7 @@ var ChannelPanel = React.createClass({
 
 	_exportHistory: function() {
 
-		alert("Sorry - this feature not yet implemented.");
+		Actions.exportChannel(this.props.id, this.state.history);
 	},
 
 	_toggleTraceVisibility: function (e) {

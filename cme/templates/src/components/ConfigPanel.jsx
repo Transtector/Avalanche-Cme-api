@@ -84,6 +84,7 @@ var ConfigPanel = React.createClass({
 					
 					<TempConfig config={config.temperature} flavor="config" pollPeriod={10000} />
 
+					{/*  Hidden for now - doesn't really do anything..
 					<InputGroup id="snmp">
 						<div className="input-group-cluster">
 							<label htmlFor="mib">MIB</label>
@@ -91,7 +92,6 @@ var ConfigPanel = React.createClass({
 						</div>
 					</InputGroup>
 
-					{/*  Hidden for now - doesn't really do anything..
 					<InputGroup id="http">
 						<TextInput id="cors" 
 								   placeholder="CORS whitelist" 
