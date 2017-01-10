@@ -55,11 +55,13 @@ var CmeExport = React.createClass({
 	},
 
 	render: function() {
-		var FORMAT = 'YYYY-MM-d h:mm:ss';
+		var FORMAT = 'MMM d yyyy h:mm:ss';
 
 		// ch will not be loaded until query response.  Provide some sensible
 		// placeholders for table until then.
-		var channel = this.state.ch && (this.state.ch.name + ' - ' + this.state.ch.description) || this.state.ch_id,
+		var ch_name = this.state.ch && (this.state.ch.name || this.state.ch_id),
+
+			ch_description = this.state.ch && this.state.ch.description,
 			
 			data = this.state.ch && this.state.ch.data,
 
@@ -71,7 +73,7 @@ var CmeExport = React.createClass({
 
 			duration = 'long time',
 
-			points = data && (data[2][0].length);
+			points = data && (data[2].length);
 
 
 
@@ -79,11 +81,11 @@ var CmeExport = React.createClass({
 			<div className="export">
 				<table>
 					<thead>
-						<tr><th>Channel</th><td>{channel}</td></tr>
+						<tr><th>Channel</th><td><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
 						<tr><th>Start</th><td>{start}</td></tr>
 						<tr><th>End</th><td>{end}</td></tr>
 						<tr><th>Step</th><td>{step}</td></tr>
-						<tr><th>Duration</th><td>{duration}</td></tr>
+						<tr><th>Duration</th><td><span>{duration}</span>&nbsp;<span>({this.state.history})</span></td></tr>
 						<tr><th>Points</th><td>{points}</td></tr>
 					</thead>
 					<tbody>

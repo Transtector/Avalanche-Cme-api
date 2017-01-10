@@ -1556,8 +1556,12 @@ li.input-group-cluster > .btn:disabled {
   padding: 0.25rem;
   text-align: left;
 }
+.export th span:last-child,
+.export td span:last-child {
+  font-style: italic;
+}
 .export tbody tr:nth-child(odd) {
-  background-color: rgba(62,164,225,0.25);
+  background-color: rgba(62,164,225,0.1);
 }
 .loaderWrapper {
   position: absolute;
