@@ -77,7 +77,7 @@ function formatPrettySeconds(seconds) {
 
 function sensorHeader(ch, item) {
 
-	if (!ch) return null;
+	if (!ch || !ch.sensors) return null;
 
 	return ch.sensors.map(function(s) {
 		return (
