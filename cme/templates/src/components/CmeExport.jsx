@@ -75,15 +75,25 @@ function formatPrettySeconds(seconds) {
 	return [days, hours, minutes].join(' ');
 }
 
-function sensorHeader(ch, item) {
+function renderSensorHeader(ch, title, item) {
 
-	if (!ch || !ch.sensors) return null;
-
-	return ch.sensors.map(function(s) {
+	if (!ch || !ch.sensors)
 		return (
-			<td colSpan='3'>{s[item]}</td>
+			<tr><th>{title}</th></tr>
 		);
-	});
+
+	return (
+		<tr>
+			<th>{title}</th>
+
+			{ch.sensors.map(function(s, i) {
+				return (
+					<td colSpan='3' key={i}>{s[item]}</td>
+				);
+			})}
+
+		</tr>
+	);
 }
 
 var CmeExport = React.createClass({
@@ -142,23 +152,26 @@ var CmeExport = React.createClass({
 
 			duration = data && end.from(start, true),
 
-			points = data && (data[2].length);
+			points = data && (data[2].length),
+
+			colSpan = data ? (3 * data[1].length) : 0;
 
 		return (
 			<div className="export">
 				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2> 
 				<table>
 					<thead>
-						<tr><th>Channel</th>	<td><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
-						<tr><th>Start</th>		<td>{formatMoment(start, this._config)}</td></tr>
-						<tr><th>End</th>		<td>{formatMoment(end, this._config)}</td></tr>
-						<tr><th>Step</th>		<td><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
-						<tr><th>Duration</th>	<td>{duration}</td></tr>
-						<tr><th>Points</th>		<td>{points}</td></tr>
+						<tr><th>Channel</th>	<td colSpan={colSpan}><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
+						<tr><th>Start</th>		<td colSpan={colSpan}>{formatMoment(start, this._config)}</td></tr>
+						<tr><th>End</th>		<td colSpan={colSpan}>{formatMoment(end, this._config)}</td></tr>
+						<tr><th>Step</th>		<td colSpan={colSpan}><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
+						<tr><th>Duration</th>	<td colSpan={colSpan}>{duration}</td></tr>
+						<tr><th>Points</th>		<td colSpan={colSpan}>{points}</td></tr>
 
-						<tr><th>Sensor</th>		{sensorHeader(this.state.ch, 'name')}</tr>
-						<tr><th>Type</th>		{sensorHeader(this.state.ch, 'type')}</tr>
-						<tr><th>Units</th>		{sensorHeader(this.state.ch, 'unit')}</tr>						
+						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
+						{renderSensorHeader(this.state.ch, 'Type', 'type')}
+						{renderSensorHeader(this.state.ch, 'Units', 'unit')}
+
 					</thead>
 					<tbody>
 						<tr><th>&nbsp;</th>	<th>Min</th><th>Avg</th><th>Max</th><th>Min</th><th>Avg</th><th>Max</th></tr>
