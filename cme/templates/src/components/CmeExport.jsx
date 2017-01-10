@@ -91,9 +91,26 @@ function renderSensorHeader(ch, title, item) {
 					? utils.SENSOR_TYPE[s[item]]
 					: s[item];
 
-					return (
-						<td colSpan='3' key={i}>{r}</td>
-					)
+					return <td colSpan='3' key={'s' + i + '_' + item}>{r}</td>;
+				})
+			}
+		</tr>
+	)
+}
+
+function renderSensorDataHeader(ch) {
+	if (!ch || !ch.sensors)
+		return <tr></tr>;
+
+	return (
+		<tr>
+			<th>Time</th>
+			{
+				ch.sensors.map(function(s, i) { 
+					return ['Min', 'Avg', 'Max'].map(function(a, j){
+						return <th key={'s' + i + '_' + a}>{a}</th>;
+					})
+
 				})
 			}
 		</tr>
@@ -165,22 +182,20 @@ var CmeExport = React.createClass({
 				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2> 
 				<table>
 					<thead>
-						<tr><th>Channel</th>	<td colSpan={colSpan}><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
-						<tr><th>Start</th>		<td colSpan={colSpan}>{formatMoment(start, this._config)}</td></tr>
-						<tr><th>End</th>		<td colSpan={colSpan}>{formatMoment(end, this._config)}</td></tr>
-						<tr><th>Step</th>		<td colSpan={colSpan}><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
-						<tr><th>Duration</th>	<td colSpan={colSpan}>{duration}</td></tr>
-						<tr><th>Points</th>		<td colSpan={colSpan}>{points}</td></tr>
-
+						<tr><th>Channel</th><td colSpan={colSpan}><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
+						<tr><th>Start</th><td colSpan={colSpan}>{formatMoment(start, this._config)}</td></tr>
+						<tr><th>End</th><td colSpan={colSpan}>{formatMoment(end, this._config)}</td></tr>
+						<tr><th>Step</th><td colSpan={colSpan}><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
+						<tr><th>Duration</th><td colSpan={colSpan}>{duration}</td></tr>
+						<tr><th>Points</th>	<td colSpan={colSpan}>{points}</td></tr>
 						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
 						{renderSensorHeader(this.state.ch, 'Type', 'type')}
 						{renderSensorHeader(this.state.ch, 'Units', 'unit')}
-
+						{renderSensorDataHeader(this.state.ch)}
 					</thead>
 					<tbody>
-						<tr>
-							<th>&nbsp;</th><th>Min</th><th>Avg</th><th>Max</th><th>Min</th><th>Avg</th><th>Max</th>
-						</tr>
+
+
 					</tbody>
 				</table>
 				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>
