@@ -45,10 +45,9 @@ var CmeExport = React.createClass({
 		// will continue to update on the parent page.  Here we'll just use the
 		// CmeAPI call directly, and process the return.
 		CmeAPI.channel(this.state.ch_id, null, this.state.history)
-			.done(function(ch) {
+			.done(function(response) {
 
-				_this.setState({ ch: ch[this.state.ch_id] });
-
+				_this.setState({ ch: response[this.state.ch_id] });
 			})
 			.fail(function(e) {
 				alert("Something bad happened!");
