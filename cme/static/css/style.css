@@ -1543,13 +1543,28 @@ li.input-group-cluster > .btn:disabled {
 }
 .export {
   position: relative;
+  padding: 10px;
+}
+.export table {
+  width: 100%;
+  border-collapse: collapse;
 }
 .export th,
 .export td {
   border: 1px solid #ccc;
+  padding: 0.25rem;
+  text-align: left;
+}
+.export tbody tr:nth-child(odd) {
+  background-color: rgba(62,164,225,0.25);
 }
 .loaderWrapper {
-  background-color: rgba(0,0,0,0.2);
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(62,164,225,0.25);
 }
 .loader {
   margin: 100px auto;

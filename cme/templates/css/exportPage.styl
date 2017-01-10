@@ -2,12 +2,25 @@
 
 .export
 	position relative
+	padding 10px
+	table 
+		width 100%
+		border-collapse collapse
 	th, td
 		border 1px solid #ccc
+		padding 0.25rem
+		text-align left
+	tbody tr:nth-child(odd)
+		background-color rgba(button-bg-color, 0.25)
 	
 
 .loaderWrapper
-	background-color rgba(0,0,0,0.2)
+	position absolute
+	left 0
+	top 0
+	right 0
+	bottom 0
+	background-color rgba(button-bg-color, 0.25)
 
 
 .loader
