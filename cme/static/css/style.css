@@ -1548,6 +1548,7 @@ li.input-group-cluster > .btn:disabled {
 .export table {
   width: 100%;
   border-collapse: collapse;
+  background-color: #fff;
 }
 .export th,
 .export td {

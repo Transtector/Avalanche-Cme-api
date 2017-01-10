@@ -30,10 +30,9 @@ var CmeExport = React.createClass({
 
 	getInitialState: function () {
 		return {
-			ch: qs['c'],
-			history: qs['h'],
-			ch_name: '',
-			data: []
+			ch_id: qs['c'], // e.g., 'ch0'
+			history: qs['h'], // e.g., 'daily'
+			ch: {} // empty until mounted - then filled w/ch object
 		};
 	},
 	
@@ -47,7 +46,9 @@ var CmeExport = React.createClass({
 		// CmeAPI call directly, and process the return.
 		CmeAPI.channel(this.state.ch, null, this.state.history)
 			.done(function(ch) {
-				//_this.setState({ data: [ 1 ] });
+
+				_this.setState({ ch: ch[this.state.ch_id] });
+
 			})
 			.fail(function(e) {
 				alert("Something bad happened!");
@@ -55,25 +56,42 @@ var CmeExport = React.createClass({
 	},
 
 	render: function() {
+		var FORMAT = 'YYYY-MM-d h:mm:ss';
+
+		// ch will not be loaded until query response.  Provide some sensible
+		// placeholders for table until then.
+		var channel = this.state.ch && (this.state.ch.name + ' - ' + this.state.ch.description) || this.state.ch_id,
+			
+			data = this.state.ch && this.state.ch.data,
+
+			start = data && moment(data[0][0] * 1000.0).format(FORMAT),
+			
+			end = data && moment(data[0][1] * 1000.0).format(FORMAT),
+
+			step = data && (data[0][2] + ' seconds'),
+
+			duration = 'long time',
+
+			points = data && (data[2][0].length);
+
+
 
 		return (
 			<div className="export">
 				<table>
 					<thead>
-						<tr><th>Channel</th><td>{this.state.ch_name || this.state.ch}</td></tr>
-						<tr><th>Start</th><td>{moment().format()}</td></tr>
-						<tr><th>End</th><td>{moment().format()}</td></tr>
-						<tr><th>Step</th><td>300 seconds</td></tr>
-						<tr><th>Points</th><td>300</td></tr>
-						<tr><th>Duration</th><td>1 day</td></tr>
-
-						<tr><th>Data</th></tr>
+						<tr><th>Channel</th><td>{channel}</td></tr>
+						<tr><th>Start</th><td>{start}</td></tr>
+						<tr><th>End</th><td>{end}</td></tr>
+						<tr><th>Step</th><td>{step}</td></tr>
+						<tr><th>Duration</th><td>{duration}</td></tr>
+						<tr><th>Points</th><td>{points}</td></tr>
 					</thead>
 					<tbody>
 						<tr><th>Body</th></tr>
 					</tbody>
 				</table>
-				<div className={this.state.data.length > 0 ? 'hidden' : 'loaderWrapper'}>
+				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>
 					<div className='loader'>Loading...</div>
 				</div>
 			</div>
