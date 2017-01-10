@@ -36,7 +36,7 @@ function formatMoment(moment, config) {
 
 	if (!moment) return '';
 
-	var date = moment.format("MMM D"),
+	var date = moment.format("MMM D Y"),
 		time = moment.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
 
 	return date + ' ' + time;
@@ -85,15 +85,19 @@ function renderSensorHeader(ch, title, item) {
 	return (
 		<tr>
 			<th>{title}</th>
+			{
+				ch.sensors.map(function(s, i) {
+					var r = (item == 'type')
+					? utils.SENSOR_TYPE[s[item]]
+					: s[item];
 
-			{ch.sensors.map(function(s, i) {
-				return (
-					<td colSpan='3' key={i}>{s[item]}</td>
-				);
-			})}
-
+					return (
+						<td colSpan='3' key={i}>{r}</td>
+					)
+				})
+			}
 		</tr>
-	);
+	)
 }
 
 var CmeExport = React.createClass({
@@ -174,7 +178,9 @@ var CmeExport = React.createClass({
 
 					</thead>
 					<tbody>
-						<tr><th>&nbsp;</th>	<th>Min</th><th>Avg</th><th>Max</th><th>Min</th><th>Avg</th><th>Max</th></tr>
+						<tr>
+							<th>&nbsp;</th><th>Min</th><th>Avg</th><th>Max</th><th>Min</th><th>Avg</th><th>Max</th>
+						</tr>
 					</tbody>
 				</table>
 				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>

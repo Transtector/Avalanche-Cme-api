@@ -47,5 +47,10 @@ module.exports = exports = {
 			return moment.local();
 
 		return moment.utcOffset(0);
+	},
+
+	SENSOR_TYPE: {
+		CAC: 'AC Current',
+		VAC: 'AC Voltage'
 	}
 }
