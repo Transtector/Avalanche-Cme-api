@@ -1560,6 +1560,9 @@ li.input-group-cluster > .btn:disabled {
 .export td span:last-child {
   font-style: italic;
 }
+.export thead tr:last-child {
+  background-color: rgba(62,164,225,0.25);
+}
 .export tbody tr:nth-child(odd) {
   background-color: rgba(62,164,225,0.1);
 }

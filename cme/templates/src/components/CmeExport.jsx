@@ -182,10 +182,10 @@ var CmeExport = React.createClass({
 				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2> 
 				<table>
 					<thead>
-						<tr><th>Channel</th><td colSpan={colSpan}><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
+						<tr><th>Channel</th><td colSpan={colSpan}><span>{ch_name}</span><span>{ch_description}</span></td></tr>
 						<tr><th>Start</th><td colSpan={colSpan}>{formatMoment(start, this._config)}</td></tr>
 						<tr><th>End</th><td colSpan={colSpan}>{formatMoment(end, this._config)}</td></tr>
-						<tr><th>Step</th><td colSpan={colSpan}><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
+						<tr><th>Step</th><td colSpan={colSpan}><span>{step} seconds</span><span>{step_pretty}</span></td></tr>
 						<tr><th>Duration</th><td colSpan={colSpan}>{duration}</td></tr>
 						<tr><th>Points</th>	<td colSpan={colSpan}>{points}</td></tr>
 						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
