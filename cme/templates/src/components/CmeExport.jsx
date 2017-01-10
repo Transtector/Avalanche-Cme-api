@@ -47,7 +47,7 @@ var CmeExport = React.createClass({
 		CmeAPI.channel(this.state.ch_id, null, this.state.history)
 			.done(function(response) {
 
-				_this.setState({ ch: response[this.state.ch_id] });
+				_this.setState({ ch: response[_this.state.ch_id] });
 			})
 			.fail(function(e) {
 				alert("Something bad happened!");
