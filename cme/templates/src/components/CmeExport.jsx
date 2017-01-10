@@ -62,9 +62,9 @@ var CmeExport = React.createClass({
 
 		// Pull and store the date/time configuration first
 		// then the desired channel.
-		CmeAPI.config('clock')
-			.done(function(clock_config) {
-				_this._config = clock_config['clock'];
+		CmeAPI.config()
+			.done(function(config) {
+				_this._config = config['config']['clock'];
 
 			// Send a request to populate the data array for the identified channel.
 			// We're not using the Action & Store to monitor channel data, however, as it
