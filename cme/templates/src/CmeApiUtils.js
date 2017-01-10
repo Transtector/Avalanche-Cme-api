@@ -29,6 +29,8 @@ module.exports = exports = {
 
 	formatRelativeMoment: function (moment, relativeTo, zone_hours) {
 
+		if (!moment) return moment;
+
 		if (relativeTo == this.TIME_DISPLAY.CME_LOCAL) {
 			var offset_minutes = zone_hours * 60;
 
