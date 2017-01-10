@@ -34,6 +34,8 @@ function error(e) {
 
 function formatMoment(moment, config) {
 
+	if (!moment) return '';
+
 	var date = moment.format("MMM D"),
 		time = moment.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
 
