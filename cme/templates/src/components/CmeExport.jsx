@@ -28,6 +28,7 @@ var utils = require('../CmeApiUtils');
 
 
 function error(e) {
+
 	alert("Something bad happened: ", e);
 }
 
@@ -72,6 +73,17 @@ function formatPrettySeconds(seconds) {
 	var minutes = pluralize(m, 'minute');
 
 	return [days, hours, minutes].join(' ');
+}
+
+function sensorHeader(ch, item) {
+
+	if (!ch) return null;
+
+	return ch.sensors.map(function(s) {
+		return (
+			<td colSpan='3'>{s[item]}</td>
+		);
+	});
 }
 
 var CmeExport = React.createClass({
@@ -137,15 +149,19 @@ var CmeExport = React.createClass({
 				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2> 
 				<table>
 					<thead>
-						<tr><th>Channel</th><td><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
-						<tr><th>Start</th><td>{formatMoment(start, this._config)}</td></tr>
-						<tr><th>End</th><td>{formatMoment(end, this._config)}</td></tr>
-						<tr><th>Step</th><td><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
-						<tr><th>Duration</th><td>{duration}</td></tr>
-						<tr><th>Points</th><td>{points}</td></tr>
+						<tr><th>Channel</th>	<td><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
+						<tr><th>Start</th>		<td>{formatMoment(start, this._config)}</td></tr>
+						<tr><th>End</th>		<td>{formatMoment(end, this._config)}</td></tr>
+						<tr><th>Step</th>		<td><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
+						<tr><th>Duration</th>	<td>{duration}</td></tr>
+						<tr><th>Points</th>		<td>{points}</td></tr>
+
+						<tr><th>Sensor</th>		{sensorHeader(this.state.ch, 'name')}</tr>
+						<tr><th>Type</th>		{sensorHeader(this.state.ch, 'type')}</tr>
+						<tr><th>Units</th>		{sensorHeader(this.state.ch, 'unit')}</tr>						
 					</thead>
 					<tbody>
-						<tr><th>Body</th></tr>
+						<tr><th>&nbsp;</th>	<th>Min</th><th>Avg</th><th>Max</th><th>Min</th><th>Avg</th><th>Max</th></tr>
 					</tbody>
 				</table>
 				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>
