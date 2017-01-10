@@ -6,8 +6,6 @@
  * data in a browser tab for the user to save, print, etc. 
  */
 var React = require('react');
-
-var Store = require('../Store');
 var CmeAPI = require('../CmeAPI');
 
 // loads the page's query string into an object, qs
@@ -28,27 +26,32 @@ var qs = (function(a) {
 var moment = require('moment');
 var utils = require('../CmeApiUtils');
 
-function formatMoment(seconds) {
+function error(e) {
+	alert("Something bad happened: ", e);
+}
 
-	var config = Store.getState().config.clock,
-			
-		datetime = utils.formatRelativeMoment(
-			moment.utc(seconds * 1000.0),
-			config.displayRelativeTo,
-			config.zone),
+function formatMoment(seconds, config) {
 
-		date = datetime.format("MMM D"),
-		time = datetime.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
+	var datetime = utils.formatRelativeMoment(
+		moment.utc(seconds * 1000.0),
+		config.displayRelativeTo,
+		config.zone),
+
+	date = datetime.format("MMM D"),
+	time = datetime.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
 
 	return date + ' ' + time;
 }
 
+
 var CmeExport = React.createClass({
+
+	_config: {}, // holds the clock configuration - populated at componentDidMount
 
 	getInitialState: function () {
 		return {
-			ch_id: qs['c'], // e.g., 'ch0'
-			history: qs['h'], // e.g., 'daily'
+			id: qs['c'], // channel id, e.g., 'ch0'
+			history: qs['h'], // history block, e.g., 'daily'
 			ch: {} // empty until mounted - then filled w/ch object
 		};
 	},
@@ -57,34 +60,39 @@ var CmeExport = React.createClass({
 
 		var _this = this;
 
-		// Send a request to populate the data array for the identified channel.
-		// We're not using the Action & Store to monitor channel data, however, as it
-		// will continue to update on the parent page.  Here we'll just use the
-		// CmeAPI call directly, and process the return.
-		CmeAPI.channel(this.state.ch_id, null, this.state.history)
-			.done(function(response) {
+		// Pull and store the date/time configuration first
+		// then the desired channel.
+		CmeAPI.config('clock')
+			.done(function(clock_config) {
+				_this._config = clock_config['clock'];
 
-				_this.setState({ ch: response[_this.state.ch_id] });
+			// Send a request to populate the data array for the identified channel.
+			// We're not using the Action & Store to monitor channel data, however, as it
+			// will continue to update on the parent page.  Here we'll just use the
+			// CmeAPI call directly, and process the return.
+			CmeAPI.channel(this.state.id, null, this.state.history)
+				.done(function(response) {
+
+					_this.setState({ ch: response[_this.state.id] });
+				})
+				.fail(error);
 			})
-			.fail(function(e) {
-				alert("Something bad happened!");
-			});
+			.fail(error);
 	},
 
 	render: function() {
 
-
 		// ch will not be loaded until query response.  Provide some sensible
 		// placeholders for table until then.
-		var ch_name = this.state.ch && (this.state.ch.name || this.state.ch_id),
+		var ch_name = this.state.ch && (this.state.ch.name || this.state.id),
 
 			ch_description = this.state.ch && this.state.ch.description,
 			
 			data = this.state.ch && this.state.ch.data,
 
-			start = data && formatMoment(data[0][0]),
+			start = data && formatMoment(data[0][0], this._config),
 			
-			end = data && formatMoment(data[0][1]),
+			end = data && formatMoment(data[0][1], this._config),
 
 			step = data && (data[0][2] + ' seconds'),
 
