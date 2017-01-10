@@ -26,23 +26,25 @@ var qs = (function(a) {
 var moment = require('moment');
 var utils = require('../CmeApiUtils');
 
+
 function error(e) {
 	alert("Something bad happened: ", e);
 }
 
-function formatMoment(seconds, config) {
 
-	var datetime = utils.formatRelativeMoment(
-		moment.utc(seconds * 1000.0),
-		config.displayRelativeTo,
-		config.zone),
+function formatMoment(moment, config) {
 
-	date = datetime.format("MMM D"),
-	time = datetime.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
+	var date = moment.format("MMM D"),
+		time = moment.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
 
 	return date + ' ' + time;
 }
 
+function capitalize(str) {
+	if (!str) return str;
+
+	return str.slice(0, 1).toUpperCase() + str.slice(1);
+}
 
 var CmeExport = React.createClass({
 
@@ -90,27 +92,26 @@ var CmeExport = React.createClass({
 			
 			data = this.state.ch && this.state.ch.data,
 
-			start = data && formatMoment(data[0][0], this._config),
+			start = data && utils.formatRelativeMoment(data[0][0] * 1000, this._config.displayRelativeTo, this._config.zone),
 			
-			end = data && formatMoment(data[0][1], this._config),
+			end = data && utils.formatRelativeMoment(data[0][1] * 1000, this._config.displayRelativeTo, this._config.zone),
 
 			step = data && (data[0][2] + ' seconds'),
 
-			duration = 'long time',
+			duration = data && end.from(start, true),
 
 			points = data && (data[2].length);
 
-
-
 		return (
 			<div className="export">
+				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2> 
 				<table>
 					<thead>
 						<tr><th>Channel</th><td><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
-						<tr><th>Start</th><td>{start}</td></tr>
-						<tr><th>End</th><td>{end}</td></tr>
+						<tr><th>Start</th><td>{formatMoment(start, this._config)}</td></tr>
+						<tr><th>End</th><td>{formatMoment(end, this._config)}</td></tr>
 						<tr><th>Step</th><td>{step}</td></tr>
-						<tr><th>Duration</th><td><span>{duration}</span>&nbsp;<span>({this.state.history})</span></td></tr>
+						<tr><th>Duration</th><td>{duration}</td></tr>
 						<tr><th>Points</th><td>{points}</td></tr>
 					</thead>
 					<tbody>
