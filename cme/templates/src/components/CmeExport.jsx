@@ -70,7 +70,7 @@ var CmeExport = React.createClass({
 			// We're not using the Action & Store to monitor channel data, however, as it
 			// will continue to update on the parent page.  Here we'll just use the
 			// CmeAPI call directly, and process the return.
-			CmeAPI.channel(this.state.id, null, this.state.history)
+			CmeAPI.channel(_this.state.id, null, _this.state.history)
 				.done(function(response) {
 
 					_this.setState({ ch: response[_this.state.id] });
