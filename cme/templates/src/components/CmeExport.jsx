@@ -47,7 +47,7 @@ function capitalize(str) {
 	return str.slice(0, 1).toUpperCase() + str.slice(1);
 }
 
-function pluralize(num, unit) {
+function pluralize(num, word) {
 	if (!num) return '';
 
 	return num > 1 
