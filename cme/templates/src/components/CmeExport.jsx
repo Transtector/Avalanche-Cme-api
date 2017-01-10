@@ -171,7 +171,9 @@ var CmeExport = React.createClass({
 
 			step_pretty = formatPrettySeconds(step),
 
-			duration = data && end.from(start, true),
+			duration = data && (data[0][1] - data[0][0]),
+
+			duration_pretty = data && end.from(start, true),
 
 			points = data && (data[2].length),
 
@@ -186,7 +188,7 @@ var CmeExport = React.createClass({
 						<tr><th>Start</th><td colSpan={colSpan}>{formatMoment(start, this._config)}</td></tr>
 						<tr><th>End</th><td colSpan={colSpan}>{formatMoment(end, this._config)}</td></tr>
 						<tr><th>Step</th><td colSpan={colSpan}><span>{step + ' seconds'}</span><span>{step_pretty}</span></td></tr>
-						<tr><th>Duration</th><td colSpan={colSpan}>{duration}</td></tr>
+						<tr><th>Duration</th><td colSpan={colSpan}><span>{duration + ' seconds'}</span><span>{duration_pretty}</span></td></tr>
 						<tr><th>Points</th><td colSpan={colSpan}>{points}</td></tr>
 						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
 						{renderSensorHeader(this.state.ch, 'Type', 'type')}
