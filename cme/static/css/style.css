@@ -1558,12 +1558,17 @@ li.input-group-cluster > .btn:disabled {
 }
 .export th span:last-child,
 .export td span:last-child {
+  margin-left: 1em;
   font-style: italic;
 }
 .export thead tr:last-child {
   background-color: rgba(62,164,225,0.25);
 }
-.export tbody tr:nth-child(odd) {
+.export thead tr:last-child th,
+.export thead tr:last-child td {
+  border-top-width: 2px;
+}
+.export tbody tr:nth-child(even) {
   background-color: rgba(62,164,225,0.1);
 }
 .loaderWrapper {
