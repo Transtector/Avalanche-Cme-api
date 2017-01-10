@@ -107,13 +107,47 @@ function renderSensorDataHeader(ch) {
 			<th>Time</th>
 			{
 				ch.sensors.map(function(s, i) { 
-					return ['Min', 'Avg', 'Max'].map(function(a, j){
+					return ['Min', 'Avg', 'Max'].map(function(a, j) {
 						return <th key={'s' + i + '_' + a}>{a}</th>;
 					})
 
 				})
 			}
 		</tr>
+	)
+}
+
+function renderSensorDataBody(ch, config) {
+	if (!ch || !ch.sensors || !ch.data) return null;
+
+	var start = ch.data[0][0],
+		step = ch.data[0][2];
+
+	return (
+		<tbody>
+			{
+				// for each data point - calculate the time and pluck each sensors' data
+				ch.data[2].map(function(p, i) {
+					var time = start + i * step,
+						time_moment = utils.formatRelativeMoment(moment.utc(time * 1000), config.displayRelativeTo, config.zone),
+						time_formatted = formatMoment(time_moment, config)
+
+					return (
+						<tr>
+							<td>{time_formatted}</td>
+							{
+								ch.p.map(function(s, j) {
+									return [3, 2, 4].map(function (col) {
+										return <td>{ch.data[col][i][j]}</td>
+									})
+								})
+							}
+						</tr>
+					)
+					})
+				})
+			}
+		</tbody>
 	)
 }
 
@@ -160,6 +194,13 @@ var CmeExport = React.createClass({
 		var ch_name = this.state.ch && (this.state.ch.name || this.state.id),
 
 			ch_description = this.state.ch && this.state.ch.description,
+
+			// data[0] = [ t_start, t_end, t_step ]
+			// data[1] = [ DS0, DS1, ..., DSN ]; DSx = "sx_stype_sunit" (e.g., "s0_VAC_Vrms")
+			// data[2] = [ [ s0_value, s1_value, ..., sN_value ], [ s0_value, s1_value, ..., sN_value ], ... , [ s0_value, s1_value, sN_value ] ]
+			// note: data[2] is AVG 
+			// data[3] is MIN 
+			// data[4] is MAX
 			
 			data = this.state.ch && this.state.ch.data,
 
@@ -195,10 +236,7 @@ var CmeExport = React.createClass({
 						{renderSensorHeader(this.state.ch, 'Units', 'unit')}
 						{renderSensorDataHeader(this.state.ch)}
 					</thead>
-					<tbody>
-
-
-					</tbody>
+					{renderSensorDataBody(this.state.ch, this._config)}
 				</table>
 				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>
 					<div className='loader'>Loading...</div>
