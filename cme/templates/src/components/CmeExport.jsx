@@ -31,7 +31,6 @@ function error(e) {
 	alert("Something bad happened: ", e);
 }
 
-
 function formatMoment(moment, config) {
 
 	if (!moment) return '';
@@ -46,6 +45,33 @@ function capitalize(str) {
 	if (!str) return str;
 
 	return str.slice(0, 1).toUpperCase() + str.slice(1);
+}
+
+function pluralize(num, unit) {
+	if (!num) return '';
+
+	return num > 1 
+		? num + ' ' + word + 's' 
+		: num + ' ' + word;
+}
+
+function formatPrettySeconds(seconds) {
+	if (!seconds) return '';
+
+	var d = Math.floor(seconds / 86400);
+	seconds -= d * 86400;
+
+	var h = Math.floor(seconds / 3600) % 24;
+	seconds -= h * 3600;
+
+	var m = Math.floor(seconds / 60) % 60;
+	seconds = m * 60;
+
+	var days = pluralize(d, 'day');
+	var hours = pluralize(h, 'hour');
+	var minutes = pluralize(m, 'minute');
+
+	return [days, hours, minutes].join(' ');
 }
 
 var CmeExport = React.createClass({
@@ -98,7 +124,9 @@ var CmeExport = React.createClass({
 			
 			end = data && utils.formatRelativeMoment(moment.utc(data[0][1] * 1000), this._config.displayRelativeTo, this._config.zone),
 
-			step = data && (data[0][2] + ' seconds'),
+			step = data && data[0][2],
+
+			step_pretty = formatPrettySeconds(step),
 
 			duration = data && end.from(start, true),
 
@@ -112,7 +140,7 @@ var CmeExport = React.createClass({
 						<tr><th>Channel</th><td><span>{ch_name}</span>&nbsp;<span>{ch_description}</span></td></tr>
 						<tr><th>Start</th><td>{formatMoment(start, this._config)}</td></tr>
 						<tr><th>End</th><td>{formatMoment(end, this._config)}</td></tr>
-						<tr><th>Step</th><td>{step}</td></tr>
+						<tr><th>Step</th><td><span>{step} seconds</span>&nbsp;<span>{step_pretty}</span></td></tr>
 						<tr><th>Duration</th><td>{duration}</td></tr>
 						<tr><th>Points</th><td>{points}</td></tr>
 					</thead>
