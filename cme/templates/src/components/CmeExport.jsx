@@ -94,9 +94,9 @@ var CmeExport = React.createClass({
 			
 			data = this.state.ch && this.state.ch.data,
 
-			start = data && utils.formatRelativeMoment(data[0][0] * 1000, this._config.displayRelativeTo, this._config.zone),
+			start = data && utils.formatRelativeMoment(moment.utc(data[0][0] * 1000), this._config.displayRelativeTo, this._config.zone),
 			
-			end = data && utils.formatRelativeMoment(data[0][1] * 1000, this._config.displayRelativeTo, this._config.zone),
+			end = data && utils.formatRelativeMoment(moment.utc(data[0][1] * 1000), this._config.displayRelativeTo, this._config.zone),
 
 			step = data && (data[0][2] + ' seconds'),
 
