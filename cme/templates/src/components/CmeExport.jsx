@@ -7,6 +7,7 @@
  */
 var React = require('react');
 
+var Store = require('../Store');
 var CmeAPI = require('../CmeAPI');
 
 // loads the page's query string into an object, qs
@@ -25,6 +26,22 @@ var qs = (function(a) {
 })(window.location.search.substr(1).split('&'));
 
 var moment = require('moment');
+var utils = require('../CmeApiUtils');
+
+function formatMoment(seconds) {
+
+	var config = Store.getState().config.clock,
+			
+		datetime = utils.formatRelativeMoment(
+			moment.utc(seconds * 1000.0),
+			config.displayRelativeTo,
+			config.zone),
+
+		date = datetime.format("MMM D"),
+		time = datetime.format(config.display12HourTime ? config.displayTimeFormat12Hour : config.displayTimeFormat24Hour);
+
+	return date + ' ' + time;
+}
 
 var CmeExport = React.createClass({
 
@@ -55,7 +72,7 @@ var CmeExport = React.createClass({
 	},
 
 	render: function() {
-		var FORMAT = 'MMM d yyyy h:mm:ss';
+
 
 		// ch will not be loaded until query response.  Provide some sensible
 		// placeholders for table until then.
@@ -65,9 +82,9 @@ var CmeExport = React.createClass({
 			
 			data = this.state.ch && this.state.ch.data,
 
-			start = data && moment(data[0][0] * 1000.0).format(FORMAT),
+			start = data && formatMoment(data[0][0]),
 			
-			end = data && moment(data[0][1] * 1000.0).format(FORMAT),
+			end = data && formatMoment(data[0][1]),
 
 			step = data && (data[0][2] + ' seconds'),
 
@@ -100,4 +117,5 @@ var CmeExport = React.createClass({
 	}
 });
 
+window.moment = moment;
 module.exports = CmeExport;
