@@ -281,7 +281,7 @@ var CmeExport = React.createClass({
 		$('.export table thead tr').each(function(i) {
 
 			var cell = [];
-			$(this).child().each(function(j) {
+			$(this).children().each(function(j) {
 				cell.push($(this).text())
 			});
 			bodytext.push(cell.join('\t'));
