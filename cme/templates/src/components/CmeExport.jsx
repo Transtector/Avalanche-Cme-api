@@ -117,42 +117,38 @@ function renderSensorDataHeader(ch) {
 	)
 }
 
+
 function renderSensorDataBody(ch, config) {
 	if (!ch || !ch.sensors || !ch.data) return null;
 
 	var start = ch.data[0][0],
 		step = ch.data[0][2];
 
-	return (
-		<tbody>
-			{
-				// for each data point - calculate the time and pluck each sensors' data
-				ch.data[2].map(function(p, i) {
-					var time = start + i * step,
-						time_moment = utils.formatRelativeMoment(moment.utc(time * 1000), config.displayRelativeTo, config.zone),
-						time_formatted = formatMoment(time_moment, config)
+	// Each data point creates a new row in the
+	// table starting with the calculated time point
+	// and followed by each sensors' min, avg, and
+	// max data values.
+	function renderSensorDataRow(p, i) {
 
-					return (
-						<tr key={'row' + i}>
-							<td>{time_formatted}</td>
-							{
-								// for each sensor value in data point
-								p.map(function(s, j) {
-									// return Min (col 3), Avg (col 2), and Max (col 4)
-									return [3, 2, 4].map(function (col) {
+		var time = start + i * step,
+			time_moment = utils.formatRelativeMoment(moment.utc(time * 1000), config.displayRelativeTo, config.zone),
+			time_formatted = formatMoment(time_moment, config);
 
-										return <td>{ch.data[col][i][j] || '-'}</td>;
-										
-									})
-								})
-							}
-						</tr>
-					)
-					})
-				})
+		function renderSensorDataCells(s, j) {
+
+			function renderSensorDataCell(c) {
+				return <td>{ch.data[c][i][j] || '-'}</td>;
 			}
-		</tbody>
-	)
+
+			// render Min (data[3]), Avg (data[2]), and Max (data[4]) cells
+			return [3, 2, 4].map(renderSensorDataCell);
+		}
+
+		return <tr key={'row' + i}><td>{time_formatted}</td>{p.map(renderSensorDataCells)}</tr>;
+	}
+
+	// map each point in the Avg data array (data[2])...
+	return <tbody>{ch.data[2].map(renderSensorDataRow)}</tbody>;
 }
 
 var CmeExport = React.createClass({
