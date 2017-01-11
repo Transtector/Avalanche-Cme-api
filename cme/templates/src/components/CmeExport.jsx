@@ -227,7 +227,7 @@ var CmeExport = React.createClass({
 
 		return (
 			<div className="export">
-				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2>
+				<h2 className='title'>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2>
 				<button className="btn open" onClick={this._toggleInstructions}>?</button>
 
 				<table>
@@ -274,7 +274,20 @@ var CmeExport = React.createClass({
 
 	_clearFormatting: function() {
 
-		alert("Ha ha - just kidding!");
+		var bodytext = [];
+
+		bodytext.push($('h2.title').text());
+
+		$('.export table thead tr').each(function(i) {
+
+			var cell = [];
+			$(this).child().each(function(j) {
+				cell.push($(this).text())
+			});
+			bodytext.push(cell.join('\t'));
+		});
+
+		alert(bodytext.slice(0, 1024));
 	},
 
 	_toggleInstructions: function() {
