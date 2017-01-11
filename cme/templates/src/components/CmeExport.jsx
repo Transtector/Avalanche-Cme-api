@@ -287,7 +287,7 @@ var CmeExport = React.createClass({
 			bodytext.push(cell.join()); // this part does the CSV
 		});
 
-		alert(bodytext.join('\n').slice(0, 2048));
+		$('body').text(bodytext.join('\n'));
 	},
 
 	_toggleInstructions: function() {
@@ -295,7 +295,5 @@ var CmeExport = React.createClass({
 		this.setState({ instructionsVisible: !this.state.instructionsVisible });
 	}
 });
-
-window.$ = $;
 
 module.exports = CmeExport;
