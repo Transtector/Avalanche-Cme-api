@@ -228,7 +228,7 @@ var CmeExport = React.createClass({
 		return (
 			<div className="export">
 				<h2 className='title'>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2>
-				<button className="btn open" onClick={this._toggleInstructions}>?</button>
+				<button className="btn" onClick={this._toggleInstructions}>?</button>
 
 				<table>
 					<thead>
@@ -255,13 +255,13 @@ var CmeExport = React.createClass({
 						and copy it to the clipboard.  Then simply paste the data into the
 						target application, for example Microsoft Excel.</p>
 
-					<p>Alternatively, clear the formatting from this page then simply
-						use the browser to save it into a comma-separated values (i.e., '.csv')
-						file which can be opened or imported by the desired application.</p>
+					<p>Alternatively, convert this page to comma-separated values (.csv)
+						which can be saved by the browser and opened or imported by the
+						desired application.</p>
 
 					<div className="buttons">
-						<button className="btn clear" onClick={this._clearFormatting}>Clear Formatting</button>
-						<button className="btn close" onClick={this._toggleInstructions}>Close</button>
+						<button className="btn" onClick={this._clearFormatting}>.CSV</button>
+						<button className="btn" onClick={this._toggleInstructions}>Close</button>
 					</div>
 				</div>
 
@@ -288,9 +288,9 @@ var CmeExport = React.createClass({
 		});
 
 		//$('body').html('<pre style="word-wrap: break-word; white-space: pre-wrap;">' + bodytext.join('\n') + '</pre>');
-		var newDoc = document.open('text/plain', 'replace');
-		newDoc.write(bodytext.join('\n'));
-		newDoc.close();
+
+		window.location.href = 'data:text/csv;charset=utf-8;base64,' + btoa(bodytext.join('\n'));
+
 	},
 
 	_toggleInstructions: function() {
