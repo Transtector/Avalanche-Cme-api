@@ -76,7 +76,7 @@ function formatPrettySeconds(seconds) {
 	return [days, hours, minutes].join(' ');
 }
 
-function renderSensorHeader(ch, title, field) {
+function renderSensorHeader(ch, h, title, field) {
 
 	if (!ch || !ch.sensors || !ch.data)
 		return <tr><th>{title}</th></tr>;
@@ -99,7 +99,7 @@ function renderSensorHeader(ch, title, field) {
 					? utils.SENSOR_TYPE[s_obj[field]]
 					: s_obj[field];
 
-					return <td colSpan='3' key={'s' + i + '_' + field}>{v}</td>;
+					return <td colSpan={(h != 'live') ? 3 : 0} key={'s' + i + '_' + field}>{v}</td>;
 				})
 			}
 		</tr>
@@ -252,9 +252,9 @@ var CmeExport = React.createClass({
 						<tr><th>Step</th><td colSpan={colSpan}><span>{step}</span><span>{step_pretty}</span></td></tr>
 						<tr><th>Duration</th><td colSpan={colSpan}><span>{duration}</span><span>{duration_pretty}</span></td></tr>
 						<tr><th>Points</th><td colSpan={colSpan}>{points}</td></tr>
-						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
-						{renderSensorHeader(this.state.ch, 'Type', 'type')}
-						{renderSensorHeader(this.state.ch, 'Units', 'unit')}
+						{renderSensorHeader(this.state.ch, this.state.history, 'Sensor', 'name')}
+						{renderSensorHeader(this.state.ch, this.state.history, 'Type', 'type')}
+						{renderSensorHeader(this.state.ch, this.state.history, 'Units', 'unit')}
 						{renderSensorDataHeader(this.state.ch, this.state.history)}
 					</thead>
 					{renderSensorDataBody(this.state.ch, this.state.history, this._config)}
