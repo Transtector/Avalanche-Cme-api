@@ -248,18 +248,17 @@ var CmeExport = React.createClass({
 
 				<div className={(this.state.instructionsVisible ? '' : 'hidden') + ' instructions'}>
 					<h3>Instructions</h3>
-					<div>
-						This page can be used to export CME channel data to use in a variety
-						of applications.
+					<p>This page can be used to export CME channel data to use in a variety
+						of applications.</p>
 
-						Close these instructions, select the desired data from the data table
+					<p>Close these instructions, select the desired data from the data table
 						and copy it to the clipboard.  Then simply paste the data into the
-						target application, for example Microsoft Excel.
+						target application, for example Microsoft Excel.</p>
 
-						Alternatively, clear the formatting from this page and simply
+					<p>Alternatively, clear the formatting from this page and simply
 						use the browser to save it in a file which can be subsequently opened
-						or imported into the desired application.
-					</div>
+						or imported into the desired application.</p>
+
 					<div className="buttons">
 						<button className="btn clear" onClick={this._clearFormatting}>Clear Formatting</button>
 						<button className="btn close" onClick={this._toggleInstructions}>Close</button>
@@ -274,7 +273,8 @@ var CmeExport = React.createClass({
 	},
 
 	_clearFormatting: function() {
-
+		
+		alert("Ha ha - just kidding!");
 	},
 
 	_toggleInstructions: function() {

@@ -1571,6 +1571,47 @@ li.input-group-cluster > .btn:disabled {
 .export tbody tr:nth-child(even) {
   background-color: rgba(62,164,225,0.1);
 }
+.export .btn.open {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 48px;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+  font-weight: bold;
+}
+.export .instructions {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  margin-left: -190px;
+  background: #fff;
+  width: 380px;
+  padding: 0 10px 10px 10px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -moz-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -ms-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  -o-box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+  box-shadow: 0 2px 9px 0 rgba(0,0,0,0.2);
+}
+.export .instructions p {
+  margin-bottom: 10px;
+}
+.export .instructions .buttons {
+  text-align: right;
+}
+.export .instructions button {
+  font-size: 80%;
+  margin-left: 10px;
+}
 .loaderWrapper {
   position: absolute;
   left: 0;
