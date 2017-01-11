@@ -141,7 +141,8 @@ function renderSensorDataBody(ch, config) {
 									// return Min (col 3), Avg (col 2), and Max (col 4)
 									return [3, 2, 4].map(function (col) {
 
-										return <td>{ch.data[col][i][j] || '-'}</td>
+										return <td>{ch.data[col][i][j] || '-'}</td>;
+										
 									})
 								})
 							}
