@@ -289,7 +289,8 @@ var CmeExport = React.createClass({
 
 		//$('body').html('<pre style="word-wrap: break-word; white-space: pre-wrap;">' + bodytext.join('\n') + '</pre>');
 
-		window.location.href = 'data:text/csv;charset=utf-8;base64,' + btoa(bodytext.join('\n'));
+		this._toggleInstructions();
+		location.replace = 'data:text/csv;charset=utf-8,' + encodeURIComponent(bodytext.join('\n'));
 
 	},
 
