@@ -136,7 +136,9 @@ function renderSensorDataBody(ch, config) {
 						<tr>
 							<td>{time_formatted}</td>
 							{
-								ch.p.map(function(s, j) {
+								// for each sensor value in data point
+								p.map(function(s, j) {
+									// return Min (col 3), Avg (col 2), and Max (col 4)
 									return [3, 2, 4].map(function (col) {
 										return <td>{ch.data[col][i][j]}</td>
 									})
@@ -208,17 +210,20 @@ var CmeExport = React.createClass({
 			
 			end = data && utils.formatRelativeMoment(moment.utc(data[0][1] * 1000), this._config.displayRelativeTo, this._config.zone),
 
-			step = data && data[0][2],
+			step = data && data[0][2] || '',
 
 			step_pretty = formatPrettySeconds(step),
 
-			duration = data && (data[0][1] - data[0][0]),
+			duration = data && (data[0][1] - data[0][0]) || '',
 
 			duration_pretty = data && end.from(start, true),
 
 			points = data && (data[2].length),
 
 			colSpan = data ? (3 * data[1].length) : 0;
+
+		step = step ? step + ' seconds' : '';
+		duration = duration ? duration + ' seconds' : '';
 
 		return (
 			<div className="export">
@@ -228,8 +233,8 @@ var CmeExport = React.createClass({
 						<tr><th>Channel</th><td colSpan={colSpan}><span>{ch_name}</span><span>{ch_description}</span></td></tr>
 						<tr><th>Start</th><td colSpan={colSpan}>{formatMoment(start, this._config)}</td></tr>
 						<tr><th>End</th><td colSpan={colSpan}>{formatMoment(end, this._config)}</td></tr>
-						<tr><th>Step</th><td colSpan={colSpan}><span>{step + ' seconds'}</span><span>{step_pretty}</span></td></tr>
-						<tr><th>Duration</th><td colSpan={colSpan}><span>{duration + ' seconds'}</span><span>{duration_pretty}</span></td></tr>
+						<tr><th>Step</th><td colSpan={colSpan}><span>{step}</span><span>{step_pretty}</span></td></tr>
+						<tr><th>Duration</th><td colSpan={colSpan}><span>{duration}</span><span>{duration_pretty}</span></td></tr>
 						<tr><th>Points</th><td colSpan={colSpan}>{points}</td></tr>
 						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
 						{renderSensorHeader(this.state.ch, 'Type', 'type')}
