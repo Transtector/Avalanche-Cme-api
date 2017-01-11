@@ -76,23 +76,30 @@ function formatPrettySeconds(seconds) {
 	return [days, hours, minutes].join(' ');
 }
 
-function renderSensorHeader(ch, title, item) {
+function renderSensorHeader(ch, title, field) {
 
-	if (!ch || !ch.sensors)
-		return (
-			<tr><th>{title}</th></tr>
-		);
+	if (!ch || !ch.sensors || !ch.data)
+		return <tr><th>{title}</th></tr>;
 
 	return (
 		<tr>
 			<th>{title}</th>
 			{
-				ch.sensors.map(function(s, i) {
-					var r = (item == 'type')
-					? utils.SENSOR_TYPE[s[item]]
-					: s[item];
+				// data[1] holds the sensors internal Id (s0_VAC_Vrms)
+				// and we'll use it to pull the sensor object
+				ch.data[1].map(function(s, i) {
+					var id = s.split('_')[0];
 
-					return <td colSpan='3' key={'s' + i + '_' + item}>{r}</td>;
+					// now find the matching sensor object
+					var s_obj = ch.sensors.find(function(s){
+						return s.id == id;
+					});
+
+					var v = (field == 'type')
+					? utils.SENSOR_TYPE[s_obj[field]]
+					: s_obj[field];
+
+					return <td colSpan='3' key={'s' + i + '_' + field}>{v}</td>;
 				})
 			}
 		</tr>
@@ -225,7 +232,9 @@ var CmeExport = React.createClass({
 
 			points = data && (data[2].length),
 
-			colSpan = data ? (3 * data[1].length) : 0;
+			spanMultiplier = (this.state.history != 'live') ? 3 : 1,
+
+			colSpan = data ? (spanMultiplier * data[1].length) : 0;
 
 		step = step ? step + ' seconds' : '';
 		duration = duration ? duration + ' seconds' : '';
