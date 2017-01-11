@@ -287,7 +287,7 @@ var CmeExport = React.createClass({
 			bodytext.push(cell.join('\t'));
 		});
 
-		alert(bodytext.slice(0, 1024));
+		alert(bodytext.join('\n').slice(0, 1024));
 	},
 
 	_toggleInstructions: function() {
@@ -296,5 +296,6 @@ var CmeExport = React.createClass({
 	}
 });
 
+window.$ = $;
 
 module.exports = CmeExport;
