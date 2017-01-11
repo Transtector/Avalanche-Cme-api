@@ -8,6 +8,8 @@
 var React = require('react');
 var CmeAPI = require('../CmeAPI');
 
+var $ = require('jquery');
+
 // loads the page's query string into an object, qs
 var qs = (function(a) {
     if (a == "") return {};
@@ -25,7 +27,6 @@ var qs = (function(a) {
 
 var moment = require('moment');
 var utils = require('../CmeApiUtils');
-
 
 function error(e) {
 
@@ -117,7 +118,6 @@ function renderSensorDataHeader(ch) {
 	)
 }
 
-
 function renderSensorDataBody(ch, config) {
 	if (!ch || !ch.sensors || !ch.data) return null;
 
@@ -159,7 +159,9 @@ var CmeExport = React.createClass({
 		return {
 			id: qs['c'], // channel id, e.g., 'ch0'
 			history: qs['h'], // history block, e.g., 'daily'
-			ch: {} // empty until mounted - then filled w/ch object
+			ch: {}, // empty until mounted - then filled w/ch object
+
+			instructionsVisible: false
 		};
 	},
 	
@@ -225,7 +227,9 @@ var CmeExport = React.createClass({
 
 		return (
 			<div className="export">
-				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2> 
+				<h2>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2>
+				<button className="btn open" onClick={this._toggleInstructions}>?</button>
+
 				<table>
 					<thead>
 						<tr><th>Channel</th><td colSpan={colSpan}><span>{ch_name}</span><span>{ch_description}</span></td></tr>
@@ -241,13 +245,43 @@ var CmeExport = React.createClass({
 					</thead>
 					{renderSensorDataBody(this.state.ch, this._config)}
 				</table>
+
+				<div className={(this.state.instructionsVisible ? '' : 'hidden') + ' instructions'}>
+					<h3>Instructions</h3>
+					<div>
+						This page can be used to export CME channel data to use in a variety
+						of applications.
+
+						Close these instructions, select the desired data from the data table
+						and copy it to the clipboard.  Then simply paste the data into the
+						target application, for example Microsoft Excel.
+
+						Alternatively, clear the formatting from this page and simply
+						use the browser to save it in a file which can be subsequently opened
+						or imported into the desired application.
+					</div>
+					<div className="buttons">
+						<button className="btn clear" onClick={this._clearFormatting}>Clear Formatting</button>
+						<button className="btn close" onClick={this._toggleInstructions}>Close</button>
+					</div>
+				</div>
+
 				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>
 					<div className='loader'>Loading...</div>
 				</div>
 			</div>
 		);
+	},
+
+	_clearFormatting: function() {
+
+	},
+
+	_toggleInstructions: function() {
+
+		this.setState({ instructionsVisible: !this.state.instructionsVisible });
 	}
 });
 
-window.moment = moment;
+
 module.exports = CmeExport;
