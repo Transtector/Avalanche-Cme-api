@@ -190,10 +190,6 @@ class Channel():
 
 	def load_history(self, resolution='live'):
 
-		# Use average, minimum, and maximum consolidation functions (CFS)
-		# for any history resolution other than "live".
-		CFS = ['LAST'] if resolution.lower() == 'live' else ['AVERAGE', 'MIN', 'MAX']
-
 		for case in switch(resolution.lower()):
 			if case('daily'):
 				s = '-1d' # last day
@@ -216,8 +212,13 @@ class Channel():
 				break
 
 			if case(): # live
+				resolution = 'live'
 				s = '-15m' # last 15 minutes
 				r = '1' # at 1 second resolution
+
+		# Use average, minimum, and maximum consolidation functions (CFS)
+		# for any history resolution other than "live".
+		CFS = ['AVERAGE', 'MIN', 'MAX'] if resolution.lower() != 'live' else ['LAST']
 
 		# this call will write to self.data (or self.error)
 		self._rrdfetch(CFS, s, r)
