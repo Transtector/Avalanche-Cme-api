@@ -248,19 +248,21 @@ var CmeExport = React.createClass({
 
 				<div className={(this.state.instructionsVisible ? '' : 'hidden') + ' instructions'}>
 					<h3>Instructions</h3>
-					<p>This page can be used to export CME channel data to use in a variety
-						of applications.</p>
+					<p>This page can be used to export CME channel data for use in a variety
+						of applications, for example Microsoft Excel.</p>
 
-					<p>Close these instructions, select the desired data from the data table
-						and copy it to the clipboard.  Then simply paste the data into the
-						target application, for example Microsoft Excel.</p>
+					<h4>Copy/Paste Method</h4>
+					<p>Close these instructions and select the desired data from the data
+						table.  Copy the selected data to the clipboard then paste it
+						into the target application.  Generally, pasting the unformatted or
+						raw data works best for this.</p>
 
-					<p>Alternatively, convert this page to comma-separated values (.csv)
-						which can be saved by the browser and opened or imported by the
-						desired application.</p>
+					<h4>Download CSV Method</h4>
+					<p>Click '.csv' to covert this table to raw comma-separated values
+						downloaded to the browser.</p>
 
 					<div className="buttons">
-						<button className="btn" onClick={this._clearFormatting}>.CSV</button>
+						<button className="btn" onClick={this._clearFormatting}>.csv</button>
 						<button className="btn" onClick={this._toggleInstructions}>Close</button>
 					</div>
 				</div>
@@ -287,11 +289,13 @@ var CmeExport = React.createClass({
 			bodytext.push(cell.join()); // this part does the CSV
 		});
 
-		//$('body').html('<pre style="word-wrap: break-word; white-space: pre-wrap;">' + bodytext.join('\n') + '</pre>');
+		// Replaces the current document body with raw (pre) formatted CSV
+		document.open();
+		document.write('<pre style="word-wrap: break-word; white-space: pre-wrap;">' + bodytext.join('\n') + '</pre>');
+		document.close();
 
-		this._toggleInstructions();
-		location.replace('data:text/csv;charset=utf-8,' + encodeURIComponent(bodytext.join('\n')));
-
+		// Downloads the CSV
+		location.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(bodytext.join('\n'));
 	},
 
 	_toggleInstructions: function() {

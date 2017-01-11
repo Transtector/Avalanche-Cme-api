@@ -1571,7 +1571,7 @@ li.input-group-cluster > .btn:disabled {
 .export tbody tr:nth-child(even) {
   background-color: rgba(62,164,225,0.1);
 }
-.export .btn.open {
+.export > button {
   position: absolute;
   right: 10px;
   top: 10px;
