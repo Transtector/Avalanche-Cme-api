@@ -133,14 +133,15 @@ function renderSensorDataBody(ch, config) {
 						time_formatted = formatMoment(time_moment, config)
 
 					return (
-						<tr>
+						<tr key={'row' + i}>
 							<td>{time_formatted}</td>
 							{
 								// for each sensor value in data point
 								p.map(function(s, j) {
 									// return Min (col 3), Avg (col 2), and Max (col 4)
 									return [3, 2, 4].map(function (col) {
-										return <td>{ch.data[col][i][j]}</td>
+
+										return <td>{ch.data[col][i][j] || '-'}</td>
 									})
 								})
 							}
