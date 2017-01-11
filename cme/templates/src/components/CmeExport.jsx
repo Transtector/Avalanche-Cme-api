@@ -99,7 +99,7 @@ function renderSensorHeader(ch, title, item) {
 	)
 }
 
-function renderSensorDataHeader(ch) {
+function renderSensorDataHeader(ch, h) {
 	if (!ch || !ch.sensors)
 		return <tr></tr>;
 
@@ -108,7 +108,9 @@ function renderSensorDataHeader(ch) {
 			<th>Time</th>
 			{
 				ch.sensors.map(function(s, i) { 
-					return ['Min', 'Avg', 'Max'].map(function(a, j) {
+					var vals = (h != 'live') ? ['Min', 'Avg', 'Max'] : ['Value'];
+
+					return vals.map(function(a, j) {
 						return <th key={'s' + i + '_' + a}>{a}</th>;
 					})
 
@@ -118,7 +120,7 @@ function renderSensorDataHeader(ch) {
 	)
 }
 
-function renderSensorDataBody(ch, config) {
+function renderSensorDataBody(ch, h, config) {
 	if (!ch || !ch.sensors || !ch.data) return null;
 
 	var start = ch.data[0][0],
@@ -136,12 +138,15 @@ function renderSensorDataBody(ch, config) {
 
 		function renderSensorDataCells(s, j) {
 
+			var cols = (h != 'live') ? [3, 2, 4] : [2];
+
 			function renderSensorDataCell(c) {
 				return <td>{ch.data[c][i][j] || '-'}</td>;
 			}
 
 			// render Min (data[3]), Avg (data[2]), and Max (data[4]) cells
-			return [3, 2, 4].map(renderSensorDataCell);
+			// unless 'live', then only Value (data[2]) is used.
+			return cols.map(renderSensorDataCell);
 		}
 
 		return <tr key={'row' + i}><td>{time_formatted}</td>{p.map(renderSensorDataCells)}</tr>;
@@ -157,8 +162,8 @@ var CmeExport = React.createClass({
 
 	getInitialState: function () {
 		return {
-			id: qs['c'], // channel id, e.g., 'ch0'
-			history: qs['h'], // history block, e.g., 'daily'
+			id: qs['c'].toLowerCase(), // channel id, e.g., 'ch0'
+			history: qs['h'].toLowerCase(), // history block, e.g., 'daily'
 			ch: {}, // empty until mounted - then filled w/ch object
 
 			instructionsVisible: false
@@ -241,9 +246,9 @@ var CmeExport = React.createClass({
 						{renderSensorHeader(this.state.ch, 'Sensor', 'name')}
 						{renderSensorHeader(this.state.ch, 'Type', 'type')}
 						{renderSensorHeader(this.state.ch, 'Units', 'unit')}
-						{renderSensorDataHeader(this.state.ch)}
+						{renderSensorDataHeader(this.state.ch, this.state.history)}
 					</thead>
-					{renderSensorDataBody(this.state.ch, this._config)}
+					{renderSensorDataBody(this.state.ch, this.state.history, this._config)}
 				</table>
 
 				<div className={(this.state.instructionsVisible ? '' : 'hidden') + ' instructions'}>
