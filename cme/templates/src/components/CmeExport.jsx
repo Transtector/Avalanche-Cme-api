@@ -255,9 +255,9 @@ var CmeExport = React.createClass({
 						and copy it to the clipboard.  Then simply paste the data into the
 						target application, for example Microsoft Excel.</p>
 
-					<p>Alternatively, clear the formatting from this page and simply
-						use the browser to save it in a file which can be subsequently opened
-						or imported into the desired application.</p>
+					<p>Alternatively, clear the formatting from this page then simply
+						use the browser to save it in a file which can be opened
+						or imported by the desired application.</p>
 
 					<div className="buttons">
 						<button className="btn clear" onClick={this._clearFormatting}>Clear Formatting</button>
@@ -273,7 +273,7 @@ var CmeExport = React.createClass({
 	},
 
 	_clearFormatting: function() {
-		
+
 		alert("Ha ha - just kidding!");
 	},
 
