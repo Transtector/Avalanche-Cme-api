@@ -287,7 +287,10 @@ var CmeExport = React.createClass({
 			bodytext.push(cell.join()); // this part does the CSV
 		});
 
-		$('body').html('<pre style="word-wrap: break-word; white-space: pre-wrap;">' + bodytext.join('\n') + '</pre>');
+		//$('body').html('<pre style="word-wrap: break-word; white-space: pre-wrap;">' + bodytext.join('\n') + '</pre>');
+		var newDoc = document.open('text/plain', 'replace');
+		newDoc.write(bodytext.join('\n'));
+		newDoc.close();
 	},
 
 	_toggleInstructions: function() {
