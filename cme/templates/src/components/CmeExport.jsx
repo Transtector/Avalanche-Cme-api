@@ -256,8 +256,8 @@ var CmeExport = React.createClass({
 						target application, for example Microsoft Excel.</p>
 
 					<p>Alternatively, clear the formatting from this page then simply
-						use the browser to save it in a file which can be opened
-						or imported by the desired application.</p>
+						use the browser to save it into a comma-separated values (i.e., '.csv')
+						file which can be opened or imported by the desired application.</p>
 
 					<div className="buttons">
 						<button className="btn clear" onClick={this._clearFormatting}>Clear Formatting</button>
@@ -278,16 +278,16 @@ var CmeExport = React.createClass({
 
 		bodytext.push($('h2.title').text());
 
-		$('.export table thead tr').each(function(i) {
+		$('.export table tr').each(function(i) {
 
 			var cell = [];
 			$(this).children().each(function(j) {
 				cell.push($(this).text())
 			});
-			bodytext.push(cell.join('\t'));
+			bodytext.push(cell.join()); // this part does the CSV
 		});
 
-		alert(bodytext.join('\n').slice(0, 1024));
+		alert(bodytext.join('\n').slice(0, 2048));
 	},
 
 	_toggleInstructions: function() {
