@@ -112,8 +112,8 @@ var ThresholdConfig = React.createClass({
 
 		var t = this.props.sensor.thresholds;
 		var r = { 
-			min: this.props.sensor.range && this.props.sensor.range.length > 0 ? this.props.sensor.range[0] : null,
-			max: this.props.sensor.range && this.props.sensor.range.length > 1 ? this.props.sensor.range[1] : null
+			min: this.props.sensor.range && this.props.sensor.range.length > 0 ? this.props.sensor.range[0] : '',
+			max: this.props.sensor.range && this.props.sensor.range.length > 1 ? this.props.sensor.range[1] : ''
 		}
 
 		var unit = this.props.sensor.unit && this.props.sensor.unit.substr(0, 1).toUpperCase();
