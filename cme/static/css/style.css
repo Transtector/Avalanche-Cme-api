@@ -1617,15 +1617,15 @@ li.input-group-cluster > .btn:disabled {
   margin-left: 20px;
   padding: 2px 10px 3px;
 }
-.loaderWrapper {
+.export .loaderWrapper {
   position: absolute;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(62,164,225,0.25);
+  background-color: rgba(62,164,225,0.5);
 }
-.loader {
+.export .loaderWrapper .loader {
   margin: 100px auto;
   font-size: 25px;
   width: 1em;

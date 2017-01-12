@@ -281,7 +281,7 @@ var CmeExport = React.createClass({
 					</div>
 				</div>
 
-				<div className={this.state.ch ? 'hidden' : 'loaderWrapper'}>
+				<div className={'loaderWrapper' + (this.state.ch ? ' hidden' : '')}>
 					<div className='loader'>Loading...</div>
 				</div>
 			</div>
