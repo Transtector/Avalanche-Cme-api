@@ -343,6 +343,8 @@ var ChannelPanel = React.createClass({
 
 					<ThresholdConfig channel={this.props.id} sensor={primarySensor} />
 
+					<ThresholdConfig channel={this.props.id} sensor={secondarySensor} />
+
 				</div>
 				<button className='btn' onClick={this._toggleConfigVisibility}>&raquo;</button>
 			</div>
