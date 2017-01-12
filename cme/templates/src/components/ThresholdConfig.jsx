@@ -127,7 +127,7 @@ var ThresholdConfig = React.createClass({
 		var _this = this;
 
 		function renderValue(value) {
-			if (!value) return '';
+			if (value == null) return '';
 
 			return percent ? toPercentage(value, parseFloat(nominal)).toFixed(0) : value;
 		}
