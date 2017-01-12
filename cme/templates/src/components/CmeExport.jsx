@@ -171,7 +171,7 @@ var CmeExport = React.createClass({
 		return {
 			id: qs['c'].toLowerCase(), // channel id, e.g., 'ch0'
 			history: qs['h'].toLowerCase(), // history block, e.g., 'daily'
-			ch: {}, // empty until mounted - then filled w/ch object
+			ch: null, // empty until mounted - then filled w/ch object
 
 			instructionsVisible: false
 		};
