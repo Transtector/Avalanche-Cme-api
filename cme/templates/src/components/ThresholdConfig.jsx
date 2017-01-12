@@ -17,8 +17,8 @@ var ESCAPE_KEY_CODE = 27;
 function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 
 function toPercentage(value, nominal) { 
-	if (!value || !isNumeric(value) || !nominal || !isNumeric(nominal)) return value;
-	return 100 * ((value / nominal) - 1); 
+	if (!isNumeric(value) || !isNumeric(nominal)) return value;
+	return 100 * ((parseFloat(value) / parseFloat(nominal)) - 1); 
 }
 
 function toAbsolute(value, nominal) { 
@@ -127,9 +127,14 @@ var ThresholdConfig = React.createClass({
 		var _this = this;
 
 		function renderValue(value) {
-			if (value == null) return '';
+			if (value == null) return ''; // coerce works for undefined as well...
 
-			return percent ? toPercentage(value, parseFloat(nominal)).toFixed(0) : value;
+			if (percent && isNumeric(value) && isNumeric(nominal)) {
+				value = toPercentage(value, nominal);
+				return isNumeric(value) ? parseFloat(value).toFixed(0) : value;
+			}
+
+			return value;
 		}
 
 		function renderClass(id, value) {
