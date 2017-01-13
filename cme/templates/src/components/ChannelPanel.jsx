@@ -406,8 +406,10 @@ var ChannelPanel = React.createClass({
 	},
 
 	_startPoll: function() {
+		var h = this.state.historyVisible ? this.state.history : null;
+		
 		this._pollTime = moment().valueOf();
-		Actions.channel(this.props.id, null, this.state.history);
+		Actions.channel(this.props.id, null, h);
 	},
 
 	_stopPoll: function() {
