@@ -1,7 +1,7 @@
 import os, glob
 import tempfile
 
-from . import router, request, send_from_directory, send_file, json_response, json_error, require_auth
+from . import router, request, send_from_directory, send_file, json_response, APIError, require_auth
 from .. import Config
 
 def bool_arg(name, request):
@@ -89,4 +89,4 @@ def logs(filename=None):
 
 		return response
 
-	return json_error('Invalid log file request', code=404)
+	raise APIError('Invalid log file request', 404)

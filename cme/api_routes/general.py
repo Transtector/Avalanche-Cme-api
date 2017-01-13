@@ -1,6 +1,6 @@
 # Handle general and support configuration fields
 
-from . import router, settings, request, path_parse, json_response, json_error, require_auth
+from . import router, settings, request, path_parse, json_response, APIError, require_auth
 
 # These routes handle reading and updating the general and support fields
 @router.route('/config/general/', methods=['GET', 'POST'])

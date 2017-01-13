@@ -3,7 +3,7 @@
 import os, threading
 
 from . import (router, settings, request, json_response, 
-	json_error, json_filter, require_auth, refresh_device)
+	APIError, json_filter, require_auth, refresh_device)
 
 from ..util.ClockUtils import refresh_time
 from ..util.Reboot import reset

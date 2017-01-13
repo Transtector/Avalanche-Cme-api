@@ -17,12 +17,7 @@ from . import Config
 # CME configuration values
 from .Settings import settings
 
-# Flask is the wsgi application that sits
-# behind the CherryPy server
-from flask import Flask
-
-# initialize the Flask application
-app = Flask('cme', static_url_path='')
+from . import  app
 app.config.from_object(Config)
 
 def main(argv=None):
@@ -121,6 +116,8 @@ def main(argv=None):
 	cherrypy.engine.block()
 
 if __name__ == "__main__":
+	Logger = App_Logger(app.logger)
+	
 	try:
 		main()
 

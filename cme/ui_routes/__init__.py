@@ -3,29 +3,26 @@
 from flask import Blueprint, render_template
 from ..util.Auth import require_auth
 from ..Settings import settings
+from .. import app
 
 router = Blueprint('uiroutes', __name__)
 
-# APIError wraps a simple error object
-class APIError(object):
-	def __init__(self, message):
-		self.message = message
-		self.status = 500
-		self.stack = ''
+# Custom 404 page
+@app.errorhandler(404)
+def handle_not_found(error):
+	return render_template('404.html', title='Oops - not found'), 404
 
 
 # UI routes
 
-TITLE = 'CME'
-
 @router.route('/') # default page w/o explicit request
 @router.route('/index.html')
 def index():
-	return render_template('index.html', title=TITLE)
+	return render_template('index.html', title='CME')
 
 
 @router.route('/export.html')
 def export():
-	return render_template('export.html', title=TITLE)
+	return render_template('export.html', title='CME Export')
 
 

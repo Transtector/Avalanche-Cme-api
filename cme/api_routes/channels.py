@@ -3,11 +3,10 @@
 from datetime import datetime, timezone
 import subprocess, json
 
-from . import settings, router, request, path_parse, json_response, json_error, require_auth
-from . import Config
+from . import settings, router, request, path_parse, json_response, APIError, require_auth, Config
+
 from ..util.Switch import switch
 from .Models import ChannelManager
-
 
 ch_mgr = ChannelManager()
 
@@ -93,7 +92,7 @@ def channel(ch_index):
 	ch = status(ch_index)
 
 	if not ch:
-		return json_error('Channel not found', 404)
+		raise APIError('Channel not found', 404)
 
 	# parse out the item name (last element of request path)
 	segments = path_parse(request.path)
@@ -158,7 +157,7 @@ def channel(ch_index):
 def ch_config(ch_index):
 
 	if not Config.RECOVERY:
-		return json_error('Resource not found', 404)
+		raise APIError('Not Found', 404)
 
 	return json_response({'w': { 'n': 2, 't': 3 }})
 
@@ -171,7 +170,7 @@ def sensors(ch_index):
 	ch = status(ch_index)
 
 	if not ch:
-		return json_error('Channel not found', 404)
+		raise APIError('Channel not found', 404)
 
 	return json_response({ ch.id + ':sensors': sorted(ch.sensors, key=lambda s: s.id) })
 
@@ -185,10 +184,10 @@ def sensor(ch_index, s_index):
 	ch = status(ch_index)
 
 	if not ch:
-		return json_error('Channel not found', 404)
+		raise APIError('Channel not found', 404)
 
 	if not (s_index >= 0 and s_index < len(ch.sensors)):
-		return json_error('Sensor not found', 404)
+		raise APIError('Sensor not found', 404)
 
 	sensor = sorted(ch.sensors, key=lambda s: s.id)[s_index]
 
@@ -221,10 +220,10 @@ def thresholds(ch_index, s_index):
 	ch = status(ch_index)
 
 	if not ch:
-		return json_error('Channel not found', 404)
+		raise APIError('Channel not found', 404)
 
 	if not (s_index >= 0 and s_index < len(ch.sensors)):
-		return json_error('Sensor not found', 404)
+		raise APIError('Sensor not found', 404)
 
 	s = sorted(ch.sensors, key=lambda s: s.id)[s_index]
 
@@ -240,7 +239,7 @@ def thresholds(ch_index, s_index):
 	th = s.addThreshold(request.get_json())
 	return json_response(th, 201)
 	#except:
-	#	return json_error('Bad request', 400)
+	#	raise APIError('Bad request', 400)
 
 
 
@@ -251,17 +250,17 @@ def threshold(ch_index, s_index, th_id):
 	ch = status(ch_index)
 
 	if not ch:
-		return json_error('Channel not found', 404)
+		raise APIError('Channel not found', 404)
 
 	if not (s_index >= 0 and s_index < len(ch.sensors)):
-		return json_error('Sensor not found', 404)
+		raise APIError('Sensor not found', 404)
 
 	s = sorted(ch.sensors, key=lambda s: s.id)[s_index]
 
 	th = next((th for th in s.thresholds if th.id == th_id), None)
 
 	if not th:
-		return json_error('Threshold not found', 404)
+		raise APIError('Threshold not found', 404)
 
 	for case in switch(request.method):
 		if case('POST'):

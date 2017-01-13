@@ -1,7 +1,7 @@
 # root level CME API
 
 from datetime import datetime, timezone
-from . import settings, router, json_response, json_error, require_auth
+from . import settings, router, json_response, APIError, require_auth
 
 def timestamp():
 	''' Raw function to get current CME date/time in UTC and ISO 8601 format.

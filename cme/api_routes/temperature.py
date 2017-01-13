@@ -1,6 +1,6 @@
 # CME temperature configuration routes
 
-from . import router, settings, request, path_parse, json_response, json_error, require_auth
+from . import router, settings, request, path_parse, json_response, APIError, require_auth
 
 
 @router.route('/config/temperature/', methods=['GET', 'POST'])

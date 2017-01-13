@@ -7,7 +7,7 @@ from xml.dom.minidom import parseString
 import xml.dom.minidom
 
 from . import (router, settings, request, path_parse, secure_filename, refresh_device,
-	allowed_file, json_response, json_error, json_filter, require_auth)
+	allowed_file, json_response, APIError, json_filter, require_auth)
 from .. import Config
 from ..util.Reboot import restart
 

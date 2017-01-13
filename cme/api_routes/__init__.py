@@ -9,10 +9,32 @@ from werkzeug import secure_filename
 from ..util.Auth import require_auth, Serializer
 from ..util.UriParse import path_parse
 from ..Settings import settings
-from .. import Config
+from .. import app, Config
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)
+
+
+# API Error class wraps 
+class APIError(Exception):
+	status_code = 400
+
+	def __init__(self, message, status_code=None, payload=None):
+		Exception.__init__(self)
+		self.message = message
+		if status_code is not None:
+			self.status_code = status_code
+		self.payload = payload
+
+	def to_dict(self):
+		rv = dict(self.payload or ())
+		rv['message'] = self.message
+		return rv
+
+
+@app.errorhandler(APIError)
+def handle_api_error(error):
+	return json_response(error.to_dict(), status=error.status_code)
 
 
 # JSON repsonse wrapper w/session cookie support
@@ -36,11 +58,6 @@ def json_response(obj, status=200, force_session=False):
 					   		timedelta(seconds=Config.SESSION_EXPIRATION))
 
 	return res
-
-
-# JSON reponse on errors
-def json_error(err, code=500):
-	return Response(err, status=code, mimetype='text/plain')
 
 
 # Filter out items named with double underscore "__" prefix

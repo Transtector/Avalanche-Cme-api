@@ -1,6 +1,6 @@
 # CME user profile
 
-from . import router, settings, request, json_response, json_error, require_auth
+from . import router, settings, request, json_response, APIError, require_auth
 
 @router.route('/user/', methods=['POST'])
 @require_auth
@@ -12,17 +12,17 @@ def user():
 		u = newuser['username']
 
 	except KeyError:
-		return json_error('Error updating profile - missing username', code=400)
+		raise APIError('Error updating profile - missing username', 400)
 
 	try:
 		p = newuser['password']
 
 	except KeyError:
-		return json_error('Error updating profile - missing password', code=400)
+		raise APIError('Error updating profile - missing password', 400)
 
 	# md5(password) = 128-bit or 32 hex digits
 	if not len(p) == 32:
-		return json_error('Error updating profile - invalid password format', code=400)
+		raise APIError('Error updating profile - invalid password format', 400)
 
 	# empty username/password preserves current settings
 	settings['__username'] = u or settings['__username']
