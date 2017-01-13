@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import subprocess, json
 
 from . import settings, router, request, path_parse, json_response, json_error, require_auth
+from . import Config
 from ..util.Switch import switch
 from .Models import ChannelManager
 
@@ -62,14 +63,14 @@ def status(ch_index=-1):
 	# select specific channel 'chX'
 	return ch_mgr.get_channel('ch' + str(ch_index))
 
-
+# CME list of available channels
 @router.route('/channels/')
 @require_auth
 def channels_list():
 	return json_response({ 'channels': ch_mgr.channels })
 
 
-# CME channels request
+# CME channels request - actual channel objects returned
 @router.route('/ch/')
 @require_auth
 def channels():
@@ -145,6 +146,22 @@ def channel(ch_index):
 		return json_response({ ch.id: ch })
 
 	return json_response({ ch.id: { item: ch.__dict__[item] }})
+
+
+# CME channel configuration (hardware)
+# Returns 404 (resource not found) if not RECOVERY MODE 
+# (i.e., running at base OS, not within a Docker container).
+# Generally config is READ-ONLY unless CALIBRATION_CODE is
+# supplied in the query string with POSTED channel config data.
+@router.route('/ch/<int:ch_index>/config', methods=['GET', 'POST'])
+@require_auth
+def ch_config(ch_index):
+
+	if not Config.RECOVERY:
+		return json_error('Resource not found', 404)
+
+	return json_response({'w': { 'n': 2, 't': 3 }})
+
 
 
 # CME channel sensors request
