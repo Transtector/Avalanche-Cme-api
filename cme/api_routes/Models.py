@@ -307,6 +307,21 @@ class Channel():
 				os.remove(tempname)
 
 
+	def get_hw_config(self):
+		if os.path.isfile(self.configpath):
+			with open(self.configpath, 'r') as f:
+				cfg = json.load(f)
+
+		result = cfg['_config']
+
+		result['sensors'] = []
+		for s in cfg['sensors']:
+			s_cfg = s['_config']
+			s_cfg.update({'id': s['id']})
+			result['sensors'].append(s_cfg)
+
+		return result
+
 	@property
 	def name(self):
 		return self.__dict__['name']

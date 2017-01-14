@@ -159,7 +159,16 @@ def ch_config(ch_index):
 	if not Config.RECOVERY:
 		raise APIError('Not Found', 404)
 
-	return json_response({'w': { 'n': 2, 't': 3 }})
+	# retrieve the desired channel configuration
+	ch = ch_mgr.get_channel('ch' + str(ch_index))
+
+	if not ch:
+		raise APIError('Channel not found', 404)
+
+	# pull the _config item from the channel and each of its sensors
+	response = ch.get_hw_config()
+
+	return json_response(response)
 
 
 
