@@ -30,7 +30,7 @@ var utils = require('../CmeApiUtils');
 
 function error(e) {
 
-	alert("Something bad happened: ", e);
+	alert("Something bad happened: \n\n    " + e);
 }
 
 function formatMoment(moment, config) {
@@ -168,9 +168,15 @@ var CmeExport = React.createClass({
 	_config: {}, // holds the clock configuration - populated at componentDidMount
 
 	getInitialState: function () {
+		var ch_id = qs ? qs['c'] || qs['C'] : null,
+			history = qs ? qs['h'] || qs['H'] : null;
+
+		ch_id = ch_id ? ch_id.toLowerCase() : null;
+		history = history ? history.toLowerCase() : null;
+
 		return {
-			id: qs['c'].toLowerCase(), // channel id, e.g., 'ch0'
-			history: qs['h'].toLowerCase(), // history block, e.g., 'daily'
+			id: ch_id, // channel id, e.g., 'ch0'
+			history: history, // history block, e.g., 'daily'
 			ch: null, // empty until mounted - then filled w/ch object
 
 			instructionsVisible: false
@@ -180,6 +186,11 @@ var CmeExport = React.createClass({
 	componentDidMount: function() {
 
 		var _this = this;
+
+		if (!this.state.id || !this.state.history) {
+			error('No channel or history provided for export.');
+			return
+		}
 
 		// Pull and store the date/time configuration first
 		// then the desired channel.
@@ -202,6 +213,8 @@ var CmeExport = React.createClass({
 	},
 
 	render: function() {
+
+		if (!this.state.id || !this.state.history) return null;
 
 		// ch will not be loaded until query response.  Provide some sensible
 		// placeholders for table until then.

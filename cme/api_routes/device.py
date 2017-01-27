@@ -1,6 +1,6 @@
 # api/device routes
 
-import os, shutil, glob, threading, logging, fnmatch
+import os, shutil, glob, threading, logging, fnmatch, json, tempfile
 
 import urllib.request
 from xml.dom.minidom import parseString
@@ -10,11 +10,18 @@ from . import (router, settings, request, path_parse, secure_filename, refresh_d
 	allowed_file, json_response, APIError, json_filter, require_auth)
 from .. import Config
 from ..util.Reboot import restart
+from ..util.LockedOpen import LockedOpen
 
 @router.route('/device/')
-@router.route('/device/modelNumber')
-@router.route('/device/serialNumber')
-@router.route('/device/firmware')
+@router.route('/device/cme/')
+@router.route('/device/cme/modelNumber')
+@router.route('/device/cme/serialNumber')
+@router.route('/device/cme/firmware')
+@router.route('/device/cme/dateCode')
+@router.route('/device/host/')
+@router.route('/device/host/modelNumber')
+@router.route('/device/host/serialNumber')
+@router.route('/device/host/dateCode')
 @router.route('/device/recovery')
 def device_read_only_settings():
 	''' Read-only device settings - NOT password protected.
@@ -23,6 +30,7 @@ def device_read_only_settings():
 	# parse out the setting name (last element of request path)
 	segments = path_parse(request.path)
 	item = segments[-1]
+	itemtype = segments[-2]
 
 	# device requests need to check for update files
 	refresh_device()
@@ -37,12 +45,83 @@ def device_read_only_settings():
 	if item == 'device':
 		# request all device parameters
 		res = device
-	else:
-		# else just a specific item
+	elif item == 'cme' or item == 'host':
+		# else just a specific item type
 		res = device[item]
+	else:
+		res = device[itemtype][item]
 
 	return json_response({ item: res })
 
+
+@router.route('/device/', methods=['POST'])
+@require_auth
+def device_write():
+	''' Device CME data can be written the first time only (during production).
+		Device data is stored in 'device.json' file in the /data volume.  Once
+		created, the API layer will prevent further updates.
+	'''
+	
+	# updating device only works in RECOVERY mode
+	if not Config.RECOVERY:
+		raise APIError('Not Found', 404)
+
+	currentDevice = settings['__device']
+	currentCme = currentDevice['cme']
+	currentHost = currentDevice['host']
+	unlocked = currentCme.get('unlocked', False)
+
+	# this is from the body of the request
+	newDevice = request.get_json()['device']
+
+	if not newDevice:
+		raise APIError('Invalid data', 400)
+
+	requestedCme = newDevice.get('cme', None)
+	requestedHost = newDevice.get('host', None)
+
+	# Once created, the cme device data becomes read-only
+	# and all future POSTS must set cme = None.  Alert
+	# API users who try to violate this.
+	if requestedCme is not None and not unlocked:
+		raise APIError('CME device data is read-only', 400)
+
+	keys = ['serialNumber', 'modelNumber', 'dateCode']
+	newCme = parseRequestObject(keys, requestedCme, currentCme)
+	newHost = parseRequestObject(keys, requestedHost, currentHost)
+
+	# CME device data also carries the API version in the 'firmware' key
+	# and we have to add it here.
+	newCme.setdefault('firmware', Config.VERSION)
+
+	# We can now update the Config.DEVICE_DATA w/new Cme and Host data
+	Config.DEVICE_DATA = {
+		'cme': newCme,
+		'host': newHost
+	}
+
+	# save device data to disk
+	devicefile = os.path.join(Config.USERDATA, Config.DEVICE_FILE)
+	with LockedOpen(devicefile, 'a') as f:
+		with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(Config.USERDATA), delete=False) as tf:
+			json.dump(Config.DEVICE_DATA, tf, indent="\t")
+			tempname = tf.name
+
+		shutil.move(tempname, devicefile)
+
+	# Finally, we need to update __device key held in the settings.
+	settings['__device'] = Config.DEVICE_DATA
+
+	refresh_device()
+
+	# return unfiltered device data
+	device = settings['__device']
+
+	# add back the 'recovery' flag (should be True)
+	device.setdefault('recovery', Config.RECOVERY)
+
+	# return updated device as stored in settings
+	return json_response(device)
 
 @router.route('/device/updates', methods=['GET', 'DELETE', 'PUT', 'POST'])
 @require_auth
@@ -258,4 +337,20 @@ def upload_file():
 		 <input type=submit value=Upload>
 	</form>'''
 # END DEBUGGING
+
+
+def parseRequestObject(keys, reqObj, defObj):
+	''' Creates a new empty object and for each key in keys pulls associated
+		value from reqObj.  Uses default value from defObj (or None) if key
+		is not found in reqObj (or defObj)
+	'''
+	if reqObj is None:
+		return defObj
+		
+	obj = {}
+
+	for k in keys:
+		obj.setdefault(k, reqObj.get(k, defObj.get(k)))
+
+	return obj
 

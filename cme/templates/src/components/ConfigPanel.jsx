@@ -26,7 +26,6 @@ var utils = require('../CmeApiUtils');
 var moment = require('moment');
 
 var classNames = require('classnames');
-var assign = require('object-assign'); // ES6 polyfill
 
 
 var ConfigPanel = React.createClass({
@@ -73,9 +72,9 @@ var ConfigPanel = React.createClass({
 					</InputGroup>
 
 					<InputGroup id="support">
-						<TextInput id="support.contact" name='contact' defaultVvalue={config.support.contact} onBlur={this._requestChange} />
-						<TextInput id="support.email" name='email' defaultVvalue={config.support.email} onBlur={this._requestChange} />
-						<TextInput id="support.phone"  name='phone' defaultVvalue={config.support.phone} onBlur={this._requestChange} />
+						<TextInput id="support.contact" name='contact' defaultValue={config.support.contact} onBlur={this._requestChange} />
+						<TextInput id="support.email" name='email' defaultValue={config.support.email} onBlur={this._requestChange} />
+						<TextInput id="support.phone"  name='phone' defaultValue={config.support.phone} onBlur={this._requestChange} />
 					</InputGroup>
 
 					<NetConfig config={config.network} />

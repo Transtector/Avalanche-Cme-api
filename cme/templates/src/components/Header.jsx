@@ -50,14 +50,33 @@ var Header = React.createClass({
 	},
 
 	render: function () {
-		
+
+		var model = '', 
+			serial = '',
+			firmware = '',
+			standAlone = true;
+
+		if (this.state.device && this.state.device.cme) {
+			model = this.state.device.cme.modelNumber;
+			serial = this.state.device.cme.serialNumber;
+			firmware = this.state.device.cme.firmware;
+		}
+
+		// overwrite model/serial number for the UI if there is host info available
+		if (this.state.device && this.state.device.host) {
+			model = this.state.device.host.modelNumber || model;
+			serial = this.state.device.host.serialNumber || serial;
+			standAlone = !this.state.device.host.modelNumber;  // indicate "stand-alone" device if no host model number
+		}
+
+
 		return (
 			<header>
 				{this.state.device.recovery ? <div id="recovery">RECOVERY MODE</div> : null}
 				
 				<div id="branding">
-					<div id="title">CME</div>
-					<div id="model">{this.state.device.modelNumber}</div>
+					<div id="title">CME<span title='This is a stand-alone CME (no host)' className={standAlone ? 'stand-alone' : 'hidden'}>*</span></div>
+					<div id="model">{model}</div>
 				</div>
 
 				<div id="tab">&nbsp;</div>
@@ -69,8 +88,8 @@ var Header = React.createClass({
 				</div>
 
 				<div id="info">
-					<Indicator item={{name: 'Serial number', value: this.state.device.serialNumber}} />
-					<Indicator item={{name: 'Firmware', value: this.state.device.firmware}} />
+					<Indicator item={{name: 'Serial number', value: serial}} />
+					<Indicator item={{name: 'Firmware', value: firmware}} />
 				</div>
 
 			</header>

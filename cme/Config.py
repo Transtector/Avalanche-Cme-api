@@ -76,25 +76,47 @@ SERVER_PORT = 80 # ports < 1024 require sudo to start
 USERNAME = 'admin'
 PASSHASH = 'b56e0b4ea4962283bee762525c2d490f' # md5('Welcome1')
 
+# CME firmware version is set and read from this text
+# file in the CME application root folder.
+VERSION_FILE = 'VERSION'
+VERSION = 'x.x.x'
+
+# It's a complete failure if VERSION cannot be read...
+with open(os.path.join(APPROOT, VERSION_FILE), "r") as f:
+	VERSION = f.readline().strip()
+
 # CME Device info is 'hard-coded' into the device.json
 # read-only file in the USERDATA folder.
+DEVICE_FILE = 'device.json'
 try:
-	with open(os.path.join(USERDATA, 'device.json'), "r") as f:
-		device_data = json.load(f)
+	with open(os.path.join(USERDATA, DEVICE_FILE), "r") as f:
+		DEVICE_DATA = json.load(f)
 except:
-	device_data = { 'modelNumber': 'UNKNOWN', 'serialNumber': '00000000' }
+	# Default device data below.  We get here because no device.json file yet exists.
+	# One will be created during CME production/calibration procedures.
+	# The cme['unlocked'] will be removed when production creates the
+	# 'device.json' file, and is used to prevent further updates to the 
+	# CME device information after it passes through production.
+	DEVICE_DATA = {
+		'host': {
+			'modelNumber': '', 
+			'serialNumber': '',
+			'dateCode': ''
+		},
+		'cme': {
+			'modelNumber': 'UNKNOWN', 
+			'serialNumber': '00000000',
+			'dateCode': '20170101',
+			'unlocked': True
+		}
+	}
 
-DEVICE_MODEL_NUMBER = device_data['modelNumber']
-DEVICE_SERIAL_NUMBER = device_data['serialNumber']
+# Set the firmware version here whether we loaded it from device.json
+# or are just using defaults.
+DEVICE_DATA['cme'].setdefault('firmware', VERSION)
 
-# The "firmware" version is stored right here - here "firmware" is the
-# base layer OS and software installed to the CME device.  Normally
-# additional layers (e.g., API, hw) run on top of the base layer and
-# will be independently versioned.
-DEVICE_FIRMWARE = "0.1.0"
-
-GENERAL_NAME = "My CME"
-GENERAL_DESCRIPTION = "Prototype CME"
+GENERAL_NAME = "CME"
+GENERAL_DESCRIPTION = "Core monitoring engine"
 GENERAL_LOCATION = ""
 
 SUPPORT_CONTACT = ""

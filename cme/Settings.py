@@ -20,15 +20,14 @@ settings['__passhash'] = settings.get('__passhash', Config.PASSHASH)
 settings['__channels'] = settings.get('__channels', {})
 
 
-# hide device from regular /config requests, but keep a copy
-# in settings for easy access
-settings['__device'] = {
-	'modelNumber': Config.DEVICE_MODEL_NUMBER,
-	'serialNumber': Config.DEVICE_SERIAL_NUMBER,
-	'firmware': Config.DEVICE_FIRMWARE,
+# Hide device from regular /config requests, but keep a copy
+# in settings for easy access.  Add the hidden update and
+# updateTrigger keys.
+settings['__device'] = Config.DEVICE_DATA
+settings['__device'].update({
 	'__update': None, # refreshed at init and whenever /device read
 	'__updateTrigger': False
-}
+})
 
 settings['general'] = settings.get('general', {
 	'name': Config.GENERAL_NAME,

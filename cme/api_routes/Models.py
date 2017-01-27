@@ -133,6 +133,13 @@ class ChannelManager:
 		return rrd_list
 
 
+	def _list_channel_configs(self):
+		# will glob for all channel config files (they are named like 'ch7_config.json')
+		cfg_pattern = os.path.join(CHDIR, 'ch*_config.json')
+
+		return glob.glob(cfg_pattern)
+
+
 	def _get_channel_rrd(self, ch_id):
 		''' glob for channel rrd filename '''
 		

@@ -20,11 +20,11 @@ from .Settings import settings
 from . import  app
 app.config.from_object(Config)
 
-def main(argv=None):
+# set up the application layer logging
+app_logger = App_Logger(app.logger)
+server_logger = Server_Logger()
 
-	# set up the application layer logging
-	app_logger = App_Logger(app.logger)
-	server_logger = Server_Logger()
+def main(argv=None):
 
 	# parse command-line options
 	if argv is None:
@@ -62,28 +62,30 @@ def main(argv=None):
 	from . import ui_routes
 	from . import api_routes
 
-	# log the network and clock states at init
-	manage_network(settings['network'])
-	manage_clock(settings['clock'])
-
 	# register route blueprints
 	app.register_blueprint(ui_routes.router)
 	app.register_blueprint(api_routes.router, url_prefix='/api')
 	
 	app_logger.info("Avalanche (Cme) is rumbling...")
+	app_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY else 'NO'))
+	app_logger.info("\tVERSION:\t{0}".format(Config.VERSION))
+	app_logger.info("\tDEBUG:\t\t{0}".format(Config.DEBUG))
 	app_logger.info("\tHOSTNAME:\t{0}".format(Config.HOSTNAME))
 	app_logger.info("\tPLATFORM:\t{0}".format(Config.SYSTEM))
-	app_logger.info("\tSERVER_IP:\t{0}".format(Config.ADDRESS))
-	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.SERVER_PORT))
-	app_logger.info("\tDEBUG:\t\t{0}".format(Config.DEBUG))
 
+	manage_network(settings['network'])	
+	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.SERVER_PORT))
+
+	manage_clock(settings['clock'])
+
+	app_logger.info("Files and Storage")
 	app_logger.info("\tAPPROOT:\t{0}".format(app.root_path))
 	app_logger.info("\tSTATIC:\t\t{0}".format(app.static_folder))
 	app_logger.info("\tTEMPLATE:\t\t{0}".format(app.template_folder))
-
 	app_logger.info("\tUPLOADS:\t{0}".format(Config.UPLOAD_FOLDER))
-
 	app_logger.info("\tRRDCACHED:\t{0}".format(Config.RRDCACHED))
+
+
 
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
 	cherrypy.tree.graft(TransLogger(app, logger=server_logger), "/")
@@ -116,18 +118,18 @@ def main(argv=None):
 	cherrypy.engine.block()
 
 if __name__ == "__main__":
-	Logger = App_Logger(app.logger)
 	
 	try:
 		main()
 
 	except KeyboardInterrupt:
-		Logger.info("Avalanche (Cme) shutdown requested ... exiting")
+		app_logger.info("Avalanche (Cme) shutdown requested ... exiting")
 
 	except Exception as e:
-		Logger.info("Avalanche (Cme) has STOPPED on exception {0}".format(e))
+		app_logger.info("Avalanche (Cme) has STOPPED on exception {0}".format(e))
 
 		# re-raise to print stack trace here (useful for debugging the problem)
 		raise
 
 	sys.exit(0)
+

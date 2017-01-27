@@ -28,7 +28,7 @@ var API = {
 	clock: API_ROOT + 'clock',
 	temperature: API_ROOT + 'temperature',
 	logs: API_ROOT + 'logs/',
-	channels: API_ROOT + 'channels',
+	channels: API_ROOT + 'channels/',
 	channel: API_ROOT + 'ch/'
 }
 
@@ -37,10 +37,13 @@ var Store = require('./Store');
 
 var CmeAPI = {
 
-	device: function() {
+	device: function(dev) {
 		return $.ajax({
 			url: API.device,
-			dataType: 'json'
+			type: dev ? 'POST' : 'GET',
+			contentType: 'application/json; charset=UTF-8',
+			data: dev ? JSON.stringify(dev) : null,
+			dataType: 'json'		
 		});
 	},
 
@@ -256,7 +259,16 @@ var CmeAPI = {
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});
-	}, 
+	},
+
+	channelConfig: function(ch_id) {
+		return $.ajax({
+			url: API.channel + parseInt(ch_id.slice(2)) + '/config',
+			data: null,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
 
 	deleteChannel: function(ch_id) {
 		var ch_index = parseInt(ch_id.slice(2));

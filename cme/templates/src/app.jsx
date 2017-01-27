@@ -10,6 +10,7 @@ var ReactDOM = require('react-dom');
 var Actions = require('./Actions');
 var CmeApp = require('./components/CmeApp');
 var CmeExport = require('./components/CmeExport');
+var CmeCalibrate = require('./components/CmeCalibrate');
 
 // This script is the entry point for more than a single
 // top-level page.  
@@ -31,6 +32,10 @@ if (document.getElementById('cmeapp')) {
 } else if (document.getElementById('cmeexport')) {
  
 	ReactDOM.render(<CmeExport />, document.getElementById('cmeexport'));
+
+} else if (document.getElementById('cmecalibrate')) {
+ 
+	ReactDOM.render(<CmeCalibrate />, document.getElementById('cmecalibrate'));
 
 } else {
 
