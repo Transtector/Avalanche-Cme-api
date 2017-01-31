@@ -114,15 +114,7 @@ var Actions = {
 			.fail(onError);
 	},
 
-	reset: function(reset_network, reset_clock) {
-		if (!dispatchRequest("factory reset")) return;
-
-		CmeAPI.reset(reset_network, reset_clock)
-			.fail(onError)
-			.always(Actions.logout);
-	},
-
-	restart: function() {
+	restart: function(recovery_mode, factory_reset) {
 		if (!dispatchRequest('restarting device')) return;
 
 		CmeAPI.restart()

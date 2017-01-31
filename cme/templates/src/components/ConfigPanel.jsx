@@ -19,6 +19,7 @@ var TempConfig= require('./Thermometer');
 var NetConfig = require('./NetConfig');
 var UserConfig = require('./UserConfig');
 var LogsConfig = require('./LogsConfig');
+var ResetPanel = require('./ResetPanel');
 
 var Updates = require('./UpdatesPanel');
 
@@ -102,13 +103,7 @@ var ConfigPanel = React.createClass({
 
 					<Updates pollPeriod={5000} />
 
-					<div className="input-group">
-						<button id="factory-reset"
-								className='btn' 
-								onClick={this._factoryReset}>
-							Factory Reset
-						</button>
-					</div>
+					<ResetPanel />
 
 				</div>
 
@@ -134,11 +129,6 @@ var ConfigPanel = React.createClass({
 		obj = {};
 		obj[key] = val;
 		Actions.config(obj); // config() just takes the key and will search config groups (for now)
-	},
-
-	_factoryReset: function() {
-		if (confirm("CME configuration will be reset to factory defaults.\n\nOk to continue?\n\n"))
-			Actions.reset();
 	}
 });
 

@@ -1,15 +1,18 @@
 import os, subprocess, time, logging
 
+from .. import Config
+
 from .ClockUtils import ntp_servers
 from .IpUtils import set_dhcp, write_network_addresses
 
 from . import is_a_cme, is_a_docker, docker_run
 
+logger = logging.getLogger('cme')
 
-def reset(delay=5, reset_network=False, reset_clock=False):
-	''' Performs the factory reset with optional network and clock (ntp) configuration reset.
+def restart(delay=5, recovery_mode=False, factory_reset=False):
+	''' Performs a reboot with optional configuration (including network and clock) reset.
 
-		Basic reset simply removes the current user settings (typically found in /data/settings.json,
+		factory_reset simply removes the current user settings (typically found in /data/settings.json,
 		but look at app.config['SETTINGS'] key to see where it might be).
 
 		Network reset:
@@ -22,49 +25,45 @@ def reset(delay=5, reset_network=False, reset_clock=False):
 			2) Enable the ntp service
 			-- NTP will reset to defaults after reboot
 
+		recovery_mode prevents docker modules (Cme, Cme-hw) from starting and just launches the
+		base API (cme) under the base OS.
 	'''
-	try:
-		os.remove(app.config['SETTINGS'])
+	if factory_reset:
+		os.remove(Config.SETTINGS)
 
-	except:
-		pass
+		if is_a_cme():
+			set_dhcp(False)
+			write_network_addresses({ 
+				'address': '192.168.1.30', 
+				'netmask': '255.255.255.0', 
+				'gateway': '192.168.1.1',
+				'primary': '8.8.4.4',
+				'secondary': '8.8.8.8' 
+			})
 
+			ntp_servers(['time.nist.gov'])
 
-	if reset_network and is_a_cme():
-		set_dhcp(False)
-		write_network_addresses({ 
-			'address': '192.168.1.30', 
-			'netmask': '255.255.255.0', 
-			'gateway': '192.168.1.1',
-			'primary': '8.8.4.4',
-			'secondary': '8.8.8.8' 
-		})
+			ntp_enable = ['systemctl', 'enable', 'ntp']
 
+			if is_a_docker():
+				docker_run(ntp_enable)
+			else:
+				subprocess.call(ntp_enable)
 
-	if reset_clock and is_a_cme():
-		ntp_servers([ 
-			'0.debian.ntp.pool.org', 
-			'1.debian.ntp.pool.org', 
-			'2.debian.ntp.pool.org', 
-			'3.debian.ntp.pool.org' 
-		])
-
-		ntp_enable = ['systemctl', 'enable', 'ntp']
-
-		if is_a_docker():
-			docker_run(ntp_enable)
-		else:
-			subprocess.call(ntp_enable)
-
-	logger = logging.getLogger('cme')
-	logger.info("Factory reset (network reset: {0}, clock reset: {1})".format(reset_network, reset_clock))	
+		logger.info("CME configuration reset to factory defaults")
 	
-	restart(delay)
+	if recovery_mode and not os.path.isfile(Config.RECOVERY_FILE):
+		logger.info("Setting CME for recovery mode boot")
+		open(Config.RECOVERY_FILE, 'w').close()
+	else:
+		if os.path.isfile(Config.RECOVERY_FILE):
+			os.remove(Config.RECOVERY_FILE)
+
+	_reboot(delay)
 
 
-def restart(delay=5):
+def _reboot(delay=5):
 	# trigger a reboot
-	logger = logging.getLogger('cme')
 	logger.info("CME rebooting in {0} seconds.".format(delay))	
 	
 	time.sleep(delay)

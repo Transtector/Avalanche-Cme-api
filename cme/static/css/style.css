@@ -685,12 +685,12 @@ td.rdtYear:hover {
   height: 32px;
   width: 380px;
 }
-.input-group > button#factory-reset {
-  background-color: #f22;
-}
 .input-group-title button {
   width: 100%;
   height: 32px;
+}
+.input-group#restart .input-group-title > button {
+  background-color: #f22;
 }
 .input-group-title::after {
   content: '';
@@ -777,7 +777,7 @@ td.rdtYear:hover {
 .input-group-cluster input[type="checkbox"],
 .input-group-cluster input[type="radio"] {
   zoom: 2;
-  margin-right: 0;
+  margin-right: 5px;
   vertical-align: middle;
 }
 .input-group-cluster input[readonly] {

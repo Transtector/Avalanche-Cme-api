@@ -6,7 +6,7 @@ import urllib.request
 from xml.dom.minidom import parseString
 import xml.dom.minidom
 
-from . import (router, settings, request, path_parse, secure_filename, refresh_device,
+from . import (router, settings, request, path_parse, secure_filename,
 	allowed_file, json_response, APIError, json_filter, require_auth)
 from .. import Config
 from ..util.Reboot import restart
@@ -31,9 +31,6 @@ def device_read_only_settings():
 	segments = path_parse(request.path)
 	item = segments[-1]
 	itemtype = segments[-2]
-
-	# device requests need to check for update files
-	refresh_device()
 
 	# get visible device parameters
 	device = json_filter(settings['__device'].items())
@@ -112,8 +109,6 @@ def device_write():
 	# Finally, we need to update __device key held in the settings.
 	settings['__device'] = Config.DEVICE_DATA
 
-	refresh_device()
-
 	# return unfiltered device data
 	device = settings['__device']
 
@@ -122,6 +117,7 @@ def device_write():
 
 	# return updated device as stored in settings
 	return json_response(device)
+
 
 @router.route('/device/updates', methods=['GET', 'DELETE', 'PUT', 'POST'])
 @require_auth
@@ -294,20 +290,32 @@ def device_updates():
 	return json_response({ 'updates': result })
 
 
-
 @router.route('/device/restart', methods=['GET'])
 @require_auth
 def device_restart():
-	# Triggers a device reboot.  If there is an update image available
-	# it will be attempted to be used in place of the current image,
-	# if there is a current image. If the new image load fails for any
-	# reason, the prior image will be used, or failing that, the Cme
-	# will startup in recovery mode.
-	t = threading.Thread(target=restart, args=(5, ))
+	'''
+	Triggers a device reboot with some optional configuration parameters
+	sent along with the query string as:
+
+		recovery_mode - this will ignore pending updates and reboot the CME
+			into recovery mode
+
+		factory_reset - this will remove the current settings.json file which
+			essentially resets the CME configuration to factory defaults
+
+		If not recovery_mode, then any pending updates will be installed
+		and attempted to use after the reboot.
+	'''
+	recovery_mode = request.args.get('recovery_mode')
+	factory_reset = request.args.get('factory_reset')
+
+	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset))
 	t.setDaemon(True)
 	t.start()
 
+	# Return nothing (but status = 200) to let 'em know we're resetting
 	return json_response(None)
+
 
 
 # DEBUGGING

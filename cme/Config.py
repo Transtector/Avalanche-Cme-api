@@ -15,6 +15,13 @@ APPROOT = os.path.abspath(os.getcwd()) # /root
 
 USERDATA = os.path.abspath('/data') # Cme user data is stored here
 
+# This file created prior to rebooting to signal init process
+# to boot to recovery mode (don't launch module dockers).  Note that
+# it is removed after detection by the boot process.  Recovery mode
+# is indicated if the cme package is NOT running inside a docker.
+# See RECOVERY key below.
+RECOVERY_FILE = os.path.abspath(os.path.join(USERDATA, '.recovery')) # /data/.recovery
+
 # uploads go to temp folder above app
 # this name is used by Flask as well
 UPLOAD_FOLDER = os.path.abspath(os.path.join(USERDATA, 'tmp')) # /data/tmp

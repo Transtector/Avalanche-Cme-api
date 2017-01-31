@@ -1,11 +1,5 @@
-import os
-import platform
-import logging
-import uuid
-import socket
-import fcntl
-import struct
-import fileinput
+import os, platform, logging
+import uuid, socket, fcntl, struct, fileinput
 
 from . import is_a_cme, is_a_docker, docker_run
 

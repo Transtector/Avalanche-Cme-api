@@ -1,9 +1,5 @@
 
-import os
-import logging
-import fileinput
-import subprocess
-import re
+import os, logging, fileinput, subprocess, re
 
 from datetime import datetime, timedelta
 from .Switch import switch

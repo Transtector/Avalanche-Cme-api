@@ -95,17 +95,10 @@ var CmeAPI = {
 		});
 	},
 
-	reset: function(reset_network, reset_clock) {
-		return $.ajax({
-			url: API.config + 'reset',
-			data: JSON.stringify({ reset_network: reset_network, reset_clock: reset_clock }),
-			dataType: 'json'
-		});
-	},
-
-	restart: function() {
+	restart: function(recovery_mode, factory_reset) {
 		return $.ajax({
 			url: API.restart,
+			data: JSON.stringify({ recovery_mode: recovery_mode, factory_reset: factory_reset }),
 			dataType: 'json'
 		});
 	},
