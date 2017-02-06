@@ -6,8 +6,9 @@ from datetime import datetime, timedelta
 from flask import Blueprint, Response, request, send_from_directory, send_file
 from werkzeug import secure_filename
 
-from ..util.Auth import require_auth, Serializer
 from ..util.UriParse import path_parse
+
+from ..Auth import require_auth, Serializer
 from ..Settings import settings
 from .. import app, Config
 

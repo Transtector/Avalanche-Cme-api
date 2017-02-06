@@ -1,10 +1,7 @@
-# ui routes
+# All CME UI (web page) routes are detailed below.
 
 from flask import Blueprint, render_template, abort
-from ..util.Auth import require_auth
-from ..Settings import settings
-from .. import app
-from .. import Config
+from .. import app, Config
 
 router = Blueprint('uiroutes', __name__)
 
