@@ -55,8 +55,8 @@ def main(argv=None):
 
 
 	# network and ntp/clock status
-	from .util.IpUtils import manage_network
-	from .util.ClockUtils import manage_clock
+	from .common.IpUtils import manage_network
+	from .common.ClockUtils import manage_clock
 
 	# import ui, api routes
 	from . import ui_routes

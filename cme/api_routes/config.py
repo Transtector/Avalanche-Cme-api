@@ -5,7 +5,7 @@ import os, threading
 from . import (router, settings, request, json_response, 
 	APIError, json_filter, require_auth)
 
-from ..util.ClockUtils import refresh_time
+from ..common.ClockUtils import refresh_time
 
 
 @router.route('/config/', methods=['GET'])

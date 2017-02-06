@@ -6,7 +6,7 @@
 from . import Config
 
 # simple dictionary to json file persistence
-from .util.DictPersistJSON import DictPersistJSON
+from .common.DictPersistJSON import DictPersistJSON
 
 settings = DictPersistJSON(Config.SETTINGS)
 

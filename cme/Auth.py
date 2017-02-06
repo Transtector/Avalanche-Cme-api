@@ -3,7 +3,7 @@ from flask import Response, request, json
 from itsdangerous import (TimedJSONWebSignatureSerializer
 						  as Serializer, BadSignature, SignatureExpired)
 
-from .. import Config
+from . import Config
 
 # access denied
 def access_denied(message='Access denied'):

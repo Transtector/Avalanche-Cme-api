@@ -8,9 +8,10 @@ import xml.dom.minidom
 
 from . import (router, settings, request, path_parse, secure_filename,
 	allowed_file, json_response, APIError, json_filter, require_auth)
+
 from .. import Config
-from ..util.Reboot import restart
-from ..util.LockedOpen import LockedOpen
+from ..common.LockedOpen import LockedOpen
+from ..common.Reboot import restart
 
 @router.route('/device/')
 @router.route('/device/cme/')
@@ -309,7 +310,8 @@ def device_restart():
 	recovery_mode = request.args.get('recovery_mode')
 	factory_reset = request.args.get('factory_reset')
 
-	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset))
+	logger = logging.getLogger('cme')
+	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset, Config.SETTINGS, Config.RECOVERY_FILE, logger))
 	t.setDaemon(True)
 	t.start()
 

@@ -3,9 +3,9 @@ import os, glob, fcntl, tempfile, json, uuid
 import rrdtool
 
 from . import Config
-from ..util import is_a_docker
-from ..util.Switch import switch
-from ..util.LockedOpen import LockedOpen
+from ..common import is_a_docker
+from ..common.Switch import switch
+from ..common.LockedOpen import LockedOpen
 
 
 # Channel data and configuration are stored here (typically /data/channels/)

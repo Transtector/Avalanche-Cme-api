@@ -5,7 +5,7 @@ import subprocess, json
 
 from . import settings, router, request, path_parse, json_response, APIError, require_auth, Config
 
-from ..util.Switch import switch
+from ..common.Switch import switch
 from .Models import ChannelManager
 
 ch_mgr = ChannelManager()
