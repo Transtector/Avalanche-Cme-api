@@ -2,3 +2,6 @@
 	path = cme/templates/src/Flot
 	url = https://github.com/flot/flot.git
 	ignore = untracked
+[submodule "cme/common"]
+	path = cme/common
+	url = git@cuscsgit01.smiths.net:Avalanche/Cme-common.git
