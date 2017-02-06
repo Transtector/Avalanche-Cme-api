@@ -60,7 +60,7 @@ RRDCACHED = None #'localhost'
 SETTINGS = os.path.join(USERDATA, 'settings.json')
 
 # recovery mode if we're not running inside a docker container
-from cme.util import is_a_docker
+from cme.common import is_a_docker
 RECOVERY = not is_a_docker()
 
 # create USERDATA folders if they don't yet exist
@@ -144,7 +144,7 @@ TEMPERATURE_ALARM_TEMP = 80 # ºC
 # These settings are read from the /etc/network configuration.  On factory
 # resets, the network can (optionally) be reset as well.
 # (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
-from cme.util.ClockUtils import check_ntp, ntp_servers
+from cme.common.ClockUtils import check_ntp, ntp_servers
 
 # default NTP settings are obtained from /etc/ntp.conf
 CLOCK_USE_NTP = check_ntp()
@@ -173,7 +173,7 @@ CLOCK_DISPLAY_12HOUR_FORMAT = "h:mm:ss A"
 # These settings are read from the /etc/network configuration.  On factory
 # resets, the network can (optionally) be reset as well.
 # (see Cme/ref/interfaces_static; deploys to /etc/network/interfaces_static)
-from cme.util.IpUtils import mac, dhcp, address, netmask, gateway
+from cme.common.IpUtils import mac, dhcp, address, netmask, gateway
 
 # just read the MAC
 MAC = mac()
