@@ -2,7 +2,7 @@
 import time, threading
 
 from . import router, settings, request, path_parse, json_response, APIError, require_auth
-from ..util.IpUtils import manage_network
+from ..common.IpUtils import manage_network
 
 
 @router.route('/config/network/', methods=['GET', 'POST'])

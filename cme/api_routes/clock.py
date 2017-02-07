@@ -3,7 +3,7 @@ import os
 
 from . import router, settings, request, path_parse, json_response, APIError, require_auth
 from .status import timestamp
-from ..util.ClockUtils import refresh_time, manage_clock, set_clock
+from ..common.ClockUtils import refresh_time, manage_clock, set_clock
 
 
 @router.route('/config/clock/', methods=['GET', 'POST'])
