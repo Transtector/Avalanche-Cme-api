@@ -11,7 +11,7 @@ from paste.translogger import TransLogger
 from .Logging import Server_Logger, App_Logger
 
 # cme configuration file
-from . import Config
+from .common import Config
 
 # load settings which may override the user-settable
 # CME configuration values

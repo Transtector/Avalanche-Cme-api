@@ -2,7 +2,7 @@
 import logging, logging.handlers
 
 import cherrypy
-from . import Config
+from .common import Config
 
 def Server_Logger():
 
@@ -46,7 +46,7 @@ def App_Logger(logger):
 		h.setFormatter(formatter)
 
 	# always send app log to file
-	fh = logging.handlers.RotatingFileHandler(Config.APPLOG,
+	fh = logging.handlers.RotatingFileHandler(Config.APILOG,
 										  maxBytes=Config.LOGBYTES,
 										  backupCount=Config.LOGCOUNT)
 	# increase level if DEBUG set

@@ -3,7 +3,7 @@
 # values in Config.py.  To reset all configuration values to default,
 # simply delete the settings.json file.
 
-from . import Config
+from .common import Config
 
 # simple dictionary to json file persistence
 from .common.DictPersistJSON import DictPersistJSON
