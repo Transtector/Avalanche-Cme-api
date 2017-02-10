@@ -37,3 +37,26 @@ def require_auth(f):
 		return f(*args, **kwargs)
 
 	return decorated
+
+# this function can be used to check if authorized request
+def authorized():
+	# read token from session cookie
+	s = Serializer(Config.SECRET_KEY,
+				   expires_in = Config.SESSION_EXPIRATION)
+
+	try:
+		token = request.cookies[Config.SESSION_COOKIE_NAME]
+
+	except KeyError:
+		return False
+
+	# verify the token
+	try:
+		authenticated = s.loads(token)
+	except SignatureExpired:
+		return False
+	except BadSignature:
+		return False
+
+	# allowed
+	return True

@@ -6,11 +6,11 @@ from datetime import datetime, timedelta
 from flask import Blueprint, Response, request, send_from_directory, send_file
 from werkzeug import secure_filename
 
-from ..common.UriParse import path_parse
-
+from .. import app
 from ..Auth import require_auth, Serializer
 from ..Settings import settings
-from .. import app, Config
+from ..common.UriParse import path_parse
+from ..common import Config
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)

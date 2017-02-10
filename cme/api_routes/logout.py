@@ -1,7 +1,7 @@
 # logout - disposes the session cookie
 
 from . import Response, router
-from .. import Config
+from ..common import Config
 
 @router.route('/logout')
 def logout():

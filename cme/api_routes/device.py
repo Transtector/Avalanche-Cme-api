@@ -9,7 +9,7 @@ import xml.dom.minidom
 from . import (router, settings, request, path_parse, secure_filename,
 	allowed_file, json_response, APIError, json_filter, require_auth)
 
-from .. import Config
+from ..common import Config
 from ..common.LockedOpen import LockedOpen
 from ..common.Reboot import restart
 

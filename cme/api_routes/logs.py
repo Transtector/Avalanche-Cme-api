@@ -2,7 +2,7 @@ import os, glob
 import tempfile
 
 from . import router, request, send_from_directory, send_file, json_response, APIError, require_auth
-from .. import Config
+from ..common import Config
 
 def bool_arg(name, request):
 	''' Convert query string arguments to boolean values.

@@ -1,7 +1,7 @@
 # CME SNMPv3 configuration routes
 
 from . import router, settings, send_from_directory, json_response, APIError, require_auth
-from .. import Config
+from ..common import Config
 
 @router.route('/config/snmp/')
 @require_auth

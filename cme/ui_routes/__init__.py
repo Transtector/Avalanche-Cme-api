@@ -1,7 +1,9 @@
 # All CME UI (web page) routes are detailed below.
 
 from flask import Blueprint, render_template, abort
-from .. import app, Config
+from .. import app
+from ..Auth import authorized
+from ..common import Config
 
 router = Blueprint('uiroutes', __name__)
 
@@ -24,8 +26,11 @@ def index():
 # Handles channel data history exporting
 @router.route('/export.html')
 def export():
-	return render_template('export.html', title='CME Export')
+	if authorized():
+		return render_template('export.html', title='CME Export')
 
+	return render_template('index.html', title='CME')
+	
 
 # Calibration UI - used in CME production and backend API
 # only works when in Recovery Mode.
@@ -34,5 +39,8 @@ def calibrate():
 
 	if not Config.RECOVERY:
 		abort(404)
-	
-	return render_template('calibrate.html', title='CME Calibrate')
+
+	if authorized():	
+		return render_template('calibrate.html', title='CME Calibrate')
+
+	return render_template('index.html', title='CME')
