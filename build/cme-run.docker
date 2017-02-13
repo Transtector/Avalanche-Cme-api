@@ -3,20 +3,23 @@
 # Requires the cme binary Python wheels are built into
 # /wheelhouse folder in the dockerfile context.
 #
-# Note: you _must_ run the host command FIFO listener
-# before running this container! Like this:
+# Note:  In order to support calling system commands
+# like 'shutdown', 'ntpq', 'reboot', etc, this docker
+# requires a script to be running on the docker HOST
+# that is listening for these commands.  Generally,
+# for a production CME system, this script is launched
+# by the Cme-init system and looks something like this:
 #
-#	$ ./cme-host-input &
+#	$ ./cme-docker-fifo.sh &
 #
 # This sets up the input and output FIFO's and listens
 # for system call requests coming from the container
 # over the input FIFO.
 #
-# The cme application layer needs some extra attention
-# to implement API commands that affect the host system.
-# In particular, networking, time, and system reboot
-# calls are required. Mostly this is accommodated via
-# switches when the docker container is run:
+# The cme API layer also needs some extra attention
+# when running inside a docker container.  These
+# command-line switches ensure that the API layer
+# has access to required system resources:
 #
 #	$ docker run \
 #		--rm \

@@ -48,6 +48,6 @@ ENTRYPOINT mkdir /srcdist; \
 	cd /srcdist; \
 	cp -R /application/cme .; \
 	cp /application/setup.py .; \
-	cp /application/VERISON .; \
+	cp /application/VERSION .; \
 	cp /application/MANIFEST.in .; \ 
 	pip wheel .
