@@ -1,2 +1,3 @@
+include VERSION
+include cme/templates/*.html
 recursive-include cme/static *
-include cme/templates/index.html
