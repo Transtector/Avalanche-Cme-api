@@ -35,14 +35,10 @@
 #		-v /media/usb:/media/usb \
 #		[<private_docker_registry>:5000/]cme
 
-# Uses our base bare-bones Alpine Linux and Python 3.5
+# Uses our cme-base docker image
 FROM cme-base
 
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
-
-# cme also requires rrdtool be installed
-RUN apk --update add rrdtool && \
-	rm /var/cache/apk/*
 
 # Application wheels should be built into wheelhouse folder
 COPY wheelhouse wheelhouse/

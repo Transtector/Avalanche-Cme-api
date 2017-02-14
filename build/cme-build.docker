@@ -14,7 +14,7 @@
 #		-v "$(pwd)"/wheelhouse:/wheelhouse \
 #		cme-build
 
-# Uses the base-alpine-python3 (3.5) image
+# Uses the cme-base image
 FROM cme-base
 
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
