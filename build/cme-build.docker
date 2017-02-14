@@ -15,7 +15,7 @@
 #		cme-build
 
 # Uses the base-alpine-python3 (3.5) image
-FROM base-alpine-python3
+FROM cme-base
 
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 
@@ -38,10 +38,7 @@ ENV PIP_FIND_LINKS=/wheelhouse
 VOLUME /wheelhouse
 VOLUME /application
 
-# Move into the application folder and build the wheels.
-#ENTRYPOINT cd /application; pip wheel .
-
-# Currently using a srcdist/ for the build because wheel
+# Create and use srcdist/ for the build because wheel
 # is adding in extraneous folders (node_modules, cme_venv,
 # and .git for example).
 ENTRYPOINT mkdir /srcdist; \

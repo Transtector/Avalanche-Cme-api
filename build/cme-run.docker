@@ -36,7 +36,7 @@
 #		[<private_docker_registry>:5000/]cme
 
 # Uses our base bare-bones Alpine Linux and Python 3.5
-FROM base-alpine-python3
+FROM cme-base
 
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 
@@ -47,13 +47,7 @@ RUN apk --update add rrdtool && \
 # Application wheels should be built into wheelhouse folder
 COPY wheelhouse wheelhouse/
 
-# Copy an entrypoint script and the cme-host-output monitor
-COPY cme-entrypoint cme-entrypoint
-
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cme
-
-# Run the cme application using an entrypoint script 
-ENTRYPOINT ["./cme-entrypoint"]
 
 CMD ["cme"]
