@@ -10,7 +10,7 @@
 # for a production CME system, this script is launched
 # by the Cme-init system and looks something like this:
 #
-#	$ ./cme-docker-fifo.sh &
+#	$ ~/Cme-init/cme-docker-fifo.sh &
 #
 # This sets up the input and output FIFO's and listens
 # for system call requests coming from the container

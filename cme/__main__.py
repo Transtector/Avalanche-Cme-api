@@ -13,6 +13,11 @@ from .Logging import Server_Logger, App_Logger
 # cme configuration file
 from .common import Config
 
+# cme uses Clock and Network configuraiton settings
+# that must be initialzed.
+Config.initialize_Clock()
+Config.initialize_Network()
+
 # load settings which may override the user-settable
 # CME configuration values
 from .Settings import settings
