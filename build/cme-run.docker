@@ -27,7 +27,7 @@
 #		--privileged \
 #		--name cme \
 #		-v /data:/data \
-#       -v /etc/network:/etc/network \
+#		-v /etc/network:/etc/network \
 #		-v /etc/ntp.conf:/etc/ntp.conf \
 #		-v /etc/localtime:/etc/localtime \
 #		-v /tmp/cmehostinput:/tmp/cmehostinput \
