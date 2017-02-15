@@ -34,6 +34,9 @@
 #		-v /tmp/cmehostoutput:/tmp/cmehostoutput \
 #		-v /media/usb:/media/usb \
 #		[<private_docker_registry>:5000/]cme
+#
+# Build this docker in the folder containing the built
+# wheels (e.g., Cme/build/wheelhouse/).  
 
 # Uses our cme-base docker image
 FROM cme-base
@@ -41,9 +44,11 @@ FROM cme-base
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 
 # Application wheels should be built into wheelhouse folder
+COPY VERSION VERSION
 COPY wheelhouse wheelhouse/
 
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cme
+RUN rm -rf wheelhouse/
 
 CMD ["cme"]
