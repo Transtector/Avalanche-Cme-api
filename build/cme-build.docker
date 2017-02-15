@@ -11,7 +11,7 @@
 #
 #	$ docker run --rm \
 #		-v "$(pwd)":/application \
-#		-v "$(pwd)"/wheelhouse:/wheelhouse \
+#		-v "$(pwd)"/build/wheelhouse:/wheelhouse \
 #		cme-build
 
 # Uses the cme-base image
