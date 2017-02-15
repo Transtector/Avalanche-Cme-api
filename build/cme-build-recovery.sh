@@ -4,6 +4,9 @@
 # that can be downloaded to a CME device and installed to provide
 # the recovery mode operation.
 
+# Read the VERSION file to use in the created archive name
+VERSION=$(<VERSION)
+ARCHIVE=1510-000-v$VERSION-SWARE-CME_RECOVERY.tgz
 
 # Requires Cme source folder at /root/Cme/
 SRC=/root/Cme
@@ -48,10 +51,6 @@ rm -rf ${SRCDIST}
 
 # Now generate the archive of the wheels
 pushd ${DIST}
-
-# Read the VERSION file to use in the created archive name
-VERSION=$(<VERSION)
-ARCHIVE=1500-000-v$VERSION-SWARE-CME_RECOVERY.tgz
 
 tar -czvf ../${ARCHIVE} .
 
