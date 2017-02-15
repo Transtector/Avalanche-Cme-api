@@ -35,8 +35,9 @@
 #		-v /media/usb:/media/usb \
 #		[<private_docker_registry>:5000/]cme
 #
-# Build this docker in the folder containing the built
-# wheels (e.g., Cme/build/wheelhouse/).  
+# Note: Build this docker from the top-level source
+# directory which should have the package's built
+# wheels in a wheelhouse folder.
 
 # Uses our cme-base docker image
 FROM cme-base

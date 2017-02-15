@@ -13,6 +13,11 @@
 #		-v "$(pwd)":/application \
 #		-v "$(pwd)"/wheelhouse:/wheelhouse \
 #		cme-build
+#
+# Note: Build this docker in the application/build
+# directory to keep the docker context small.  However,
+# _run_ this docker from the top-level application
+# folder containing the destination 'wheelhouse' folder.
 
 # Uses the cme-base image
 FROM cme-base
