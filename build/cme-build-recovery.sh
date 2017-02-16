@@ -4,27 +4,22 @@
 # that can be downloaded to a CME device and installed to provide
 # the recovery mode operation.
 
+SRC=$(pwd)/Cme  # project source code
+SRCDIST=$(pwd)/srcdist # source copied here for building
+DIST=$(pwd)/dist # built code ends up here
+
 # Read the VERSION file to use in the created archive name
-VERSION=$(<VERSION)
+VERSION=$(<${SRC}/VERSION)
 ARCHIVE=1510-000-v$VERSION-SWARE-CME_RECOVERY.tgz
-
-# Requires Cme source folder at /root/Cme/
-SRC=/root/Cme
-
-# Source files copied to SRCDIST
-SRCDIST=/root/srcdist
-
-# System built to DIST
-DIST=/root/dist
 
 # Point PIP env paths to wheelhouse
 export WHEELHOUSE=${DIST}/wheelhouse
-export PIP_WHEEL_DIR=${DIST}/wheelhouse
-export PIP_FIND_LINKS=${DIST}/wheelhouse
+export PIP_WHEEL_DIR=$WHEELHOUSE
+export PIP_FIND_LINKS=$WHEELHOUSE
 
-mkdir ${SRCDIST}
-mkdir ${DIST}
-mkdir ${WHEELHOUSE}
+# Make the SRCDIST and DIST directories
+mkdir ${SRCDIST}  # source files copied here for the build
+mkdir -p ${WHEELHOUSE} # PIP stores the built wheels here
 
 # Copy source files over to srcdist/
 # Note: this is to avoid wheel adding a bunch of files and
@@ -42,12 +37,9 @@ source ${SRC}/cme_venv/bin/activate
 # These will show up in WHEELHOUSE
 pip wheel .
 
-# Copy the top-level VERSION file
-cp ${SRCDIST}/VERSION ${DIST}/VERSION
-
-# Wheels are built - done with srcdist/
 popd
-rm -rf ${SRCDIST}
+cp ${SRCDIST}/VERSION ${DIST} # copy VERSION
+rm -rf ${SRCDIST} # done w/srcdist
 
 # Now generate the archive of the wheels
 pushd ${DIST}
@@ -59,4 +51,3 @@ popd
 rm -rf ${DIST}
 
 echo "Done!"
-exit 0
