@@ -21,7 +21,7 @@ COPY ref.bashrc .bashrc
 # Use v3.5 apk branch for package updates, add bash, and clear the
 # package cache to keep image size small.  Get python3 from Alpine
 # package repository and upgrade pip. Clear the cache when we're done.
-RUN echo -e "http://nl.alpinelinux.org/alpine/v3.5/main\n" > /etc/apk/repositories
+RUN echo -e "http://dl-cdn.alpinelinux.org/alpine/v3.5/main\n" > /etc/apk/repositories
 RUN apk update && apk upgrade; exit 0 && apk fix
 RUN	apk --update add bash python3 rrdtool && \
 	rm /var/cache/apk/* && \
