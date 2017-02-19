@@ -12,7 +12,7 @@ setup (
 	packages				= ['cme', 'cme.api_routes', 'cme.ui_routes', 'cme.common'],
 	include_package_data	= True,
 	zip_safe				= False,
-	install_requires		= ["CherryPy", "Paste", "Flask", "rrdtool" ],
+	install_requires		= ["CherryPy", "Paste", "Flask", "rrdtool<=0.1.4" ],
 	entry_points			= {'console_scripts': ['cme = cme.__main__:main'] }
 )
 
