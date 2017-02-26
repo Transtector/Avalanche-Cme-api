@@ -385,11 +385,13 @@ var ChannelPanel = React.createClass({
 			newState = { ch: Store.getState().channel_objs[this.props.id] }
 
 		// read name, description into state if not yet initialized (or new ones set)
-		if (newState.ch && !this._chAttrInit) {
-			if ((newState.name != newState.ch.name) || (newState.description != newState.ch.description)) {
-				newState.name = newState.ch.name;
+		if (newState.ch) {
+			if (this.state.name != newState.ch.name) {
+				newState.name = newState.ch.name;				
+			}
+
+			if (this.state.description != newState.ch.description){
 				newState.description = newState.ch.description;
-				this._chAttrInit = true; // set this only after we've updated to new values
 			}
 		}
 
@@ -515,16 +517,16 @@ var ChannelPanel = React.createClass({
 			n = e.target.name,
 			obj = {};
 
-		var _this = this;
-		this.setState({ activeId: '' });
-
 		obj[n] = v;
 
+		// var _this = this;
+		this.setState({ activeId: '' });
 		this._chAttrInit = false;
-		this.setState(obj, function () {
-			console.log('You want to update: ', obj);
-			Actions.channel(_this.props.id, obj);
-		});
+
+		//this.setState(obj, function () {
+		console.log('You want to update: ', obj);
+		Actions.channel(this.props.id, obj);
+		//});
 	}
 
 });
