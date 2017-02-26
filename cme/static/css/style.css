@@ -468,6 +468,13 @@ header #buttons button {
   color: #fff;
 }
 #error.panel .errors {
+  position: absolute;
+  margin: 0;
+  top: 30px;
+  left: 0;
+  right: 0;
+  bottom: 48px;
+  overflow: auto;
   list-style: none;
   text-align: left;
   font-size: 120%;
