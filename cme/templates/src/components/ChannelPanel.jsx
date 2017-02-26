@@ -517,9 +517,7 @@ var ChannelPanel = React.createClass({
 		this.setState({ activeId: '' });
 
 		// send the change request if we've made a change
-		if (this.state[n] != v) {
-			Actions.channel(this.props.id, obj);
-		}
+		Actions.channel(this.props.id, obj);
 	}
 
 });
