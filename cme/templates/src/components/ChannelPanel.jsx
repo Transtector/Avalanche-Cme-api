@@ -386,7 +386,7 @@ var ChannelPanel = React.createClass({
 
 		// read name, description into state if not yet initialized (or new ones set)
 		if (newState.ch && !this._chAttrInit) {
-			if (newState.name != newState.ch.name) || (newState.description != newState.ch.description) {
+			if ((newState.name != newState.ch.name) || (newState.description != newState.ch.description)) {
 				newState.name = newState.ch.name;
 				newState.description = newState.ch.description;
 				this._chAttrInit = true; // set this only after we've updated to new values
