@@ -113,15 +113,8 @@ def channel(ch_index):
 		if method('POST'):
 			# update name or description (or both) from POST data
 			ch_update = request.get_json()
-
-			if isFullChannel:
-				# try update all attributes
-				for attr in ['name', 'description']:
-					ch.__dict__[attr] = ch_update.get(attr, ch.__dict__[attr])
-
-			else:
-				ch.__dict__[item] = ch_update.get(item, ch.__dict__[item])
-
+			ch.name = ch_update.get('name', ch.name)
+			ch.description = ch_update.get('description', ch.description)
 			break
 	
 		if method():
