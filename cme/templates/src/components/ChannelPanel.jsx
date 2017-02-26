@@ -229,8 +229,13 @@ var ChannelPanel = React.createClass({
 
 			}, this);
 
-			var y1Axis = { }, 
-				y2Axis = { position: 'right' };
+			function tickFormatter(val, axis) {
+				var digits = val > 1 ? (val > 10 ? 1 : 2) : (val < 0.1 ? 1 : 3);
+				return val.toFixed(digits);
+			}
+
+			var y1Axis = { tickFormatter: tickFormatter }, 
+				y2Axis = { position: 'right', tickFormatter: tickFormatter };
 
 			if (live && Math.abs(y1max - y1min) < 0.1)
 				y1Axis.autoscaleMargin = 1;
