@@ -37,8 +37,6 @@ var ChannelPanel = React.createClass({
 	_pollPeriod: FAST_POLL_PERIOD,
 	_pollTime: 0,
 
-	_chAttrInit: false,
-
 	_historyTraceColorsInit: false, // set colors after first plot generated
 	_historyTraceColors: [ '#00000000', '#00000000' ], // modified after first render
 
@@ -384,15 +382,10 @@ var ChannelPanel = React.createClass({
 		var _this = this,
 			newState = { ch: Store.getState().channel_objs[this.props.id] }
 
-		// read name, description into state if not yet initialized (or new ones set)
-		if (newState.ch) {
-			if (this.state.name != newState.ch.name) {
-				newState.name = newState.ch.name;				
-			}
-
-			if (this.state.description != newState.ch.description){
-				newState.description = newState.ch.description;
-			}
+		// read name, description into state if not currently editing them
+		if (newState.ch && !this.state.activeId) {
+			newState.name = newState.ch.name;				
+			newState.description = newState.ch.description;
 		}
 
 		this.setState(newState, function () {
@@ -501,7 +494,8 @@ var ChannelPanel = React.createClass({
 		if (e.keyCode === ESCAPE_KEY_CODE) {
 			this.setState({
 				name: this.state.ch.name,
-				description: this.state.ch.description
+				description: this.state.ch.description,
+				activeId: ''
 			});
 		}
 
@@ -518,15 +512,14 @@ var ChannelPanel = React.createClass({
 			obj = {};
 
 		obj[n] = v;
+		//console.log('You want to update: ', obj);
 
-		// var _this = this;
 		this.setState({ activeId: '' });
-		this._chAttrInit = false;
 
-		//this.setState(obj, function () {
-		console.log('You want to update: ', obj);
-		Actions.channel(this.props.id, obj);
-		//});
+		// send the change request if we've made a change
+		if (this.state[n] != v) {
+			Actions.channel(this.props.id, obj);
+		}
 	}
 
 });
