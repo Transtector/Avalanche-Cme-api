@@ -1429,6 +1429,12 @@ li.input-group-cluster > .btn:disabled {
   bottom: 0;
   height: 34px;
 }
+.ch-controls > button {
+  height: 32px;
+  width: 32px;
+  margin-top: 1px;
+  margin-left: 12px;
+}
 .btn.ch-history-badge {
   position: absolute;
   display: inline-block;
