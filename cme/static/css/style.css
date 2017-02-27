@@ -1423,17 +1423,32 @@ li.input-group-cluster > .btn:disabled {
 .ch-controls {
   background: #2297dd;
   position: absolute;
-  padding: 0;
+  padding-left: 24px;
   left: 0;
   right: 0;
   bottom: 0;
   height: 34px;
 }
-.ch-controls > button {
-  height: 32px;
-  width: 32px;
-  margin-top: 1px;
+.ch-controls button {
+  height: 26px;
+  width: 26px;
+  margin-top: 4px;
   margin-left: 12px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,0.4);
+  background-color: transparent;
+}
+.ch-controls .icon-play {
+  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff'><path d='m248,248l600,300l-600,300l0,-600z'/></g></svg>");
+}
+.ch-controls .icon-pause {
+  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff'><path d='M400,200l0,623m200,-623l0,623l0,-623z' stroke-linecap='round' stroke-linejoin='round' stroke-width='48'/></g></svg>");
+}
+.ch-controls .icon-record {
+  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff'>null</g></svg>");
+}
+.ch-controls .icon-record-check {
+  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff'>null</g></svg>");
 }
 .btn.ch-history-badge {
   position: absolute;

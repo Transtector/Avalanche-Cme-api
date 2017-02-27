@@ -117,16 +117,27 @@ error-badge-size = 30px
 .ch-controls
 	background lightness(button-bg-color, 50%)
 	position absolute
-	padding 0
+	padding-left 24px
 	left 0
 	right 0
 	bottom 0
 	height 34px
-.ch-controls > button
-	height 32px
-	width 32px
-	margin-top 1px
-	margin-left 12px
+	button
+		height 26px
+		width 26px
+		margin-top 4px
+		margin-left 12px
+		padding 0
+		border 1px solid rgba(255,255,255,0.4)
+		background-color transparent
+	.icon-play
+		background-image svg('play')
+	.icon-pause
+		background-image svg('pause')
+	.icon-record
+		background-image svg('record')
+	.icon-record-check
+		background-image svg('record-check')
 
 .btn.ch-history-badge
 	position absolute
