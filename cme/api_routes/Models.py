@@ -257,10 +257,10 @@ class Channel():
 	def load_alarms(self):
 		self.alarms = None
 
-		ch_alarms_file = os.path.join(CHDIR, channel.id + '_alarms.json')
+		ch_alarms_file = os.path.join(CHDIR, self.id + '_alarms.json')
 
 		# just return if channel alarms are being reset
-		if os.path.isfile(os.path.join(CHDIR, channel.id + '.alarms.reset')):
+		if os.path.isfile(os.path.join(CHDIR, self.id + '.alarms.reset')):
 			return
 
 		# read alarms from file
