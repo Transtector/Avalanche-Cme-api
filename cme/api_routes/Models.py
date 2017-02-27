@@ -301,9 +301,8 @@ class Channel():
 		# save to disk
 		with LockedOpen(self.configpath, 'a') as f:
 			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.configpath), delete=False) as tf:
-				json.dump(new_cfg, tf, indent="\t")
+				json.dump(cfg, tf, indent="\t")
 				tempname = tf.name
-
 			try:
 				os.chmod(tempname, 0o666) # set rw for u, g, o
 				os.replace(tempname, self.configpath) # atomic on Linux
