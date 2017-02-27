@@ -1428,14 +1428,22 @@ li.input-group-cluster > .btn:disabled {
   right: 0;
   bottom: 0;
   height: 34px;
+  overflow: hidden;
 }
 .ch-controls button {
-  height: 26px;
-  width: 26px;
-  margin-top: 4px;
+  height: 48px;
+  width: 48px;
+  margin-top: -6px;
   margin-left: 12px;
   padding: 0;
+  border: 1px solid rgba(255,255,255,0.3);
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
   background-color: transparent;
+  backgground-size: 28px 28px;
 }
 .ch-controls .icon-play {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff' stroke='#fff'><path d='m248,248l600,300l-600,300l0,-600z'/></g></svg>");

@@ -135,7 +135,7 @@ var ChannelPanel = React.createClass({
 
 	_renderControls: function() {
 		var playClass = 'btn ' + (this.state.polling ? 'icon-pause' : 'icon-play'),
-			recordClass = 'btn ' + (this.state.recording ? 'icon-recording-check' : 'icon-record');
+			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record');
 
 		return (
 			<div className='ch-controls'>
@@ -447,8 +447,17 @@ var ChannelPanel = React.createClass({
 	},
 
 	_togglePolling: function() {
-
-		this.setState({ polling: !this.state.polling });
+		// PAUSE (polling = false)
+		// 	Any pending channel update will run, but
+		// 	will NOT trigger a new poll.
+		// PLAY (polling = true)
+		//	Have to call _startPoll() after the render update
+		var _this = this;
+		this.setState({ polling: !this.state.polling }, function () {
+			if (_this.state.polling) {
+				_this._startPoll()
+			}
+		});
 	},
 
 	_toggleRecording: function() {
