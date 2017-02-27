@@ -85,6 +85,7 @@ def channels():
 @router.route('/ch/<int:ch_index>', methods=['GET', 'POST', 'DELETE'])
 @router.route('/ch/<int:ch_index>/name', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/description', methods=['GET', 'POST'])
+@router.route('/ch/<int:ch_index>/recordAlarms', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/error')
 @require_auth
 def channel(ch_index):
@@ -98,7 +99,7 @@ def channel(ch_index):
 	segments = path_parse(request.path)
 	item = segments[-1].lower()
 
-	isFullChannel = item not in ['name', 'description', 'error']
+	isFullChannel = item not in ['name', 'description', 'error', 'recordAlarms']
 
 	for method in switch(request.method):
 		if method('DELETE'): 
@@ -115,6 +116,7 @@ def channel(ch_index):
 			ch_update = request.get_json()
 			ch.name = ch_update.get('name', ch.name)
 			ch.description = ch_update.get('description', ch.description)
+			ch.recordAlarms = ch_update.get('recordAlarms', ch.recordAlarms)
 			break
 	
 		if method():

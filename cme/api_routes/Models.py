@@ -237,69 +237,66 @@ class Channel():
 
 
 	def load_config(self):
+
 		# Load user-configurable attributes for the channel.  Channel's sensors
 		# have been detected and are in the sensors attribute.
+		cfg = {}
 		if os.path.isfile(self.configpath):
 			with open(self.configpath, 'r') as f:
 				cfg = json.load(f)
 
-			self.__dict__['name'] = cfg['name']
-			self.__dict__['description'] = cfg['description']
-			
-			# add any sensor configuration for attached sensors
-			for s in self.sensors:
+		# Default values written to __dict__ attributes to avoid 
+		# triggering the property setters during init
+		name = 'Ch ' + str(int(self.id[2:]) + 1)
+		self.__dict__['name'] = cfg.get('name', name)
+		self.__dict__['description'] = cfg.get('description', name + ' description')
+		self.__dict__['recordAlarms'] = cfg.get('recordAlarms', False)
+		
+		# add any sensor configuration for attached sensors
+		for s in self.sensors:
+			s.__dict__['name'] = s.id
+			s.__dict__['thresholds'] = []
 
-				# find matching sensor id, if any
-				found_sensor = next((cs for cs in cfg['sensors'] if cs['id'] == s.id), None)
+			# find matching sensor id, if any
+			found_sensor = next((cs for cs in cfg.get('sensors',[]) if cs['id'] == s.id), None)
 
-				if found_sensor:
-					# sensor name is user-configurable
-					s.name = found_sensor.get('name', s.name)
+			if found_sensor:
+				# sensor name is user-configurable
+				s.name = found_sensor.get('name', s.name)
 
-					# sensor range is set in hardware configuration
-					s.range = found_sensor['_config'].get('range', [])
+				# sensor range is set in hardware configuration
+				s.range = found_sensor.get('_config', {}).get('range', [])
 
-					# load up sensor thresholds 
-					s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
+				# load up sensor thresholds 
+				s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
 
-		else:
-			# load default values
-			self.__dict__['name'] = 'Ch ' + str(int(self.id[2:]) + 1)
-			self.__dict__['description'] = self.name + ' description'
-
-			for s in self.sensors:
-				s.__dict__['name'] = s.id
-				s.__dict__['thresholds'] = []
 
 
 	def save_config(self):
+		cfg = {}
+
 		# load current config, if any
 		if os.path.isfile(self.configpath):
 			with open(self.configpath, 'r') as f:
 				cfg = json.load(f)
-		else:
-				cfg = {}
-				
-		# merge new settings
-		new_cfg = cfg.copy()
 
-		new_cfg.update({
-			"name": self.name,
-			"description": self.description
+		cfg.update({
+			'name': self.name,
+			'description': self.description,
+			'recordAlarms': self.recordAlarms
 		})
 
 		# for each configured sensor (if there are any)
-		if new_cfg.get('sensors', None):
-			for s in new_cfg['sensors']:
-				# find matching sensor id from channel sensors model
-				found_s = next((cs for cs in self.sensors if cs.id == s['id']), None)
+		for s in cfg.get('sensors', []):
+			# find matching sensor id from channel sensors model
+			found_s = next((cs for cs in self.sensors if cs.id == s['id']), None)
 
-				if found_s:
-					# update name and thresholds attributes in config
-					s.update({ 
-						'name': found_s.name,
-						'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification } for th in found_s.thresholds ]
-					})
+			if found_s:
+				# update name and thresholds attributes in config
+				s.update({ 
+					'name': found_s.name,
+					'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification } for th in found_s.thresholds ]
+				})
 
 		# save to disk
 		with LockedOpen(self.configpath, 'a') as f:
@@ -329,6 +326,7 @@ class Channel():
 
 		return result
 
+
 	@property
 	def name(self):
 		return self.__dict__['name']
@@ -345,6 +343,15 @@ class Channel():
 	@description.setter
 	def description(self, value):
 		self.__dict__['description'] = value # this is the attr that gets serialized to json - keep in sync
+		self.save_config()
+
+	@property
+	def recordAlarms(self):
+		return self.__dict__['recordAlarms']
+
+	@recordAlarms.setter
+	def recordAlarms(self, value):
+		self.__dict__['recordAlarms'] = value
 		self.save_config()
 
 
