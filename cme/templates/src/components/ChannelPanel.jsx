@@ -302,10 +302,10 @@ var ChannelPanel = React.createClass({
 
 		var _this = this;
 		function updatePlot(el) {
-			if (!_this.state.historyVisible || !_this.state.ch.data) return;
+			if (!_this.state.historyVisible || !_this.state.ch.data || !el) return;
 
 			// this generates the plot
-			console.log("Preparing to plot: ", $(el));
+			console.log("Preparing to plot: ", el);
 
 			var plot = $.plot($(el), plotSeries, plotOptions);
 
