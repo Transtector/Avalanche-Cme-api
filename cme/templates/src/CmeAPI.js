@@ -308,32 +308,35 @@ var CmeAPI = {
 					data: JSON.stringify(th),
 					contentType: 'application/json; charset=UTF-8'
 				}));
+			}
+
+			// non-blank id with empty value means remove (DELETE) the threshold
+			if (th.id && !th.value) {
+				debug("Removing existing threshold from " + ch_id + ":" + sensor_id);
+
+				ajaxCalls.push($.ajax({
+					type: 'DELETE',
+					url: url + th.id,
+					dataType: 'json',
+					contentType: 'application/json; charset=UTF-8'
+				}));
 			
+			}
+
+			// blank id && blank value - NOP
+			if (!th.id && !th.value) {
+				return;
 			} else {
+				// non-blank id with non-empty (valid) value means update (POST)
+				debug("Modifying existing threshold on " + ch_id + ":" + sensor_id);
 
-				// non-blank id with empty value means remove (DELETE) the threshold
-				if (th.id && !th.value) {
-					debug("Removing existing threshold from " + ch_id + ":" + sensor_id);
-
-					ajaxCalls.push($.ajax({
-						type: 'DELETE',
-						url: url + th.id,
-						dataType: 'json',
-						contentType: 'application/json; charset=UTF-8'
-					}));
-				
-				} else {
-					// non-blank id with non-empty (valid) value means update (POST)
-					debug("Modifying existing threshold on " + ch_id + ":" + sensor_id);
-
-					ajaxCalls.push($.ajax({
-						type: 'POST',
-						url: url + th.id,
-						dataType: 'json',
-						data: JSON.stringify(th),
-						contentType: 'application/json; charset=UTF-8'
-					}));
-				}
+				ajaxCalls.push($.ajax({
+					type: 'POST',
+					url: url + th.id,
+					dataType: 'json',
+					data: JSON.stringify(th),
+					contentType: 'application/json; charset=UTF-8'
+				}));
 			}
 		});
 
