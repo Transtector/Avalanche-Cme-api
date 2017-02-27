@@ -97,7 +97,7 @@ def channel(ch_index):
 
 	# parse out the item name (last element of request path)
 	segments = path_parse(request.path)
-	item = segments[-1].lower()
+	item = segments[-1]
 
 	isFullChannel = item not in ['name', 'description', 'error', 'recordAlarms']
 
