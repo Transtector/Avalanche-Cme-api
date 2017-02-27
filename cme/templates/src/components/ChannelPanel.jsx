@@ -305,6 +305,8 @@ var ChannelPanel = React.createClass({
 			if (!_this.state.historyVisible || !_this.state.ch.data) return;
 
 			// this generates the plot
+			console.log("Preparing to plot: ", $(el));
+
 			var plot = $.plot($(el), plotSeries, plotOptions);
 
 			// get/set flot series colors from 'live'
@@ -326,7 +328,7 @@ var ChannelPanel = React.createClass({
 				</div>
 
 				<div className="plot-wrapper">
-					<div className="plot sensorPlot" ref={updatePlot}></div>
+					<div className="plot" ref={updatePlot}></div>
 				</div>
 
 				<div className="ch-history-footer">
