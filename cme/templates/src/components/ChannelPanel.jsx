@@ -47,6 +47,8 @@ var ChannelPanel = React.createClass({
 			description: '',
 			configOpen: false,
 			activeId: '',
+			polling: true,
+			recording: false,
 			history: '',
 			historyVisible: false,
 			historyTraceVisible: [ true, true ]
@@ -98,7 +100,7 @@ var ChannelPanel = React.createClass({
 					{this._renderControls()}
 
 					<button className="btn ch-history-badge" disabled={this.state.ch.error}
-						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>				
+						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>
 
 					{this._renderHistory(primary, secondary)}
 
@@ -132,9 +134,13 @@ var ChannelPanel = React.createClass({
 	},
 
 	_renderControls: function() {
+		var playClass = 'btn ' + (this.state.polling ? 'icon-pause' : 'icon-play'),
+			recordClass = 'btn ' + (this.state.recording ? 'icon-recording-check' : 'icon-record');
+
 		return (
 			<div className='ch-controls'>
-				Hi!
+				<button className={playClass} onClick={this._togglePolling} />
+				<button className={recordClass} onClick={this._toggleRecording} />
 			</div>
 		);
 	},
@@ -405,7 +411,7 @@ var ChannelPanel = React.createClass({
 
 		this.setState(newState, function () {
 
-			if (!_this._pollTime) return;
+			if (!_this._pollTime || !_this.state.polling) return;
 
 			var age = moment().valueOf() - _this._pollTime,
 				period = _this._pollPeriod - (age % _this._pollPeriod);
@@ -435,14 +441,19 @@ var ChannelPanel = React.createClass({
 		return this.refs["_sensorsPlot"];
 	},
 
-	_controlsPlot: function() {
-
-		return this.refs["_controlsPlot"];
-	},
-
 	_toggleConfigVisibility: function() {
 
 		this.setState({ configOpen: !this.state.configOpen });
+	},
+
+	_togglePolling: function() {
+
+		this.setState({ polling: !this.state.polling });
+	},
+
+	_toggleRecording: function() {
+
+		this.setState({ recording: !this.state.recording });
 	},
 
 	_toggleHistoryVisibility: function() {
