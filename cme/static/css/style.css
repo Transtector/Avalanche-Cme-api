@@ -1455,7 +1455,7 @@ li.input-group-cluster > .btn:disabled {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#f22' stroke='#f22'><ellipse cx='512' cy='512' rx='284' ry='284'/></g></svg>");
 }
 .ch-controls .icon-record-check {
-  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#f22' stroke='#f22'><path fill='#ffffff' d='m306,512l50,-50l100,100l200,-200l50,50l-250,250'/><ellipse cx='512' cy='512' rx='284' ry='284'/></g></svg>");
+  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#f22' stroke='#f22'><ellipse cx='512' cy='512' rx='284' ry='284'/><path fill='#ffffff' d='m306,512l50,-50l100,100l200,-200l50,50l-250,250'/></g></svg>");
 }
 .btn.ch-history-badge {
   position: absolute;
