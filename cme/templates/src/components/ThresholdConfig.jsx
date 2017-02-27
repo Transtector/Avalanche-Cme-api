@@ -306,8 +306,6 @@ var ThresholdConfig = React.createClass({
 		// Make it a float and convert from percentage if necessary.		
 		var newvalue = this.state.percent ? toAbsolute(v, this.state.nominal) : parseFloat(v);
 
-		if (newvalue === obj[n].value) return; // no changes were made
-
 		// New thresholds don't have any id, but we've added one internally
 		// that starts with underscore ('_'), so we need to delete it
 		// before submitting the change to the server.
