@@ -37,7 +37,7 @@ svg-icons = {
 svg(icon, viewbox = '0 0 1024 1024', color = #fff)
 	preamble = "data:image/svg+xml;charset=utf8,"
 	svg_open = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='" + viewbox + "'>"
-	group_open = "<g fill='" + color + "'>"
+	group_open = "<g fill='" + color + "' stroke='" + color + "'>"
 	group_close = "</g>"
 	svg_close = "</svg>"
 	url(preamble + svg_open + group_open + svg-icons[icon] + group_close + svg_close)
