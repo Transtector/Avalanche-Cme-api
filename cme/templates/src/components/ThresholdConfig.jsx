@@ -87,7 +87,6 @@ var ThresholdConfig = React.createClass({
 
 		var ths = nextProps.sensor && nextProps.sensor.thresholds || [];
 		var nextThs = Thresholds(ths);
-		var _this = this;
 
 		// See if any (some) of the new thresholds are
 		// changed from the initial thresholds.  This is
@@ -95,13 +94,16 @@ var ThresholdConfig = React.createClass({
 		// along with the sensor value, and the thresholds
 		// may NOT be changing.
 		for (var th in nextThs) {
-			if (nextThs[th].value !== _this._initial[th].value) {
 
-				_this._initial[th] = nextThs[th]; // update initial threshold to new threshold
+			var nextValue = this.state.percent ? toPercentage(nextThs[th].value, this.state.nominal) : nextThs[th].value;
+
+			if (nextThs[th].value !== this._initial[th].value) {
+
+				this._initial[th] = nextThs[th]; // update initial threshold to new threshold
 
 				var obj = {}
 				obj[th] = nextThs[th];
-				_this.setState(obj); // set the internal threshold state
+				this.setState(obj); // set the internal threshold state
 			}
 		}
 	},
