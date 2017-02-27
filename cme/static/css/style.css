@@ -1435,19 +1435,13 @@ li.input-group-cluster > .btn:disabled {
   margin-top: 4px;
   margin-left: 12px;
   padding: 0;
-  border: 1px solid rgba(255,255,255,0.4);
-  -webkit-border-radius: 100%;
-  -moz-border-radius: 100%;
-  -ms-border-radius: 100%;
-  -o-border-radius: 100%;
-  border-radius: 100%;
   background-color: transparent;
 }
 .ch-controls .icon-play {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff' stroke='#fff'><path d='m248,248l600,300l-600,300l0,-600z'/></g></svg>");
 }
 .ch-controls .icon-pause {
-  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff' stroke='#fff'><path d='M400,200l0,623m200,-623l0,623l0,-623z' stroke-linecap='round' stroke-linejoin='round' stroke-width='48'/></g></svg>");
+  background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff' stroke='#fff'><rect x='330' y='256' width='120' height='568'/><rect x='553' y='256' width='120' height='568'/></g></svg>");
 }
 .ch-controls .icon-record {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff' stroke='#fff'>null</g></svg>");
