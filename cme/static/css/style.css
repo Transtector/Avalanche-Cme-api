@@ -1423,7 +1423,7 @@ li.input-group-cluster > .btn:disabled {
 .ch-controls {
   background: #2297dd;
   position: absolute;
-  padding: 10px 20px;
+  padding: 0;
   left: 0;
   right: 0;
   bottom: 0;

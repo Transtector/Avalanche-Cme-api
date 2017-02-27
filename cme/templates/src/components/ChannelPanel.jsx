@@ -95,6 +95,8 @@ var ChannelPanel = React.createClass({
 
 					{this._renderReadout(secondary, 'secondary')}
 
+					{this._renderControls()}
+
 					<button className="btn ch-history-badge" disabled={this.state.ch.error}
 						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>				
 
@@ -125,6 +127,14 @@ var ChannelPanel = React.createClass({
 				<span className="unit">{sensor.unit.substr(1).toUpperCase()}</span>
 				<ThresholdBadge sensor={sensor} />
 				<ThresholdGauge sensor={sensor} />
+			</div>
+		);
+	},
+
+	_rendercontrols: function() {
+		return (
+			<div className='ch-controls'>
+				Hi!
 			</div>
 		);
 	},
