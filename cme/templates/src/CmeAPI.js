@@ -340,6 +340,8 @@ var CmeAPI = {
 			}
 		});
 
+		if (ajaxCalls.length == 0) return;
+
 		// refresh entire channel when done processing Thresholds
 		return $.when(ajaxCalls).done(function() {
 			CmeAPI.channel(ch_id);
