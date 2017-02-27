@@ -496,7 +496,7 @@ var ChannelPanel = React.createClass({
 		var _this = this,
 			cleared_ch = assign({}, this.state.ch);
 
-		cleared_ch.data = [];
+		cleared_ch.data = null;
 		this.setState({ ch: cleared_ch, history: e.target.value }, function () {
 			if (!_this.state.polling) {
 				_this._startPoll();
