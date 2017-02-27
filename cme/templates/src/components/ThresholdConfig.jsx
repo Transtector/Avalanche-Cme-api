@@ -133,10 +133,9 @@ var ThresholdConfig = React.createClass({
 
 			if (percent && isNumeric(value) && isNumeric(nominal)) {
 				value = toPercentage(value, nominal);
-				return isNumeric(value) ? parseFloat(value).toFixed(0) : value;
 			}
 
-			return value;
+			return isNumeric(value) ? parseFloat(value).toFixed(0) : value;
 		}
 
 		function renderClass(id, value) {
