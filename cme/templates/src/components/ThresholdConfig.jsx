@@ -299,6 +299,9 @@ var ThresholdConfig = React.createClass({
 		// If there's no id and the value we're trying to set is empty, then this is a NOP
 		if (!obj[n].id && !v) return;
 
+		// If there's a "new" id ("_thX"), but the value is empty - ignore
+		if (obj[n].id && obj[n].id.substr(0, 1) === '_' && !v) return;
+
 		// At this point we have validated threshold value.
 		// Make it a float and convert from percentage if necessary.		
 		var newvalue = this.state.percent ? toAbsolute(v, this.state.nominal) : parseFloat(v);
