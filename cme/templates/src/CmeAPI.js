@@ -293,7 +293,6 @@ var CmeAPI = {
 			});
 		}
 
-
 		// else loop through each threshold and POST or DELETE as necessary
 		var ajaxCalls = [];
 		thresholds.forEach(function (th) {
@@ -323,11 +322,8 @@ var CmeAPI = {
 			
 			}
 
-			// blank id && blank value - NOP
-			if (!th.id && !th.value) {
-				return;
-			} else {
-				// non-blank id with non-empty (valid) value means update (POST)
+			// non-blank id with non-empty (valid) value means update (POST)
+			if (th.id && th.value) {
 				debug("Modifying existing threshold on " + ch_id + ":" + sensor_id);
 
 				ajaxCalls.push($.ajax({
@@ -339,8 +335,6 @@ var CmeAPI = {
 				}));
 			}
 		});
-
-		if (ajaxCalls.length == 0) return;
 
 		// refresh entire channel when done processing Thresholds
 		return $.when(ajaxCalls).done(function() {
