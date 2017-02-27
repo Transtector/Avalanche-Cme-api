@@ -131,7 +131,7 @@ var ChannelPanel = React.createClass({
 		);
 	},
 
-	_rendercontrols: function() {
+	_renderControls: function() {
 		return (
 			<div className='ch-controls'>
 				Hi!
