@@ -470,7 +470,7 @@ header #buttons button {
 #error.panel .errors {
   position: absolute;
   margin: 0;
-  top: 30px;
+  top: 60px;
   left: 0;
   right: 0;
   bottom: 48px;
