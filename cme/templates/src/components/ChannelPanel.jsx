@@ -135,12 +135,14 @@ var ChannelPanel = React.createClass({
 
 	_renderControls: function() {
 		var playClass = 'btn ' + (this.state.polling ? 'icon-pause' : 'icon-play'),
-			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record');
+			playTitle = this.state.polling ? 'Pause channel updates' : 'Resume channel updates',
+			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record'),
+			recordTitle = this.state.recording ? 'Stop recording all alarms' : 'Record all alarms';
 
 		return (
 			<div className='ch-controls'>
-				<button className={playClass} onClick={this._togglePolling} />
-				<button className={recordClass} onClick={this._toggleRecording} />
+				<button className={playClass} title={playTitle} onClick={this._togglePolling} />
+				<button className={recordClass} title={recordTitle} onClick={this._toggleRecording} />
 			</div>
 		);
 	},
@@ -270,9 +272,8 @@ var ChannelPanel = React.createClass({
 			if (y1Axis.show)
 				y2Axis.alignTicksWithAxis = 1;
 
-			var plotSeries = [], plotOptions;
-
-			plotOptions = {
+			var plotSeries = [];
+			var plotOptions = {
 				xaxes: [ { 
 					mode: "time",
 					timezone: "browser",
@@ -297,16 +298,22 @@ var ChannelPanel = React.createClass({
 				plotSeries.push({ data: y2Series[1], yaxis: 2, color: this._historyTraceColors[1], lines: { lineWidth: 1 }, shadowSize: 0 });
 				plotSeries.push({ data: y2Series[2], yaxis: 2, color: this._historyTraceColors[1], shadowSize: 0 });
 			}
+		}
+
+		var _this = this;
+		function updatePlot(el) {
+			if (!_this.state.historyVisible || !_this.state.ch.data) return;
 
 			// this generates the plot
-			var plot = $.plot($(this._sensorsPlot()), plotSeries, plotOptions);
+			var plot = $.plot($(el), plotSeries, plotOptions);
 
 			// get/set flot series colors from 'live'
-			if (live && !this._historyTraceColorsInit) {
+			if (live && !_this._historyTraceColorsInit) {
 				var series = plot.getData();
-				this._historyTraceColorsInit = true;
-				this._historyTraceColors = [ series[0].color, series[1].color ];
+				_this._historyTraceColorsInit = true;
+				_this._historyTraceColors = [ series[0].color, series[1].color ];
 			}
+
 		}
 
 		return (
@@ -319,7 +326,7 @@ var ChannelPanel = React.createClass({
 				</div>
 
 				<div className="plot-wrapper">
-					<div className="plot sensorPlot" ref="_sensorsPlot"></div>
+					<div className="plot sensorPlot" ref={updatePlot}></div>
 				</div>
 
 				<div className="ch-history-footer">
@@ -407,6 +414,7 @@ var ChannelPanel = React.createClass({
 		if (newState.ch && !this.state.activeId) {
 			newState.name = newState.ch.name;				
 			newState.description = newState.ch.description;
+			newState.recordAlarms = newState.ch.recordAlarms;
 		}
 
 		this.setState(newState, function () {
@@ -436,11 +444,6 @@ var ChannelPanel = React.createClass({
 		this._pollTimeout = null;
 	},
 
-	_sensorsPlot: function() {
-
-		return this.refs["_sensorsPlot"];
-	},
-
 	_toggleConfigVisibility: function() {
 
 		this.setState({ configOpen: !this.state.configOpen });
@@ -462,29 +465,43 @@ var ChannelPanel = React.createClass({
 
 	_toggleRecording: function() {
 
+		// fire off the channel attribute change request and update the UI state
+		Actions.channel(this.props.id, { recordAlarms: !this.state.recording });
 		this.setState({ recording: !this.state.recording });
 	},
 
 	_toggleHistoryVisibility: function() {
 
-		var h = this.state.history || 'live';
+		var h = this.state.history || 'live',
+			_this = this;
 
-		if (this.state.historyVisible) {
-			this._stopPoll();
-			this._pollPeriod = FAST_POLL_PERIOD;
-			this._startPoll();
-		} else {
-			this._pollPeriod = SLOW_POLL_PERIOD;
-		}
+		this.setState({ history: h, historyVisible: !this.state.historyVisible }, function () {
+			if (_this.state.historyVisible) {
+				// visible history - reset poll speed
+				_this._pollPeriod = SLOW_POLL_PERIOD;
 
-		this.setState({ history: h, historyVisible: !this.state.historyVisible });
+				// trigger a sweep if we're not already polling
+				if (!_this.state.polling) {
+					_this._startPoll();
+				}
+
+			} else {
+				// hidden history - poll faster
+				_this._pollPeriod = FAST_POLL_PERIOD;
+			}
+		});
 	},
 
 	_setHistory: function(e) {
+		var _this = this,
+			cleared_ch = assign({}, this.state.ch);
 
-		this._stopPoll();
-		this.setState({ history: e.target.value });
-		this._startPoll();
+		cleared_ch.data = [];
+		this.setState({ ch: cleared_ch, history: e.target.value }, function () {
+			if (!_this.state.polling) {
+				_this._startPoll();
+			}
+		});
 	},
 
 	_clearHistory: function() {
