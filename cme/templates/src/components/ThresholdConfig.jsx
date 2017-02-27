@@ -293,12 +293,17 @@ var ThresholdConfig = React.createClass({
 		// value is invalid.
 		if (e.target.className.includes('error')) return;
 
-		// At this point we have validated threshold value.
-		// Make it a float and convert from percentage if necessary.
+		// Get the threshold we're working with
 		obj[n] = this.state[n];
+
+		// If there's no id and the value we're trying to set is empty, then this is a NOP
+		if (!obj[n].id && !v) return;
+
+		// At this point we have validated threshold value.
+		// Make it a float and convert from percentage if necessary.		
 		var newvalue = this.state.percent ? toAbsolute(v, this.state.nominal) : parseFloat(v);
 
-		if (newvalue === obj[n].value) return; // no changes made
+		if (newvalue === obj[n].value) return; // no changes were made
 
 		// New thresholds don't have any id, but we've added one internally
 		// that starts with underscore ('_'), so we need to delete it
