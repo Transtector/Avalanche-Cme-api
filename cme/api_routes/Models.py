@@ -61,7 +61,7 @@ class ChannelManager:
 		self._Channels = {}
 
 
-	def clear_channel(self, ch_id):
+	def clear_channel_history(self, ch_id):
 		''' Clears the RRD for the identified channel by
 			deleting the RRD.  It will get recreated by
 			the Cme-hw loop.
@@ -77,6 +77,19 @@ class ChannelManager:
 
 		# create or overwrite any existing chX.rrd.reset file
 		open(os.path.join(CHDIR, ch_rrd_reset), 'w').close()
+
+
+	def clear_channel_alarms(self, ch_id):
+		''' Clears the channel alarms for the identified channel
+			by setting the 'chX.alarms.reset' signal file.
+		'''
+		if not ch_id in self._list_channels():
+			return
+
+		ch_alarms_reset = ch_id + '.alarms.reset'
+
+		# create or overwrite any existing chX.rrd.reset file
+		open(os.path.join(CHDIR, ch_alarms_reset), 'w').close()
 
 
 	def get_channel(self, ch_id):
@@ -236,6 +249,26 @@ class Channel():
 		self.data = None
 
 
+	def clear_alarms(self):
+
+		self.alarms = None
+
+
+	def load_alarms(self):
+		self.alarms = None
+
+		ch_alarms_file = os.path.join(CHDIR, channel.id + '_alarms.json')
+
+		# just return if channel alarms are being reset
+		if os.path.isfile(os.path.join(CHDIR, channel.id + '.alarms.reset')):
+			return
+
+		# read alarms from file
+		if os.path.isfile(ch_alarms_file):
+			with open(ch_alarms_file, 'r') as f:
+				self.alarms = json.load(f)
+
+
 	def load_config(self):
 
 		# Load user-configurable attributes for the channel.  Channel's sensors
@@ -269,7 +302,6 @@ class Channel():
 
 				# load up sensor thresholds 
 				s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
-
 
 
 	def save_config(self):

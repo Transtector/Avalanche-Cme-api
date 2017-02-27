@@ -78,10 +78,16 @@ def channels():
 
 
 # CME channel updates
-# DELETE a channel will clear its RRD database history
-# GET a complete channel or bits of it (name, description, error, controls, or sensors)
-# POST updates to the name or description (or both at the same time)
-# Supply an optional query string 'h=[RESOLUTION]' to GET  channel history (RRD) data
+# 	DELETE a channel will clear its RRD database history
+# 	GET a complete channel or bits of it (name, description, error, controls, or sensors)
+# 	POST updates to the name or description (or both at the same time)
+#
+# Supports optional query strings to specify channel history and alarms.
+# History is attached in the 'data' attribute, and alarms are in the 'alarms'.
+#
+# h=[resolution], resolution can be one of 'live', 'daily', 'weekly', 'monthly', 'yearly'
+# a=True | 1
+# If no h or a parameter, then data and alarms attributes are not returned.
 @router.route('/ch/<int:ch_index>', methods=['GET', 'POST', 'DELETE'])
 @router.route('/ch/<int:ch_index>/name', methods=['GET', 'POST'])
 @router.route('/ch/<int:ch_index>/description', methods=['GET', 'POST'])
@@ -101,41 +107,45 @@ def channel(ch_index):
 
 	isFullChannel = item not in ['name', 'description', 'error', 'recordAlarms']
 
-	for method in switch(request.method):
-		if method('DELETE'): 
-			# clear any history in ch buffer
-			ch.clear_history()
+	if request.method == 'DELETE': 
+		# clear any history in ch buffer
+		ch.clear_history()
 
-			# clear the channel's historic data
-			ch_mgr.clear_channel(ch.id)
+		# clear the channel's historic data
+		ch_mgr.clear_channel_history(ch.id)
 
-			return json_response({ ch.id: ch })
+		return json_response({ ch.id: ch })
 
-		if method('POST'):
-			# update name or description (or both) from POST data
-			ch_update = request.get_json()
-			ch.name = ch_update.get('name', ch.name)
-			ch.description = ch_update.get('description', ch.description)
-			ch.recordAlarms = ch_update.get('recordAlarms', ch.recordAlarms)
-			break
-	
-		if method():
-			# default GET request - see if we need to read ch history
-			# check query string for h(istory) = RESOLUTION 
+
+	if request.method == 'POST':
+		# update name or description (or both) from POST data
+		ch_update = request.get_json()
+		ch.name = ch_update.get('name', ch.name)
+		ch.description = ch_update.get('description', ch.description)
+		ch.recordAlarms = ch_update.get('recordAlarms', ch.recordAlarms)
+
+	else:
+		# GET request - see if we need to read ch history
+		# check query string for h(istory) = RESOLUTION 
+		if isFullChannel:
 			h = request.args.get('h')
 			h = h.lower() if h else None
 
-			for case in switch(h):
-				if case('live', 'daily', 'weekly', 'monthly', 'yearly'):
-					ch.load_history(h)
-					break
+			if h in ['live', 'daily', 'weekly', 'monthly', 'yearly']:
+				ch.load_history(h)
+			else:
+				ch.clear_history()
 
-				if case():
-					# default (no or unknown 'h' param - clear ch.data)
-					# this case runs when no plot is needed
-					ch.clear_history()
-					pass
+			a = request.args.get('a')
+			a = a.lower() if a else None
 
+			if a in ['true', '1']:
+				ch.load_alarms()
+			else:
+				ch.clear_alarms()
+
+
+	# return either full channel or the item requested
 	if isFullChannel:
 		return json_response({ ch.id: ch })
 
@@ -165,6 +175,50 @@ def ch_config(ch_index):
 
 	return json_response(response)
 
+
+
+@router.route('/ch/<int:ch_index>/alarms/', methods=['GET', 'DELETE'])
+@require_auth
+def ch_alarms(ch_index):
+	# retrieve the desired channel configuration	
+	ch = ch_mgr.get_channel('ch' + str(ch_index))
+
+	if not ch:
+		raise APIError('Channel not found', 404)
+
+	if request.method == 'DELETE':
+		ch.clear_alarms()
+		ch_mgr.clear_channel_alarms(ch.id)
+
+	else:
+		ch.load_alarms()
+
+	return json_response({ ch.id + '.alarms': ch.alarms })
+
+
+@router.route('/ch/<int:ch_index>/history/', methods=['GET', 'DELETE'])
+@require_auth
+def ch_history(ch_index):
+	# retrieve the desired channel configuration	
+	ch = ch_mgr.get_channel('ch' + str(ch_index))
+
+	if not ch:
+		raise APIError('Channel not found', 404)
+
+	if request.method == 'DELETE':
+		ch.clear_history()
+		ch_mgr.clear_channel_history(ch.id)
+
+	else:
+		h = request.args.get('h')
+		h = h.lower() if h else None
+
+		if not h in ['live', 'daily', 'weekly', 'monthly', 'yearly']:
+			raise APIError('Bad request', 400)
+		
+		ch.load_history(h)
+
+	return json_response({ ch.id + '.history' + '.' + h: ch.data })
 
 
 # CME channel sensors request
