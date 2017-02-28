@@ -141,7 +141,7 @@ var ChannelPanel = React.createClass({
 			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record'),
 			recordTitle = this.state.recording ? 'Stop recording all alarms' : 'Record all alarms',
 
-			throbberClass = 'throbber-loader' + (this.state.chRequest ? '' : 'hidden');
+			throbberClass = 'throbber-loader' + (this.state.chRequest ? '' : ' invisible');
 
 		return (
 			<div className='ch-controls'>

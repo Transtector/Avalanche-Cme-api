@@ -224,6 +224,11 @@ display inline-block {
   animation: throbber-loader 2000ms 450ms infinite ease-out;
   right: -1.6em;
 }
+.throbber-loader.invisible,
+.throbber-loader.invisible:before,
+.throbber-loader.invisible:after {
+  background: transparent;
+}
 header {
   position: relative;
   z-index: 1;
