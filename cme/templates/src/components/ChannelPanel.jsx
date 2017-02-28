@@ -141,11 +141,11 @@ var ChannelPanel = React.createClass({
 			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record'),
 			recordTitle = this.state.recording ? 'Stop recording all alarms' : 'Record all alarms',
 
-			throbberClass = 'throbber-loader' + (this.state.chRequest ? '' : ' invisible');
+			chStatus = this.state.chRequest ? 'ch-status' : 'hidden');
 
 		return (
 			<div className='ch-controls'>
-				<div className={throbberClass}></div>
+				<div className={chStatus}></div>
 				<button className={playClass} title={playTitle} onClick={this._togglePolling} />
 				<button className={recordClass} title={recordTitle} onClick={this._toggleRecording} />
 				<button className='btn icon-view-alarms' title='View channel alarms' onClick={this._toggleAlarmsVisibility} />
