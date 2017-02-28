@@ -49,6 +49,7 @@ var ChannelPanel = React.createClass({
 			activeId: '',
 			polling: true,
 			recording: false,
+			alarmsVisible: false,
 			history: '',
 			historyVisible: false,
 			historyTraceVisible: [ true, true ]
@@ -143,6 +144,7 @@ var ChannelPanel = React.createClass({
 			<div className='ch-controls'>
 				<button className={playClass} title={playTitle} onClick={this._togglePolling} />
 				<button className={recordClass} title={recordTitle} onClick={this._toggleRecording} />
+				<button className='btn icon-view-alarms' title='View channel alarms' onClick={this._toggleAlarmsVisibility} />
 			</div>
 		);
 	},
@@ -414,7 +416,7 @@ var ChannelPanel = React.createClass({
 		if (newState.ch && !this.state.activeId) {
 			newState.name = newState.ch.name;				
 			newState.description = newState.ch.description;
-			newState.recordAlarms = newState.ch.recordAlarms;
+			newState.recording = newState.ch.recordAlarms;
 		}
 
 		this.setState(newState, function () {
@@ -468,6 +470,11 @@ var ChannelPanel = React.createClass({
 		// fire off the channel attribute change request and update the UI state
 		Actions.channel(this.props.id, { recordAlarms: !this.state.recording });
 		this.setState({ recording: !this.state.recording });
+	},
+
+	_toggleAlarmsVisibility: function() {
+		
+		this.setState({ alarmsVisible: !this.state.alarmsVisible });
 	},
 
 	_toggleHistoryVisibility: function() {
