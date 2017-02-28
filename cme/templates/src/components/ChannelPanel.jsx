@@ -304,9 +304,7 @@ var ChannelPanel = React.createClass({
 		function updatePlot(el) {
 			if (!_this.state.historyVisible || !_this.state.ch.data || !el) return;
 
-			// this generates the plot
-			console.log("Preparing to plot: ", el);
-
+			// generate the plot here
 			var plot = $.plot($(el), plotSeries, plotOptions);
 
 			// get/set flot series colors from 'live'
