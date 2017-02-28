@@ -124,14 +124,14 @@ error-badge-size = 30px
 	height 34px
 	overflow hidden
 	button
-		height 48px
-		width 48px
-		margin-top -6px
+		height 40px
+		width 40px
+		margin-top -5px
 		padding 0
 		border 0px solid rgba(255,255,255,0.3)
 		border-radius 100%
 		background-color transparent
-		backgground-size 28px 28px
+		background-size 28px 28px
 	.icon-play
 		background-image svg('play')
 	.icon-pause
@@ -144,12 +144,15 @@ error-badge-size = 30px
 		background-image svg('record-check', '0 0 1024 1024', error-color)
 	.ch-status
 		position absolute
+		background-color #999
 		width 8px
 		height 8px
+		left 8px
 		top 50%
-		margin-top -4px
-		background-color #00aa00
+		margin-top -5px
 		border-radius 100%
+		&.active
+			background-color #0e0
 		
 .btn.ch-history-badge
 	position absolute

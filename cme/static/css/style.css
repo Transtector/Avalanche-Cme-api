@@ -1496,9 +1496,9 @@ li.input-group-cluster > .btn:disabled {
   overflow: hidden;
 }
 .ch-controls button {
-  height: 48px;
-  width: 48px;
-  margin-top: -6px;
+  height: 40px;
+  width: 40px;
+  margin-top: -5px;
   padding: 0;
   border: 0px solid rgba(255,255,255,0.3);
   -webkit-border-radius: 100%;
@@ -1507,7 +1507,7 @@ li.input-group-cluster > .btn:disabled {
   -o-border-radius: 100%;
   border-radius: 100%;
   background-color: transparent;
-  backgground-size: 28px 28px;
+  background-size: 28px 28px;
 }
 .ch-controls .icon-play {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'><g fill='#fff' stroke='#fff'><path d='m248,248l600,300l-600,300l0,-600z'/></g></svg>");
@@ -1526,16 +1526,20 @@ li.input-group-cluster > .btn:disabled {
 }
 .ch-controls .ch-status {
   position: absolute;
+  background-color: #999;
   width: 8px;
   height: 8px;
+  left: 8px;
   top: 50%;
-  margin-top: -4px;
-  background-color: #0a0;
+  margin-top: -5px;
   -webkit-border-radius: 100%;
   -moz-border-radius: 100%;
   -ms-border-radius: 100%;
   -o-border-radius: 100%;
   border-radius: 100%;
+}
+.ch-controls .ch-status.active {
+  background-color: #0e0;
 }
 .btn.ch-history-badge {
   position: absolute;

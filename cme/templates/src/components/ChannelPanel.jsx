@@ -140,7 +140,7 @@ var ChannelPanel = React.createClass({
 			playTitle = this.state.polling ? 'Pause channel updates' : 'Resume channel updates',
 			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record'),
 			recordTitle = this.state.recording ? 'Stop recording all alarms' : 'Record all alarms',
-			chStatus = this.state.chRequest ? 'ch-status' : 'hidden';
+			chStatus = 'ch-status' + (this.state.chRequest ? ' active' : '');
 
 		return (
 			<div className='ch-controls'>
