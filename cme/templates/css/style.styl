@@ -171,27 +171,30 @@ input[type="text"]
 .throbber-loader:not(:required)
 	animation throbber-loader 2000ms 300ms infinite ease-out
 	background #dde2e7
- 	display inline-block
-	position relative
-	text-indent -9999px
-	width 0.9em
-	height 1.5em
-	margin 0 1.6em
-.throbber-loader:not(:required):before, .throbber-loader:not(:required):after
-	background #dde2e7
-	content '\x200B'
-	display inline-block
-	width 0.9em
-	height 1.5em
 	position absolute
-	top 0
+	text-indent -9999px
+	width 10px
+	height 10px
+	top 50%
+	margin-top -5px
+	border-radius 100%
+.throbber-loader:not(:required):before, 
+.throbber-loader:not(:required):after
+	background #dde2e7
+	content '\200B'
+	position absolute
+	width 10px
+	height 10px
+	border-radius 100%
 .throbber-loader:not(:required):before
 	animation throbber-loader 2000ms 150ms infinite ease-out
-	left -1.6em
+	right 10px
 .throbber-loader:not(:required):after
 	animation throbber-loader 2000ms 450ms infinite ease-out
-	right -1.6em
-.throbber-loader.invisible, .throbber-loader.invisible:before, .throbber-loader.invisible:after
+	left 10px
+.throbber-loader.invisible, 
+.throbber-loader.invisible:before, 
+.throbber-loader.invisible:after
 	background transparent
 	
 
