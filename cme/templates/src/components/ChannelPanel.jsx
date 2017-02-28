@@ -42,6 +42,7 @@ var ChannelPanel = React.createClass({
 
 	getInitialState: function() {
 		return {
+			chRequest: false,
 			ch: null,
 			name: '',
 			description: '',
@@ -138,10 +139,13 @@ var ChannelPanel = React.createClass({
 		var playClass = 'btn ' + (this.state.polling ? 'icon-pause' : 'icon-play'),
 			playTitle = this.state.polling ? 'Pause channel updates' : 'Resume channel updates',
 			recordClass = 'btn ' + (this.state.recording ? 'icon-record-check' : 'icon-record'),
-			recordTitle = this.state.recording ? 'Stop recording all alarms' : 'Record all alarms';
+			recordTitle = this.state.recording ? 'Stop recording all alarms' : 'Record all alarms',
+
+			throbberClass = 'throbber-loader' + (this.state.chRequest ? '' : 'hidden');
 
 		return (
 			<div className='ch-controls'>
+				<div className={throbberClass}></div>
 				<button className={playClass} title={playTitle} onClick={this._togglePolling} />
 				<button className={recordClass} title={recordTitle} onClick={this._toggleRecording} />
 				<button className='btn icon-view-alarms' title='View channel alarms' onClick={this._toggleAlarmsVisibility} />
@@ -410,7 +414,7 @@ var ChannelPanel = React.createClass({
 
 	_onChannelChange: function() {
 		var _this = this,
-			newState = { ch: Store.getState().channel_objs[this.props.id] }
+			newState = { ch: Store.getState().channel_objs[this.props.id], chRequest: false }
 
 		// read name, description into state if not currently editing them
 		if (newState.ch && !this.state.activeId) {
@@ -419,7 +423,7 @@ var ChannelPanel = React.createClass({
 			newState.recording = newState.ch.recordAlarms;
 		}
 
-		this.setState(newState, function () {
+		this.setState(newState, function() {
 
 			if (!_this._pollTime || !_this.state.polling) return;
 
@@ -434,10 +438,14 @@ var ChannelPanel = React.createClass({
 	},
 
 	_startPoll: function() {
-		var h = this.state.historyVisible ? this.state.history : null;
+		var _this = this,
+			h = this.state.historyVisible ? this.state.history : null;
 		
 		this._pollTime = moment().valueOf();
-		Actions.channel(this.props.id, null, h);
+
+		this.setState({ chRequest: true }, function() {
+			Actions.channel(_this.props.id, null, h);
+		});
 	},
 
 	_stopPoll: function() {
@@ -466,14 +474,18 @@ var ChannelPanel = React.createClass({
 	},
 
 	_toggleRecording: function() {
+		var _this = this,
+			isRecording = this.state.recording;
 
 		// fire off the channel attribute change request and update the UI state
-		Actions.channel(this.props.id, { recordAlarms: !this.state.recording });
-		this.setState({ recording: !this.state.recording });
+		this.setState({ recording: !isRecording, chRequest: true }, function() {
+			Actions.channel(_this.props.id, { recordAlarms: !isRecording });
+
+		});
 	},
 
 	_toggleAlarmsVisibility: function() {
-		
+
 		this.setState({ alarmsVisible: !this.state.alarmsVisible });
 	},
 
@@ -512,9 +524,12 @@ var ChannelPanel = React.createClass({
 	},
 
 	_clearHistory: function() {
+		var _this = this;
+
 		if (confirm("Are you sure?  This action cannot be undone.")) {
-			Actions.deleteChannel(this.props.id);
-			this._toggleHistoryVisibility();
+			this.setState({ chRequest: true }, function() {
+				Actions.deleteChannel(_this.props.id);
+			})
 		}
 	},
 
@@ -573,10 +588,10 @@ var ChannelPanel = React.createClass({
 		obj[n] = v;
 		//console.log('You want to update: ', obj);
 
-		this.setState({ activeId: '' });
+		this.setState({ activeId: '', chRequest: true }, function() {
+			Actions.channel(_this.props.id, obj);
+		});
 
-		// send the change request if we've made a change
-		Actions.channel(this.props.id, obj);
 	}
 
 });
