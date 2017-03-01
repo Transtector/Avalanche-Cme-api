@@ -54,7 +54,7 @@ def logs(filename=None):
 
 		# if clearing, use a temporary file to return current log
 		if clear:
-			f = tempfile.NamedTemporaryFile(mode="w+")
+			f = tempfile.NamedTemporaryFile(mode="wb+")
 			f.writelines([l for l in open(path).readlines()])
 			f.seek(0)
 			response = send_file(f, mimetype='text/plain', as_attachment=download, attachment_filename=filename)
