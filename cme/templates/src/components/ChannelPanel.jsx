@@ -328,7 +328,7 @@ var ChannelPanel = React.createClass({
 
 				<div className="ch-plot-header">
 					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}></button>
-					<button className="btn reset" onClick={this._clearHistory}>Clear</button>
+					<button className="btn reset" onClick={this._clearHistory}>Clear History</button>
 					<button className="btn export icon-download" onClick={this._exportHistory} />
 				</div>
 
@@ -363,20 +363,71 @@ var ChannelPanel = React.createClass({
 
 	_renderAlarms: function() {
 
-		var _this = this;
-		var plotSeries = [];
-		var plotOptions = {}
+		/* 	ch.alarms = { 
+				s0: {
+					WARNING: [ [t0, v0], ..., null, [ tx, vx], ..., [ tn, vn ] ],
+					ALARM: [ ] 
+				},
+				s1: {
+					WARNING: [],
+					ALARM: []
+				},
+				...,
+				sN (but we only support 2 sensors for now...)
+			}
+		*/
 
-		/*{
-			xaxes: [ { 
-				mode: "time",
-				timezone: "browser",
-				min: t_start, max: t_end,
-				ticks: [ t_start, t_end ],
-				timeformat: "%I:%M:%S %P",
-			} ],
-			yaxes: [ y1Axis, y2Axis ]
-		};*/
+		var _this = this,
+			plotOptions = {},
+			plotSeries = [],
+			t_start = Date.now(),
+			t_end = 0,
+			alarms = this.state.ch.alarms;
+
+		function tickFormatter(val, axis) {
+			var digits = val > 1 ? (val > 10 ? 1 : 2) : (val < 0.1 ? 1 : 3);
+			return val.toFixed(digits);
+		}
+
+		function pushDataSeries(sensorId, classification) {
+			var series = [];
+
+			if (alarms[sensorId] && alarms[sensorId][classification]) {
+				alarms[sensorId][classification].foreach(function(p) {
+					var t = p[0] * 1000;
+					var y = sensorId == 's1' ? 2 : 1;
+					
+					t_start = t < t_start ? t : t_start;
+					t_end = t > t_end ? t : t_end;
+					series.push([ t, p[1] ]);
+				});
+
+				plotSeries.push( { data: series, yaxis: y } );
+			}
+		} 
+
+		if (this.state.alarmsVisible && alarms) {
+
+			['s0', 's1'].foreach(function(sId) {
+				['WARNING', 'ALARM'].foreach(function(cls) {
+					pushDataSeries(sId, cls);
+				});
+			});
+
+			plotOptions = {
+				xaxes: [ { 
+					mode: "time",
+					timezone: "browser",
+					min: t_start, max: t_end,
+					ticks: [ t_start, t_end ],
+					timeformat: "%I:%M:%S %P",
+				} ],
+				yaxes: [
+					{ y1Axis: { tickFormatter: tickFormatter, autoscaleMargin: 1 }}, 
+					{ y2Axis: { position: 'right', tickFormatter: tickFormatter, autoscaleMargin: 1 }}
+				]
+			}
+		}
 
 		function updatePlot(el) {
 			if (!_this.state.alarmsVisible || !_this.state.ch.alarms || !el) return;
@@ -390,7 +441,7 @@ var ChannelPanel = React.createClass({
 
 				<div className="ch-plot-header">
 					<button className="btn close icon-cross" onClick={this._toggleAlarmsVisibility}></button>
-					<button className="btn reset" onClick={this._clearAlarms}>Clear</button>
+					<button className="btn reset" onClick={this._clearAlarms}>Clear Alarms</button>
 					<button className="btn export icon-download" onClick={this._exportHistory} />
 				</div>
 
