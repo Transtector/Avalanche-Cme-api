@@ -106,6 +106,8 @@ var ChannelPanel = React.createClass({
 
 					{this._renderHistory(primary, secondary)}
 
+					{this._renderAlarms()}
+
 					{this._renderConfig(primary, secondary)}
 				</div>
 
@@ -206,7 +208,7 @@ var ChannelPanel = React.createClass({
 
 				// Calculate 'live' min/max for y-axis scaling
 				if (live) {
-				   if (y1) {
+					if (y1) {
 						y1min = !y1min || y1min > y1 ? y1 : y1min;
 						y1max = !y1max || y1max < y1 ? y1 : y1max;
 					}
@@ -322,9 +324,9 @@ var ChannelPanel = React.createClass({
 		}
 
 		return (
-			<div className={'ch-history' + (this.state.historyVisible ? ' open' : '')}>
+			<div className={'ch-plot' + (this.state.historyVisible ? ' open' : '')}>
 
-				<div className="ch-history-header">
+				<div className="ch-plot-header">
 					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}></button>
 					<button className="btn reset" onClick={this._clearHistory}>Clear</button>
 					<button className="btn export icon-download" onClick={this._exportHistory} />
@@ -334,7 +336,7 @@ var ChannelPanel = React.createClass({
 					<div className="plot" ref={updatePlot}></div>
 				</div>
 
-				<div className="ch-history-footer">
+				<div className="ch-plot-footer">
 					<button className="btn trace pri" disabled={traceDisabled[0]} id="trace1" onClick={this._toggleTraceVisibility}>
 						<span style={{background: this._historyTraceColors[0]}}></span>
 						{primarySensor && primarySensor.unit ? primarySensor.unit : ''}
@@ -354,6 +356,50 @@ var ChannelPanel = React.createClass({
 						<span style={{background: this._historyTraceColors[1] }}></span>
 						{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
 					</button>
+				</div>
+			</div>
+		);
+	},
+
+	_renderAlarms: function() {
+
+		var _this = this;
+		var plotSeries = [];
+		var plotOptions = {}
+
+		/*{
+			xaxes: [ { 
+				mode: "time",
+				timezone: "browser",
+				min: t_start, max: t_end,
+				ticks: [ t_start, t_end ],
+				timeformat: "%I:%M:%S %P",
+			} ],
+			yaxes: [ y1Axis, y2Axis ]
+		};*/
+
+		function updatePlot(el) {
+			if (!_this.state.alarmsVisible || !_this.state.ch.alarms || !el) return;
+
+			// generate the plot here
+			var plot = $.plot($(el), plotSeries, plotOptions);
+		}
+
+		return (
+			<div className={'ch-plot' + (this.state.alarmsVisible ? ' open' : '')}>
+
+				<div className="ch-plot-header">
+					<button className="btn close icon-cross" onClick={this._toggleAlarmsVisibility}></button>
+					<button className="btn reset" onClick={this._clearAlarms}>Clear</button>
+					<button className="btn export icon-download" onClick={this._exportHistory} />
+				</div>
+
+				<div className="plot-wrapper">
+					<div className="plot" ref={updatePlot}></div>
+				</div>
+
+				<div className="ch-plot-footer">
+
 				</div>
 			</div>
 		);
@@ -484,8 +530,13 @@ var ChannelPanel = React.createClass({
 	},
 
 	_toggleAlarmsVisibility: function() {
-
-		this.setState({ alarmsVisible: !this.state.alarmsVisible });
+		var _this = this;
+		this.setState({ alarmsVisible: !this.state.alarmsVisible }, function() {
+			// trigger an update to refresh alarms if we're not polling
+			if (_this.state.alarmsVisible && !_this.state.polling) {
+					_this._startPoll();
+			} 
+		});
 	},
 
 	_toggleHistoryVisibility: function() {
@@ -528,8 +579,19 @@ var ChannelPanel = React.createClass({
 		if (confirm("Are you sure?  This action cannot be undone.")) {
 			this.setState({ chRequest: true }, function() {
 				Actions.deleteChannel(_this.props.id);
-			})
+			});
 		}
+	},
+
+	_clearAlarms: function() {
+		var _this = this;
+
+		if (confirm("Are you sure?  This action cannot be undone.")) {
+			this.setState({ chRequest: true }, function() {
+				alert("TODO:  Support this Action!"); //Actions.deleteChannel(_this.props.id);
+			});
+		}
+
 	},
 
 	_exportHistory: function() {

@@ -1572,7 +1572,7 @@ li.input-group-cluster > .btn:disabled {
 .btn.ch-history-badge[disabled]::before {
   background-color: #909090;
 }
-.ch-history {
+.ch-plot {
   position: absolute;
   top: 0;
   height: 100%;
@@ -1582,25 +1582,25 @@ li.input-group-cluster > .btn:disabled {
   background-color: #fff;
   text-align: center;
 }
-.ch-history.open {
+.ch-plot.open {
   z-index: 1;
 }
-.ch-history-header,
-.ch-history-footer {
+.ch-plot-header,
+.ch-plot-footer {
   position: relative;
   height: 24px;
   text-align: center;
   background-color: #3ea4e1;
 }
-.ch-history-header > .select-wrapper,
-.ch-history-footer > .select-wrapper {
+.ch-plot-header > .select-wrapper,
+.ch-plot-footer > .select-wrapper {
   position: relative;
   top: 3px;
   display: inline-block;
   cursor: pointer;
 }
-.ch-history-header > .select-wrapper select,
-.ch-history-footer > .select-wrapper select {
+.ch-plot-header > .select-wrapper select,
+.ch-plot-footer > .select-wrapper select {
   position: relative;
   padding-right: 24px;
   -webkit-appearance: none;
@@ -1620,8 +1620,8 @@ li.input-group-cluster > .btn:disabled {
   cursor: pointer;
   outline: none;
 }
-.ch-history-header .btn,
-.ch-history-footer .btn {
+.ch-plot-header .btn,
+.ch-plot-footer .btn {
   font-size: 80%;
   font-weight: bold;
   text-transform: uppercase;
@@ -1632,35 +1632,35 @@ li.input-group-cluster > .btn:disabled {
   min-width: 24px;
   height: 24px;
 }
-.ch-history-header .btn.close,
-.ch-history-footer .btn.close {
+.ch-plot-header .btn.close,
+.ch-plot-footer .btn.close {
   position: absolute;
   left: 0;
   padding-left: 30px;
   background-position-x: 0;
 }
-.ch-history-header .btn.export,
-.ch-history-footer .btn.export {
+.ch-plot-header .btn.export,
+.ch-plot-footer .btn.export {
   position: absolute;
   right: 0;
 }
-.ch-history-header .btn.trace,
-.ch-history-footer .btn.trace {
+.ch-plot-header .btn.trace,
+.ch-plot-footer .btn.trace {
   position: absolute;
   padding-left: 15px;
   background-color: transparent;
   text-transform: none;
 }
-.ch-history-header .btn.trace.pri,
-.ch-history-footer .btn.trace.pri {
+.ch-plot-header .btn.trace.pri,
+.ch-plot-footer .btn.trace.pri {
   left: 0;
 }
-.ch-history-header .btn.trace.sec,
-.ch-history-footer .btn.trace.sec {
+.ch-plot-header .btn.trace.sec,
+.ch-plot-footer .btn.trace.sec {
   right: 0;
 }
-.ch-history-header .btn.trace > span,
-.ch-history-footer .btn.trace > span {
+.ch-plot-header .btn.trace > span,
+.ch-plot-footer .btn.trace > span {
   position: absolute;
   top: 50%;
   margin-top: -3px;
@@ -1668,11 +1668,11 @@ li.input-group-cluster > .btn:disabled {
   width: 6px;
   height: 6px;
 }
-.ch-history .plot-wrapper {
+.ch-plot .plot-wrapper {
   width: 100%;
   height: 197px;
 }
-.ch-history .plot {
+.ch-plot .plot {
   width: 100%;
   height: 100%;
   margin: 0;
