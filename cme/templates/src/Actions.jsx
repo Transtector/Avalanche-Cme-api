@@ -285,7 +285,7 @@ var Actions = {
 	},
 
 	channel: function(ch_id, ch_config, ch_history, ch_alarms) {
-		//if (!dispatchRequest('reading ' + ch_id + ' (' + JSON.stringify(ch_config) + ', ' + ch_history + ')')) return;
+		if (!dispatchRequest('reading ' + ch_id + ' (' + JSON.stringify(ch_config) + ', ' + ch_history + ')')) return;
 
 		CmeAPI.channel(ch_id, ch_config, ch_history, ch_alarms)
 			.done(function(data) {

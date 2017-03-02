@@ -172,7 +172,7 @@ var Clock = React.createClass({
 
 		Store.addChangeListener(Constants.CLOCK, this._onClockChange);
 
-		if (this.props.flavor === 'widget')
+		if (this.props.flavor === 'widget' && this.props.pollPeriod > 0)
 			this._startPoll();
 	},
 
@@ -366,7 +366,10 @@ var Clock = React.createClass({
 
 			time = clock.format(timeformat);
 
-			clockClasses = classNames('clock')
+			clockClasses = classNames({
+				'clock': true,
+				'hidden': this.props.pollPeriod < 0
+			});
 		}
 
 		return (
@@ -387,7 +390,7 @@ var Clock = React.createClass({
 		// Set the state and set up next clock poll
 		this.setState({ clock: Store.getState().clock }, function () {
 
-			if (!_this._pollTime) return;
+			if (!_this._pollTime || _this.props.pollPeriod < 0) return;
 
 			var age = moment().valueOf() - _this._pollTime,
 				period = _this.props.pollPeriod - (age % _this.props.pollPeriod);

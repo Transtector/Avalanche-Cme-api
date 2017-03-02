@@ -42,7 +42,7 @@ var Thermometer = React.createClass({
 	componentDidMount: function() {
 		Store.addChangeListener(Constants.TEMPERATURE, this._onTempChange);
 
-		if (this.props.flavor === 'widget')
+		if (this.props.flavor === 'widget' && this.props.pollPeriod > 0)
 			this._startPoll();
 	},
 
@@ -155,7 +155,8 @@ var Thermometer = React.createClass({
 			thermoClasses = classNames({
 				'thermometer': true,
 				'warn': temp_value > config.warningTemp,
-				'alarm': temp_value > config.alarmTemp
+				'alarm': temp_value > config.alarmTemp,
+				'hidden': this.props.pollPeriod < 0
 			});
 
 			display_temperature = utils.formatTemperatureDisplay(temp_value, config.displayUnits, 1);
@@ -173,7 +174,7 @@ var Thermometer = React.createClass({
 	_onTempChange: function() {
 		var _this = this;
 		this.setState({ temperature: Store.getState().temperature }, function () {
-			if (_this._pollStartTime) {
+			if (_this._pollStartTime && _this.props.pollPeriod > 0) {
 
 				var age = moment().valueOf() - _this._pollStartTime,
 					period = (age >= _this.props.pollPeriod)

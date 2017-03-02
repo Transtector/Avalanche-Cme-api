@@ -25,7 +25,9 @@ var HomePanel = React.createClass({
 	getInitialState: function() {
 		return {
 			channels: Store.getState().channels,
-			config: Store.getState().config
+			config: Store.getState().config,
+			pollClock: 1000,
+			pollTemp: 10000
 		}
 	},
 
@@ -44,7 +46,7 @@ var HomePanel = React.createClass({
 
 	render: function() {
 		return (
-			<div className="panel" id="home">
+			<div className="panel" id="home" onKeyDown={this._onKeyDown}>
 				<div className="panel-header">
 					<div className="title">
 						Status
@@ -55,9 +57,9 @@ var HomePanel = React.createClass({
 					</div>
 
 					<div className='widgets'>
-						<Clock config={this.state.config.clock} flavor='widget' pollPeriod={1000} />
+						<Clock config={this.state.config.clock} flavor='widget' pollPeriod={this.state.pollClock} />
 
-						<Thermometer config={this.state.config.temperature} flavor='widget' pollPeriod={10000} />
+						<Thermometer config={this.state.config.temperature} flavor='widget' pollPeriod={this.state.pollTemp} />
 					</div>
 				</div>
 
@@ -70,6 +72,18 @@ var HomePanel = React.createClass({
 				</div>
 			</div>
 		);
+	},
+
+	_onKeyDown: function(e) {
+		console.log("Clock and Thermometer polling toggled...");
+		
+		DASH_KEY_CODE = 189;
+		if (e.shiftKey && e.keyCode === DASH_KEY_CODE) {
+			this.setState({ 
+				pollClock: this.state.pollClock < 0 ? 1000 : -1,
+				pollTemp: this.state.pollTemp < 0 ? 10000 : -1 
+			});
+		}
 	},
 
 	_onChannelsChange: function() {
