@@ -20,9 +20,8 @@ var ChannelPanel = require('./ChannelPanel');
 var Clock = require('./Clock');
 var Thermometer = require('./Thermometer');
 
-
+// application-level key press handler
 var key = require('../keymaster/keymaster.js');
-window.key = key;
 
 var HomePanel = React.createClass({
 
@@ -42,7 +41,7 @@ var HomePanel = React.createClass({
 		// register keypress handler for shift + underscore to
 		// toggle the clock and thermometer polling
 		var _this = this;
-		key('shift+_, ctrl+8, ⌘+8', function(e, handler) {
+		key('ctrl+8, ⌘+8', function(e, handler) {
 
 			console.log("Clock and Thermometer polling toggled: ", handler.shortcut);
 
