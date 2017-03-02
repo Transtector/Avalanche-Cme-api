@@ -332,7 +332,7 @@ var ChannelPanel = React.createClass({
 					<button className="btn export icon-download" onClick={this._exportHistory} />
 				</div>
 
-				<div className="plot-wrapper" style="height:197px;">
+				<div className="plot-wrapper" style={{ height: '197px' }}>
 					<div className="plot" ref={updatePlot}></div>
 				</div>
 
@@ -451,7 +451,7 @@ var ChannelPanel = React.createClass({
 					<button className="btn export icon-download" onClick={this._exportHistory} />
 				</div>
 
-				<div className="plot-wrapper" style="height:221px;">
+				<div className="plot-wrapper" style={{ height: '221px' }}>
 					<div className="plot" ref={updatePlot}></div>
 				</div>
 			</div>
