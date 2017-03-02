@@ -48,7 +48,7 @@ var ChannelPanel = React.createClass({
 			description: '',
 			configOpen: false,
 			activeId: '',
-			polling: true,
+			polling: false,
 			recording: false,
 			alarmsVisible: false,
 			history: '',
@@ -699,7 +699,8 @@ var ChannelPanel = React.createClass({
 	},
 
 	_onBlur: function(e) {
-		var v = e.target.value.trim(),
+		var _this = this,
+			v = e.target.value.trim(),
 			n = e.target.name,
 			obj = {};
 
