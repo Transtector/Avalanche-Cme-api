@@ -57,7 +57,7 @@ var HomePanel = React.createClass({
 	},
 
 	componentWillUnmount: function() {
-		key.unbind('shift+_');
+		key.unbind('ctrl+8, ⌘+8');
 
 		Store.removeChangeListener(Constants.CHANNELS, this._onChannelsChange);
 		Store.removeChangeListener(Constants.CONFIG, this._onConfigChange);
