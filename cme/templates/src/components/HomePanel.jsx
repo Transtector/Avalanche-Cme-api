@@ -22,7 +22,7 @@ var Thermometer = require('./Thermometer');
 
 
 var key = require('../keymaster/keymaster.js');
-
+window.key = key;
 
 var HomePanel = React.createClass({
 
@@ -42,13 +42,15 @@ var HomePanel = React.createClass({
 		// register keypress handler for shift + underscore to
 		// toggle the clock and thermometer polling
 		var _this = this;
-		key('shift+_', function() {
-			console.log("Clock and Thermometer polling toggled...");
+		key('shift+_, ctrl+8, ⌘+8', function(e, handler) {
+
+			console.log("Clock and Thermometer polling toggled: ", handler.shortcut);
 
 			_this.setState({ 
 				pollClock: _this.state.pollClock < 0 ? 1000 : -1,
 				pollTemp: _this.state.pollTemp < 0 ? 10000 : -1 
 			});
+			return false;
 		});
 
 		// request hw channels update to get all available channels
