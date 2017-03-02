@@ -408,8 +408,8 @@ var ChannelPanel = React.createClass({
 
 		if (this.state.alarmsVisible && alarms) {
 
-			['s0', 's1'].foreach(function(sId) {
-				['WARNING', 'ALARM'].foreach(function(cls) {
+			['s0', 's1'].forEach(function(sId) {
+				['WARNING', 'ALARM'].forEach(function(cls) {
 					pushDataSeries(sId, cls);
 				});
 			});
