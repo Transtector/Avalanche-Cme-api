@@ -76,8 +76,9 @@ var HomePanel = React.createClass({
 
 	_onKeyDown: function(e) {
 		console.log("Clock and Thermometer polling toggled...");
+
+		var DASH_KEY_CODE = 189;
 		
-		DASH_KEY_CODE = 189;
 		if (e.shiftKey && e.keyCode === DASH_KEY_CODE) {
 			this.setState({ 
 				pollClock: this.state.pollClock < 0 ? 1000 : -1,
