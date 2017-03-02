@@ -1,5 +1,4 @@
-import os, glob
-import tempfile
+import os, glob, tempfile, shutil
 
 from . import router, request, send_from_directory, send_file, json_response, APIError, require_auth
 from ..common import Config
@@ -55,17 +54,14 @@ def logs(filename=None):
 		# if clearing, use a temporary file to return current log
 		if clear:
 
-			from functools import partial
-
-			with open(path, 'rb') as f:
-				tf = tempfile.NamedTemporaryFile(mode="wb+")
-				for _bytes in iter(partial(f.read, 1024), ''):
-					tf.write(_bytes)
-				tf.seek(0)
-				response = send_file(tf, mimetype='text/plain', as_attachment=download, attachment_filename=filename)
-				tf.seek(0, os.SEEK_END)
-				size = tf.tell()
-				tf.seek(0)
+			tf = tempfile.NamedTemporaryFile(mode="r+b")
+			with open(path, 'r+b') as f:
+				shutil.copyfileobj(f, tf)			
+			tf.seek(0)
+			response = send_file(tf, mimetype='text/plain', as_attachment=download, attachment_filename=filename)
+			tf.seek(0, os.SEEK_END)
+			size = tf.tell()
+			tf.seek(0)
 
 			# If we're clearing a rotated log file, it's name will
 			# end in a number (e.g., "cme.log.1, cme.log.2, ...").
