@@ -284,10 +284,10 @@ var Actions = {
 			.fail(onError);
 	},
 
-	channel: function(ch_id, ch_config, ch_history) {
+	channel: function(ch_id, ch_config, ch_history, ch_alarms) {
 		//if (!dispatchRequest('reading ' + ch_id + ' (' + JSON.stringify(ch_config) + ', ' + ch_history + ')')) return;
 
-		CmeAPI.channel(ch_id, ch_config, ch_history)
+		CmeAPI.channel(ch_id, ch_config, ch_history, ch_alarms)
 			.done(function(data) {
 				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 			})
@@ -315,7 +315,7 @@ var Actions = {
 	thresholds: function(ch_id, sensor_id, thresholds) {
 		if (!dispatchRequest('posting thresholds for ' + ch_id + ':' + sensor_id)) return;
 
-		console.log("You're trying to update these thresholds:\n", thresholds);
+		//console.log("You're trying to update these thresholds:\n", thresholds);
 
 		// when CmeAPI thresholds calls finishes, it returns the entire channel in data
 		CmeAPI.thresholds(ch_id, sensor_id, thresholds)

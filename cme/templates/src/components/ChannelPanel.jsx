@@ -540,7 +540,7 @@ var ChannelPanel = React.createClass({
 		this._pollTime = moment().valueOf();
 
 		this.setState({ chRequest: true }, function() {
-			Actions.channel(_this.props.id, null, h);
+			Actions.channel(_this.props.id, null, h, _this.state.alarmsVisible);
 		});
 	},
 

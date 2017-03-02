@@ -234,15 +234,24 @@ var CmeAPI = {
 		});
 	},
 
-	channel: function(ch_id, ch_config, ch_history) {
+	channel: function(ch_id, ch_config, ch_history, ch_alarms) {
 		var ch_index = parseInt(ch_id.slice(2)),
 			method = (ch_config && !ch_history) ? 'POST' : 'GET',
 			payload = (ch_config && !ch_history) ? JSON.stringify(ch_config) : null,
-			url = API.channel + ch_index;
+			url = API.channel + ch_index,
+			qs = [];
 
 		// add query string to get history
-		if (method == 'GET' && ch_history) {
-			url += '?h=' + ch_history;
+		if (method == 'GET') {
+			if (ch_history) {
+				qs.push('h=' + ch_history);
+			}
+			if (ch_alarms) {
+				qs.push('a=1');
+			}
+
+			if (qs.length > 0)
+				url = url + '?' + qs.join('&');
 		}
 
 		return $.ajax({
