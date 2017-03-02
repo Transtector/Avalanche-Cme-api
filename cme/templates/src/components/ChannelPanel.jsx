@@ -393,7 +393,7 @@ var ChannelPanel = React.createClass({
 			var series = [];
 
 			if (alarms[sensorId] && alarms[sensorId][classification]) {
-				alarms[sensorId][classification].foreach(function(p) {
+				alarms[sensorId][classification].forEach(function(p) {
 					var t = p[0] * 1000;
 					var y = sensorId == 's1' ? 2 : 1;
 					
