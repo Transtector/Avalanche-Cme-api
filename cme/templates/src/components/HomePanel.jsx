@@ -40,17 +40,7 @@ var HomePanel = React.createClass({
 
 		// register keypress handler for shift + underscore to
 		// toggle the clock and thermometer polling
-		var _this = this;
-		key('ctrl+8, ⌘+8', function(e, handler) {
-
-			console.log("Clock and Thermometer polling toggled: ", handler.shortcut);
-
-			_this.setState({ 
-				pollClock: _this.state.pollClock < 0 ? 1000 : -1,
-				pollTemp: _this.state.pollTemp < 0 ? 10000 : -1 
-			});
-			return false;
-		});
+		key('ctrl+8, ⌘+8', this._toggleWidgetPolling);
 
 		// request hw channels update to get all available channels
 		Actions.channels();
@@ -91,6 +81,16 @@ var HomePanel = React.createClass({
 				</div>
 			</div>
 		);
+	},
+
+	_toggleWidgetPolling: function(e, handler) {
+		console.log("Clock and Thermometer polling toggled: ", handler.shortcut);
+
+		this.setState({ 
+			pollClock: this.state.pollClock < 0 ? 1000 : -1,
+			pollTemp: this.state.pollTemp < 0 ? 10000 : -1 
+		});
+		return false;
 	},
 
 	_onChannelsChange: function() {

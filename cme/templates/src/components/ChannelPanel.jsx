@@ -108,7 +108,9 @@ var ChannelPanel = React.createClass({
 
 					{this._renderAlarms()}
 
+					{/*
 					{this._renderConfig(primary, secondary)}
+					*/}
 				</div>
 
 				{this._renderErrors()}
@@ -148,8 +150,10 @@ var ChannelPanel = React.createClass({
 			<div className='ch-controls'>
 				<div className={chStatus}></div>
 				<button className={playClass} title={playTitle} onClick={this._togglePolling} />
+				{ /*
 				<button className={recordClass} title={recordTitle} onClick={this._toggleRecording} />
 				<button className='btn icon-view-alarms' title='View channel alarms' onClick={this._toggleAlarmsVisibility} />
+				*/ }
 			</div>
 		);
 	},
