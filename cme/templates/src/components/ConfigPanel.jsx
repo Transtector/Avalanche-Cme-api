@@ -124,7 +124,7 @@ var ConfigPanel = React.createClass({
 
 		// console.log(group + '.' + key + ': ' + this.props.config[group][key] + ' --> ' + val);
 
-		if (this.props.config[group][key] == val) return; // skip if no change
+		if (this.state.config[group][key] == val) return; // skip if no change
 
 		obj = {};
 		obj[key] = val;
