@@ -393,16 +393,22 @@ var ChannelPanel = React.createClass({
 			var series = [];
 
 			if (alarms[sensorId] && alarms[sensorId][classification]) {
+
 				alarms[sensorId][classification].forEach(function(p) {
-					var t = p[0] * 1000;
-					var y = sensorId == 's1' ? 2 : 1;
+					var t;
+
+					if (!p) {
+						series.push([ p ]); // push null to signify break in event segment
 					
-					t_start = t < t_start ? t : t_start;
-					t_end = t > t_end ? t : t_end;
-					series.push([ t, p[1] ]);
+					} else {
+						t = p[0] * 1000;
+						t_start = t < t_start ? t : t_start;
+						t_end = t > t_end ? t : t_end;
+						series.push([ t, p[1] ]);
+					}
 				});
 
-				plotSeries.push( { data: series, yaxis: y } );
+				plotSeries.push( { data: series, yaxis: sensorId == 's1' ? 2 : 1 } );
 			}
 		} 
 
