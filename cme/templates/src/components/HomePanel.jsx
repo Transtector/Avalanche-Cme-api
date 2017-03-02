@@ -46,7 +46,8 @@ var HomePanel = React.createClass({
 
 	render: function() {
 		return (
-			<div className="panel" id="home" onKeyDown={this._onKeyDown}>
+			<div className="panel" id="home">
+				<input type='hidden' onKeyDown={this._onKeyDown} />
 				<div className="panel-header">
 					<div className="title">
 						Status
@@ -78,7 +79,7 @@ var HomePanel = React.createClass({
 		console.log("Clock and Thermometer polling toggled...");
 
 		var DASH_KEY_CODE = 189;
-		
+
 		if (e.shiftKey && e.keyCode === DASH_KEY_CODE) {
 			this.setState({ 
 				pollClock: this.state.pollClock < 0 ? 1000 : -1,
