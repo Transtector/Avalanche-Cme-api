@@ -20,6 +20,10 @@ var ChannelPanel = require('./ChannelPanel');
 var Clock = require('./Clock');
 var Thermometer = require('./Thermometer');
 
+
+var key = require('../keymaster/keymaster.js');
+
+
 var HomePanel = React.createClass({
 
 	getInitialState: function() {
@@ -35,11 +39,25 @@ var HomePanel = React.createClass({
 		Store.addChangeListener(Constants.CHANNELS, this._onChannelsChange);
 		Store.addChangeListener(Constants.CONFIG, this._onConfigChange);
 
+		// register keypress handler for shift + underscore to
+		// toggle the clock and thermometer polling
+		var _this = this;
+		key('shift+_', function() {
+			console.log("Clock and Thermometer polling toggled...");
+
+			_this.setState({ 
+				pollClock: _this.state.pollClock < 0 ? 1000 : -1,
+				pollTemp: _this.state.pollTemp < 0 ? 10000 : -1 
+			});
+		});
+
 		// request hw channels update to get all available channels
 		Actions.channels();
 	},
 
 	componentWillUnmount: function() {
+		key.unbind('shift+_');
+
 		Store.removeChangeListener(Constants.CHANNELS, this._onChannelsChange);
 		Store.removeChangeListener(Constants.CONFIG, this._onConfigChange);
 	},
@@ -47,7 +65,6 @@ var HomePanel = React.createClass({
 	render: function() {
 		return (
 			<div className="panel" id="home">
-				<input type='hidden' onKeyDown={this._onKeyDown} />
 				<div className="panel-header">
 					<div className="title">
 						Status
@@ -73,19 +90,6 @@ var HomePanel = React.createClass({
 				</div>
 			</div>
 		);
-	},
-
-	_onKeyDown: function(e) {
-		console.log("Clock and Thermometer polling toggled...");
-
-		var DASH_KEY_CODE = 189;
-
-		if (e.shiftKey && e.keyCode === DASH_KEY_CODE) {
-			this.setState({ 
-				pollClock: this.state.pollClock < 0 ? 1000 : -1,
-				pollTemp: this.state.pollTemp < 0 ? 10000 : -1 
-			});
-		}
 	},
 
 	_onChannelsChange: function() {

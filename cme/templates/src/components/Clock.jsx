@@ -154,6 +154,12 @@ var Clock = React.createClass({
 		}
 	},
 
+	componentWillReceiveProps: function(nextProps) {
+		if (this.props.flavor == 'widget' && nextProps.pollPeriod > 0) {
+			this._startPoll();
+		}
+	},
+
 	getInitialState: function() {
 		
 		return { 

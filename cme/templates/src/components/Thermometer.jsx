@@ -39,6 +39,12 @@ var Thermometer = React.createClass({
 		}
 	},
 
+	componentWillReceiveProps: function(nextProps) {
+		if (this.props.flavor == 'widget' && nextProps.pollPeriod > 0) {
+			this._startPoll();
+		}
+	},
+
 	componentDidMount: function() {
 		Store.addChangeListener(Constants.TEMPERATURE, this._onTempChange);
 
