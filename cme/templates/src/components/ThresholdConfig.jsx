@@ -149,7 +149,7 @@ var ThresholdConfig = React.createClass({
 			var obj = _this.state[threshold];
 			return (
 				<td className='input' colSpan='2' rowSpan='2'>
-					<input type='text' id={obj.id} name={threshold}
+					<input type='text' id={obj.id} name={threshold} disabled={true}
 						className={renderClass(obj.id, obj.value)}
 						value={renderValue(obj.value)}
 						onChange={_this._requestChange}

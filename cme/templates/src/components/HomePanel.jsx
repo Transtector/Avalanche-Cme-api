@@ -29,6 +29,7 @@ var HomePanel = React.createClass({
 		return {
 			channels: Store.getState().channels,
 			config: Store.getState().config,
+			notificationVisible: false,
 			pollClock: 1000,
 			pollTemp: 10000
 		}
@@ -62,7 +63,7 @@ var HomePanel = React.createClass({
 					</div>
 
 					<div className="subtitle">
-						CME device channels status
+						Channels status
 					</div>
 
 					<div className='widgets'>
@@ -79,8 +80,15 @@ var HomePanel = React.createClass({
 						})
 					}
 				</div>
+
+				{this._renderNotification()}
+
 			</div>
 		);
+	},
+
+	_renderNotification: function() {
+		return null;
 	},
 
 	_toggleWidgetPolling: function(e, handler) {

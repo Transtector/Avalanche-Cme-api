@@ -108,9 +108,7 @@ var ChannelPanel = React.createClass({
 
 					{this._renderAlarms()}
 
-					{/*
 					{this._renderConfig(primary, secondary)}
-					*/}
 				</div>
 
 				{this._renderErrors()}
@@ -474,7 +472,7 @@ var ChannelPanel = React.createClass({
 		return (
 			<div className={configClass}>
 				<div className='ch-config-content'>
-					<button className='btn'	onClick={this._toggleConfigVisibility}>&laquo;</button>
+					<button className='btn' title="Alarm setpoints" onClick={this._toggleConfigVisibility}>&laquo;</button>
 
 					<ThresholdConfig channel={this.props.id} sensor={primarySensor} />
 
