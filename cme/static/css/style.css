@@ -1119,7 +1119,6 @@ li.input-group-cluster > .btn:disabled {
 .ch-wrapper {
   position: relative;
   float: left;
-  font-family: 'Share Tech';
 }
 .ch-header {
   padding: 0 20px;
@@ -1258,6 +1257,7 @@ li.input-group-cluster > .btn:disabled {
   text-align: center;
   line-height: normal;
   margin-top: 18px;
+  font-family: 'Share Tech';
 }
 .ch-readout .UNIT {
   margin-left: 0.5em;
@@ -1271,6 +1271,7 @@ li.input-group-cluster > .btn:disabled {
   background-color: transparent;
   border: none;
   color: #fff;
+  font-family: 'Share Tech';
   font-size: 20pt;
 }
 .ch-readout.primary .value {
