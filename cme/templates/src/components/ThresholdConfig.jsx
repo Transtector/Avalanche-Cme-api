@@ -68,10 +68,12 @@ var ThresholdConfig = React.createClass({
 		// passed in component props.
 		var ths = Thresholds(this.props.sensor && this.props.sensor.thresholds || []);
 
+		var nominal = this.props.sensor.nominal || 0;
+
 		this._initial = ths; // save a copy of the initial threshold values
 
 		var state = assign({ 
-			nominal: '',  // holds a nominal value for percentage thresholds
+			nominal: nominal,  // holds a nominal value for percentage thresholds
 			percent: false, // use percentage thresholds
 			active: '' // tracks the active input element id
 		}, ths);
