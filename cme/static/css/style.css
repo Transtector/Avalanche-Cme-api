@@ -1472,6 +1472,7 @@ li.input-group-cluster > .btn:disabled {
   height: 100%;
   left: 0;
   width: 70px;
+  text-align: right;
   background-color: transparent;
   border: none;
   color: #fff;
