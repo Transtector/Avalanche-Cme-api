@@ -1467,6 +1467,12 @@ li.input-group-cluster > .btn:disabled {
 .ch-readout .UNIT {
   margin-left: 0.5em;
 }
+.ch-readout input {
+  text-align: right;
+}
+.ch-readout.primary input {
+  color: #00f;
+}
 .ch-readout.primary .value {
   font-size: 48px;
 }
@@ -1475,6 +1481,9 @@ li.input-group-cluster > .btn:disabled {
 }
 .ch-readout.primary .unit {
   font-size: 19px;
+}
+.ch-readout.secondary input {
+  color: #f00;
 }
 .ch-readout.secondary .value {
   font-size: 34px;
