@@ -130,6 +130,9 @@ var ChannelPanel = React.createClass({
 
 		return (
 			<div className={c}>
+				<input type="text" id={sensor.id} name={sensor.id} 
+							   value={sensor.name}
+							   placeholder="Name" disabled={true} />
 				<span className="value">{sensor.value.toFixed(digits)}</span>
 				<span className="UNIT">{sensor.unit.substr(0, 1)}</span>
 				<span className="unit">{sensor.unit.substr(1).toUpperCase()}</span>
