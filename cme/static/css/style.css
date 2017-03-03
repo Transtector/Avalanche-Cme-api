@@ -1112,9 +1112,14 @@ li.input-group-cluster > .btn:disabled {
 .panel-header .widgets .thermometer.alarm > div {
   border-color: #f00;
 }
+@font-face {
+  font-family: 'Share Tech';
+  src: url("/Share-Tech.otf");
+}
 .ch-wrapper {
   position: relative;
   float: left;
+  font-family: 'Share Tech';
 }
 .ch-header {
   padding: 0 20px;
