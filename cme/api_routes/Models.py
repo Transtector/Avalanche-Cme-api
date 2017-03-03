@@ -187,6 +187,7 @@ class Channel():
 
 		# load config from file or defaults into self.config
 		self.configpath = os.path.join(CHDIR, id + '_config.json') # e.g., 'ch0_config.json'
+		self.configmod = 0 # watch the file last modified time
 		self.load_config()
 
 		# TODO: Add channel controls...
@@ -195,8 +196,17 @@ class Channel():
 		# save any new default channel user data back to disk
 		self.save_config()
 
-
 	def update(self):
+		''' Check for channel config file changes and reload if any.  This gives us
+			support for editing channels outside of the running API server while picking
+			up the changes without forcing a server restart.  Normally channel updates
+			from the API calls will also update the configuration file, but will also
+			update the associated file modification time to avoid unnecessary reads from file. 
+		'''
+		if self.configmod != os.stat(self.configpath).st_mtime:
+			self.load_config()
+
+
 		''' read channel RRD for updated information before returning self '''
 		self._update_rrd_info()
 
@@ -278,6 +288,9 @@ class Channel():
 			with open(self.configpath, 'r') as f:
 				cfg = json.load(f)
 
+		# set the file last modified time
+		self.configmod = os.stat(self.configpath).st_mtime
+
 		# Default values written to __dict__ attributes to avoid 
 		# triggering the property setters during init
 		name = 'Ch ' + str(int(self.id[2:]) + 1)
@@ -340,6 +353,9 @@ class Channel():
 				os.replace(tempname, self.configpath) # atomic on Linux
 			except OSError:
 				os.remove(tempname)
+
+			# set the file last modified time
+			self.configmod = os.stat(self.configpath).st_mtime
 
 
 	def get_hw_config(self):
