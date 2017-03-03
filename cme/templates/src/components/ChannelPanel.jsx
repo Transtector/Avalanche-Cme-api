@@ -80,14 +80,14 @@ var ChannelPanel = React.createClass({
 				<div className="ch">
 					<div className="ch-header">
 						<input type="text" id="name" name="name" 
-							   value={this.state.name}
+							   value={this.state.name} disabled={true}
 							   className={this.state.activeId === 'name' ? 'active': ''}
 							   placeholder="Name"
 							   onChange={this._requestChange}
 							   onKeyDown={this._onKeyDown}
 							   onBlur={this._onBlur} />
 						<input type="text" id="description" name="description"
-							   value={this.state.description}
+							   value={this.state.description} disabled={true}
 							   className={this.state.activeId === 'description' ? 'active': ''}
 							   placeholder="Description"
 							   onChange={this._requestChange}
@@ -124,12 +124,10 @@ var ChannelPanel = React.createClass({
 
 		if (!sensor) return null;
 
-		var c = "ch-readout " + sensorClass;
-
 		var digits = sensor.value > 1 ? (sensor.value > 10 ? 1 : 2) : (sensor.value < 0.1 ? 1 : 3);
 
 		return (
-			<div className={c}>
+			<div className={'ch-readout ' + sensorClass}>
 				<input type="text" id={sensor.id} name={sensor.id} 
 							   value={sensor.name}
 							   placeholder="Name" disabled={true} />
