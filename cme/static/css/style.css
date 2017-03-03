@@ -1468,26 +1468,28 @@ li.input-group-cluster > .btn:disabled {
   margin-left: 0.5em;
 }
 .ch-readout input {
-  text-align: right;
-}
-.ch-readout.primary input {
-  color: #00f;
+  position: absolute;
+  height: 100%;
+  left: 0;
+  width: 70px;
+  background-color: transparent;
+  border: none;
+  color: #fff;
 }
 .ch-readout.primary .value {
   font-size: 48px;
 }
+.ch-readout.primary input,
 .ch-readout.primary .UNIT {
   font-size: 38px;
 }
 .ch-readout.primary .unit {
   font-size: 19px;
 }
-.ch-readout.secondary input {
-  color: #f00;
-}
 .ch-readout.secondary .value {
   font-size: 34px;
 }
+.ch-readout.secondary input,
 .ch-readout.secondary .UNIT {
   font-size: 27px;
 }

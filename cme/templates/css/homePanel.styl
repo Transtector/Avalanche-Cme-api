@@ -97,27 +97,27 @@ error-badge-size = 30px
 	.UNIT
 		margin-left 0.5em
 	input
-		text-align right
-
-.ch-readout.primary
-	input
-		color blue
-	.value
-		font-size 48px
-	.UNIT
-		font-size 38px
-	.unit
-		font-size 19px
-
-.ch-readout.secondary
-	input
-		color red
-	.value
-		font-size 34px
-	.UNIT
-		font-size 27px
-	.unit
-		font-size 13px
+		position absolute
+		height 100%
+		left 0
+		width 70px
+		background-color transparent
+		border none
+		color white
+	&.primary
+		.value
+			font-size 48px
+		input, .UNIT
+			font-size 38px
+		.unit
+			font-size 19px
+	&.secondary
+		.value
+			font-size 34px
+		input, .UNIT
+			font-size 27px
+		.unit
+			font-size 13px
 
 	
 .ch-controls
