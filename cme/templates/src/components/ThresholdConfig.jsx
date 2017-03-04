@@ -79,7 +79,7 @@ var ThresholdConfig = React.createClass({
 		var state = assign({ 
 			display_range: display_range,
 			nominal: nominal,  // holds a nominal value for percentage thresholds
-			percent: true, // use percentage thresholds
+			percent: !!nominal, // use percentage thresholds if nominal is a nonzero value
 			active: '' // tracks the active input element id
 		}, ths);
 
@@ -236,7 +236,7 @@ var ThresholdConfig = React.createClass({
 				</table>
 				<div className='th-percent'>
 					<label><input type='checkbox' id='percent' name='percent' title='Show percentages or absolute values'
-							checked={this.state.percent} onChange={this._togglePercent} />Show percentages</label>
+							checked={this.state.percent} disabled={nominal == 0} onChange={this._togglePercent} />Show percentages</label>
 					
 				</div>
 			</div>
