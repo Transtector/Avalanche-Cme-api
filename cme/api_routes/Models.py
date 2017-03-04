@@ -32,15 +32,6 @@ class ChannelManager:
 			Channel data and configuration is shared in a subdirectory of the DATA
 			volume (typically /data/channels/) called CHDIR.
 
-			The rrdcached daemon manages the channel RRD's and is used by Cme-hw to create
-			and update the channel RRD's.  The ChannelManager ideally just reads the data
-			captured in the channel RRD's, but it must also support additional methods
-			like clearing the RRD's (basically a reset), listing the available RRD's, and
-			providing channel configuration.
-
-			Since the rrdcached doesn't support these additional functions (clearing, listing,
-			configuration) the ChannelManager just works with the CHDIR folder contents directly.
-
 			To clear an RRD, ChannelManager places a "chX.rrd.reset" file to be detected
 			by the Cme-hw update.  The channel RRD will be created and the .reset file
 			will be deleted.
@@ -99,7 +90,7 @@ class ChannelManager:
 
 		# check if channel still available and 
 		# remove it from internal list if not
-		if not ch_id in self._list_channels():
+		if not ch_id in self.channels:
 			if ch_id in self._Channels:
 				del self._Channels[ch_id]
 
@@ -113,24 +104,35 @@ class ChannelManager:
 			return self._Channels[ch_id].update()
 
 		# else return newly created/added channel
-		return self._Channels.setdefault(ch_id, Channel(ch_id, self._get_channel_rrd(ch_id)))
+		return self._Channels.setdefault(ch_id, Channel(ch_id))
+
 
 	@property
 	def channels(self):
 		''' Returns a list of available channels by listing
 			the channel RRD's found in the CHDIR.
 		'''
-		return sorted(self._list_channels())
+		chans = self._list_channels_by_config()
+		return sorted(os.path.basename(p).split('_')[0] for p in chans)
 
 
-	def _list_channels(self):
+	@property
+	def channelRrds(self):
+		''' Returns a list of available channels by listing
+			the channel RRD's found in the CHDIR.
+		'''
+		rrds = self._list_channels_by_rrd()
+		return sorted(os.path.basename(p).split('_')[0] for p in rrds)
+
+
+	def _list_channels_by_rrd(self):
 		''' private function to poll the channels folder for channel RRD's '''
 
 		# will glob for all ch RRD reset files
 		rrd_reset_pattern = os.path.join(CHDIR, 'ch*.rrd.reset')
 
 		# lists all channel id's for which a reset file exists: [ 'ch0', 'ch1', 'chx(y)', ... ]
-		rrd_reset_list = [ os.path.basename(p).split('.')[0] for p in glob.glob(rrd_reset_pattern)]
+		rrd_reset_list = glob.glob(rrd_reset_pattern)
 		
 		# DEBUGGING - restrict returned channels by filtering ch_id's:
 		#rrd_reset_list = [ 'ch0' ]
@@ -139,62 +141,47 @@ class ChannelManager:
 		rrd_pattern = os.path.join(CHDIR, 'ch*.rrd')
 
 		# skips channel RRD's if pending reset 
-		rrd_list = [ os.path.basename(p).split('_')[0]
-			for p in glob.glob(rrd_pattern) 
-			if os.path.basename(p).split('_')[0] not in rrd_reset_list ]
+		rrd_list = [ p for p in glob.glob(rrd_pattern) if p not in rrd_reset_list ]
 
 		return rrd_list
 
 
-	def _list_channel_configs(self):
+	def _list_channels_by_config(self):
 		# will glob for all channel config files (they are named like 'ch7_config.json')
 		cfg_pattern = os.path.join(CHDIR, 'ch*_config.json')
 
 		return glob.glob(cfg_pattern)
 
 
-	def _get_channel_rrd(self, ch_id):
-		''' glob for channel rrd filename '''
-		
-		rrd_pattern = os.path.join(CHDIR, ch_id + '_*.rrd')
-		rrd = glob.glob(rrd_pattern)
-
-		if rrd:
-			return os.path.basename(rrd[0])
-
-		return None
-
 
 class Channel():
 
-	def __init__(self, id, rrd): 
+	def __init__(self, id): 
 
 		self.id = id # e.g., 'ch0'
-		self.rrd = rrd # e.g., 'ch0_1466802992.rrd'
+		self.rrd = self._get_channel_rrd() # e.g., 'ch0_1466802992.rrd', might be None
 
 		self.error = False # add 'error' dict item for serialized object
 
+		# Read most recent RRD info, set first_ and last_ 
+		# update timestamps and set sensor datasources from the
+		# channel RRD (if any)
 		self.last_update = 0
 		self.first_update = 0
-		self.ch_ds = {}
+		self.datasources = self._get_datasources()
 
-		# read most recent RRD info, set first_ and last_ 
-		# update timestamps and refresh ch_ds
-		self._update_rrd_info()
+		#print("{0} DATASOURCES: {1}".format(self.id, self.datasources))
 
-		# push the ch_ds into new Sensor objects
-		self.sensors = [ Sensor(self, ds_id, ds_obj) for ds_id, ds_obj in self.ch_ds.items() ]
-
-		# load config from file or defaults into self.config
+		# Load config from file.  Sensors will look at ch_ds to
+		# find matching data sources loaded from RRD
+		self.sensors = []
 		self.configpath = os.path.join(CHDIR, id + '_config.json') # e.g., 'ch0_config.json'
 		self.configmod = 0 # watch the file last modified time
 		self.load_config()
 
-		# TODO: Add channel controls...
-		#self.controls = []
-		
-		# save any new default channel user data back to disk
-		self.save_config()
+
+
+	### PUBLIC METHODS
 
 	def update(self):
 		''' Check for channel config file changes and reload if any.  This gives us
@@ -208,12 +195,11 @@ class Channel():
 
 
 		''' read channel RRD for updated information before returning self '''
-		self._update_rrd_info()
+		self.datasources = self._get_datasources()
 
 		# push new sensor timestamps and last_ds values
 		for s in self.sensors:
-			ds_name = "_".join([ s.id, s.type, s.unit ])
-			s.value = float(self.ch_ds[ds_name]['last_ds'])
+			s.update()
 
 		return self
 
@@ -286,7 +272,11 @@ class Channel():
 		cfg = {}
 		if os.path.isfile(self.configpath):
 			with open(self.configpath, 'r') as f:
-				cfg = json.load(f)
+				try:
+					cfg = json.load(f)
+				except Exception as e:
+					self.error = e # TODO: we might want to log this to the API log
+					return 
 
 		# set the file last modified time
 		self.configmod = os.stat(self.configpath).st_mtime
@@ -298,27 +288,10 @@ class Channel():
 		self.__dict__['description'] = cfg.get('description', name + ' description')
 		self.__dict__['recordAlarms'] = cfg.get('recordAlarms', False)
 		
-		# add any sensor configuration for attached sensors
-		for s in self.sensors:
-			s.__dict__['name'] = s.id
-			s.__dict__['nominal'] = s.nominal
-			s.__dict__['display_range'] = s.display_range
-			s.__dict__['thresholds'] = []
-
-			# find matching sensor id, if any
-			found_sensor = next((cs for cs in cfg.get('sensors',[]) if cs['id'] == s.id), None)
-
-			if found_sensor:
-				# sensor name is user-configurable
-				s.name = found_sensor.get('name', s.name)
-				s.nominal = found_sensor.get('nominal', s.nominal)
-				s.display_range = found_sensor.get('display_range', s.display_range)
-
-				# sensor range is set in hardware configuration
-				s.range = found_sensor.get('_config', {}).get('range', [])
-
-				# load up sensor thresholds 
-				s.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in found_sensor.get('thresholds', []) ]
+		# clear and add any sensor configuration
+		self.sensors = []
+		for s_cfg in cfg.get('sensors',[]):
+			self.sensors.append(Sensor(self, s_cfg['id'], s_cfg))
 
 
 	def save_config(self):
@@ -327,8 +300,15 @@ class Channel():
 		# load current config, if any
 		if os.path.isfile(self.configpath):
 			with open(self.configpath, 'r') as f:
-				cfg = json.load(f)
+				try:
+					cfg = json.load(f)
+				except Exception as e:
+					self.error = e # fail and return if no current channel config
+					return
 
+
+		# Update the writable portion of the configuration
+		# with new values
 		cfg.update({
 			'name': self.name,
 			'description': self.description,
@@ -364,21 +344,7 @@ class Channel():
 			self.configmod = os.stat(self.configpath).st_mtime
 
 
-	def get_hw_config(self):
-		if os.path.isfile(self.configpath):
-			with open(self.configpath, 'r') as f:
-				cfg = json.load(f)
-
-		result = cfg['_config']
-
-		result['sensors'] = []
-		for s in cfg['sensors']:
-			s_cfg = s['_config']
-			s_cfg.update({'id': s['id']})
-			result['sensors'].append(s_cfg)
-
-		return result
-
+	### CHANNEL PROPERTIES (when set, these properties save the underlying __dict__ to disk)
 
 	@property
 	def name(self):
@@ -408,7 +374,22 @@ class Channel():
 		self.save_config()
 
 
-	def _update_rrd_info(self):
+	### PRIVATE METHODS
+
+	def _get_channel_rrd(self):
+		''' glob for channel rrd filename '''
+		
+		rrd_pattern = os.path.join(CHDIR, self.id + '_*.rrd')
+		rrd = glob.glob(rrd_pattern)
+
+		if rrd:
+			#print("{0} RRD: {1}".format(self.id, rrd[0]))
+			return os.path.basename(rrd[0])
+
+		return None
+
+
+	def _get_datasources(self):
 
 		# reading _channel_info can encounter errors
 		# so we reset them here, read, then check error status
@@ -426,11 +407,13 @@ class Channel():
 		# first update is either right now, or use RRD filename timestamp
 		self.first_update = int(self.rrd.split('_')[1].split('.')[0])
 
-		# parse all DS from ch_info
-		ch_ds_raw = { k:ch_info[k] for k in ch_info if k.lower().startswith('ds') }
-		
 		# parse DS objects into cached dict
-		for k, v in ch_ds_raw.items():
+		ds_obj = {}
+
+		# parse all DS from ch_info
+		ds_raw = { k:ch_info[k] for k in ch_info if k.lower().startswith('ds') }
+		
+		for k, v in ds_raw.items():
 		
 			# e.g., k = 'ds[s0_VAC_Vrms].last_ds', v = 0.020578
 
@@ -438,7 +421,9 @@ class Channel():
 			ds_name = split[0].split('[')[1] # 's0_VAC_Vrms'
 			ds_attr = split[1].split('.')[1] # 'last_ds'
 
-			self.ch_ds.setdefault(ds_name, {}).update({ ds_attr: v })
+			ds_obj.setdefault(ds_name, {}).update({ ds_attr: v })
+
+		return ds_obj
 
 
 	def _channel_info(self, flush_first=True):
@@ -507,46 +492,41 @@ class Sensor():
 		Channel configuration (which includes sensor config) has been
 		loaded at the point of Sensor object creation.
 	'''
-	def __init__(self, ch, ds_id, ds_values):
+	def __init__(self, ch, id, cfg):
 	
-		self.__save_config = ch.save_config # track which channel we belong to for settings and data lookups
+		self.id = id
+		self.ch = ch
+		self.type = cfg['_config']['type']
+		self.unit = cfg['_config']['units']
+		self.range = cfg['_config']['range'] # sensor range is [min, max] and may be empty
 
-		# split ds_id into id, type, and unit (e.g., s0_VAC_Vrms)
-		self.ds_id = ds_id
-		split = ds_id.split('_')
-		
-		self.id = split[0]
-		self.type = split[1]
-		self.unit = split[2]
+		self.value = 0
+		self.update() # this will update self.value from ch.sensor_datasource, if any
 
-		self.range = [] # sensor range is a read-only list of [min, max] and may be empty
-		
-		self.value = float(ds_values['last_ds'])
+		self.__save_config = ch.save_config # Just save whole channel if sensor attributes are changed		
 
-		# look for previous sensor config and load it
-		found = False
+		# We'll create the sensor attributes that are read/write by the user
+		# here.  We use __dict__ here to avoid triggering unnecessary save to disk
+		# when the attribute is set.
 
-		for s in getattr(ch, 'sensors', []): # use getattr in case sensors hasn't been added to ch yet...
-			found = False
-			if s['id'] == self.id:
-				found = True
-				break
+		self.__dict__['name'] = cfg.get('name', self.id)
+		self.__dict__['nominal'] = cfg.get('nominal', 0)
+		self.__dict__['display_range'] = cfg.get('display_range', self.range)
+		self.thresholds = [ Threshold(th['value'], th['direction'], th['classification']) for th in cfg.get('thresholds', []) ]
 
-		# use __dict__ here to avoid triggering unnecessary save to disk
-		if not found:
-			# load defaults
-			self.__dict__['name'] = self.id
-			self.__dict__['nominal'] = 0
-			self.__dict__['display_range'] = self.range
-			self.thresholds = []
 
-		else:
-			# load from file
-			self.__dict__['name'] = s.get('name', self.id)
-			self.__dict__['nominal'] = s.get('nominal', 0)
-			self.__dict__['display_range'] = s.get('display_range', [])
-			self.thresholds = [ Threshold(th['value'], th['direction'], th['classification'], th['id']) for th in s['thresholds'] ]
+	### PUBLIC MEHTODS
 
+	def update(self):
+		# Create a datasource key from id, type, and unit (e.g., s0_VAC_Vrms)
+		# to search for a matching datasource for this sensor
+		ds_key = self.id + '_' + self.type + '_' + self.unit
+		ds = self.ch.datasources and self.ch.datasources.get(ds_key, None)
+
+		value = ds and ds.get('last_ds', None)
+		self.value = float(value) if value else None
+
+	
 	def addThreshold(self, th_obj):
 		th = Threshold(float(th_obj['value']), th_obj['direction'], th_obj['classification'])
 		self.thresholds.append(th)
@@ -577,6 +557,8 @@ class Sensor():
 		return th
 
 
+	### PUBLIC PROPERTIES
+
 	@property
 	def name(self):
 		return self.__dict__['name']
@@ -603,6 +585,8 @@ class Sensor():
 	def display_range(self, value):
 		self.__dict__['display_range'] = value
 		self.__save_config()
+
+
 
 class Threshold():
 	''' Threshold object holds scalar values and properties to allow setting
