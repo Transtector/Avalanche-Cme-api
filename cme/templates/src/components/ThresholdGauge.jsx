@@ -10,6 +10,8 @@ var React = require('react');
 
 var classNames = require('classnames');
 
+function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
+
 var ThresholdGauge = React.createClass({
 
 	render: function() {
@@ -27,7 +29,7 @@ var ThresholdGauge = React.createClass({
 		r.max = d_range && d_range[1] < r.max ? d_range[1] : r.max;
 
 		if (!t || t.length == 0) return null; // no thresholds
-		if (!r.min || !r.max) return null; // no range
+		if (!(isNumeric(r.min) && isNumeric(r.max))) return null; // no range
 
 		// calculate relative positioning as a left percentage of range
 		function pos(v, fromRight) {
