@@ -76,7 +76,7 @@ var ThresholdConfig = React.createClass({
 		var state = assign({ 
 			display_range: display_range,
 			nominal: nominal,  // holds a nominal value for percentage thresholds
-			percent: false, // use percentage thresholds
+			percent: true, // use percentage thresholds
 			active: '' // tracks the active input element id
 		}, ths);
 

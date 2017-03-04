@@ -60,7 +60,8 @@ var ThresholdGauge = React.createClass({
 		var alarm_max_values = t.filter(filter_thresholds, [ "MAX", "ALARM" ]);
 
 		// Set positioning styles for the UI elements
-		var pointerStyle = { left: pos(this.props.sensor.value)} // pointer just uses left position
+		var pointerPos = pos(this.props.sensor.value);
+		var pointerStyle = (pointerPos > 0 && pointerPos <= 100) ? { left: pointerPos } : { display: none };
 
 		// warning block is top-level GREEN
 		var warningStyle = {
