@@ -166,11 +166,11 @@ class Channel():
 		# Read most recent RRD info, set first_ and last_ 
 		# update timestamps and set sensor datasources from the
 		# channel RRD (if any)
-		self.last_update = 0
-		self.first_update = 0
-		self.datasources = self._get_datasources()
+		self._last_update = 0
+		self._first_update = 0
+		self._datasources = self._get_datasources()
 
-		#print("{0} DATASOURCES: {1}".format(self.id, self.datasources))
+		#print("{0} DATASOURCES: {1}".format(self.id, self._datasources))
 
 		# Load config from file.  Sensors will look at ch_ds to
 		# find matching data sources loaded from RRD
@@ -195,7 +195,7 @@ class Channel():
 
 
 		''' read channel RRD for updated information before returning self '''
-		self.datasources = self._get_datasources()
+		self._datasources = self._get_datasources()
 
 		# push new sensor timestamps and last_ds values
 		for s in self.sensors:
@@ -402,10 +402,10 @@ class Channel():
 			return
 
 		# Most recent timestamp is in ch_info header
-		self.last_update = ch_info['last_update']
+		self._last_update = ch_info['last_update']
 
 		# first update is either right now, or use RRD filename timestamp
-		self.first_update = int(self.rrd.split('_')[1].split('.')[0])
+		self._first_update = int(self.rrd.split('_')[1].split('.')[0])
 
 		# parse DS objects into cached dict
 		ds_obj = {}
@@ -493,9 +493,10 @@ class Sensor():
 		loaded at the point of Sensor object creation.
 	'''
 	def __init__(self, ch, id, cfg):
-	
+
+		self._ch = ch
+
 		self.id = id
-		self.ch = ch
 		self.type = cfg['_config']['type']
 		self.unit = cfg['_config']['units']
 		self.range = cfg['_config']['range'] # sensor range is [min, max] and may be empty
@@ -521,7 +522,7 @@ class Sensor():
 		# Create a datasource key from id, type, and unit (e.g., s0_VAC_Vrms)
 		# to search for a matching datasource for this sensor
 		ds_key = self.id + '_' + self.type + '_' + self.unit
-		ds = self.ch.datasources and self.ch.datasources.get(ds_key, None)
+		ds = self._ch._datasources and self._ch._datasources.get(ds_key, None)
 
 		value = ds and ds.get('last_ds', None)
 		self.value = float(value) if value else None
