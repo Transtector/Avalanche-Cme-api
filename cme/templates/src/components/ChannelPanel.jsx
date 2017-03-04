@@ -132,7 +132,7 @@ var ChannelPanel = React.createClass({
 				<input type="text" id={sensor.id} name={sensor.id} 
 							   value={sensor.name}
 							   placeholder="Name" disabled={true} />
-				<span className="value">{sensor.value.toFixed(digits)}</span>
+				<span className="value">{sensor.value && sensor.value.toFixed(digits)}</span>
 				<span className="UNIT">{sensor.unit.substr(0, 1)}</span>
 				<span className="unit">{sensor.unit.substr(1).toUpperCase()}</span>
 				<ThresholdBadge sensor={sensor} />
