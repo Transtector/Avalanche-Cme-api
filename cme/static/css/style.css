@@ -1755,7 +1755,9 @@ li.input-group-cluster > .btn:disabled {
   font-size: 12px;
 }
 .th-config .th-nominal {
-  text-align: center;
+  margin-top: 2px;
+  margin-left: 40%;
+  font-size: 90%;
 }
 .th-config .th-nominal input[type='text'] {
   width: 20%;
