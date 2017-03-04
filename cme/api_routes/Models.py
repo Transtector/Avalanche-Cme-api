@@ -166,8 +166,8 @@ class Channel():
 		# Read most recent RRD info, set first_ and last_ 
 		# update timestamps and set sensor datasources from the
 		# channel RRD (if any)
-		self._last_update = 0
-		self._first_update = 0
+		self.last_update = 0
+		self.first_update = 0
 		self._datasources = self._get_datasources()
 
 		#print("{0} DATASOURCES: {1}".format(self.id, self._datasources))
@@ -402,10 +402,10 @@ class Channel():
 			return
 
 		# Most recent timestamp is in ch_info header
-		self._last_update = ch_info['last_update']
+		self.last_update = ch_info['last_update']
 
 		# first update is either right now, or use RRD filename timestamp
-		self._first_update = int(self.rrd.split('_')[1].split('.')[0])
+		self.first_update = int(self.rrd.split('_')[1].split('.')[0])
 
 		# parse DS objects into cached dict
 		ds_obj = {}
