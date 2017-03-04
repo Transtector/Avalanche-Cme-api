@@ -1737,12 +1737,12 @@ li.input-group-cluster > .btn:disabled {
   border: 0;
   background-color: #eee;
 }
-.th-config thead input[type='text'] td.nominal input {
+.th-config thead td.nominal input {
   width: 34%;
   margin-right: 5px;
   text-align: right;
 }
-.th-config thead input[type='text'] td.nominal label {
+.th-config thead td.nominal label {
   font-size: 90%;
   font-style: italic;
 }

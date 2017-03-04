@@ -180,7 +180,7 @@ var ThresholdConfig = React.createClass({
 								<input type='text' id='range-min' name='range-min' 
 									value={r.min} disabled='disabled'/>
 							</td>
-							<td colSpan='3'>
+							<td className='nominal' colSpan='3'>
 								<input type='text' id='nominal' name='nominal' disabled={true}
 									value={nominal} className={renderClass('nominal', nominal)}
 									onChange={this._requestChange} onKeyDown={this._onKeyDown} onBlur={this._onBlur} />
