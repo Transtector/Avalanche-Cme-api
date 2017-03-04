@@ -472,14 +472,14 @@ var ChannelPanel = React.createClass({
 		return (
 			<div className={configClass}>
 				<div className='ch-config-content'>
-					<button className='btn' title="Alarm setpoints" onClick={this._toggleConfigVisibility}>&laquo;</button>
+					<button className='btn' title="Hide alarm setpoints" onClick={this._toggleConfigVisibility}>&laquo;</button>
 
 					<ThresholdConfig channel={this.props.id} sensor={primarySensor} />
 
 					<ThresholdConfig channel={this.props.id} sensor={secondarySensor} />
 
 				</div>
-				<button className='btn' onClick={this._toggleConfigVisibility}>&raquo;</button>
+				<button className='btn' title='Show alarm setpoints' onClick={this._toggleConfigVisibility}>&raquo;</button>
 			</div>
 		);
 	},

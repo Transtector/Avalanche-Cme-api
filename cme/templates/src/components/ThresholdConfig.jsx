@@ -69,10 +69,12 @@ var ThresholdConfig = React.createClass({
 		var ths = Thresholds(this.props.sensor && this.props.sensor.thresholds || []);
 
 		var nominal = this.props.sensor.nominal || 0;
+		var display_range = this.props.sensor.display_range || [];
 
 		this._initial = ths; // save a copy of the initial threshold values
 
 		var state = assign({ 
+			display_range: display_range,
 			nominal: nominal,  // holds a nominal value for percentage thresholds
 			percent: false, // use percentage thresholds
 			active: '' // tracks the active input element id
@@ -115,10 +117,16 @@ var ThresholdConfig = React.createClass({
 		if (!this.props.sensor) return null; // no sensor
 
 		var t = this.props.sensor.thresholds;
+		var d_range = this.props.sensor.display_range;
+
 		var r = { 
 			min: this.props.sensor.range && this.props.sensor.range.length > 0 ? this.props.sensor.range[0] : '',
 			max: this.props.sensor.range && this.props.sensor.range.length > 1 ? this.props.sensor.range[1] : ''
 		}
+
+		// d_range must be within hardware range 
+		r.min = d_range && d_range[0] > r.min ? d_range[0] : r.min;
+		r.max = d_range && d_range[1] < r.max ? d_range[1] : r.max;
 
 		var unit = this.props.sensor.unit && this.props.sensor.unit.substr(0, 1).toUpperCase();
 		var subunit = this.props.sensor.unit && this.props.sensor.unit.length > 1 ? this.props.sensor.unit.substr(1).toUpperCase() : '';
@@ -214,10 +222,11 @@ var ThresholdConfig = React.createClass({
 				<div className='th-nominal' title='Enter a nominal value to set thresholds as percentages.'>
 					<input type='checkbox' id='percent' name='percent' value='Use percentages'
 						checked={this.state.percent} onChange={this._togglePercent} />
-					<input type='text' id='nominal' name='nominal' disabled={!percent}
+					<label htmlFor='percent'>Percent of nominal</label>
+					<input type='text' id='nominal' name='nominal' disabled={true}
 						value={nominal} className={renderClass('nominal', nominal)}
 						onChange={this._requestChange} onKeyDown={this._onKeyDown} onBlur={this._onBlur} />
-					<label htmlFor='percent' className='nominal-unit'>{unit}<span>{subunit.toLowerCase()}, nominal</span></label>
+					<label className='nominal-unit'>{unit}<span>{subunit.toLowerCase()}</span></label>
 				</div>
 			</div>
 		);
