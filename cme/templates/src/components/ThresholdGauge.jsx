@@ -33,7 +33,7 @@ var ThresholdGauge = React.createClass({
 
 		// calculate relative positioning as a left percentage of range
 		function pos(v, fromRight) {
-			var p = 100 * (v / Math.abs(r.max - r.min));
+			var p = 100 * ((v - r.min)  / Math.abs(r.max - r.min));
 			return fromRight ? 100 - p : p
 		}
 
