@@ -92,6 +92,8 @@ var ThresholdConfig = React.createClass({
 	// of this component.
 	componentWillReceiveProps: function(nextProps) {
 
+		if (!this.state || !nextProps) return;
+
 		var ths = nextProps.sensor && nextProps.sensor.thresholds || [];
 		var nextThs = Thresholds(ths);
 
