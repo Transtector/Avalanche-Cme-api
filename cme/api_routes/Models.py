@@ -57,12 +57,13 @@ class ChannelManager:
 			deleting the RRD.  It will get recreated by
 			the Cme-hw loop.
 		'''
-		if not ch_id in self._list_channels():
-			return
 
 		# force rebuild Channel to cache
 		if ch_id in self._Channels:
 			del self._Channels[ch_id]
+
+		if not ch_id in self.channelRrds:
+			return
 
 		ch_rrd_reset = ch_id + '.rrd.reset'
 
@@ -74,7 +75,7 @@ class ChannelManager:
 		''' Clears the channel alarms for the identified channel
 			by setting the 'chX.alarms.reset' signal file.
 		'''
-		if not ch_id in self._list_channels():
+		if not ch_id in self.channels:
 			return
 
 		ch_alarms_reset = ch_id + '.alarms.reset'
