@@ -301,6 +301,8 @@ class Channel():
 		# add any sensor configuration for attached sensors
 		for s in self.sensors:
 			s.__dict__['name'] = s.id
+			s.__dict__['nominal'] = s.nominal
+			s.__dict__['display_range'] = s.display_range
 			s.__dict__['thresholds'] = []
 
 			# find matching sensor id, if any
@@ -309,6 +311,8 @@ class Channel():
 			if found_sensor:
 				# sensor name is user-configurable
 				s.name = found_sensor.get('name', s.name)
+				s.nominal = found_sensor.get('nominal', s.nominal)
+				s.display_range = found_sensor.get('display_range', s.display_range)
 
 				# sensor range is set in hardware configuration
 				s.range = found_sensor.get('_config', {}).get('range', [])
@@ -340,6 +344,8 @@ class Channel():
 				# update name and thresholds attributes in config
 				s.update({ 
 					'name': found_s.name,
+					'nominal': found_s.nominal,
+					'display_range': found_s.display_range,
 					'thresholds': [ { 'value': th.value, 'direction': th.direction, 'classification': th.classification } for th in found_s.thresholds ]
 				})
 
@@ -530,11 +536,15 @@ class Sensor():
 		if not found:
 			# load defaults
 			self.__dict__['name'] = self.id
+			self.__dict__['nominal'] = 0
+			self.__dict__['display_range'] = self.range
 			self.thresholds = []
 
 		else:
 			# load from file
-			self.__dict__['name'] = s['name']
+			self.__dict__['name'] = s.get('name', self.id)
+			self.__dict__['nominal'] = s.get('nominal', 0)
+			self.__dict__['display_range'] = s.get('display_range', [])
 			self.thresholds = [ Threshold(th['value'], th['direction'], th['classification'], th['id']) for th in s['thresholds'] ]
 
 	def addThreshold(self, th_obj):
@@ -576,6 +586,23 @@ class Sensor():
 		self.__dict__['name'] = value
 		self.__save_config()
 
+	@property
+	def nominal(self):
+		return self.__dict__['nominal']
+
+	@nominal.setter
+	def nominal(self, value):
+		self.__dict__['nominal'] = value
+		self.__save_config()
+
+	@property
+	def display_range(self):
+		return self.__dict__['display_range']
+
+	@display_range.setter
+	def display_range(self, value):
+		self.__dict__['display_range'] = value
+		self.__save_config()
 
 class Threshold():
 	''' Threshold object holds scalar values and properties to allow setting
