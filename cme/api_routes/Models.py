@@ -175,8 +175,8 @@ class Channel():
 		# Load config from file.  Sensors will look at ch_ds to
 		# find matching data sources loaded from RRD
 		self.sensors = []
-		self.configpath = os.path.join(CHDIR, id + '_config.json') # e.g., 'ch0_config.json'
-		self.configmod = 0 # watch the file last modified time
+		self._configpath = os.path.join(CHDIR, id + '_config.json') # e.g., 'ch0_config.json'
+		self._configmod = 0 # watch the file last modified time
 		self.load_config()
 
 
@@ -190,7 +190,7 @@ class Channel():
 			from the API calls will also update the configuration file, but will also
 			update the associated file modification time to avoid unnecessary reads from file. 
 		'''
-		if self.configmod != os.stat(self.configpath).st_mtime:
+		if self._configmod != os.stat(self._configpath).st_mtime:
 			self.load_config()
 
 
@@ -270,8 +270,8 @@ class Channel():
 		# Load user-configurable attributes for the channel.  Channel's sensors
 		# have been detected and are in the sensors attribute.
 		cfg = {}
-		if os.path.isfile(self.configpath):
-			with open(self.configpath, 'r') as f:
+		if os.path.isfile(self._configpath):
+			with open(self._configpath, 'r') as f:
 				try:
 					cfg = json.load(f)
 				except Exception as e:
@@ -279,7 +279,7 @@ class Channel():
 					return 
 
 		# set the file last modified time
-		self.configmod = os.stat(self.configpath).st_mtime
+		self._configmod = os.stat(self._configpath).st_mtime
 
 		# Default values written to __dict__ attributes to avoid 
 		# triggering the property setters during init
@@ -298,8 +298,8 @@ class Channel():
 		cfg = {}
 
 		# load current config, if any
-		if os.path.isfile(self.configpath):
-			with open(self.configpath, 'r') as f:
+		if os.path.isfile(self._configpath):
+			with open(self._configpath, 'r') as f:
 				try:
 					cfg = json.load(f)
 				except Exception as e:
@@ -330,18 +330,18 @@ class Channel():
 				})
 
 		# save to disk
-		with LockedOpen(self.configpath, 'a') as f:
-			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self.configpath), delete=False) as tf:
+		with LockedOpen(self._configpath, 'a') as f:
+			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self._configpath), delete=False) as tf:
 				json.dump(cfg, tf, indent="\t")
 				tempname = tf.name
 			try:
 				os.chmod(tempname, 0o666) # set rw for u, g, o
-				os.replace(tempname, self.configpath) # atomic on Linux
+				os.replace(tempname, self._configpath) # atomic on Linux
 			except OSError:
 				os.remove(tempname)
 
 			# set the file last modified time
-			self.configmod = os.stat(self.configpath).st_mtime
+			self._configmod = os.stat(self._configpath).st_mtime
 
 
 	### CHANNEL PROPERTIES (when set, these properties save the underlying __dict__ to disk)
