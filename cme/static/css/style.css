@@ -1732,6 +1732,15 @@ li.input-group-cluster > .btn:disabled {
   font-size: 100%;
   font-weight: bold;
 }
+.th-config td.nominal input {
+  width: 34%;
+  margin-right: 5px;
+  text-align: right;
+}
+.th-config td.nominal label {
+  font-size: 90%;
+  font-style: italic;
+}
 .th-config thead input[type='text'] {
   font-style: italic;
   border: 0;
@@ -1755,7 +1764,6 @@ li.input-group-cluster > .btn:disabled {
   font-size: 12px;
 }
 .th-config .th-percent {
-  background: #ffc0cb;
   padding-left: 40%;
   padding-top: 2px;
   font-size: 90%;
