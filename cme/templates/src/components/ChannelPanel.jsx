@@ -636,7 +636,7 @@ var ChannelPanel = React.createClass({
 		var _this = this;
 
 		if (confirm("Are you sure?  This action cannot be undone.")) {
-			this.setState({ chRequest: true }, function() {
+			this.setState({ chRequest: true, historyVisible: false }, function() {
 				Actions.deleteChannel(_this.props.id);
 			});
 		}
@@ -646,7 +646,7 @@ var ChannelPanel = React.createClass({
 		var _this = this;
 
 		if (confirm("Are you sure?  This action cannot be undone.")) {
-			this.setState({ chRequest: true }, function() {
+			this.setState({ chRequest: true, alarmsVisible: false }, function() {
 				alert("TODO:  Support this Action!"); //Actions.deleteChannel(_this.props.id);
 			});
 		}
