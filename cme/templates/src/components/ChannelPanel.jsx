@@ -125,11 +125,7 @@ var ChannelPanel = React.createClass({
 
 		var digits = sensor.value > 1 ? (sensor.value > 10 ? 1 : 2) : (sensor.value < 0.1 ? 1 : 3);
 
-		var cls = classNames({
-			'ch-readout': true,
-			sensorClass: true,
-			'single': singleSensor
-		});
+		var cls = classNames('ch-readout', sensorClass, { 'single': singleSensor });
 
 		return (
 			<div className={cls}>
