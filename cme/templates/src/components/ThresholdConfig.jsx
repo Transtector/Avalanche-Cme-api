@@ -225,11 +225,8 @@ var ThresholdConfig = React.createClass({
 					</tbody>
 				</table>
 				<div className='th-percent'>
-					<label htmlFor='percent'>
-						<input type='checkbox' id='percent' name='percent' title='Show percentages or absolute values'
-							checked={this.state.percent} onChange={this._togglePercent} />
-						Show percentages
-					</label>
+					<label><input type='checkbox' id='percent' name='percent' title='Show percentages or absolute values'
+							checked={this.state.percent} onChange={this._togglePercent} />Show percentages</label>
 					
 				</div>
 			</div>
