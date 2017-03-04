@@ -1754,6 +1754,12 @@ li.input-group-cluster > .btn:disabled {
 .th-config .subunit {
   font-size: 12px;
 }
+.th-config .th-percent {
+  background: #ffc0cb;
+  padding-left: 40%;
+  padding-top: 2px;
+  font-size: 90%;
+}
 .export {
   position: relative;
   padding: 10px;
