@@ -474,6 +474,9 @@ class Channel():
 				start:	starting time reference (str) e.g., '-30m', '-1d', ...
 				res:	RRA resolution (str) e.g., '-5m', '1', '300', ...
 		'''
+		if not self.rrd:
+			return
+			
 		rrd = os.path.join(CHDIR, self.rrd)
 
 		for i, CF in enumerate(CFS):
