@@ -53,7 +53,7 @@ var ThresholdBadge = React.createClass({
 		});
 
 		return (
-			<span className={c}></span>
+			<span title='Value out of range' className={c}></span>
 		);
 	}
 
