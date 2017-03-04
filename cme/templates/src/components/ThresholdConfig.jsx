@@ -175,8 +175,13 @@ var ThresholdConfig = React.createClass({
 			);
 		}
 
+		var cls = classNames({
+			'th-config': true,
+			'single': this.props.single
+		})
+
 		return (
-			<div className='th-config'>
+			<div className={cls}>
 				<table>
 					<thead>
 						<tr className='range'>

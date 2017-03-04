@@ -95,13 +95,14 @@ var ChannelPanel = React.createClass({
 							   onBlur={this._onBlur} />
 					</div>
 
-					{this._renderReadout(primary, 'primary')}
+					{this._renderReadout(primary, 'primary', !secondary)}
 
 					{this._renderReadout(secondary, 'secondary')}
 
 					{this._renderControls()}
 
 					<button className="btn ch-history-badge" disabled={this.state.ch.error}
+						title='Display channel history'
 						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>
 
 					{this._renderHistory(primary, secondary)}
@@ -118,14 +119,20 @@ var ChannelPanel = React.createClass({
 		);
 	},
 
-	_renderReadout: function(sensor, sensorClass) {
+	_renderReadout: function(sensor, sensorClass, singleSensor) {
 
 		if (!sensor) return null;
 
 		var digits = sensor.value > 1 ? (sensor.value > 10 ? 1 : 2) : (sensor.value < 0.1 ? 1 : 3);
 
+		var cls = classNames({
+			'ch-readout': true,
+			sensorClass: true,
+			'single': singleSensor
+		});
+
 		return (
-			<div className={'ch-readout ' + sensorClass}>
+			<div className={cls}>
 				<input type="text" id={sensor.id} name={sensor.id} 
 							   value={sensor.name}
 							   placeholder="Name" disabled={true} />
@@ -474,7 +481,7 @@ var ChannelPanel = React.createClass({
 				<div className='ch-config-content'>
 					<button className='btn' title="Hide alarm setpoints" onClick={this._toggleConfigVisibility}>&laquo;</button>
 
-					<ThresholdConfig channel={this.props.id} sensor={primarySensor} />
+					<ThresholdConfig channel={this.props.id} sensor={primarySensor} single={!secondarySensor} />
 
 					<ThresholdConfig channel={this.props.id} sensor={secondarySensor} />
 
