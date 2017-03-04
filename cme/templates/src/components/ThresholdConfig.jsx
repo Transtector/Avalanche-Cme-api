@@ -62,6 +62,9 @@ function Thresholds(thresholds) {
 var ThresholdConfig = React.createClass({
 
 	getInitialState: function() {
+
+		if (!this.props.sensor) return;
+
 		// Component allows editing of 4 threshold values:
 		// min/max "warning" and min/max "alarm".  We can
 		// parse and load the initial values from the sensor

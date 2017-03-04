@@ -18,7 +18,7 @@ var ThresholdBadge = React.createClass({
 	render: function() {
 		if (!this.props.sensor) return null; // no sensor
 		if (!this.props.sensor.thresholds || this.props.sensor.thresholds.length == 0) return null; // no thresholds
-		if (!this.props.sensor.value) return null; // no value
+		if (!this.props.sensor.value) return null; // no value (or value === 0)
 
 		var t = this.props.sensor.thresholds;
 		var value = this.props.sensor.value;
