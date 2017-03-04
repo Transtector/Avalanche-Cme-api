@@ -399,7 +399,7 @@ class Channel():
 		# Get most recent RRD info (flush first)
 		ch_info = self._channel_info(True)
 
-		if self.error:
+		if not ch_info:
 			return
 
 		# Most recent timestamp is in ch_info header
@@ -432,6 +432,10 @@ class Channel():
 			also flush the rrdcached and get most recent information.
 		'''
 		result = None
+
+		if not self.rrd:
+			# nothing to read
+			return result
 
 		# RRDCACHED_ADDRESS is set to a flag value if there
 		# is no service.  We can still run cme layer however
