@@ -181,13 +181,10 @@ var ThresholdConfig = React.createClass({
 									value={r.min} disabled='disabled'/>
 							</td>
 							<td colSpan='3'>
-								<label htmlFor='nominal' className='nominal-unit'>Nominal
-									<input type='text' id='nominal' name='nominal' disabled={true}
-										value={nominal} className={renderClass('nominal', nominal)}
-										onChange={this._requestChange} onKeyDown={this._onKeyDown} onBlur={this._onBlur} />
-									{unit}
-									<span>{subunit.toLowerCase()}</span>
-								</label>
+								<input type='text' id='nominal' name='nominal' disabled={true}
+									value={nominal} className={renderClass('nominal', nominal)}
+									onChange={this._requestChange} onKeyDown={this._onKeyDown} onBlur={this._onBlur} />
+								<label htmlFor='nominal'>{unit}<span>{subunit.toLowerCase()}</span></label>
 							</td>
 							
 							<td colSpan='2'>
@@ -227,10 +224,12 @@ var ThresholdConfig = React.createClass({
 						<tr><td></td><td></td><td></td><td></td><td></td></tr>
 					</tbody>
 				</table>
-				<div className='th-nominal' title='Enter a nominal value to set thresholds as percentages.'>
-					<input type='checkbox' id='percent' name='percent' value='Use percentages'
-						checked={this.state.percent} onChange={this._togglePercent} />
-					<label htmlFor='percent'>Show percentages</label>
+				<div className='th-percent'>
+					<label htmlFor='percent'>
+						<input type='checkbox' id='percent' name='percent' title='Show percentages or absolute values'
+							checked={this.state.percent} onChange={this._togglePercent} />
+						Show percentages
+					</label>
 					
 				</div>
 			</div>

@@ -1754,21 +1754,6 @@ li.input-group-cluster > .btn:disabled {
 .th-config .subunit {
   font-size: 12px;
 }
-.th-config .th-nominal {
-  margin-top: 2px;
-  margin-left: 40%;
-  font-size: 90%;
-}
-.th-config .th-nominal input[type='text'] {
-  width: 20%;
-}
-.th-config .th-nominal .nominal-unit {
-  position: absolute;
-  margin-left: 5px;
-}
-.th-config .th-nominal .nominal-unit span {
-  font-size: 80%;
-}
 .export {
   position: relative;
   padding: 10px;
