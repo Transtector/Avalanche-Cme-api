@@ -15,14 +15,19 @@ var ThresholdGauge = React.createClass({
 	render: function() {
 
 		if (!this.props.sensor) return null; // no sensor
-		if (!this.props.sensor.thresholds || this.props.sensor.thresholds.length == 0) return null; // no thresholds
-		if (!this.props.sensor.range || this.props.sensor.range.length < 2) return null; // no range
 
 		var t = this.props.sensor.thresholds;
+		var d_range = this.props.sensor.display_range;
 		var r = { 
-			min: this.props.sensor.range[0],
-			max: this.props.sensor.range[1] 
+			min: this.props.sensor.range && this.props.sensor.range.length > 0 ? this.props.sensor.range[0] : '',
+			max: this.props.sensor.range && this.props.sensor.range.length > 1 ? this.props.sensor.range[1] : ''
 		}
+		// d_range must be within hardware range 
+		r.min = d_range && d_range[0] > r.min ? d_range[0] : r.min;
+		r.max = d_range && d_range[1] < r.max ? d_range[1] : r.max;
+
+		if (!t || t.length == 0) return null; // no thresholds
+		if (!r.min || !r.max) return null; // no range
 
 		// calculate relative positioning as a left percentage of range
 		function pos(v, fromRight) {
