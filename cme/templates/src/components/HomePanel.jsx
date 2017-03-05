@@ -59,11 +59,11 @@ var HomePanel = React.createClass({
 			<div className="panel" id="home">
 				<div className="panel-header">
 					<div className="title">
-						Status
+						Dashboard
 					</div>
 
 					<div className="subtitle">
-						Channels status
+						Channel sensors
 					</div>
 
 					<div className='widgets'>
