@@ -162,8 +162,8 @@ class Channel():
 		self.id = id # e.g., 'ch0'
 		
 		self.rrd = self._get_channel_rrd() # e.g., 'ch0_1466802992.rrd', might be None
-		self.rra = self._get_channel_rra()
 
+		self.rra = {} # loaded from config
 		self.error = False # add 'error' dict item for serialized object
 
 		# Read most recent RRD info, set first_ and last_ 
