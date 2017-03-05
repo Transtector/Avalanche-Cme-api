@@ -431,11 +431,14 @@ class Channel():
 		''' Calls the rrdtool.info on the channel RRD directly.  This will
 			also flush the rrdcached and get most recent information.
 		'''
-		result = None
+		
+		if not self.rrd or not os.path.isfile(os.path.join(CHDIR, self.rrd)):
+			# If the rrd is not found, it may be getting recreated
+			# or it may be a different one, try to get it...
+			self.rrd = _get_channel_rrd()
 
 		if not self.rrd:
-			# nothing to read
-			return result
+			return None
 
 		# RRDCACHED_ADDRESS is set to a flag value if there
 		# is no service.  We can still run cme layer however
@@ -456,6 +459,7 @@ class Channel():
 		# Wrap the rrdtool call in try/except as something bad
 		# may be going on with the RRD cache daemon.  We'll set
 		# the channel error flag.
+		result = None
 		try:
 			result = rrdtool.info(os.path.join(CHDIR, self.rrd))
 
@@ -476,7 +480,7 @@ class Channel():
 		'''
 		if not self.rrd:
 			return
-			
+
 		rrd = os.path.join(CHDIR, self.rrd)
 
 		for i, CF in enumerate(CFS):
@@ -529,7 +533,10 @@ class Sensor():
 	def update(self):
 		# Create a datasource key from id, type, and unit (e.g., s0_VAC_Vrms)
 		# to search for a matching datasource for this sensor
-		ds_key = self.id + '_' + self.type + '_' + self.unit
+		regex = re.compile('[^a-zA-Z0-9_]')
+		clean_type = regex.sub('_', self.type)[:3]
+		clean_unit = regex.sub('_', self.unit)[:3]
+		ds_key = self.id + '_' + clean_type + '_' + clean_unit
 		ds = self._ch._datasources and self._ch._datasources.get(ds_key, None)
 
 		value = ds and ds.get('last_ds', None)
