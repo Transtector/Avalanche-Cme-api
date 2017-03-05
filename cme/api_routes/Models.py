@@ -160,7 +160,9 @@ class Channel():
 	def __init__(self, id): 
 
 		self.id = id # e.g., 'ch0'
+		
 		self.rrd = self._get_channel_rrd() # e.g., 'ch0_1466802992.rrd', might be None
+		self.rra = self._get_channel_rra()
 
 		self.error = False # add 'error' dict item for serialized object
 
@@ -288,6 +290,7 @@ class Channel():
 		self.__dict__['name'] = cfg.get('name', name)
 		self.__dict__['description'] = cfg.get('description', name + ' description')
 		self.__dict__['recordAlarms'] = cfg.get('recordAlarms', False)
+		self.__dict__['rra'] = cfg.get('_config', {}).get('rra', {})
 		
 		# clear and add any sensor configuration
 		self.sensors = []
@@ -373,6 +376,10 @@ class Channel():
 	def recordAlarms(self, value):
 		self.__dict__['recordAlarms'] = value
 		self.save_config()
+
+	@property
+	def rra(self):
+		return self.__dict__['rra']
 
 
 	### PRIVATE METHODS
