@@ -330,6 +330,11 @@ var ChannelPanel = React.createClass({
 
 		}
 
+		var historyOptions = this.state.historyOptions.map(function (ho) {
+			return <option key={ho} value={ho} />
+		});
+
+
 		return (
 			<div className={'ch-plot' + (this.state.historyVisible ? ' open' : '')}>
 
@@ -350,12 +355,8 @@ var ChannelPanel = React.createClass({
 					</button>
 
 					<div className="select-wrapper">
-						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistory} >
-							{	
-								this.state.historyOptions.map(function(h) {
-									return <option key={h} value={h} />;
-								});
-							}
+						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistory}>
+							{historyOptions}
 						</select>
 					</div>
 
