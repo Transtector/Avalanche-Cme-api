@@ -52,6 +52,7 @@ var ChannelPanel = React.createClass({
 			recording: false,
 			alarmsVisible: false,
 			history: '',
+			historyOptions: null,
 			historyVisible: false,
 			historyTraceVisible: [ true, true ]
 		}
@@ -101,7 +102,7 @@ var ChannelPanel = React.createClass({
 
 					{this._renderControls()}
 
-					<button className="btn ch-history-badge" disabled={this.state.ch.error}
+					<button className="btn ch-history-badge" disabled={this.state.ch.error || !this.state.historyOptions}
 						title='Display channel history'
 						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>
 
@@ -173,7 +174,7 @@ var ChannelPanel = React.createClass({
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
 		var y1Series, y2Series, traceDisabled = [ false, false ];
 
-		if (this.state.historyVisible && this.state.ch.data) {
+		if (this.state.historyVisible && this.state.ch.data && this.state.historyOptions) {
 
 			// get start, stop, and step timestamps
 			var times = this.state.ch.data[0],
@@ -350,11 +351,11 @@ var ChannelPanel = React.createClass({
 
 					<div className="select-wrapper">
 						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistory} >
-							<option value="live">Live</option>
-							<option value="daily">Daily</option>
-							<option value="weekly">Weekly</option>
-							<option value="monthly">Monthly</option>
-							<option value="yearly">Yearly</option>
+							{	
+								this.state.historyOptions.map(function(h) {
+									return <option key={h} value={h} />;
+								});
+							}
 						</select>
 					</div>
 
@@ -525,6 +526,7 @@ var ChannelPanel = React.createClass({
 			newState.name = newState.ch.name;				
 			newState.description = newState.ch.description;
 			newState.recording = newState.ch.recordAlarms;
+			newState.historyOptions = Object.keys(newState.ch.rra);
 		}
 
 		this.setState(newState, function() {
@@ -650,7 +652,6 @@ var ChannelPanel = React.createClass({
 				alert("TODO:  Support this Action!"); //Actions.deleteChannel(_this.props.id);
 			});
 		}
-
 	},
 
 	_exportHistory: function() {
@@ -712,7 +713,6 @@ var ChannelPanel = React.createClass({
 		this.setState({ activeId: '', chRequest: true }, function() {
 			Actions.channel(_this.props.id, obj);
 		});
-
 	}
 
 });
