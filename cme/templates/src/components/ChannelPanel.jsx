@@ -331,7 +331,7 @@ var ChannelPanel = React.createClass({
 		}
 
 		var historyOptions = this.state.historyOptions.map(function (ho) {
-			return <option key={ho} value={ho} />
+			return <option key={ho} value={ho}>{ho}</option>;
 		});
 
 
