@@ -12,6 +12,12 @@ var Constants = require('../Constants');
 var Actions = require('../Actions');
 var Store = require('../Store');
 
+var Clock = require('./Clock');
+var Thermometer = require('./Thermometer');
+
+var key = require('../keymaster/keymaster.js');
+var classNames = require('classnames');
+
 var Indicator = React.createClass({
 
 	render: function () {
@@ -34,19 +40,41 @@ var Header = React.createClass({
 
 		return {
 			device: cmeState.device,
-			isLoggedIn: cmeState.isLoggedIn
+			config: cmeState.config,
+			ui_panel: cmeState.ui_panel,
+			pollClock: -1,
+			pollTemp: -1
 		}
 
 	},
 
 	componentDidMount: function() {
-		Store.addChangeListener(Constants.SESSION, this._onSessionChange);
+		Store.addChangeListener(Constants.UI_PANEL, this._onUiPanelChange);		
 		Store.addChangeListener(Constants.DEVICE, this._onDeviceChange);
+		Store.addChangeListener(Constants.CONFIG, this._onConfigChange);
+
+		// register keypress handler for shift + underscore to
+		// toggle the clock and thermometer polling
+		key('ctrl+8, ⌘+8', this._toggleWidgetPolling);
+	},
+
+	componentWillReceiveProps: function(nextProps) {
+
+	},
+
+	componentWillReceiveProps: function(nextProps) {
+		var _this = this;
+		if (nextProps.isLoggedIn) {
+			this.setState({ pollClock: 1000, pollTemp: 10000 });
+		}
 	},
 
 	componentWillUnmount: function() {
-		Store.removeChangeListener(Constants.SESSION, this._onSessionChange);
+		key.unbind('ctrl+8, ⌘+8');
+
+		Store.removeChangeListener(Constants.UI_PANEL, this._onUiPanelChange);
 		Store.removeChangeListener(Constants.DEVICE, this._onDeviceChange);
+		Store.removeChangeListener(Constants.CONFIG, this._onConfigChange);
 	},
 
 	render: function () {
@@ -69,52 +97,90 @@ var Header = React.createClass({
 			standAlone = !this.state.device.host.modelNumber;  // indicate "stand-alone" device if no host model number
 		}
 
+		var dashButtonCls = classNames('btn', 'icon-dashboard', { 'active': this.state.ui_panel == 'dashboard'});
+		var alarmButtonCls = classNames('btn', 'icon-alarm', { 'active': this.state.ui_panel == 'alarms'});
+		var configButtonCls = classNames('btn', 'icon-settings', { 'active': this.state.ui_panel == 'settings'});
+
+		var recoveryCls = classNames('recovery', { 'hidden': !this.state.device.recovery });
+
+		var brandName = 'CME';
+		if (this.state.config && this.state.config.general)
+			brandName = this.state.config.general.name;
 
 		return (
 			<header>
-				{this.state.device.recovery ? <div id="recovery">RECOVERY MODE</div> : null}
-				
-				<div id="branding">
-					<div id="title">CME<span title='This is a stand-alone CME (no host)' className={standAlone ? 'stand-alone' : 'hidden'}>*</span></div>
-					<div id="model">{model}</div>
+				<div className="branding">
+					<div className="title">
+						{brandName}<span title='This is a stand-alone CME (no host)' className={standAlone ? 'stand-alone' : 'hidden'}>*</span>
+					</div>
+					<div className="model">{model}</div>
 				</div>
 
-				<div id="tab">&nbsp;</div>
+				<div className={recoveryCls}>RECOVERY MODE</div>
 
-				<div id="buttons">
-					{this.state.isLoggedIn ? <button className="btn icon-home" onClick={this._showHome} /> : null}
-					{this.state.isLoggedIn ? <button className="btn icon-settings" onClick={this._showSettings} /> : null}
-					{this.state.isLoggedIn ? <button className="btn icon-logout" onClick={this._logout} /> : null}
-				</div>
+				<div className="tab">&nbsp;</div>
 
-				<div id="info">
+				<div className="info">
 					<Indicator item={{name: 'Serial number', value: serial}} />
 					<Indicator item={{name: 'Firmware', value: firmware}} />
+				</div>
+
+				<div className='widgets'>
+					<Clock config={this.state.config.clock} flavor='widget' pollPeriod={this.state.pollClock} />
+					<Thermometer config={this.state.config.temperature} flavor='widget' pollPeriod={this.state.pollTemp} />
+				</div>
+				
+				<div className="buttons">
+					{this.props.isLoggedIn ? <button className={dashButtonCls} title="Show dashboard" name="dashboard" onClick={this._showPanel}>Dashboard</button> : null}
+					{this.props.isLoggedIn ? <button className={alarmButtonCls} title="Show alarms" name="alarms" onClick={this._showPanel}>Alarms</button> : null}
+					{this.props.isLoggedIn ? <button className={configButtonCls} title="Show settings" name="settings" onClick={this._showPanel}>Settings</button> : null}
+					{this.props.isLoggedIn ? <button className="btn icon-logout" title="Logout" onClick={this._logout}>Logout</button> : null}
 				</div>
 
 			</header>
 		);
 	},
 
+	_onUiPanelChange: function() {
+
+		this.setState({ ui_panel: Store.getState().ui_panel });
+	},
+
 	_onSessionChange: function() {
-		console.log("Header got onSessionChange event");
+		//console.log("Header got onSessionChange event");
 		this.setState({ isLoggedIn: Store.getState().isLoggedIn });
 	},
+
 	_onDeviceChange: function() {
-		console.log("Header got onDeviceChange event");
+		//console.log("Header got onDeviceChange event");
 		this.setState({ device: Store.getState().device });
 	},
 
-	_showHome: function() {
-		Actions.ui('home');
+	_onConfigChange: function() {
+
+		this.setState({ config: Store.getState().config });
 	},
 
-	_showSettings: function() {
-		Actions.ui('config');
+	_toggleWidgetPolling: function(e, handler) {
+		//console.log("Clock and Thermometer polling toggled: ", handler.shortcut);
+
+		this.setState({ 
+			pollClock: this.state.pollClock < 0 ? 1000 : -1,
+			pollTemp: this.state.pollTemp < 0 ? 10000 : -1 
+		});
+		return false;
 	},
 
+	_showPanel: function(e) {
+		var panel = e.target.name;
+		Actions.ui(panel);
+	},
+	
 	_logout: function () {
-		Actions.logout();
+
+		this.setState({ pollClock: -1, pollTemp: -1 }, function () { 
+			Actions.logout();
+		});
 	}
 });
 

@@ -58,7 +58,7 @@ var ConfigPanel = React.createClass({
 		return (
 			<div className="panel" id="config">
 				<div className="panel-header">
-					<div className="title">Configuration</div>
+					<div className="title">Settings</div>
 					<div className="subtitle">Device settings</div>
 				</div>
 

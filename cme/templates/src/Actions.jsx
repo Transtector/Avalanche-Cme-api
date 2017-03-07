@@ -59,7 +59,7 @@ function dispatchRequest(action, silent) {
 
 var Actions = {
 	setDebug: function(d) {
-		DEBUG = d;
+		DEBUG = !!d;
 	},
 
 	clearErrors: function() {
@@ -165,10 +165,10 @@ var Actions = {
 	},
 
 	logout: function() {
+		// Dispatch SESSION removal immediately - there may be polling
+		// requests in flight and we want to ignore their responses.
+		AppDispatcher.dispatch({ actionType: Constants.SESSION, data: false });
 		CmeAPI.logout()
-			.always(function () {
-				AppDispatcher.dispatch({ actionType: Constants.SESSION, data: false });
-			});
 	},
 
 	profile: function(u, p, success) {

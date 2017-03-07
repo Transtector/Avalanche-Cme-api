@@ -4,7 +4,7 @@ header // 100px height, vertically center logo w/24px padding
 	margin 0
 	padding 0
 	background-linear-gradient(top, header-gradient-top-color, 0%, header-gradient-bottom-color, header-gradient-bottom-stop)
-	#branding
+	.branding
 		padding 24px 0 23px 86px // accommmodate 1px bottom border
 		color #fff
 		border 0 solid header-tab-border-color
@@ -15,22 +15,23 @@ header // 100px height, vertically center logo w/24px padding
 		background-position 18px center
 		background-size 48px 48px
 		background-image url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><defs><mask id='mask'><circle cx='50%' cy='50%' r='64' fill='white'/><path fill='black' d='M0,84 L 33.5,84 L 88,30 L 68,84 L 128, 84 L 128, 92 L 55, 92 L 66,66 L 39, 92 L 0, 92z' /></mask></defs><circle cx='50%' cy='50%' r='64' fill='white' mask='url(#mask)'/></svg>")
-
-	#title
-		font-size 36px
-	#model
-		font-size 16px
-	#recovery
+		.title
+			font-size 36px
+		.model
+			font-size 16px
+	
+	.recovery
 		position absolute
 		width 100%
-		top 80px
+		top 30px
 		z-index 9
 		text-align center
 		font-size 40px
 		color header-bg-color
 		opacity 0.4
 		text-shadow -1px -1px 0 error-color, -1px 1px 0 error-color, 1px -1px 0 error-color, 1px 1px 0 error-color
-	#tab
+		
+	.tab
 		position absolute
 		top -3px
 		left 236px
@@ -59,16 +60,19 @@ header // 100px height, vertically center logo w/24px padding
 			background-size auto 100px
 			background-position 0 -80px
 			background-linear-gradient(top, header-gradient-top-color, 0%, header-gradient-bottom-color, header-gradient-bottom-stop)
-	#info
+	
+	.info // this div extends the graphical tab on very wide displays
 		position absolute
+		background-color header-bg-color
 		white-space nowrap
-		top 5px
+		top 7px
 		right 0
+		height 100px
 		text-align right
+		box-shadow 1px -1px 2px #ccc
 		> div
 			display inline-block
 			margin 0 16px
-			line-height 30px
 			.separator
 				margin 0 16px 0 2px
 			> label
@@ -76,25 +80,63 @@ header // 100px height, vertically center logo w/24px padding
 				font-style italic
 			> span
 				font-weight bold
-	#buttons
+	.widgets
 		position absolute
-		top 7px
+		top 32px
+		right 16px
+		bottom 10px
+		color #fff
+		font-size 14px
+		div
+			display inline-block
+			text-align center
+			> div
+				padding 4px 10px
+		> div 
+			margin-left 10px
+		.clock
+			background-color button-bg-color
+		.date
+			background-color lightness(button-bg-color, 50%)
+		.thermometer
+			background-color #334
+			> div
+				margin 0 2px 2px 2px
+				padding-bottom 0
+				border-bottom 2px solid green
+		.thermometer.warn > div
+			border-color yellow
+		.thermometer.alarm > div
+			border-color red
+			
+	.buttons
+		position absolute
+		margin-top 5px
 		right 0
-		height 100%
-		min-width 350px
-		background header-bg-color
-		box-shadow 1px -1px 2px #ccc
 		white-space nowrap
 		text-align right
 		button
-			margin 26px 16px
+			width auto
+			height auto
+			margin-right 20px
+			padding-top 36px
+			color inherit
+			font-size 10pt
+			font-weight bold
+			text-transform uppercase
+			background-color transparent
+			background-position center top
+		button.active
+			border-bottom 3px solid button-bg-color
 
-.icon-home
-	background-image svg('home2')
+.icon-dashboard
+	background-image svg('dashboard', '0 0 1000 1000', fg-color)
+.icon-alarm
+	background-image svg('alarm', '0 0 80 80', fg-color)
 .icon-settings
-	background-image svg('settings2')
+	background-image svg('settings2', '0 0 1024 1024', fg-color)
 .icon-logout
-	background-image svg('logout2')
+	background-image svg('logout2', '0 0 1024 1024', fg-color)
 	
 
 .panel-header
@@ -116,31 +158,38 @@ header // 100px height, vertically center logo w/24px padding
 
 // for very wide layouts, open up the buttons min-width
 @media only screen and (min-width: 1400px)
-	header #buttons
+	header .info
 		min-width 1024px
 
 @media only screen and (max-width: width-breakpoint)
 	header
-		#branding
+		.branding
 			border none
-		#tab
+		.recovery
+			top 4px
+			font-size 30px
+		.tab
 			display none
-		#buttons
+		.info
 			position static
-			box-shadow none
-			padding 0
+			height auto
 			text-align center
-			button
-				margin 0
-				width 34%
-		#info
-			position static
-			background-color header-bg-color
 			> div
 				margin 0
 				width 50%
-				text-align center
-		#info::after
-			content ''
-			display block
-			clear both
+		.widgets
+			position static
+			padding 20px 0 // use padding; margins let bg show through
+			text-align center
+			background-color header-bg-color
+		.buttons
+			position static
+			margin 0
+			background-color header-bg-color
+			text-align center
+			button
+				margin 0
+				width 25%
+	.panel-header
+		display none
+

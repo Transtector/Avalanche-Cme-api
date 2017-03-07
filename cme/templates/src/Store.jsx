@@ -22,7 +22,7 @@ var _config = {};
 var _errors = [];
 var _isLoggedIn = false;
 var _isSubmitting = false;
-var _ui_panel = 'home';
+var _ui_panel = 'dashboard';
 var _logs = [];
 var _updates = { pending: false, usb: [], web: [], uploads: [] };
 var _channels = [];
@@ -175,8 +175,18 @@ var Store = assign({}, EventEmitter.prototype, {
 		if (event && event !== Constants.REQUEST)
 			_isSubmitting = false;
 
-		if (event)
-			Store.emitChange(event); // notify store changes
+		// Store has updated; in general we want to notify
+		// registered event waiters of the event.  Normally
+		// if valid event and we're logged in: emit event.
+		if (event && _isLoggedIn) {
+			
+			Store.emitChange(event); // normal logged in event notification
+
+		} else if (event && event === Constants.SESSION || event === Constants.DEVICE) {
+
+				Store.emitChange(event); // only notify SESSION or DEVICE events if not logged in
+		}
+
 
 		return true; // No errors. Needed by promise in Dispatcher.
 	})

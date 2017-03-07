@@ -14,8 +14,9 @@ var Store = require('../Store');
 
 var Header = require('./Header');
 var Login = require('./Login');
+var Dashboard = require('./Dashboard');
 var ConfigPanel = require('./ConfigPanel');
-var HomePanel = require('./HomePanel');
+var AlarmsPanel = require('./AlarmsPanel');
 var ErrorPanel = require('./ErrorPanel');
 
 var CmeApp = React.createClass({
@@ -43,7 +44,7 @@ var CmeApp = React.createClass({
 
 		return (
 			<div>
-				<Header />
+				<Header isLoggedIn={this.state.isLoggedIn} />
 
 				<Login />
 				
@@ -66,11 +67,14 @@ var CmeApp = React.createClass({
 
 		switch (this.state.ui_panel) {
 
-			case 'config':
+			case 'settings':
 				return <ConfigPanel />
 
-			default: // 'home'
-				return <HomePanel />
+			case 'alarms':
+				return <AlarmsPanel />
+
+			default: // 'dashboard'
+				return <Dashboard />
 		}
 
 	},

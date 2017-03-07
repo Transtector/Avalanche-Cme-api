@@ -1,0 +1,39 @@
+.panel#home
+	position relative
+
+panel-icon-color = #ff0
+.panel .notification
+	position absolute
+	max-width 400px
+	top 70px
+	right -415px
+	padding 20px 20px 0 20px
+	opacity 0.9
+	color white
+	background-color #333
+	border 1px solid #000
+	border-radius 8px
+	z-index 9
+	box-shadow 0 2px 9px 0 rgba(0,0,0,0.6)	
+	transition right 0.3s ease 0s
+	.title
+		padding 7px 0 4px 38px
+		font-weight bold
+		font-size 11pt
+		background-repeat no-repeat
+		background-size 32px 32px
+		background-image url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><path id='triangle' fill-opacity='0' stroke='" + warning-color + "' stroke-width='4' stroke-linejoin='round' d='m10.03833,62.02504c-0.41624,0.80152 -0.90672,1.55295 -0.90672,2.43189l0.0041,0.36888c0,1.89906 1.48737,3.04669 3.19698,3.04669l55.25034,0c1.71234,0 3.18332,-1.42088 3.18332,-3.31994l-0.01822,-0.36888c0,-0.8835 -0.43264,-1.64858 -0.90627,-2.43644l-27.36285,-49.08409c-1.20911,-1.34155 -3.1692,-1.34155 -4.37831,0.00182l-28.06191,49.36189l-0.00046,-0.00182z'/><path id='exclaim-bar' fill='" + warning-color + "' d='m40.573,26.833c1.713,0 4.371,1.365 4.371,3.06l-1.279,17.615c0,1.695 -1.379,3.06 -3.092,3.06s-3.091,-1.365 -3.091,-3.06l-1.493,-17.615c0,-1.695 2.871,-3.06 4.584,-3.06z'/><circle id='exclaim-dot' fill='" + warning-color + "' r='4.3' cy='57.1' cx='40.6'/></svg>")
+		
+	.message
+		font-size 10pt
+		margin 5px 0
+	.buttons
+		margin-top 10px
+		text-align right
+		button
+			font-size 11pt
+			background-color transparent
+
+.panel .notification.alarms
+	right 15px
+
