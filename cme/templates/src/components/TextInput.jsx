@@ -10,6 +10,7 @@ var React = require('react');
 
 var classNames = require('classnames');
 
+
 var TextInput = React.createClass({
 
 	propTypes: {
@@ -20,7 +21,7 @@ var TextInput = React.createClass({
 	render: function() {
 		var id = this.props.id,
 			type = this.props.type || "text",
-			name = this.props.name.charAt(0).toUpperCase() + this.props.name.slice(1),
+			name = this.props.name,
 
 			onBlur = this.props.onBlur,
 			readonly = !onBlur,

@@ -69,7 +69,7 @@ var ConfigPanel = React.createClass({
 					<InputGroup id="general">
 						<TextInput id="general.name" name='name' defaultValue={config.general.name} onBlur={this._requestChange} />
 						<TextInput id="general.description" name='description' defaultValue={config.general.description} onBlur={this._requestChange} />
-						<TextInput id="general.location" name='location' defaultValue={config.general.location} onBlur={this._requestChange} />
+						<TextInput id="general.location" name='device location' defaultValue={config.general.location} onBlur={this._requestChange} />
 					</InputGroup>
 
 					<InputGroup id="support">

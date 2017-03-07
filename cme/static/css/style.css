@@ -884,6 +884,7 @@ td.rdtYear:hover {
 .input-group-cluster > label {
   display: block;
   color: #006ec5;
+  text-transform: capitalize;
   font-size: 90%;
   font-weight: bold;
 }
