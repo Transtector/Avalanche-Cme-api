@@ -29,10 +29,12 @@ var AlarmsPanel = React.createClass({
 	},
 
 	componentDidMount: function() {
+
 		Store.addChangeListener(Constants.CONFIG, this._onConfigChange);
 	},
 
 	componentWillUnmount: function() {
+		
 		Store.removeChangeListener(Constants.CONFIG, this._onConfigChange);
 	},
 

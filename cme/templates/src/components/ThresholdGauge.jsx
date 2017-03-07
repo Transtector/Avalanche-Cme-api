@@ -12,6 +12,12 @@ var classNames = require('classnames');
 
 function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 
+function toPercentage(value, nominal, precision) {
+	var precision = precision || 1; 
+	if (!isNumeric(value) || !isNumeric(nominal)) return value;
+	return (100 * ((parseFloat(value) / parseFloat(nominal)) - 1)).toFixed(precision); 
+}
+
 var ThresholdGauge = React.createClass({
 
 	render: function() {
@@ -86,11 +92,13 @@ var ThresholdGauge = React.createClass({
 		add_percent(alarmStyle);
 		add_percent(pointerStyle);
 
+		var deviation = toPercentage(this.props.sensor.value, this.props.sensor.nominal);
+
 		return (
 			<div className="th-gauge">
 				<div className="alarm" style={alarmStyle}></div>
 				<div className="warning" style={warningStyle}></div>
-				<div className="pointer" style={pointerStyle}></div>
+				<div className="pointer" style={pointerStyle}><span>{deviation}</span></div>
 			</div>
 		);
 	}

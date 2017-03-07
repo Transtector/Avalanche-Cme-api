@@ -1709,8 +1709,8 @@ li.input-group-cluster > .btn:disabled {
 }
 .th-gauge .pointer {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   left: 50%;
   margin-left: -4px;
   top: 50%;
