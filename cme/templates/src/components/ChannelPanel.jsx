@@ -58,7 +58,7 @@ var ChannelPanel = React.createClass({
 			description: '',
 			configOpen: false,
 			activeId: '',
-			polling: true,
+			polling: false,
 			recording: false,
 			alarmsVisible: false,
 			history: '',
