@@ -223,10 +223,10 @@ var ChannelPanel = React.createClass({
 					if (live) {
 
 						y1Series = [ 
-							[t, ALARM_MAX ],
-							[t, ALARM_MIN ],
-							[t, WARN_MAX ],
-							[t, WARN_MIN ],
+							[ [t, ALARM_MAX ] ],
+							[ [t, ALARM_MIN ] ],
+							[ [t, WARN_MAX ] ],
+							[ [t, WARN_MIN ] ],
 							[]
 						];
 
