@@ -1,3 +1,6 @@
+// Top-level application page header styles
+
+
 header // 100px height, vertically center logo w/24px padding
 	position relative
 	z-index 1
@@ -138,23 +141,6 @@ header // 100px height, vertically center logo w/24px padding
 .icon-logout
 	background-image svg('logout2', '0 0 1024 1024', fg-color)
 	
-
-.panel-header
-	position relative
-	padding 10px
-	background-color header-bg-color
-	border-bottom 1px solid #ccc
-	.title
-		font-size 150%
-	.subtitle
-		margin 0.5em 0 0 0.5em
-		font-style italic
-
-.panel-content::after
-	content ''
-	display block
-	clear both
-
 
 // for very wide layouts, open up the buttons min-width
 @media only screen and (min-width: 1400px)

@@ -50,7 +50,7 @@ var Dashboard = React.createClass({
 
 	render: function() {
 		return (
-			<div className="panel" id="home">
+			<div className="panel" id="dashboard">
 				<div className="panel-header">
 					<div className="title">
 						Dashboard

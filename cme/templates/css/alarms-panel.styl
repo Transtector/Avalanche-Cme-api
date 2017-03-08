@@ -1,0 +1,64 @@
+
+.panel#alarms
+	.panel-content
+		position relative
+		width 8in
+		margin 30px auto
+		padding 0.25in 0.5in 1.5in 0.5in
+		background-color white
+		box-shadow 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 0, 0, 0.1) inset
+		&:before, &:after
+			content ""
+			position absolute
+			z-index -1
+			box-shadow 0 0 20px rgba(0,0,0,0.8)
+			top 0
+			bottom 0
+			left 10px
+			right 10px
+			border-radius 100px / 10px
+		&:after
+			right 10px
+			left auto
+			transform skew(8deg) rotate(3deg)
+		h2:first-child, h3
+			text-align center
+			
+		h2:not(:first-child)
+			margin 1.4em 0 0.4em 0
+		
+	table
+		width 100%
+		border-collapse collapse
+		th, td
+			border 1px solid #ddd
+			padding 0.2em 0.8em
+		th
+			text-align left
+		thead th
+			vertical-align bottom
+		thead th:not(:first-child)
+			text-align center
+		tbody th
+			padding 0.2em 1.4em
+		
+
+	.power-summary td,
+	.alarm-summary td
+		text-align center
+
+	.copyright
+		position absolute
+		left 0.5in
+		bottom 0
+		right 0.5in
+		padding 8px 12px 0.25in 12px
+		border 0px solid button-bg-color
+		border-top-width 3px
+		div:first-child
+			margin-bottom 0.25em
+			font-size 12pt
+			font-weight bold
+		div:last-child
+			font-size 10pt
+			

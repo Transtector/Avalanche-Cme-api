@@ -1,0 +1,191 @@
+
+
+
+/* input-groups used in the config panel */
+.input-group
+	position relative
+	margin 10px
+	float left
+	text-align left
+	overflow hidden
+	box-shadow 1px 1px 3px #ccc
+	
+.input-group > button
+	height 32px
+	width 380px
+
+.input-group-title button
+	width 100%
+	height 32px
+
+.input-group#restart .input-group-title > button
+	background-color error-color
+	
+.input-group-title::after
+	content ''
+	position absolute
+	width 0
+	height 0
+	left 6px
+	top 12px
+	border-left 8px solid transparent
+	border-right 8px solid transparent
+	border-top 8px solid #fff
+	transition all 0.3s ease 0s
+		
+.input-group.collapsed
+	.input-group-title::after
+		transform rotate(-90deg)
+	.input-group-content
+		padding 0 10px
+		height 0
+
+.input-group-content
+	position relative
+	padding 10px
+	overflow hidden
+	background #fff
+	transition all 0.3s ease 0s
+	> ul
+		margin 0
+		padding 0
+		list-style none
+	.screen
+		display none
+		position absolute
+		top 0
+		left 0
+		bottom 0
+		right 0
+		background black
+		opacity 0.2
+	.screen.active
+		display block
+
+.input-group-cluster
+	width 360px
+	margin 10px auto
+	white-space nowrap
+	border-bottom 1px solid #ccc
+	> label
+		display block
+		color #006EC5
+		text-transform capitalize
+		font-size 90%
+		font-weight bold
+	> input[type="text"],
+	> input[type="password"]
+		margin-left 8px
+		width 100%
+	input, a, .led-text
+		font-size 20px
+		line-height 40px
+		border 0
+		background transparent
+		outline none
+	input[type="checkbox"], 
+	input[type="radio"]
+		zoom 2
+		margin-right 5px
+		vertical-align middle
+	input[readonly]
+		color #999
+	a
+		display block
+		width 360px
+		text-align center
+	textarea
+		width 334px
+		height 40px
+		outline none
+		resize vertical
+	p
+		white-space normal
+		font-style italic
+		padding 0 20px
+
+	.radio-group
+		padding 10px
+		> div
+			margin-top 10px
+	#ntpGroup, #tempGroup
+		padding 10px
+		position relative
+		#status
+			border 0
+			margin 0
+			position absolute
+			top -10px
+			right 10px
+		#ta-wrapper label
+			margin-top 10px
+			display block
+
+.input-group-cluster.no-border
+	border-bottom-color transparent
+
+.drop-target
+	border 3px dashed #ccc
+	border-radius 4px
+	background-color #ECEFF1
+	background-repeat no-repeat
+	background-position	50% 0
+	background-image url('data:image/png;base64,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');
+	text-align center
+	h1, h2
+		margin 0
+		color #95A7B6
+	h1
+		margin-top 100px
+		font-size 170%
+	h2
+		margin-bottom 5px
+		font-size 100%
+
+.drop-target.active
+	border-style solid
+
+.upload-widget
+	position relative
+	progress,
+	.progress-bar
+		position absolute
+		visibility hidden
+		left 10%
+		width 80%
+		top 50px
+	.active
+		visibility visible
+
+
+	
+li.input-group-cluster
+	position relative
+	padding 8px 0
+	font-size 90%
+	text-align right
+	> .btn
+		background-color transparent
+	> .btn.icon-left
+		float left
+	> .btn:disabled
+		color #ddd
+		opacity 0.4
+
+
+.input-group-buttons
+	margin -10px // changes with .input-group margin above
+	margin-top 0
+	border-top 1px solid bg-color
+	.btn
+		background transparent
+		color #006EC5
+		width 50%
+	.btn:first-child
+		border-right 1px solid bg-color
+	.btn:disabled
+		background-color transparent
+		color #ddd
+	.btn.full-width
+		width 100%
+		border-right 0

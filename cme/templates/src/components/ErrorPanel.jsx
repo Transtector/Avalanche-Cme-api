@@ -37,7 +37,7 @@ var ErrorPanel = React.createClass({
 		if (this.state.isLoggedIn && this.state.errors && this.state.errors.length > 0) {
 
 			return (
-				<div id="error" className="panel">
+				<div className="panel" id='error'>
 					<div className="popup">
 						<div className="title">Error</div>
 						
