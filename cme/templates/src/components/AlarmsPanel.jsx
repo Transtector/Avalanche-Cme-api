@@ -47,6 +47,9 @@ var AlarmsPanel = React.createClass({
 			startDate = moment().startOf('week').format(dateFormat),
 			endDate = moment().endOf('week').format(dateFormat);
 
+		// dateCode: YYYYMMDD
+		var dateCode = moment(this.state.device.host.dateCode).format('MMM D YYYY');
+
 		return (
 			<div className="panel" id="alarms">
 				<div className="panel-header">
@@ -73,7 +76,7 @@ var AlarmsPanel = React.createClass({
 								'Site Description': this.state.config.general.description,
 								'Site Address': this.state.config.general.location,
 								'Power Conditioner Model/SN': this.state.device.host.modelNumber + '/' + this.state.device.host.serialNumber,
-								'Installation Date': this.state.device.host.dateCode
+								'Installation Date': dateCode
 							})
 						}</tbody>
 					</table>

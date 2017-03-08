@@ -32,6 +32,16 @@ var ESCAPE_KEY_CODE = 27;
 var FAST_POLL_PERIOD = 1000; // showing current values
 var SLOW_POLL_PERIOD = 5000; // showing historic values
 
+function getSensorThreshold(s, classification, direction) {
+	if (!s || !s.thresholds || s.thresholds.length == 0) return null;
+
+	var th = s.thresholds.find(function(th){
+		return th.classification == classification && th.direction == direction;
+	});
+
+	return th.value;
+}
+
 var ChannelPanel = React.createClass({
 	_pollTimeout: null,
 	_pollPeriod: FAST_POLL_PERIOD,
@@ -172,7 +182,7 @@ var ChannelPanel = React.createClass({
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-		var y1Series, y2Series, traceDisabled = [ false, false ];
+		var y1Series, y2Series, traceDisabled = [ false, !secondarySensor ];
 
 		if (this.state.historyVisible && this.state.ch.data && this.state.historyOptions) {
 
@@ -205,8 +215,24 @@ var ChannelPanel = React.createClass({
 				// Intialize the series data arrays
 				if (index == 0) {
 					if (live) {
-						y1Series = [ [] ]; // LIVE data
+
+						y1Series = [ 
+							[t, getSensorThreshold(primarySensor, 'ALARM', 'MAX') ],
+							[t, getSensorThreshold(primarySensor, 'ALARM', 'MIN') ],
+							[t, getSensorThreshold(primarySensor, 'WARNING', 'MAX') ],
+							[t, getSensorThreshold(primarySensor, 'WARNING', 'MIN') ],
+							[]
+						]; 
+
+
+
+
+
 						y2Series = [ [] ]; 
+
+
+
+
 					} else {
 						y1Series = [[], [], []]; // MAX, MIN, AVG data
 						y2Series = [[], [], []];
@@ -214,6 +240,7 @@ var ChannelPanel = React.createClass({
 				} 
 
 				// Calculate 'live' min/max for y-axis scaling
+				/*
 				if (live) {
 					if (y1) {
 						y1min = !y1min || y1min > y1 ? y1 : y1min;
@@ -225,10 +252,11 @@ var ChannelPanel = React.createClass({
 						y2max = !y2max || y2max < y2 ? y2 : y2max;
 					}
 				}
+				*/
 
 				if (this.state.historyTraceVisible[0]) {
 					if (live) {
-						y1Series[0].push([ t, y1 ]);
+						y1Series[4].push([ t, y1 ]);
 
 					} else {
 						// Add the traces in order as AVG, MIN, MAX.
@@ -243,7 +271,7 @@ var ChannelPanel = React.createClass({
 
 				}
 
-				if (this.state.historyTraceVisible[1]) {
+				if (this.state.historyTraceVisible[1] && secondarySensor) {
 					if (live) {
 						y2Series[0].push([ t, y2 ]);
 
@@ -258,7 +286,6 @@ var ChannelPanel = React.createClass({
 						y2Series[2].push([ t, y2 ]); // AVG point
 					}
 				}
-
 			}, this);
 
 			function tickFormatter(val, axis) {
@@ -269,14 +296,14 @@ var ChannelPanel = React.createClass({
 			var y1Axis = { tickFormatter: tickFormatter }, 
 				y2Axis = { position: 'right', tickFormatter: tickFormatter };
 
-			if (live && Math.abs(y1max - y1min) < 0.1)
-				y1Axis.autoscaleMargin = 1;
+			//if (live && Math.abs(y1max - y1min) < 0.1)
+			//	y1Axis.autoscaleMargin = 1;
 
-			if (live && Math.abs(y2max - y2min) < 0.1)
-				y2Axis.autoscaleMargin = 1;
+			//if (live && Math.abs(y2max - y2min) < 0.1)
+			//	y2Axis.autoscaleMargin = 1;
 
 			y1Axis.show = this.state.historyTraceVisible[0];
-			y2Axis.show = this.state.historyTraceVisible[1]; 
+			y2Axis.show = this.state.historyTraceVisible[1] && secondarySensor; 
 
 			// Disable alternate trace visibility buttons
 			// so user can't turn both off at the same time.
@@ -327,13 +354,15 @@ var ChannelPanel = React.createClass({
 				_this._historyTraceColorsInit = true;
 				_this._historyTraceColors = [ series[0].color, series[1].color ];
 			}
-
 		}
 
+		// get history plot drop-downs from historyOptions.   These are
+		// ultimately built from the channel's RRA (round-robin archives)
+		// defined in the channel configuration file.
 		var historyOptions = this.state.historyOptions.map(function (ho) {
+
 			return <option key={ho} value={ho}>{ho}</option>;
 		});
-
 
 		return (
 			<div className={'ch-plot' + (this.state.historyVisible ? ' open' : '')}>
@@ -360,10 +389,13 @@ var ChannelPanel = React.createClass({
 						</select>
 					</div>
 
-					<button className="btn trace sec" disabled={traceDisabled[1]} id="trace2" onClick={this._toggleTraceVisibility}>
-						<span style={{background: this._historyTraceColors[1] }}></span>
-						{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
-					</button>
+					{ secondarySensor && (
+						<button className="btn trace sec" disabled={traceDisabled[1]} id="trace2" onClick={this._toggleTraceVisibility}>
+							<span style={{background: this._historyTraceColors[1] }}></span>
+							{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
+						</button>
+						)
+					}
 				</div>
 			</div>
 		);
