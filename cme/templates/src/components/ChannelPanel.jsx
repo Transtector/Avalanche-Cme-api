@@ -192,6 +192,12 @@ var ChannelPanel = React.createClass({
 				t_end = times[1] * 1000,
 				t_step = times[2] * 1000;
 
+			// threshold values
+			var ALARM_MAX = getSensorThreshold(primarySensor, 'ALARM', 'MAX'),
+				ALARM_MIN = getSensorThreshold(primarySensor, 'ALARM', 'MIN'),
+				WARN_MAX = getSensorThreshold(primarySensor, 'WARNING', 'MAX'),
+				WARN_MIN = getSensorThreshold(primarySensor, 'WARNING', 'MIN');
+
 			// track current, min and max y-values for y-axes scaling
 			var y1, y1min, y1max, y2, y2min, y2max;
 
@@ -207,7 +213,7 @@ var ChannelPanel = React.createClass({
 			}
 
 			// process each trace data point
-			this.state.ch.data[2].forEach(function(sensorDataValues, index) {
+			this.state.ch.data[2].forEach(function(sensorDataValues, index, data) {
 				var t = t_start + t_step * index,
 					y1 = sensorDataValues[0],
 					y2 = sensorDataValues[1];
@@ -217,27 +223,30 @@ var ChannelPanel = React.createClass({
 					if (live) {
 
 						y1Series = [ 
-							[t, getSensorThreshold(primarySensor, 'ALARM', 'MAX') ],
-							[t, getSensorThreshold(primarySensor, 'ALARM', 'MIN') ],
-							[t, getSensorThreshold(primarySensor, 'WARNING', 'MAX') ],
-							[t, getSensorThreshold(primarySensor, 'WARNING', 'MIN') ],
+							[t, ALARM_MAX ],
+							[t, ALARM_MIN ],
+							[t, WARN_MAX ],
+							[t, WARN_MIN ],
 							[]
-						]; 
-
-
-
-
+						];
 
 						y2Series = [ [] ]; 
-
-
-
 
 					} else {
 						y1Series = [[], [], []]; // MAX, MIN, AVG data
 						y2Series = [[], [], []];
 					}
-				} 
+
+				} else if (index == data.length - 1) {
+					// Add last threshold points
+					if (live) {
+						y1Series[0].push([ t, ALARM_MAX ]);
+						y1Series[1].push([ t, ALARM_MIN ]);
+						y1Series[2].push([ t, WARN_MAX ]);
+						y1Series[3].push([ t, WARN_MIN ]);
+					}
+
+				}
 
 				// Calculate 'live' min/max for y-axis scaling
 				/*
@@ -303,7 +312,7 @@ var ChannelPanel = React.createClass({
 			//	y2Axis.autoscaleMargin = 1;
 
 			y1Axis.show = this.state.historyTraceVisible[0];
-			y2Axis.show = this.state.historyTraceVisible[1] && secondarySensor; 
+			y2Axis.show = this.state.historyTraceVisible[1] && !!secondarySensor; 
 
 			// Disable alternate trace visibility buttons
 			// so user can't turn both off at the same time.
