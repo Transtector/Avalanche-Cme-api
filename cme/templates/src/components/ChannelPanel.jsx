@@ -280,7 +280,7 @@ var ChannelPanel = React.createClass({
 
 				}
 
-				if (this.state.historyTraceVisible[1] && secondarySensor) {
+				if (this.state.historyTraceVisible[1] && !!secondarySensor) {
 					if (live) {
 						y2Series[0].push([ t, y2 ]);
 
@@ -335,7 +335,12 @@ var ChannelPanel = React.createClass({
 			};
 
 			if (history == 'live') {
-				plotSeries.push({ data: y1Series[0], yaxis: 1 });
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: '#f00' }); // ALARM MAX
+				plotSeries.push({ data: y1Series[1], yaxis: 1, color: '#f00' }); // ALARM MIN
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: '#ff0' }); // WARN MAX
+				plotSeries.push({ data: y1Series[3], yaxis: 1, color: '#ff0' }); // WARN MIN
+				plotSeries.push({ data: y1Series[4], yaxis: 1 }); // DATA
+
 				plotSeries.push({ data: y2Series[0], yaxis: 2 });
 
 			} else {
