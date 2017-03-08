@@ -1732,6 +1732,15 @@ li.input-group-cluster > .btn:disabled {
   -o-transform: rotate(-45deg);
   transform: rotate(-45deg);
 }
+.th-gauge .pointer span {
+  display: inline-block;
+  margin-top: 20px;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
 .th-badge {
   position: absolute;
   width: 32px;

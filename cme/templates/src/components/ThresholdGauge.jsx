@@ -104,7 +104,7 @@ var ThresholdGauge = React.createClass({
 
 	_renderDeviation: function () {
 		if (this.props.sensor.type == 'VAC') {
-			return <span>{toPercentage(this.props.sensor.value, this.props.sensor.nominal)}</span>;
+			return <span>{toPercentage(this.props.sensor.value, this.props.sensor.nominal) + ' %'}</span>;
 		}
 		return null;
 	}
