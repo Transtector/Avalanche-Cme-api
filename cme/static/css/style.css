@@ -1734,7 +1734,8 @@ li.input-group-cluster > .btn:disabled {
 }
 .th-gauge .pointer span {
   display: inline-block;
-  margin-top: 20px;
+  margin-top: 24px;
+  white-space: nowrap;
   -webkit-transform: rotate(45deg);
   -moz-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
