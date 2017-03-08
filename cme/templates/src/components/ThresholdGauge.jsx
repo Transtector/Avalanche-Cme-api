@@ -92,15 +92,21 @@ var ThresholdGauge = React.createClass({
 		add_percent(alarmStyle);
 		add_percent(pointerStyle);
 
-		var deviation = toPercentage(this.props.sensor.value, this.props.sensor.nominal);
-
+		
 		return (
 			<div className="th-gauge">
 				<div className="alarm" style={alarmStyle}></div>
 				<div className="warning" style={warningStyle}></div>
-				<div className="pointer" style={pointerStyle}><span>{deviation}</span></div>
+				<div className="pointer" style={pointerStyle}>{this._renderDeviation()}</div>
 			</div>
 		);
+	},
+
+	_renderDeviation: function () {
+		if (this.props.sensor.type == 'VAC') {
+			return <span>{toPercentage(this.props.sensor.value, this.props.sensor.nominal)}</span>;
+		}
+		return null;
 	}
 
 });
