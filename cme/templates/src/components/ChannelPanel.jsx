@@ -42,13 +42,17 @@ function getSensorThreshold(s, classification, direction) {
 	return th.value;
 }
 
+var TRACE_COLORS = {
+	'WARNING': '#ff0',
+	'ALARM': '#f00',
+	'PRI_DATA': '#EB942A',
+	'SEC_DATA': '#2296E0'
+}
+
 var ChannelPanel = React.createClass({
 	_pollTimeout: null,
 	_pollPeriod: FAST_POLL_PERIOD,
 	_pollTime: 0,
-
-	_historyTraceColorsInit: false, // set colors after first plot generated
-	_historyTraceColors: [ '#00000000', '#00000000' ], // modified after first render
 
 	getInitialState: function() {
 		return {
@@ -328,23 +332,24 @@ var ChannelPanel = React.createClass({
 			};
 
 			if (history == 'live') {
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: '#f00', lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MAX
-				plotSeries.push({ data: y1Series[1], yaxis: 1, color: '#f00', lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MIN
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: '#ff0', lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MAX
-				plotSeries.push({ data: y1Series[3], yaxis: 1, color: '#ff0', lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MIN
-				plotSeries.push({ data: y1Series[4], yaxis: 1 }); // DATA
+				// push ALARM_MAX, ALARM_MIN, WARN_MAX, WARN_MIN, DATA
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MAX
+				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MIN
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MAX
+				plotSeries.push({ data: y1Series[3], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MIN
+				plotSeries.push({ data: y1Series[4], yaxis: 1, color: TRACE_COLORS['PRI_DATA'] }); // DATA
 
 				plotSeries.push({ data: y2Series[0], yaxis: 2 });
 
 			} else {
 				// Add MAX, MIN, and AVG traces for each sensor
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: this._historyTraceColors[0], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
-				plotSeries.push({ data: y1Series[1], yaxis: 1, color: this._historyTraceColors[0], lines: { lineWidth: 1 }, shadowSize: 0 });
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: this._historyTraceColors[0], shadowSize: 0 });
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
+				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], shadowSize: 0 });
 
-				plotSeries.push({ data: y2Series[0], yaxis: 2, color: this._historyTraceColors[1], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
-				plotSeries.push({ data: y2Series[1], yaxis: 2, color: this._historyTraceColors[1], lines: { lineWidth: 1 }, shadowSize: 0 });
-				plotSeries.push({ data: y2Series[2], yaxis: 2, color: this._historyTraceColors[1], shadowSize: 0 });
+				plotSeries.push({ data: y2Series[0], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
+				plotSeries.push({ data: y2Series[1], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
+				plotSeries.push({ data: y2Series[2], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], shadowSize: 0 });
 			}
 		}
 
@@ -354,13 +359,6 @@ var ChannelPanel = React.createClass({
 
 			// generate the plot here
 			var plot = $.plot($(el), plotSeries, plotOptions);
-
-			// get/set flot series colors from 'live'
-			if (live && !_this._historyTraceColorsInit) {
-				var series = plot.getData();
-				_this._historyTraceColorsInit = true;
-				_this._historyTraceColors = [ series[0].color, series[1].color ];
-			}
 		}
 
 		// get history plot drop-downs from historyOptions.   These are
@@ -386,7 +384,7 @@ var ChannelPanel = React.createClass({
 
 				<div className="ch-plot-footer">
 					<button className="btn trace pri" disabled={traceDisabled[0]} id="trace1" onClick={this._toggleTraceVisibility}>
-						<span style={{background: this._historyTraceColors[0]}}></span>
+						<span style={{background: TRACE_COLORS['PRI_DATA']}}></span>
 						{primarySensor && primarySensor.unit ? primarySensor.unit : ''}
 					</button>
 
@@ -396,9 +394,9 @@ var ChannelPanel = React.createClass({
 						</select>
 					</div>
 
-					{ secondarySensor && (
+					{ !!secondarySensor && (
 						<button className="btn trace sec" disabled={traceDisabled[1]} id="trace2" onClick={this._toggleTraceVisibility}>
-							<span style={{background: this._historyTraceColors[1] }}></span>
+							<span style={{background: TRACE_COLORS['SEC_DATA'] }}></span>
 							{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
 						</button>
 						)
