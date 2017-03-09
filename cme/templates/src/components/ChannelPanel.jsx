@@ -39,7 +39,7 @@ function getSensorThreshold(s, classification, direction) {
 		return th.classification == classification && th.direction == direction;
 	});
 
-	return th.value;
+	return th && th.value;
 }
 
 var TRACE_COLORS = {
