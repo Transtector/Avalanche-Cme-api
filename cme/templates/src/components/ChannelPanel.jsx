@@ -199,12 +199,15 @@ var ChannelPanel = React.createClass({
 				WARN_MIN = getSensorThreshold(primarySensor, 'WARNING', 'MIN');
 
 			// track current, min and max y-values for y-axes scaling
-			var y1, 
-				y1min = primarySensor.display_range[0],
-				y1max = primarySensor.display_range[1],
-				y2, 
-				y2min = secondarySensor.display_range[0],
+			var y1, y2, y1min, y1max, y2min, y2max;
+				
+			y1min = primarySensor.display_range[0],
+			y1max = primarySensor.display_range[1];
+
+			if (secondarySensor) {
+				y2min = secondarySensor.display_range[0];
 				y2max = secondarySensor.display_range[1];
+			}
 
 			// live, daily, weekly, monthly, yearly history setting
 			var history = this.state.history,
