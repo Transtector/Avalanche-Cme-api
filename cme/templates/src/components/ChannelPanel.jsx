@@ -199,7 +199,12 @@ var ChannelPanel = React.createClass({
 				WARN_MIN = getSensorThreshold(primarySensor, 'WARNING', 'MIN');
 
 			// track current, min and max y-values for y-axes scaling
-			var y1, y1min, y1max, y2, y2min, y2max;
+			var y1, 
+				y1min = primarySensor.display_range[0],
+				y1max = primarySensor.display_range[1],
+				y2, 
+				y2min = secondarySensor.display_range[0],
+				y2max = secondarySensor.display_range[1];
 
 			// live, daily, weekly, monthly, yearly history setting
 			var history = this.state.history,
@@ -223,10 +228,10 @@ var ChannelPanel = React.createClass({
 					if (live) {
 
 						y1Series = [ 
-							[ [t, ALARM_MAX ] ],
-							[ [t, ALARM_MIN ] ],
-							[ [t, WARN_MAX ] ],
-							[ [t, WARN_MIN ] ],
+							[ [t, ALARM_MAX, y1max ] ],
+							[ [t, ALARM_MIN, y1min ] ],
+							[ [t, WARN_MAX, ALARM_MAX ] ],
+							[ [t, WARN_MIN, ALARM_MIN ] ],
 							[]
 						];
 
@@ -240,28 +245,13 @@ var ChannelPanel = React.createClass({
 				} else if (index == data.length - 1) {
 					// Add last threshold points
 					if (live) {
-						y1Series[0].push([ t, ALARM_MAX ]);
-						y1Series[1].push([ t, ALARM_MIN ]);
-						y1Series[2].push([ t, WARN_MAX ]);
-						y1Series[3].push([ t, WARN_MIN ]);
+						y1Series[0].push([ t, ALARM_MAX, y1max ]);
+						y1Series[1].push([ t, ALARM_MIN, y1min ]);
+						y1Series[2].push([ t, WARN_MAX, ALARM_MAX ]);
+						y1Series[3].push([ t, WARN_MIN, ALARM_MIN ]);
 					}
 
 				}
-
-				// Calculate 'live' min/max for y-axis scaling
-				/*
-				if (live) {
-					if (y1) {
-						y1min = !y1min || y1min > y1 ? y1 : y1min;
-						y1max = !y1max || y1max < y1 ? y1 : y1max;
-					}
-
-					if (y2) {
-						y2min = !y2min || y2min > y2 ? y2 : y2min;
-						y2max = !y2max || y2max < y2 ? y2 : y2max;
-					}
-				}
-				*/
 
 				if (this.state.historyTraceVisible[0]) {
 					if (live) {
@@ -302,7 +292,7 @@ var ChannelPanel = React.createClass({
 				return val.toFixed(digits);
 			}
 
-			var y1Axis = { tickFormatter: tickFormatter }, 
+			var y1Axis = { tickFormatter: tickFormatter, min: y1min, max: y1max }, 
 				y2Axis = { position: 'right', tickFormatter: tickFormatter };
 
 			//if (live && Math.abs(y1max - y1min) < 0.1)
@@ -335,10 +325,10 @@ var ChannelPanel = React.createClass({
 			};
 
 			if (history == 'live') {
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: '#f00' }); // ALARM MAX
-				plotSeries.push({ data: y1Series[1], yaxis: 1, color: '#f00' }); // ALARM MIN
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: '#ff0' }); // WARN MAX
-				plotSeries.push({ data: y1Series[3], yaxis: 1, color: '#ff0' }); // WARN MIN
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: '#f00', lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MAX
+				plotSeries.push({ data: y1Series[1], yaxis: 1, color: '#f00', lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MIN
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: '#ff0', lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MAX
+				plotSeries.push({ data: y1Series[3], yaxis: 1, color: '#ff0', lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MIN
 				plotSeries.push({ data: y1Series[4], yaxis: 1 }); // DATA
 
 				plotSeries.push({ data: y2Series[0], yaxis: 2 });
