@@ -46,7 +46,8 @@ var TRACE_COLORS = {
 	'WARNING': '#ff0',
 	'ALARM': '#f00',
 	'PRI_DATA': '#EB942A',
-	'SEC_DATA': '#2296E0'
+	'SEC_DATA': '#2296E0',
+	'FILL': 0.2
 }
 
 var ChannelPanel = React.createClass({
@@ -333,21 +334,21 @@ var ChannelPanel = React.createClass({
 
 			if (history == 'live') {
 				// push ALARM_MAX, ALARM_MIN, WARN_MAX, WARN_MIN, DATA
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MAX
-				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: 0.2, lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MIN
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MAX
-				plotSeries.push({ data: y1Series[3], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: 0.3, lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MIN
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MAX
+				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MIN
+				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MAX
+				plotSeries.push({ data: y1Series[3], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MIN
 				plotSeries.push({ data: y1Series[4], yaxis: 1, color: TRACE_COLORS['PRI_DATA'] }); // DATA
 
 				plotSeries.push({ data: y2Series[0], yaxis: 2 });
 
 			} else {
 				// Add MAX, MIN, and AVG traces for each sensor
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
+				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
 				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
 				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], shadowSize: 0 });
 
-				plotSeries.push({ data: y2Series[0], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { fill: 0.4, lineWidth: 1, zero: false }, shadowSize: 0 });
+				plotSeries.push({ data: y2Series[0], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
 				plotSeries.push({ data: y2Series[1], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
 				plotSeries.push({ data: y2Series[2], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], shadowSize: 0 });
 			}

@@ -20,8 +20,19 @@ function decimalHours(h, m) {
 	return h + mult * m / 60;
 }
 
+// polyfill for IE
+Math.trunc = Math.trunc || function(x) {
+  if (isNaN(x)) {
+    return NaN;
+  }
+  if (x > 0) {
+    return Math.floor(x);
+  }
+  return Math.ceil(x);
+};
+
 function parseDecimalHours(v) {
-	var h = Math.trunc(v),
+	var h = Math.trunc(v), // note: polyfill required for IE
 		m = 15 * Math.round(4 * (Math.abs(v) % 1));
 
 	return {

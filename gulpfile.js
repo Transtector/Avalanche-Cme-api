@@ -15,7 +15,7 @@ var stylus = require('gulp-stylus');
 var path = {
 	HTML: './cme/templates/*.html',
 	CSS_GLOB: './cme/templates/css/**/*.styl',
-	CSS: './cme/templates/css/style.styl',
+	CSS: ['./cme/templates/css/style.styl', './cme/templates/css/style-ie.styl'],
 	CSS_OUT: './cme/static/css',
 	OUT: 'cme.js',
 	MINIFIED_OUT: 'cme.min.js',
