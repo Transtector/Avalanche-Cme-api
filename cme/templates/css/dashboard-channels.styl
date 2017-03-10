@@ -37,7 +37,6 @@ icon-small-viewport = '-512 -512 2048 2048'
 			margin-left 10px
 			width 224px
 
-
 .ch
 	position relative
 	margin 10px
@@ -68,19 +67,20 @@ icon-small-viewport = '-512 -512 2048 2048'
 			height 100%
 			background-color lightness(#EA9338, 50%)
 			background-repeat no-repeat
-			background-image url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 50 40'%3E%3Cpath stroke='%23FFFFFF' stroke-linejoin='round' stroke-linecap='round' fill-opacity='0' d='m2,18l4,-3l4,8l4,-18l4,15l4,-7l4,2l4,-2l4,6l4,-14' /%3E%3C/svg%3E")
+			background-image svg('plot-trace', '-5 -5 50 40') 
 	.ch-history-badge[disabled]::before
 		background-color #909090
-	.icon-download
-		background-image svg('download2', icon-small-viewport)
-	.icon-chevron-left
-		background-image svg('chevron-left', icon-small-viewport)
-	.icon-chevron-right
-		background-image svg('chevron-right', icon-small-viewport)
-	.icon-chevron-down
-		background-image svg('chevron-down', '-128 -128 1152 1152') // just slightly smaller
-	.icon-cross
-		background-image svg('cross', icon-small-viewport)
+
+.icon-download
+	background-image svg('download2', icon-small-viewport)
+.icon-chevron-left
+	background-image svg('chevron-left', icon-small-viewport)
+.icon-chevron-right
+	background-image svg('chevron-right', icon-small-viewport)
+.icon-chevron-down
+	background-image svg('chevron-down', '-128 -128 1152 1152') // just slightly smaller
+.icon-cross
+	background-image svg('cross', icon-small-viewport)
 
 
 .ch-error-badge
@@ -158,16 +158,6 @@ icon-small-viewport = '-512 -512 2048 2048'
 		border-radius 100%
 		background-color transparent
 		background-size 28px 28px
-	.icon-play
-		background-image svg('play')
-	.icon-pause
-		background-image svg('pause')
-	.icon-view-alarms
-		background-image svg('view-alarms', '0 0 80 80')
-	.icon-record
-		background-image svg('record', '0 0 1024 1024', error-color)
-	.icon-record-check
-		background-image svg('record-check', '0 0 1024 1024', error-color)
 	.ch-status
 		position absolute
 		background-color #999
@@ -179,6 +169,18 @@ icon-small-viewport = '-512 -512 2048 2048'
 		border-radius 100%
 		&.active
 			background-color #0e0
+
+
+.icon-play
+	background-image svg('play')
+.icon-pause
+	background-image svg('pause')
+.icon-view-alarms
+	background-image svg('view-alarms', '0 0 80 80')
+.icon-record
+	background-image svg('record', '0 0 1024 1024', error-color)
+.icon-record-check
+	background-image svg('record-check', '0 0 1024 1024', error-color)
 	
 	
 .ch-plot
