@@ -51,7 +51,7 @@ var Login = React.createClass({
 		var cn = classNames('login-error', {'isVisible': this.state.errors.length > 0});
 
 		return (
-			<div id="login">
+			<div className="panel" id="login">
 				<div id="welcome">Welcome</div>
 
 				<div id="instructions">

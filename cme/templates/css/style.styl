@@ -241,4 +241,9 @@ div#test-buttons
 	border-top 1px solid #ccc
 	> *
 		margin-right 10px
-	
+
+
+// IE 10+ style overrides
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+@import style-ie
+}

@@ -29,7 +29,7 @@ var moment = require('moment');
 var classNames = require('classnames');
 
 
-var ConfigPanel = React.createClass({
+var SettingsPanel = React.createClass({
 
 	getInitialState: function () {
 		return {
@@ -56,7 +56,7 @@ var ConfigPanel = React.createClass({
 		var config = this.state.config;
 
 		return (
-			<div className="panel" id="config">
+			<div className="panel" id="settings">
 				<div className="panel-header">
 					<div className="title">Settings</div>
 					<div className="subtitle">Device settings</div>
@@ -132,4 +132,4 @@ var ConfigPanel = React.createClass({
 	}
 });
 
-module.exports = ConfigPanel;
+module.exports = SettingsPanel;

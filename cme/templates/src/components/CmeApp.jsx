@@ -15,7 +15,7 @@ var Store = require('../Store');
 var Header = require('./Header');
 var Login = require('./Login');
 var Dashboard = require('./Dashboard');
-var ConfigPanel = require('./ConfigPanel');
+var ConfigPanel = require('./SettingsPanel');
 var AlarmsPanel = require('./AlarmsPanel');
 var ErrorPanel = require('./ErrorPanel');
 
