@@ -6,10 +6,9 @@ import urllib.request
 from xml.dom.minidom import parseString
 import xml.dom.minidom
 
-from . import (router, settings, request, path_parse, secure_filename,
+from . import (Config, router, settings, request, path_parse, secure_filename,
 	allowed_file, json_response, APIError, json_filter, require_auth)
 
-from ..common import Config
 from ..common.LockedOpen import LockedOpen
 from ..common.Reboot import restart
 
@@ -38,7 +37,7 @@ def device_read_only_settings():
 
 	# add 'recovery' flag depends on how Config.py
 	# loaded (i.e., the presence of a recovery flag file)
-	device['recovery'] = Config.RECOVERY
+	device['recovery'] = Config.RECOVERY.RECOVERY_MODE
 
 	if item == 'device':
 		# request all device parameters
@@ -61,7 +60,7 @@ def device_write():
 	'''
 	
 	# updating device only works in RECOVERY mode
-	if not Config.RECOVERY:
+	if not Config.RECOVERY.RECOVERY_MODE:
 		raise APIError('Not Found', 404)
 
 	currentDevice = settings['__device']
@@ -90,31 +89,31 @@ def device_write():
 
 	# CME device data also carries the API version in the 'firmware' key
 	# and we have to add it here.
-	newCme.setdefault('firmware', Config.VERSION)
+	newCme.setdefault('firmware', Config.INFO.VERSION)
 
-	# We can now update the Config.DEVICE_DATA w/new Cme and Host data
-	Config.DEVICE_DATA = {
+	# We can now update the Config.INFO.DEVICE w/new Cme and Host data
+	Config.INFO.DEVICE = {
 		'cme': newCme,
 		'host': newHost
 	}
 
 	# save device data to disk
-	devicefile = os.path.join(Config.USERDATA, Config.DEVICE_FILE)
+	devicefile = os.path.join(Config.PATHS.USERDATA, Config.PATHS.DEVICE_FILE)
 	with LockedOpen(devicefile, 'a') as f:
-		with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(Config.USERDATA), delete=False) as tf:
-			json.dump(Config.DEVICE_DATA, tf, indent="\t")
+		with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(Config.PATHS.USERDATA), delete=False) as tf:
+			json.dump(Config.INFO.DEVICE, tf, indent="\t")
 			tempname = tf.name
 
 		shutil.move(tempname, devicefile)
 
 	# Finally, we need to update __device key held in the settings.
-	settings['__device'] = Config.DEVICE_DATA
+	settings['__device'] = Config.INFO.DEVICE
 
 	# return unfiltered device data
 	device = settings['__device']
 
 	# add back the 'recovery' flag (should be True)
-	device.setdefault('recovery', Config.RECOVERY)
+	device.setdefault('recovery', Config.RECOVERY.RECOVERY_MODE)
 
 	# return updated device as stored in settings
 	return json_response(device)
@@ -165,11 +164,11 @@ def device_updates():
 	}
 
 	# read configurable items into local variables
-	update_dir = Config.UPDATE
-	upload_dir = Config.UPLOAD_FOLDER
-	usb_dir = Config.USB
-	update_glob = Config.UPDATE_GLOB
-	pub_url = Config.PUBLIC_UPDATES_URL
+	update_dir = Config.PATHS.UPDATE
+	upload_dir = Config.PATHS.UPLOADS
+	usb_dir = Config.PATHS.USB
+	update_glob = Config.UPDATES.UPDATE_GLOB
+	pub_url = Config.UPDATES.PUBLIC_UPDATES_URL
 
 	logger = logging.getLogger('cme')
 
@@ -193,25 +192,26 @@ def device_updates():
 
 	# from web (our distribution URL)
 	# TODO: get official web repo for Cme updates set up
-	try:
-		with urllib.request.urlopen(pub_url) as response:
-			web_listing_raw = response.read()
+	for url in pub_url:
+		try:
+			with urllib.request.urlopen(url) as response:
+				web_listing_raw = response.read()
 
-		web_listing_xml = xml.dom.minidom.parseString(web_listing_raw)
-		ListBucketResult = web_listing_xml.documentElement
+			web_listing_xml = xml.dom.minidom.parseString(web_listing_raw)
+			ListBucketResult = web_listing_xml.documentElement
 
-		# Get all the items in the S3 bucket
-		items = ListBucketResult.getElementsByTagName('Contents')
+			# Get all the items in the S3 bucket
+			items = ListBucketResult.getElementsByTagName('Contents')
 
-		# Now filter for Cme items - these will have a Key property
-		# that starts with 'Cme/' and the top-level Cme 'folder' will
-		# just have Key = 'Cme/', so it can also be discarded.
-		for item in items:
-			key = item.getElementsByTagName('Key')[0].childNodes[0].data
-			if key.startswith('Cme/') and key != 'Cme/' and fnmatch.fnmatch(key.split('/')[1], update_glob):
-				result['web'].append(key.split('/')[1])
-	except:
-		logger.error("Error listing updates from web {0}".format(pub_url))
+			# Now filter for Cme items - these will have a Key property
+			# that starts with 'Cme/' and the top-level Cme 'folder' will
+			# just have Key = 'Cme/', so it can also be discarded.
+			for item in items:
+				key = item.getElementsByTagName('Key')[0].childNodes[0].data
+				if key.startswith('Cme/') and key != 'Cme/' and fnmatch.fnmatch(key.split('/')[1], update_glob):
+					result['web'].append(key.split('/')[1])
+		except:
+			logger.error("Error listing updates from web {0}".format(url))
 
 
 	# are we handling an upload (POST)?
@@ -261,12 +261,13 @@ def device_updates():
 		
 		# copy web updates
 		if source.lower() == 'web':
-			try:
-				# Download the file from `url` and save it locally under update_dir:
-				with urllib.request.urlopen(pub_url + 'Cme/' + name) as src, open(os.path.join(update_dir, name), 'wb') as dst:
-				    shutil.copyfileobj(src, dst)
-			except:
-				error = True
+			for url in pub_url:
+				try:
+					# Download the file from `url` and save it locally under update_dir:
+					with urllib.request.urlopen(url + 'Cme/' + name) as src, open(os.path.join(update_dir, name), 'wb') as dst:
+					    shutil.copyfileobj(src, dst)
+				except:
+					error = True
 
 
 		# move uploaded updates
@@ -311,7 +312,7 @@ def device_restart():
 	factory_reset = request.args.get('factory_reset')
 
 	logger = logging.getLogger('cme')
-	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset, Config.SETTINGS, Config.RECOVERY_FILE, logger))
+	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset, Config.PATHS.SETTINGS, Config.PATHS.RECOVERY_FILE, logger))
 	t.setDaemon(True)
 	t.start()
 
@@ -330,7 +331,7 @@ def upload_file():
 		if file and allowed_file(file.filename):
 			filename = secure_filename(file.filename)
 
-			p = os.path.join(Config.UPLOAD_FOLDER, filename)
+			p = os.path.join(Config.PATHS.UPLOADS, filename)
 
 			print ("Saved upload to `", p, "`")
 			file.save(p)

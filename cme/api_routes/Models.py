@@ -9,13 +9,13 @@ from ..common.LockedOpen import LockedOpen
 
 
 # Channel data and configuration are stored here (typically /data/channels/)
-CHDIR = Config.CHDIR
+CHDIR = Config.PATHS.CHDIR
 
 # cme layer _always_ runs as if the cme-mc is sitting on localhost
 # at the default port (42217).  This is because the cme-mc layer
 # maps the port to the host system at runtime, and the cme layer uses
 # the host's network (--net=host) at runtime.
-RRDCACHED = Config.RRDCACHED
+RRDCACHED = Config.RRD.RRDCACHED
 
 
 class ChannelManager:

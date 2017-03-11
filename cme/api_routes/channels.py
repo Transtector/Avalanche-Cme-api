@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 import subprocess, json
 
-from . import settings, router, request, path_parse, json_response, APIError, require_auth, Config
+from . import router, request, path_parse, json_response, APIError, require_auth, Config
 
 from ..common.Switch import switch
 from .Models import ChannelManager
@@ -161,7 +161,7 @@ def channel(ch_index):
 @require_auth
 def ch_config(ch_index):
 
-	if not Config.RECOVERY:
+	if not Config.RECOVERY.RECOVERY_MODE:
 		raise APIError('Not Found', 404)
 
 	# retrieve the desired channel configuration

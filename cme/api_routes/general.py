@@ -7,6 +7,7 @@ from . import router, settings, request, path_parse, json_response, APIError, re
 @router.route('/config/general/name', methods=['GET', 'POST'])
 @router.route('/config/general/description', methods=['GET', 'POST'])
 @router.route('/config/general/location', methods=['GET', 'POST'])
+@router.route('/config/general/sitecode', methods=['GET', 'POST'])
 @router.route('/config/support/', methods=['GET', 'POST'])
 @router.route('/config/support/contact', methods=['GET', 'POST'])
 @router.route('/config/support/email', methods=['GET', 'POST'])

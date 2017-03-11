@@ -1,7 +1,6 @@
 import os, glob, tempfile, shutil
 
-from . import router, request, send_from_directory, send_file, json_response, APIError, require_auth
-from ..common import Config
+from . import Config, router, request, send_from_directory, send_file, json_response, APIError, require_auth
 
 def bool_arg(name, request):
 	''' Convert query string arguments to boolean values.
@@ -26,7 +25,7 @@ def logs(filename=None):
 			download (bool) - download identified log file (as opposed to stream content)
 			clear (bool) - clear the identified log file (content returned before clear)
 	'''
-	logdir = Config.LOGDIR
+	logdir = Config.PATHS.LOGDIR
 
 	if not filename:
 		# return the list of logs available if no name requested

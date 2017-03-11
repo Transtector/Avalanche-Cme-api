@@ -7,27 +7,21 @@ import sys, getopt, rrdtool
 import cherrypy
 from paste.translogger import TransLogger
 
+# cme configuration file
+from .common import Config
+settings = Config.USER_SETTINGS
+
 # Set up server and application logging
 from .Logging import Server_Logger, App_Logger
 
-# cme configuration file
-from .common import Config
-
-# cme uses Clock and Network configuraiton settings
-# that must be initialzed.
-Config.initialize_Clock()
-Config.initialize_Network()
-
-# load settings which may override the user-settable
-# CME configuration values
-from .Settings import settings
-
-from . import  app
-app.config.from_object(Config)
+# Flask is the wsgi application that sits
+# behind the CherryPy server
+from . import app
+app.config.from_object(Config.FLASK)
 
 # set up the application layer logging
-app_logger = App_Logger(app.logger)
-server_logger = Server_Logger()
+app_logger = App_Logger(app.logger, Config)
+server_logger = Server_Logger(Config)
 
 def main(argv=None):
 
@@ -43,20 +37,20 @@ def main(argv=None):
 		args = []
 
 	for opt, arg in opts:
-		# override the Config.RRDCACHED
+		# override the Config.RRD.RRDCACHED
 		if opt == '--rrdcached':
-			Config.RRDCACHED = arg
+			Config.RRD.RRDCACHED = arg
 
 
 	# Now that RRDCACHED is set up, try to read the "test.rrd" channel
 	# If no problems, then things are fine and we can move on.  If not,
 	# we still want to allow the cme layer to run, so we set the address
 	# to flag it to downstream code so they may bypass rrdcached calls.
-	if Config.RRDCACHED:
+	if Config.RRD.RRDCACHED:
 		try:
-			rrdtool.info('test.rrd', '-d', Config.RRDCACHED)
+			rrdtool.info('test.rrd', '-d', Config.RRD.RRDCACHED)
 		except rrdtool.OperationalError:
-			Config.RRDCACHED = 'FAILED'
+			Config.RRD.RRDCACHED = 'FAILED'
 
 
 	# network and ntp/clock status
@@ -72,14 +66,14 @@ def main(argv=None):
 	app.register_blueprint(api_routes.router, url_prefix='/api')
 	
 	app_logger.info("Avalanche (Cme) is rumbling...")
-	app_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY else 'NO'))
-	app_logger.info("\tVERSION:\t{0}".format(Config.VERSION))
-	app_logger.info("\tDEBUG:\t\t{0}".format(Config.DEBUG))
-	app_logger.info("\tHOSTNAME:\t{0}".format(Config.HOSTNAME))
-	app_logger.info("\tPLATFORM:\t{0}".format(Config.SYSTEM))
+	app_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY.RECOVERY_MODE else 'NO'))
+	app_logger.info("\tVERSION:\t{0}".format(Config.INFO.VERSION))
+	app_logger.info("\tDEBUG:\t\t{0}".format(Config.INFO.DEBUG))
+	app_logger.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
+	app_logger.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
 
 	manage_network(settings['network'])	
-	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.SERVER_PORT))
+	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
 
 	manage_clock(settings['clock'])
 
@@ -87,10 +81,8 @@ def main(argv=None):
 	app_logger.info("\tAPPROOT:\t{0}".format(app.root_path))
 	app_logger.info("\tSTATIC:\t\t{0}".format(app.static_folder))
 	app_logger.info("\tTEMPLATE:\t\t{0}".format(app.template_folder))
-	app_logger.info("\tUPLOADS:\t{0}".format(Config.UPLOAD_FOLDER))
-	app_logger.info("\tRRDCACHED:\t{0}".format(Config.RRDCACHED))
-
-
+	app_logger.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
+	app_logger.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
 
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
 	cherrypy.tree.graft(TransLogger(app, logger=server_logger), "/")
@@ -102,8 +94,8 @@ def main(argv=None):
 	http_server = cherrypy._cpserver.Server()
 
 	# configure
-	http_server.socket_host = Config.SERVER_HOST
-	http_server.socket_port = Config.SERVER_PORT
+	http_server.socket_host = Config.API.SERVER_HOST
+	http_server.socket_port = Config.API.SERVER_PORT
 	http_server.thread_pool = 30
 
 	# subscribe to http

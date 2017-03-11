@@ -8,9 +8,10 @@ from werkzeug import secure_filename
 
 from .. import app
 from ..Auth import require_auth, Serializer
-from ..Settings import settings
+
 from ..common.UriParse import path_parse
 from ..common import Config
+settings = Config.USER_SETTINGS
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)
@@ -43,20 +44,20 @@ def json_response(obj, status=200, force_session=False):
 	res = Response(json_serialize(obj), status, mimetype='application/json')
 
 	try:
-		prev_cookie = request.cookies[Config.SESSION_COOKIE_NAME]
+		prev_cookie = request.cookies[Config.API.SESSION_COOKIE_NAME]
 	
 	except KeyError:
 		prev_cookie = None
 
 	if force_session or prev_cookie is not None:
 		# generate a signed session cookie
-		session_cookie = Serializer(Config.SECRET_KEY,
-					   				expires_in = Config.SESSION_EXPIRATION)
+		session_cookie = Serializer(Config.API.SECRET_KEY,
+					   				expires_in = Config.API.SESSION_EXPIRATION)
 
-		res.set_cookie(Config.SESSION_COOKIE_NAME,
+		res.set_cookie(Config.API.SESSION_COOKIE_NAME,
 					   session_cookie.dumps(settings['__username']),
 					   expires=datetime.utcnow() + 
-					   		timedelta(seconds=Config.SESSION_EXPIRATION))
+					   		timedelta(seconds=Config.API.SESSION_EXPIRATION))
 
 	return res
 
@@ -108,22 +109,9 @@ def allowed_file(filename):
 	''' Check passed filename extension to see if it's allowed upload.
 	'''
 	return '.' in filename and \
-			filename.rsplit('.', 1)[1].lower() in [x.lower() for x in Config.ALLOWED_EXTENSIONS]
+			filename.rsplit('.', 1)[1].lower() in [x.lower() for x in Config.UPDATES.ALLOWED_EXTENSIONS]
 
 
-def refresh_device():
-	''' Check uploads folder for any contents.  There should only
-		be at most a single file which will be used if an update
-		is triggered.
-	'''
-	files = [fn for fn in os.listdir(Config.UPLOAD_FOLDER)
-			if any(fn.endswith(ext) for ext in Config.ALLOWED_EXTENSIONS)]
-
-	# choose the first one, if any
-	settings['__device']['__update'] = '' if len(files) == 0 else files[0]
-
-
-# make routes available
 from . import (login, logout, user, channels, status, config, device, logs,
 			   general, temperature, clock, http, network, snmp)
 

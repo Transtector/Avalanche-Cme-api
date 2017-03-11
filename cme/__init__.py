@@ -1,6 +1,4 @@
-# Flask is the wsgi application that sits
-# behind the CherryPy server
-from flask import Flask
+# Adding this here for easy submodule access
 
-# initialize the Flask application
+from flask import Flask
 app = Flask('cme', static_url_path='')

@@ -16,11 +16,11 @@ def require_auth(f):
 	@wraps(f)
 	def decorated(*args, **kwargs):
 		# read token from session cookie
-		s = Serializer(Config.SECRET_KEY,
-					   expires_in = Config.SESSION_EXPIRATION)
+		s = Serializer(Config.API.SECRET_KEY,
+					   expires_in = Config.API.SESSION_EXPIRATION)
 
 		try:
-			token = request.cookies[Config.SESSION_COOKIE_NAME]
+			token = request.cookies[Config.API.SESSION_COOKIE_NAME]
 
 		except KeyError:
 			return access_denied('Invalid session cookie')
@@ -41,11 +41,11 @@ def require_auth(f):
 # this function can be used to check if authorized request
 def authorized():
 	# read token from session cookie
-	s = Serializer(Config.SECRET_KEY,
-				   expires_in = Config.SESSION_EXPIRATION)
+	s = Serializer(Config.API.SECRET_KEY,
+				   expires_in = Config.API.SESSION_EXPIRATION)
 
 	try:
-		token = request.cookies[Config.SESSION_COOKIE_NAME]
+		token = request.cookies[Config.API.SESSION_COOKIE_NAME]
 
 	except KeyError:
 		return False
