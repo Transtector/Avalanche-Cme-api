@@ -23,6 +23,14 @@ var classNames = require('classnames');
 // application-level key press handler
 var key = require('../keymaster/keymaster.js');
 
+function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
+
+function toPercentage(value, nominal, precision) {
+	var precision = precision || 1; 
+	if (!isNumeric(value) || !isNumeric(nominal)) return value;
+	return (100 * ((parseFloat(value) / parseFloat(nominal)) - 1)).toFixed(precision); 
+}
+
 // hard-coded channels processed for the 
 // various tables in Alarms report [ chId, sensorId ]
 var CHANNEL_GROUPS = [
@@ -128,7 +136,7 @@ var AlarmsPanel = React.createClass({
 					<table className='power-summary'>
 						<thead>
 							<tr>
-								<th>Channel / Sensor<br />Description</th>
+								<th>Sensor<br />Description</th>
 								<th>Units</th>
 								<th>Spec<br />Low</th>
 								<th>Actual<br />Low</th>
@@ -195,9 +203,17 @@ var AlarmsPanel = React.createClass({
 				// request channel weekly history to populate extremes
 				CmeAPI.channelHistory(channel.id, 'weekly', this.state.week + 1)
 					.done(function(data){
-						sensor.act_low = 9;
-						sensor.act_hi = 99;
-						sensor.max_dev = 33;
+
+						var MIN = data[3],
+							MAX = data[4];
+
+						sensor.act_low = Math.min.apply(null, MIN);
+						sensor.act_hi = Math.max.apply(null, MAX);
+
+						var low_dev = toPercentage(sensor.act_low, sensor.nominal),
+							hi_dev = toPercentage(sensor.act_hi, sensor.nominal)
+
+						sensor.max_dev = Math.max(low_dev, hi_dev);
 
 						// add results back to correct row @ index
 						_pms[index] = sensor;
