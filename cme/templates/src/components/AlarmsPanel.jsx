@@ -85,11 +85,9 @@ var AlarmsPanel = React.createClass({
 
 			powerMonitoringItems.push(desc);
 
-			chg.forEach(function(ch) {
-				var channel = this.state.channels[ch[0]],
-					sensor = channel.sensors.find(function(s) {
-						return s.id == ch[1];
-					});
+			chg.forEach(function(ch_s) {
+				var channel = this.state.channels[ch_s[0]],
+					sensor = channel.sensors[ch_s[1]];
 
 				powerMonitoringItems.push(sensor);
 			}, this);
