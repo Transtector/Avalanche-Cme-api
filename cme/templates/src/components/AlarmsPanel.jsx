@@ -204,9 +204,10 @@ var AlarmsPanel = React.createClass({
 			}, this);
 		}, this);
 
+		var _this = this;
 		$.when(_reqs).done(function() {
 
-			this.setState({ powerMonitoringSummary: _pms });
+			_this.setState({ powerMonitoringSummary: _pms });
 		});
 
 	},
