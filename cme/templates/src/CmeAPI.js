@@ -293,7 +293,7 @@ var CmeAPI = {
 
 	sensorHistory: function(ch_id, sensor_id, history, start_block) {
 		return $.ajax({
-			url: API.channel + parseInt(ch_id.slice(2)) + '/sensors/' + parseInt(sensor_id.slice(2)) + '/history/' + history + '?s=' + start_block,
+			url: API.channel + parseInt(ch_id.slice(2)) + '/sensors/' + parseInt(sensor_id.slice(1)) + '/history/' + history + '?s=' + start_block,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});
