@@ -18,21 +18,6 @@ var Thermometer = require('./Thermometer');
 var key = require('../keymaster/keymaster.js');
 var classNames = require('classnames');
 
-var Indicator = React.createClass({
-
-	render: function () {
-		return (
-			<div>
-				<label>
-					<span>{this.props.item.name}</span>
-					<span className='separator'>:</span>
-				</label>
-				<span>{this.props.item.value}</span>
-			</div>
-		);
-	}
-});
-
 var Header = React.createClass({
 
 	getInitialState: function () {
@@ -53,19 +38,20 @@ var Header = React.createClass({
 		Store.addChangeListener(Constants.DEVICE, this._onDeviceChange);
 		Store.addChangeListener(Constants.CONFIG, this._onConfigChange);
 
+		if (this.props.isLoggedIn) {
+			this.setState({ pollClock: 1000, pollTemp: 10000 });
+		}
+
 		// register keypress handler for shift + underscore to
 		// toggle the clock and thermometer polling
 		key('ctrl+8, ⌘+8', this._toggleWidgetPolling);
 	},
 
 	componentWillReceiveProps: function(nextProps) {
-
-	},
-
-	componentWillReceiveProps: function(nextProps) {
-		var _this = this;
 		if (nextProps.isLoggedIn) {
 			this.setState({ pollClock: 1000, pollTemp: 10000 });
+		} else {
+			this.setState({ pollClock: -1, pollTemp: -1 });
 		}
 	},
 
@@ -109,6 +95,8 @@ var Header = React.createClass({
 
 		return (
 			<header>
+				<div className="tab">&nbsp;</div>
+
 				<div className="branding">
 					<div className="title">
 						{brandName}<span title='This is a stand-alone CME (no host)' className={standAlone ? 'stand-alone' : 'hidden'}>*</span>
@@ -118,11 +106,15 @@ var Header = React.createClass({
 
 				<div className={recoveryCls}>RECOVERY MODE</div>
 
-				<div className="tab">&nbsp;</div>
-
 				<div className="info">
-					<Indicator item={{name: 'Serial number', value: serial}} />
-					<Indicator item={{name: 'Firmware', value: firmware}} />
+					<div>
+						<label><span>Serial number</span><span className='separator'>:</span></label>
+						<span>{serial}</span>
+					</div>
+					<div>
+						<label><span>Version</span><span className='separator'>:</span></label>
+						<span>{firmware}</span>
+					</div>
 				</div>
 
 				<div className='widgets'>

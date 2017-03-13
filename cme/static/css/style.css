@@ -261,9 +261,12 @@ header .branding {
   background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><g fill='white' stroke='white'><defs><mask id='mask'><circle cx='50%' cy='50%' r='64' /><path fill='black' d='M0,84 L 33.5,84 L 88,30 L 68,84 L 128, 84 L 128, 92 L 55, 92 L 66,66 L 39, 92 L 0, 92z' /></mask></defs><circle cx='50%' cy='50%' r='64' mask='url(#mask)'/></g></svg>");
 }
 header .branding .title {
+  position: relative;
   font-size: 36px;
 }
 header .branding .model {
+  position: relative;
+  top: 2px;
   font-size: 16px;
 }
 header .recovery {
@@ -1533,6 +1536,22 @@ td.rdtYear:hover {
   margin-left: 8px;
   width: 100%;
 }
+.input-group-cluster > input[type="text"]::-webkit-input-placeholder,
+.input-group-cluster > input[type="password"]::-webkit-input-placeholder {
+  text-transform: capitalize;
+}
+.input-group-cluster > input[type="text"]:-moz-placeholder,
+.input-group-cluster > input[type="password"]:-moz-placeholder {
+  text-transform: capitalize;
+}
+.input-group-cluster > input[type="text"]::-moz-placeholder,
+.input-group-cluster > input[type="password"]::-moz-placeholder {
+  text-transform: capitalize;
+}
+.input-group-cluster > input[type="text"]:-ms-input-placeholder,
+.input-group-cluster > input[type="password"]:-ms-input-placeholder {
+  text-transform: capitalize;
+}
 .input-group-cluster input,
 .input-group-cluster a,
 .input-group-cluster .led-text {
@@ -1820,7 +1839,38 @@ li.input-group-cluster > .btn:disabled {
   text-align: center;
 }
 .panel#alarms .panel-content h2:not(:first-child) {
-  margin: 1.4em 0 0.4em 0;
+  margin: 2.4em 0 0.4em 0;
+}
+.panel#alarms .panel-content h3.date-range {
+  font-style: italic;
+}
+.panel#alarms .panel-content h3.date-range span {
+  margin: 0 1em;
+  font-style: normal;
+}
+.panel#alarms .panel-content .content-header h2 span {
+  position: relative;
+  margin-left: 1em;
+  padding: 0 30px;
+  border: 0 solid #eee;
+  border-bottom-width: 1px;
+}
+.panel#alarms .panel-content .content-header h2 span::after {
+  position: absolute;
+  content: "";
+  right: 0;
+  bottom: 0;
+  border: 6px solid transparent;
+  border-right-color: #eee;
+  border-bottom-color: #eee;
+}
+.panel#alarms .panel-content .content-header h2 span:hover {
+  cursor: pointer;
+  border-color: #ccc;
+}
+.panel#alarms .panel-content .content-header h2 span:hover::after {
+  border-right-color: #ccc;
+  border-bottom-color: #ccc;
 }
 .panel#alarms table {
   width: 100%;
@@ -1828,7 +1878,7 @@ li.input-group-cluster > .btn:disabled {
 }
 .panel#alarms table th,
 .panel#alarms table td {
-  border: 1px solid #ddd;
+  border: 1px solid #eee;
   padding: 0.2em 0.8em;
 }
 .panel#alarms table th {
@@ -1837,15 +1887,24 @@ li.input-group-cluster > .btn:disabled {
 .panel#alarms table thead th {
   vertical-align: bottom;
 }
-.panel#alarms table thead th:not(:first-child) {
+.panel#alarms table td,
+.panel#alarms table th:not(:first-child) {
   text-align: center;
 }
 .panel#alarms table tbody th {
-  padding: 0.2em 1.4em;
+  padding: 0.4em 1.4em;
 }
-.panel#alarms .power-summary td,
-.panel#alarms .alarm-summary td {
+.panel#alarms table .centered {
   text-align: center;
+}
+.panel#alarms .site-info th {
+  width: 40%;
+}
+.panel#alarms .power-summary .channel-row {
+  font-style: italic;
+}
+.panel#alarms .power-summary .channel-row th {
+  padding-top: 1.8em;
 }
 .panel#alarms .copyright {
   position: absolute;
@@ -1863,6 +1922,82 @@ li.input-group-cluster > .btn:disabled {
 }
 .panel#alarms .copyright div:last-child {
   font-size: 10pt;
+}
+.panel#week-chooser {
+  position: fixed;
+  text-align: center;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.2);
+}
+.panel#week-chooser .popup {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  top: 50%;
+  margin-top: -90px;
+  left: 50%;
+  margin-left: -190px;
+  overflow: hidden;
+  background: #fff;
+  -webkit-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  -moz-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  -ms-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  -o-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+.panel#week-chooser .title {
+  padding: 5px;
+  font-size: 140%;
+  background: #3ea4e1;
+  color: #fff;
+}
+.panel#week-chooser .buttons {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.panel#week-chooser .buttons button {
+  font-size: 12px;
+  font-weight: bold;
+  color: #3ea4e1;
+  background: transparent;
+  text-transform: uppercase;
+}
+.panel#week-chooser ul {
+  padding: 0;
+  list-style-type: none;
+  text-align: left;
+  overflow: auto;
+  height: 280px;
+}
+.panel#week-chooser ul li {
+  padding: 8px 0 8px 20px;
+  border-bottom: 1px solid #eee;
+}
+.panel#week-chooser ul li label {
+  display: block;
+}
+.panel#week-chooser ul li label span {
+  font-style: italic;
+  margin-left: 1.5em;
+}
+.panel#week-chooser ul li input[type='radio'] {
+  position: relative;
+  margin: 0 16px 0 10px;
+  top: 2px;
+  zoom: 2;
+}
+.panel#week-chooser ul li.year {
+  border-bottom: 0;
+  padding: 8px 0 0 20px;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 90%;
+  color: #3ea4e1;
 }
 .export {
   position: relative;

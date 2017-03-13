@@ -23,29 +23,62 @@
 			transform skew(8deg) rotate(3deg)
 		h2:first-child, h3
 			text-align center
-			
 		h2:not(:first-child)
-			margin 1.4em 0 0.4em 0
-		
+			margin 2.4em 0 0.4em 0
+		h3.date-range
+			font-style italic
+			span
+				margin 0 1em
+				font-style normal
+				//text-decoration underline
+		.content-header h2 span
+			position relative
+			margin-left 1em
+			padding 0 30px
+			border 0 solid #eee
+			border-bottom-width 1px
+			&::after
+				position absolute
+				content ""
+				right 0
+				bottom 0
+				border 6px solid transparent
+				border-right-color #eee
+				border-bottom-color #eee
+			&:hover
+				cursor pointer
+				border-color #ccc
+				&::after
+					border-right-color #ccc
+					border-bottom-color #ccc
+
+
 	table
 		width 100%
 		border-collapse collapse
 		th, td
-			border 1px solid #ddd
+			border 1px solid #eee
 			padding 0.2em 0.8em
 		th
 			text-align left
 		thead th
 			vertical-align bottom
-		thead th:not(:first-child)
+		td, th:not(:first-child)
 			text-align center
 		tbody th
-			padding 0.2em 1.4em
-		
+			padding 0.4em 1.4em
+		.centered
+			text-align center
 
-	.power-summary td,
-	.alarm-summary td
-		text-align center
+
+	.site-info th
+		width 40%
+		
+	.power-summary .channel-row
+		font-style italic
+		th
+			padding-top 1.8em
+		
 
 	.copyright
 		position absolute
@@ -62,3 +95,4 @@
 		div:last-child
 			font-size 10pt
 			
+@import week-chooser-panel

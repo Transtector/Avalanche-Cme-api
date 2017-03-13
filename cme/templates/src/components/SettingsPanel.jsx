@@ -58,8 +58,8 @@ var SettingsPanel = React.createClass({
 		return (
 			<div className="panel" id="settings">
 				<div className="panel-header">
-					<div className="title">Settings</div>
-					<div className="subtitle">Device settings</div>
+					<div className="title">Device Settings</div>
+					<div className="subtitle">Set behavior and informational fields</div>
 				</div>
 
 				<div className="panel-content">
@@ -69,6 +69,7 @@ var SettingsPanel = React.createClass({
 					<InputGroup id="general">
 						<TextInput id="general.name" name='name' defaultValue={config.general.name} onBlur={this._requestChange} />
 						<TextInput id="general.description" name='description' defaultValue={config.general.description} onBlur={this._requestChange} />
+						<TextInput id="general.sitecode" name='site code' defaultValue={config.general.sitecode} onBlur={this._requestChange} />
 						<TextInput id="general.location" name='device location' defaultValue={config.general.location} onBlur={this._requestChange} />
 					</InputGroup>
 
