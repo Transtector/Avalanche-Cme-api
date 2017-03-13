@@ -175,9 +175,8 @@ var AlarmsPanel = React.createClass({
 
 	_powerMonitoringSummary: function() {
 		
-		// Power Monitoring Summary
-		var _pms = [];
-		var _reqs = [];
+		var _this = this,
+			_pms = [];
 
 		CHANNEL_GROUPS.forEach(function(chg, i) {
 
@@ -191,7 +190,7 @@ var AlarmsPanel = React.createClass({
 					sensor = channel.sensors[ch_s[1]];
 
 				// request channel weekly history to populate extremes
-				_reqs.push(CmeAPI.channelHistory(channel.id, 'weekly', this.state.week + 1)
+				CmeAPI.channelHistory(channel.id, 'weekly', this.state.week + 1)
 					.done(function(data) {
 
 						sensor.act_low = 9;
@@ -200,10 +199,11 @@ var AlarmsPanel = React.createClass({
 
 						_pms.push(sensor);
 						
-						this.setState({ powerMonitoringSummary: _pms });
-					}));
-		
+						_this.setState({ powerMonitoringSummary: _pms });
+					});
+
 			}, this);
+
 		}, this);
 	},
 
