@@ -14,7 +14,7 @@ var Store = require('../Store');
 
 var WeekChooser = require('./WeekChooser');
 
-var API = require('../CmeAPI');
+var CmeAPI = require('../CmeAPI');
 var $ = require('jquery');
 
 var moment = require('moment');
