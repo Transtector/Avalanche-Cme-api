@@ -201,7 +201,7 @@ var AlarmsPanel = React.createClass({
 				_pms.push('retrieving...'); // while we wait for results
 
 				// request channel weekly history to populate extremes
-				CmeAPI.channelHistory(channel.id, 'weekly', this.state.week + 1)
+				CmeAPI.sensorHistory(channel.id, sensor.id, 'weekly', this.state.week + 1)
 					.done(function(data){
 
 						var MIN = data[3],

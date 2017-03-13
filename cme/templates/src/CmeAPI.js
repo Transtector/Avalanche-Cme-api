@@ -291,6 +291,14 @@ var CmeAPI = {
 		});
 	},
 
+	sensorHistory: function(ch_id, sensor_id, history, start_block) {
+		return $.ajax({
+			url: API.channel + parseInt(ch_id.slice(2)) + '/sensors/' + sensor_id + '/history/' + history + '?s=' + start_block,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
+
 	thresholds: function(ch_id, sensor_id, thresholds) {
 		var ch_index = parseInt(ch_id.slice(2)),
 			s_index = parseInt(sensor_id.slice(1)),
