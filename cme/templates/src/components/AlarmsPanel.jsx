@@ -28,6 +28,8 @@ function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 function toPercentage(value, nominal, precision) {
 	var precision = precision || 1; 
 	if (!isNumeric(value) || !isNumeric(nominal)) return value;
+	if (!nominal) return value.toFixed(precision);
+
 	return (100 * ((parseFloat(value) / parseFloat(nominal)) - 1)).toFixed(precision); 
 }
 
@@ -213,7 +215,7 @@ var AlarmsPanel = React.createClass({
 						var low_dev = toPercentage(sensor.act_low, sensor.nominal),
 							hi_dev = toPercentage(sensor.act_hi, sensor.nominal)
 
-						sensor.max_dev = Math.max(low_dev, hi_dev);
+						sensor.max_dev = Math.max(low_dev, hi_dev) + ' %';
 
 						// add results back to correct row @ index
 						_pms[index] = sensor;
