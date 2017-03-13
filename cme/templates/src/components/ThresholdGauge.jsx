@@ -99,7 +99,7 @@ var ThresholdGauge = React.createClass({
 			<div className="th-gauge">
 				<div className="alarm" style={alarmStyle}></div>
 				<div className="warning" style={warningStyle}></div>
-				<div className="pointer" style={{left: pointerPos + '%'}>{this._renderDeviation(pointerPos)}</div>
+				<div className="pointer" style={{left: pointerPos + '%'}}>{this._renderDeviation(pointerPos)}</div>
 			</div>
 		);
 	},
