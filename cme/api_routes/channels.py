@@ -271,7 +271,7 @@ def sensor(ch_index, s_index):
 		raise APIError('Channel not found', 404)
 
 
-	sensor = ch.sensors.get('s' + s_index, None)
+	sensor = ch.sensors.get('s' + str(s_index), None)
 
 	if not sensor:
 		raise APIError('Sensor not found', 404)
@@ -307,7 +307,7 @@ def thresholds(ch_index, s_index):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	s = ch.sensors.get('s' + s_index, None)
+	s = ch.sensors.get('s' + str(s_index), None)
 
 	if not s:
 		raise APIError('Sensor not found', 404)
@@ -337,7 +337,7 @@ def threshold(ch_index, s_index, th_id):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	s = ch.sensors.get('s' + s_index, None)
+	s = ch.sensors.get('s' + str(s_index), None)
 
 	if not s:
 		raise APIError('Sensor not found', 404)
