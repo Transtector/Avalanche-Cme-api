@@ -199,17 +199,12 @@ var AlarmsPanel = React.createClass({
 						sensor.max_dev = 33;
 
 						_pms.push(sensor);
+						
+						this.setState({ powerMonitoringSummary: _pms });
 					}));
 		
 			}, this);
 		}, this);
-
-		var _this = this;
-		$.when(_reqs).done(function() {
-
-			_this.setState({ powerMonitoringSummary: _pms });
-		});
-
 	},
 
 	_renderSiteInfoRows: function(siteInfo) {
