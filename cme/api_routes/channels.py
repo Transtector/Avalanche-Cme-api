@@ -295,6 +295,57 @@ def sensor(ch_index, s_index):
 	return json_response({ ch.id + ':' + sensor.id: { 'name': sensor.name }})
 
 
+# GET sensor history
+@router.route('/ch/<int:ch_index>/sensors/<int:s_index>/history/<history>')
+@require_auth
+def sensor(ch_index, s_index, history):
+	ch = status(ch_index)
+
+	if not ch:
+		raise APIError('Channel not found', 404)
+
+	sensor = ch.sensors.get('s' + str(s_index), None)
+
+	if not sensor:
+		raise APIError('Sensor not found', 404)
+
+	# TODO: look at channel RRA config to see if history is okay
+	h = history.lower()
+	if h not in ['live', 'weekly']:
+		raise APIError('Channel data {0} history not collected'.format(h), 400)
+
+
+	s = request.args.get('s')
+	try:
+		s = int(s) if s else 1
+	except:
+		s = 1
+
+	b = request.args.get('b')
+	try:
+		b = int(b) if b else 1
+	except:
+		b = 1
+
+	ch.load_history(h, s, b)
+
+	# ch.data has all sensors, so pluck indicated sensor data
+	sensor_index = [ ds.split('_')[0] for ds in  ch.data[1] ].index(sensor.id) # [ "s0_VAC_Vrms", "s1_CAC_Arms", ...] ==> [ 's0', 's1', ...]
+
+	if not sensor_index:
+		raise APIError('Sensor {0} history not found'.format(sensor.id), 404)
+
+
+	data = []
+	data.append([ v[sensor_index] for v in ch.data[2] ])
+
+	if h != 'live':
+		data.append([ v[sensor_index] for v in ch.data[3] ])
+		data.append([ v[sensor_index] for v in ch.data[4] ])
+
+	return json_response(data)
+
+
 # CME sensor thresholds request
 # GET - list current thresholds
 # DELETE - remove all thresholds
