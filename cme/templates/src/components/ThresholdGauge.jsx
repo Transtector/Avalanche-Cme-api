@@ -67,7 +67,11 @@ var ThresholdGauge = React.createClass({
 
 		// Set positioning styles for the UI elements
 		var pointerPos = pos(this.props.sensor.value);
-		var pointerStyle = (pointerPos > 0 && pointerPos <= 100) ? { left: pointerPos } : { display: 'none' };
+
+		if (pointerPos < 0)
+			pointerPos = 0;
+		if (pointerPos > 100)
+			pointerPos = 100;
 
 		// warning block is top-level GREEN
 		var warningStyle = {
@@ -97,7 +101,7 @@ var ThresholdGauge = React.createClass({
 			<div className="th-gauge">
 				<div className="alarm" style={alarmStyle}></div>
 				<div className="warning" style={warningStyle}></div>
-				<div className="pointer" style={pointerStyle}>{this._renderDeviation()}</div>
+				<div className="pointer" style={{left: pointerPos}}>{this._renderDeviation()}</div>
 			</div>
 		);
 	},

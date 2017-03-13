@@ -256,7 +256,7 @@ def sensors(ch_index):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	return json_response({ ch.id + ':sensors': sorted(ch.sensors, key=lambda s: s.id) })
+	return json_response({ ch.id + ':sensors': ch.sensors })
 
 
 
