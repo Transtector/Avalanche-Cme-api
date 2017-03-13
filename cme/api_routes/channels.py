@@ -62,6 +62,7 @@ def status(ch_index=-1):
 	# select specific channel 'chX'
 	return ch_mgr.get_channel('ch' + str(ch_index))
 
+
 # CME list of available channels
 @router.route('/channels/')
 @require_auth
@@ -165,7 +166,7 @@ def channel(ch_index):
 
 
 
-@router.route('/ch/<int:ch_index>/<history>', methods=['GET', 'DELETE'])
+@router.route('/ch/<int:ch_index>/history/<history>', methods=['GET', 'DELETE'])
 @require_auth
 def channel_data(ch_index, history):
 	ch = status(ch_index)
@@ -269,10 +270,11 @@ def sensor(ch_index, s_index):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	if not (s_index >= 0 and s_index < len(ch.sensors)):
-		raise APIError('Sensor not found', 404)
 
-	sensor = sorted(ch.sensors, key=lambda s: s.id)[s_index]
+	sensor = ch.sensors.get('s' + s_index, None)
+
+	if not sensor:
+		raise APIError('Sensor not found', 404)
 
 	# parse out the item (last key in request)
 	# it will be either the sensor index or a sensor attribute name
@@ -287,10 +289,10 @@ def sensor(ch_index, s_index):
 	# update from POST data (item will only match POST method names)
 	if request.method == 'POST':
 		update = request.get_json()
-		sensor.__dict__[item] = update.get(item, sensor.__dict__[item])
+		sensor.name = update.get('name', sensor.name)
 
 	# return item attribute
-	return json_response({ ch.id + ':' + sensor.id: { item: sensor.__dict__[item] }})
+	return json_response({ ch.id + ':' + sensor.id: { 'name': sensor.name }})
 
 
 # CME sensor thresholds request
@@ -305,10 +307,10 @@ def thresholds(ch_index, s_index):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	if not (s_index >= 0 and s_index < len(ch.sensors)):
-		raise APIError('Sensor not found', 404)
+	s = ch.sensors.get('s' + s_index, None)
 
-	s = sorted(ch.sensors, key=lambda s: s.id)[s_index]
+	if not s:
+		raise APIError('Sensor not found', 404)
 
 	if request.method == 'GET':
 		return json_response({ ch.id + ':' + s.id + ':thresholds': s.thresholds })
@@ -335,10 +337,10 @@ def threshold(ch_index, s_index, th_id):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	if not (s_index >= 0 and s_index < len(ch.sensors)):
-		raise APIError('Sensor not found', 404)
+	s = ch.sensors.get('s' + s_index, None)
 
-	s = sorted(ch.sensors, key=lambda s: s.id)[s_index]
+	if not s:
+		raise APIError('Sensor not found', 404)
 
 	th = next((th for th in s.thresholds if th.id == th_id), None)
 

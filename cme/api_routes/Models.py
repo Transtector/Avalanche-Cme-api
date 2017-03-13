@@ -176,7 +176,7 @@ class Channel():
 
 		# Load config from file.  Sensors will look at ch_ds to
 		# find matching data sources loaded from RRD
-		self.sensors = []
+		self.sensors = {}
 		self._configpath = os.path.join(CHDIR, id + '_config.json') # e.g., 'ch0_config.json'
 		self._configmod = 0 # watch the file last modified time
 		self.load_config()
@@ -200,7 +200,7 @@ class Channel():
 		self._datasources = self._get_datasources()
 
 		# push new sensor timestamps and last_ds values
-		for s in self.sensors:
+		for k, s in self.sensors.items():
 			s.update()
 
 		return self
@@ -303,9 +303,9 @@ class Channel():
 		self.__dict__['rra'] = cfg.get('_config', {}).get('rra', {})
 		
 		# clear and add any sensor configuration
-		self.sensors = []
-		for s_cfg in cfg.get('sensors',[]):
-			self.sensors.append(Sensor(self, s_cfg['id'], s_cfg))
+		self.sensors = {}
+		for sId, s in cfg.get('sensors',{}).items():
+			self.sensors[sId] = Sensor(self, sId, s)
 
 
 	def save_config(self):
@@ -330,9 +330,9 @@ class Channel():
 		})
 
 		# for each configured sensor (if there are any)
-		for s in cfg.get('sensors', []):
+		for sId, s in cfg.get('sensors', {}).items():
 			# find matching sensor id from channel sensors model
-			found_s = next((cs for cs in self.sensors if cs.id == s['id']), None)
+			found_s = next((cs for cs in self.sensors if cs.id == sId), None)
 
 			if found_s:
 				# update name and thresholds attributes in config
@@ -365,11 +365,11 @@ class Channel():
 
 		result = cfg['_config']
 
-		result['sensors'] = []
-		for s in cfg['sensors']:
+		result['sensors'] = {}
+		for k, s in cfg['sensors'].items():
 			s_cfg = s['_config']
-			s_cfg.update({'id': s['id']})
-			result['sensors'].append(s_cfg)
+			s_cfg.update({ 'id': k })
+			result['sensors'][k] = s_cfg
 
 		return result
 
@@ -521,7 +521,6 @@ class Channel():
 			# see http://oss.oetiker.ch/rrdtool/doc/rrdfetch.en.html
 			data = rrdtool.fetch(rrd, CF, '-a', '-s', start, '-e', end, '-r', res)
 
-
 			if i == 0:
 				# set initial fetch data
 				self.data = data
@@ -583,6 +582,7 @@ class Sensor():
 		self.__save_config()
 		return th
 
+
 	def removeThreshold(self, th):
 		try:
 			self.thresholds.remove(th)
@@ -590,12 +590,14 @@ class Sensor():
 		except:
 			pass
 
+
 	def removeAllThresholds(self):
 		try:
 			self.thresholds = []
 			self.__save_config()
 		except:
 			pass
+
 
 	def modifyThreshold(self, th, th_obj):
 		
