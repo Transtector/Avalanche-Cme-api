@@ -131,8 +131,20 @@ def channel(ch_index):
 			h = request.args.get('h')
 			h = h.lower() if h else None
 
+			s = request.args.get('s')
+			try:
+				s = int(s) if s else 1
+			except:
+				s = 1
+
+			b = request.args.get('b')
+			try:
+				b = int(b) if b else 1
+			except:
+				b = 1
+
 			if h in ['live', 'daily', 'weekly', 'monthly', 'yearly']:
-				ch.load_history(h)
+				ch.load_history(h, s, b)
 			else:
 				ch.clear_history()
 
@@ -151,6 +163,38 @@ def channel(ch_index):
 
 	return json_response({ ch.id: { item: ch.__dict__[item] }})
 
+
+
+@router.route('/ch/<int:ch_index>/data/<history>')
+@require_auth
+def channel_data(ch_index, history):
+	ch = status(ch_index)
+
+	if not ch:
+		raise APIError('Channel not found', 404)
+
+	# TODO: look at channel RRA config to see if history is okay
+	h = history.lower()
+	if h not in ['live', 'weekly']:
+		raise APIError('Channel data history not collected', 400)
+
+	s = request.args.get('s')
+	try:
+		s = int(s) if s else 1
+	except:
+		s = 1
+
+	b = request.args.get('b')
+	try:
+		b = int(b) if b else 1
+	except:
+		b = 1
+
+	ch.load_history(h, s, b)
+	return json_response(ch.data)
+
+
+	
 
 # CME channel configuration (hardware)
 # Returns 404 (resource not found) if not RECOVERY MODE 

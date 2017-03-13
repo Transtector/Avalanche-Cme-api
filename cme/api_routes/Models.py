@@ -206,32 +206,43 @@ class Channel():
 		return self
 
 
-	def load_history(self, resolution='live'):
+	def load_history(self, resolution='live', start=1, blocks=1):
+
+		start_blocks_back = start if start >= 1 else 1
+		s = -1 * start_blocks_back
+
+		blocks_to_retrieve = blocks if (blocks >=1 and blocks <= start) else 1
+		e = -1 * blocks_to_retrieve if blocks != start else 0
 
 		for case in switch(resolution.lower()):
 			if case('daily'):
-				s = '-1d' # last day
+				s = str(s) + 'd' # 1 day
+				e = str(e) + 'd' if e else 'now'
 				r = '5m' # at 5 minute resolution
 				break
 
 			if case('weekly'):
-				s = '-7d' # last week
+				s = str(s * 7) + 'd' # '-7d' = last week
+				e = str(e * 7) + 'd' if e else 'now'
 				r = '30m' # at 30 min resolution
 				break
 
 			if case('monthly'):
-				s = '-31d' # last month (31 days)
+				s = str(s * 31) + 'd' # last month (31 days)
+				e = str(e * 31) + 'd' if e else 'now'
 				r = '2h' # 2 hour resolution
 				break
 
 			if case('yearly'):
-				s = '-365d' # last year (365 days)
+				s = str(s * 365) + 'd' # last year (365 days)
+				e = str(e * 365) + 'd' if e else 'now'
 				r = '1d' # 1 day resolution
 				break
 
 			if case(): # live
 				resolution = 'live'
 				s = '-15m' # last 15 minutes
+				e = 'now'
 				r = '1' # at 1 second resolution
 
 		# Use average, minimum, and maximum consolidation functions (CFS)
@@ -239,7 +250,7 @@ class Channel():
 		CFS = ['AVERAGE', 'MIN', 'MAX'] if resolution.lower() != 'live' else ['LAST']
 
 		# this call will write to self.data (or self.error)
-		self._rrdfetch(CFS, s, r)
+		self._rrdfetch(CFS, s, e, r)
 
 
 	def clear_history(self):
@@ -345,6 +356,22 @@ class Channel():
 
 			# set the file last modified time
 			self._configmod = os.stat(self._configpath).st_mtime
+
+
+	def get_hw_config(self):
+		if os.path.isfile(self._configpath):
+			with open(self._configpath, 'r') as f:
+				cfg = json.load(f)
+
+		result = cfg['_config']
+
+		result['sensors'] = []
+		for s in cfg['sensors']:
+			s_cfg = s['_config']
+			s_cfg.update({'id': s['id']})
+			result['sensors'].append(s_cfg)
+
+		return result
 
 
 	### CHANNEL PROPERTIES (when set, these properties save the underlying __dict__ to disk)
@@ -475,7 +502,7 @@ class Channel():
 		return result
 
 
-	def _rrdfetch(self, CFS, start, res):
+	def _rrdfetch(self, CFS, start, end, res):
 		''' Does the heavy lifting of calling rrdtool.fetch for each
 			CF in the CFS list and assembling the returned data
 			in the self.data attribute.
@@ -492,7 +519,8 @@ class Channel():
 		for i, CF in enumerate(CFS):
 
 			# see http://oss.oetiker.ch/rrdtool/doc/rrdfetch.en.html
-			data = rrdtool.fetch(rrd, CF, '-a', '-s', start, '-r', res)
+			data = rrdtool.fetch(rrd, CF, '-a', '-s', start, '-e', end, '-r', res)
+
 
 			if i == 0:
 				# set initial fetch data
