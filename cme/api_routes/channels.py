@@ -330,18 +330,21 @@ def sensor_history(ch_index, s_index, history):
 	ch.load_history(h, s, b)
 
 	# ch.data has all sensors, so pluck indicated sensor data
-	sensor_index = [ ds.split('_')[0] for ds in  ch.data[1] ].index(sensor.id) # [ "s0_VAC_Vrms", "s1_CAC_Arms", ...] ==> [ 's0', 's1', ...]
-
-	if not sensor_index:
+	try:
+		sensor_index = [ ds.split('_')[0] for ds in  ch.data[1] ].index(sensor.id) # [ "s0_VAC_Vrms", "s1_CAC_Arms", ...] ==> [ 's0', 's1', ...]
+	
+	except:
 		raise APIError('Sensor {0} history not found'.format(sensor.id), 404)
 
 
 	data = []
-	data.append([ v[sensor_index] for v in ch.data[2] ])
+	data.append(ch.data[0]) # time series range/step
+	data.append([ ch.data[1][sensor_index] ]) # sensor DS name
+	data.append([ v[sensor_index] for v in ch.data[2] ]) # data (live or AVERAGE)
 
 	if h != 'live':
-		data.append([ v[sensor_index] for v in ch.data[3] ])
-		data.append([ v[sensor_index] for v in ch.data[4] ])
+		data.append([ v[sensor_index] for v in ch.data[3] ]) # data (MIN if not "live")
+		data.append([ v[sensor_index] for v in ch.data[4] ]) # data (MAX if not "live")
 
 	return json_response(data)
 
