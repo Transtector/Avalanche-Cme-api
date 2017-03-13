@@ -183,23 +183,26 @@ var AlarmsPanel = React.createClass({
 			var desc = (i == 0) ? 'Source/Utility' : 'Power Conditioner';
 			desc += ' ' + this.state.channels[chg[0][0]].description.split('P')[0];
 
-			_pms.push(desc);
+			_pms.push(desc);  // channel group description
 
-			chg.forEach(function(ch_s) {
+			chg.forEach(function(ch_s, j) {
 				var channel = this.state.channels[ch_s[0]],
-					sensor = channel.sensors[ch_s[1]];
+					sensor = channel.sensors[ch_s[1]],
+					index = (i * 5) + (j + 1);
+
+				_pms.push('retrieving...'); // while we wait for results
 
 				// request channel weekly history to populate extremes
 				CmeAPI.channelHistory(channel.id, 'weekly', this.state.week + 1)
-					.done(function(data) {
-
+					.done(function(data){
 						sensor.act_low = 9;
 						sensor.act_hi = 99;
 						sensor.max_dev = 33;
 
-						_pms.push(sensor);
-						
-						_this.setState({ powerMonitoringSummary: _pms });
+						// add results back to correct row @ index
+						_pms[index] = sensor;
+
+						_this.setState({ powerMonitoringSummary: _pms });				
 					});
 
 			}, this);
