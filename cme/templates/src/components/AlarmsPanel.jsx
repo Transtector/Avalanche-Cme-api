@@ -12,9 +12,10 @@ var Constants = require('../Constants');
 var Actions = require('../Actions');
 var Store = require('../Store');
 
-var API = require('../CmeAPI');
-
 var WeekChooser = require('./WeekChooser');
+
+var API = require('../CmeAPI');
+var $ = require('jquery');
 
 var moment = require('moment');
 var classNames = require('classnames');
@@ -176,6 +177,7 @@ var AlarmsPanel = React.createClass({
 		
 		// Power Monitoring Summary
 		var _pms = [];
+		var _reqs = [];
 
 		CHANNEL_GROUPS.forEach(function(chg, i) {
 
@@ -188,11 +190,25 @@ var AlarmsPanel = React.createClass({
 				var channel = this.state.channels[ch_s[0]],
 					sensor = channel.sensors[ch_s[1]];
 
-				_pms.push(sensor);
+				// request channel weekly history to populate extremes
+				_reqs.push(CmeAPI.channelHistory(channel.id, 'weekly', this.state.week + 1)
+					.done(function(data) {
+
+						sensor.act_low = 9;
+						sensor.act_hi = 99;
+						sensor.max_dev = 33;
+
+						_pms.push(sensor);
+					}));
+		
 			}, this);
 		}, this);
 
-		this.setState({ powerMonitoringSummary: _pms });
+		$.when(_reqs).done(function() {
+
+			this.setState({ powerMonitoringSummary: _pms });
+		});
+
 	},
 
 	_renderSiteInfoRows: function(siteInfo) {
@@ -230,20 +246,16 @@ var AlarmsPanel = React.createClass({
 		else
 			spec_hi = 'n/a';
 
-
-		// Data items (read and/or calculated from retrieved channel history)
-
-
 		return (
 			<tr key={'pm-summary-row_' + i}>
 				<th className='centered'>{pmItem.name}</th>
 				<th>{pmItem.unit}</th>
 				<td>{spec_low}</td>
-				<td>act_low</td>
+				<td>{pmItem.act_low}</td>
 				<td>{pmItem.nominal}</td>
 				<td>{spec_hi}</td>
-				<td>act_hi</td>
-				<td>max_dev</td>
+				<td>{pmItem.act_hi}</td>
+				<td>{pmItem.max_dev}</td>
 			</tr>
 		);
 	},

@@ -263,6 +263,14 @@ var CmeAPI = {
 		});
 	},
 
+	channelHistory: function(ch_id, history, start_block) {
+		return $.ajax({
+			url: API.channel + parseInt(ch_id.slice(2)) + '/history/' + history + '?s=' + start_block,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
+
 	channelConfig: function(ch_id) {
 		return $.ajax({
 			url: API.channel + parseInt(ch_id.slice(2)) + '/config',
