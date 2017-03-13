@@ -25,8 +25,7 @@ var key = require('../keymaster/keymaster.js');
 
 function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 
-function toPercentage(value, nominal, precision) {
-	var precision = precision || 1; 
+function toPercentage(value, nominal) {
 	if (!isNumeric(value) || !isNumeric(nominal)) return value;
 	if (!nominal) return value;
 
@@ -212,12 +211,11 @@ var AlarmsPanel = React.createClass({
 						sensor.act_low = Math.min.apply(null, MIN).toFixed(1);
 						sensor.act_hi = Math.max.apply(null, MAX).toFixed(1);
 
-						var low_dev = toPercentage(sensor.act_low, sensor.nominal).toFixed(1),
-							hi_dev = toPercentage(sensor.act_hi, sensor.nominal).toFixed(1)
+						var low_dev = toPercentage(sensor.act_low, sensor.nominal),
+							hi_dev = toPercentage(sensor.act_hi, sensor.nominal),
+							max_dev = Math.max(low_dev, hi_dev);
 
-						var max_dev = Math.max(low_dev, hi_dev);
-
-						if (max_dev < 3)
+						if (Math.abs(max_dev) < 3)
 							sensor.max_dev = max_dev.toFixed(3) + ' %';
 						else
 							sensor.max_dev = max_dev.toFixed(0) + ' %';
