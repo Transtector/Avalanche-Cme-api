@@ -168,7 +168,7 @@ def channel(ch_index):
 
 @router.route('/ch/<int:ch_index>/history/<history>', methods=['GET', 'DELETE'])
 @require_auth
-def channel_data(ch_index, history):
+def channel_history(ch_index, history):
 	ch = status(ch_index)
 
 	if not ch:
@@ -298,7 +298,7 @@ def sensor(ch_index, s_index):
 # GET sensor history
 @router.route('/ch/<int:ch_index>/sensors/<int:s_index>/history/<history>')
 @require_auth
-def sensor(ch_index, s_index, history):
+def sensor_history(ch_index, s_index, history):
 	ch = status(ch_index)
 
 	if not ch:
