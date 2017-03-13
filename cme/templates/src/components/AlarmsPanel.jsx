@@ -28,9 +28,9 @@ function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 function toPercentage(value, nominal, precision) {
 	var precision = precision || 1; 
 	if (!isNumeric(value) || !isNumeric(nominal)) return value;
-	if (!nominal) return value.toFixed(precision);
+	if (!nominal) return value;
 
-	return (100 * ((parseFloat(value) / parseFloat(nominal)) - 1)).toFixed(precision); 
+	return (100 * ((parseFloat(value) / parseFloat(nominal)) - 1)); 
 }
 
 // hard-coded channels processed for the 
@@ -209,13 +209,18 @@ var AlarmsPanel = React.createClass({
 						var MIN = data[3],
 							MAX = data[4];
 
-						sensor.act_low = Math.min.apply(null, MIN);
-						sensor.act_hi = Math.max.apply(null, MAX);
+						sensor.act_low = Math.min.apply(null, MIN).toFixed(1);
+						sensor.act_hi = Math.max.apply(null, MAX).toFixed(1);
 
-						var low_dev = toPercentage(sensor.act_low, sensor.nominal),
-							hi_dev = toPercentage(sensor.act_hi, sensor.nominal)
+						var low_dev = toPercentage(sensor.act_low, sensor.nominal).toFixed(1),
+							hi_dev = toPercentage(sensor.act_hi, sensor.nominal).toFixed(1)
 
-						sensor.max_dev = Math.max(low_dev, hi_dev) + ' %';
+						var max_dev = Math.max(low_dev, hi_dev);
+
+						if (max_dev < 3)
+							sensor.max_dev = max_dev.toFixed(3) + ' %';
+						else
+							sensor.max_dev = max_dev.toFixed(0) + ' %';
 
 						// add results back to correct row @ index
 						_pms[index] = sensor;
