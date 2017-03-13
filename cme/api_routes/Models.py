@@ -568,7 +568,7 @@ class Sensor():
 		# to search for a matching datasource for this sensor
 		regex = re.compile('[^a-zA-Z0-9_]')
 		clean_type = regex.sub('_', self.type)[:3]
-		clean_unit = regex.sub('_', self.unit)[:3]
+		clean_unit = regex.sub('_', self.unit)[:5]
 		ds_key = self.id + '_' + clean_type + '_' + clean_unit
 		ds = self._ch._datasources and self._ch._datasources.get(ds_key, None)
 
