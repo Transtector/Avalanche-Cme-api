@@ -73,8 +73,6 @@ var ThresholdGauge = React.createClass({
 		if (pointerPos > 100)
 			pointerPos = 100;
 
-		pointerPos = { left: pointerPos }
-
 		// warning block is top-level GREEN
 		var warningStyle = {
 			left: warn_min_values.length > 0 ? pos(warn_min_values[0].value) : 0,
@@ -96,18 +94,19 @@ var ThresholdGauge = React.createClass({
 		// finally, add the '%' character for the styles
 		add_percent(warningStyle);
 		add_percent(alarmStyle);
-		add_percent(pointerPos);
 		
 		return (
 			<div className="th-gauge">
 				<div className="alarm" style={alarmStyle}></div>
 				<div className="warning" style={warningStyle}></div>
-				<div className="pointer" style={pointerPos}>{this._renderDeviation()}</div>
+				<div className="pointer" style={{left: pointerPos + '%'}>{this._renderDeviation(pointerPos)}</div>
 			</div>
 		);
 	},
 
-	_renderDeviation: function () {
+	_renderDeviation: function (pointerPosition) {
+		if (pointerPosition <= 0 || pointerPosition >= 100)
+			return null;
 		if (this.props.sensor.type == 'VAC') {
 			return <span>{toPercentage(this.props.sensor.value, this.props.sensor.nominal) + ' %'}</span>;
 		}
