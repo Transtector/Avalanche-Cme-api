@@ -88,8 +88,8 @@ var ChannelPanel = React.createClass({
 		if (!this.state.ch) return null;
 
 		// ch primary/secondary sensor display values
-		var primary = this.state.ch.sensors.filter(function(s) { return s.id === 's0' })[0];
-		var secondary = this.state.ch.sensors.filter(function(s) { return s.id === 's1' })[0];
+		var primary = this.state.ch.sensors['s0'];
+		var secondary = this.state.ch.sensors['s1'];
 
 		return (
 			<div className='ch-wrapper'>
