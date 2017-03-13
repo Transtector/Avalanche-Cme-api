@@ -12,6 +12,8 @@ var Constants = require('../Constants');
 var Actions = require('../Actions');
 var Store = require('../Store');
 
+var API = require('../CmeAPI');
+
 var WeekChooser = require('./WeekChooser');
 
 var moment = require('moment');
@@ -41,6 +43,10 @@ var AlarmsPanel = React.createClass({
 			week: 0,
 			weeks: [ 0, -1, -2, -3, -9, -10, -20 ],
 			weekChooserOpen: false,
+
+			powerMonitoringSummary: [],
+
+
 			alarms: false
 		}
 	},
@@ -53,6 +59,9 @@ var AlarmsPanel = React.createClass({
 
 		// Request channels update
 		Actions.channels();
+
+		// Kick off power monitoring summary
+		this._powerMonitoringSummary();
 	},
 
 	componentWillUnmount: function() {
@@ -75,23 +84,6 @@ var AlarmsPanel = React.createClass({
 
 		// dateCode: YYYYMMDD
 		var dateCode = moment(this.state.device.host.dateCode).format('MMM D YYYY');
-
-
-		var powerMonitoringItems = [];
-		CHANNEL_GROUPS.forEach(function(chg, i) {
-
-			var desc = (i == 0) ? 'Source/Utility' : 'Power Conditioner';
-			desc += ' ' + this.state.channels[chg[0][0]].description.split('P')[0];
-
-			powerMonitoringItems.push(desc);
-
-			chg.forEach(function(ch_s) {
-				var channel = this.state.channels[ch_s[0]],
-					sensor = channel.sensors[ch_s[1]];
-
-				powerMonitoringItems.push(sensor);
-			}, this);
-		}, this);
 
 		return (
 			<div className="panel" id="alarms">
@@ -146,7 +138,7 @@ var AlarmsPanel = React.createClass({
 							</tr>
 						</thead>
 						<tbody>
-							{powerMonitoringItems.map(this._renderPowerMonitoringRow)}
+							{this.state.powerMonitoringSummary.map(this._renderPowerMonitoringRow)}
 						</tbody>
 					</table>
 
@@ -180,6 +172,29 @@ var AlarmsPanel = React.createClass({
 		);
 	},
 
+	_powerMonitoringSummary: function() {
+		
+		// Power Monitoring Summary
+		var _pms = [];
+
+		CHANNEL_GROUPS.forEach(function(chg, i) {
+
+			var desc = (i == 0) ? 'Source/Utility' : 'Power Conditioner';
+			desc += ' ' + this.state.channels[chg[0][0]].description.split('P')[0];
+
+			_pms.push(desc);
+
+			chg.forEach(function(ch_s) {
+				var channel = this.state.channels[ch_s[0]],
+					sensor = channel.sensors[ch_s[1]];
+
+				_pms.push(sensor);
+			}, this);
+		}, this);
+
+		this.setState({ powerMonitoringSummary: _pms });
+	},
+
 	_renderSiteInfoRows: function(siteInfo) {
 		return Object.keys(siteInfo).map(function (k, i) {
 				return (<tr key={'site-info-row_' + i}><th>{k}</th><td>{this[k]}</td></tr>);
@@ -187,12 +202,15 @@ var AlarmsPanel = React.createClass({
 	},
 
 	_renderPowerMonitoringRow: function(pmItem, i) {
+
+		// If pmItem is a string render as a full-width label for the "channel group"
 		if (typeof pmItem == 'string') {
 			return (
 				<tr key={'pm-summary-row_' + i} className='channel-row'><th colSpan='8'>{pmItem}</th></tr>
 			)
 		}
 
+		// Informational Items (plucked from sensor/threshold fields)
 		if (pmItem.unit == '%')
 			pmItem.name = 'Phase Imbalance';
 
@@ -211,6 +229,9 @@ var AlarmsPanel = React.createClass({
 			spec_hi = spec_hi.value;
 		else
 			spec_hi = 'n/a';
+
+
+		// Data items (read and/or calculated from retrieved channel history)
 
 
 		return (
