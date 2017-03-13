@@ -165,7 +165,7 @@ def channel(ch_index):
 
 
 
-@router.route('/ch/<int:ch_index>/data/<history>')
+@router.route('/ch/<int:ch_index>/<history>', methods=['GET', 'DELETE'])
 @require_auth
 def channel_data(ch_index, history):
 	ch = status(ch_index)
@@ -176,21 +176,27 @@ def channel_data(ch_index, history):
 	# TODO: look at channel RRA config to see if history is okay
 	h = history.lower()
 	if h not in ['live', 'weekly']:
-		raise APIError('Channel data history not collected', 400)
+		raise APIError('Channel data {0} history not collected'.format(h), 400)
 
-	s = request.args.get('s')
-	try:
-		s = int(s) if s else 1
-	except:
-		s = 1
+	if request.method == 'DELETE':
+		ch.clear_history()
+		ch_mgr.clear_channel_history(ch.id)
 
-	b = request.args.get('b')
-	try:
-		b = int(b) if b else 1
-	except:
-		b = 1
+	else:
+		s = request.args.get('s')
+		try:
+			s = int(s) if s else 1
+		except:
+			s = 1
 
-	ch.load_history(h, s, b)
+		b = request.args.get('b')
+		try:
+			b = int(b) if b else 1
+		except:
+			b = 1
+
+		ch.load_history(h, s, b)
+	
 	return json_response(ch.data)
 
 
@@ -238,31 +244,6 @@ def ch_alarms(ch_index):
 		ch.load_alarms()
 
 	return json_response({ ch.id + '.alarms': ch.alarms })
-
-
-@router.route('/ch/<int:ch_index>/history/', methods=['GET', 'DELETE'])
-@require_auth
-def ch_history(ch_index):
-	# retrieve the desired channel configuration	
-	ch = ch_mgr.get_channel('ch' + str(ch_index))
-
-	if not ch:
-		raise APIError('Channel not found', 404)
-
-	if request.method == 'DELETE':
-		ch.clear_history()
-		ch_mgr.clear_channel_history(ch.id)
-
-	else:
-		h = request.args.get('h')
-		h = h.lower() if h else None
-
-		if not h in ['live', 'daily', 'weekly', 'monthly', 'yearly']:
-			raise APIError('Bad request', 400)
-		
-		ch.load_history(h)
-
-	return json_response({ ch.id + '.history' + '.' + h: ch.data })
 
 
 # CME channel sensors request
