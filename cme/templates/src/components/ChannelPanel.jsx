@@ -376,7 +376,7 @@ var ChannelPanel = React.createClass({
 				<div className="ch-plot-header">
 					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}></button>
 					<button className="btn reset" onClick={this._clearHistory}>Clear History</button>
-					<button className="btn export icon-download" onClick={this._exportHistory} />
+					<button className="btn export icon-download2" onClick={this._exportHistory} />
 				</div>
 
 				<div className="plot-wrapper" style={{ height: '197px' }}>
