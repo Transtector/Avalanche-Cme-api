@@ -131,12 +131,6 @@ var ChannelPanel = React.createClass({
 
 						{this._renderHistory(secondary, 1)}
 
-						<div className='ch-plot-tools'>
-							{/* <button title='Reset scales' className='btn icon-reset' onClick={this._resetHistoryPlotScale} />*/}
-							<button title='Scale to data or display range' className='btn icon-autoscale' onClick={this._toggleHistoryPlotAutoscale} />
-							<button title='Show/hide alarm thresholds' className='btn icon-thresholds' onClick={this._toggleHistoryPlotThresholds}/>
-						</div>
-
 						<div className="ch-plot-footer">
 							<button className={ps0Class} id="plot_0" onClick={this._setHistoryPlot}>
 								{primary && primary.unit ? primary.unit : ''}
@@ -391,6 +385,11 @@ var ChannelPanel = React.createClass({
 		return (
 			<div className={cls}>
 				<div className='plot' ref={updatePlot}></div>
+
+				<div className='ch-plot-tools'>
+					<button title='Scale to data or display range' className='btn icon-autoscale' onClick={this._toggleHistoryPlotAutoscale} />
+					<button title='Show/hide alarm thresholds' className='btn icon-thresholds' onClick={this._toggleHistoryPlotThresholds}/>
+				</div>
 				{
 					this.state.ch.data
 						? null

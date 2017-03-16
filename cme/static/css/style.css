@@ -1070,7 +1070,6 @@ header .buttons button.active {
   -ms-border-radius: 3px 0 0 3px;
   -o-border-radius: 3px 0 0 3px;
   border-radius: 3px 0 0 3px;
-  z-index: 2;
   -webkit-transition: right 0.3s ease 0s;
   -moz-transition: right 0.3s ease 0s;
   -ms-transition: right 0.3s ease 0s;
