@@ -13,7 +13,7 @@ var classNames = require('classnames');
 var InputGroup = React.createClass({
 
 	propTypes: {
-		id: React.PropTypes.string.isRequired,
+		title: React.PropTypes.string.isRequired,
 		onExpand: React.PropTypes.func,
 		onCollapse: React.PropTypes.func
 	},
@@ -41,14 +41,14 @@ var InputGroup = React.createClass({
 	},
 
 	render: function() {
-		var capitalizedId = this.props.id.charAt(0).toUpperCase() + this.props.id.slice(1);
+
 		var cn = classNames({'input-group': true, 'collapsed': this.state.collapsed});
 
 		return (
 			<div className={cn} id={this.props.id}>
 				<div className="input-group-title">
 					<button className='btn' onClick={this._onClick}>
-						{capitalizedId}
+						{this.props.title}
 					</button>
 				</div>
 				<div className="input-group-content">

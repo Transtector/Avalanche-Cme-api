@@ -31,7 +31,7 @@ var UserConfig = React.createClass({
 			valid = this.state.p === this.state.pc && (this.state.p.length == 0 || this.state.p.length >= 4);
 
 		return (
-			<InputGroup id="profile" ref="_InputGroup">
+			<InputGroup title="Login Profile" ref="_InputGroup">
 
 				{/* These hidden inputs are to stop Chrome from autofilling the username and password fields.
 					See: http://stackoverflow.com/questions/12374442/chrome-browser-ignoring-autocomplete-off	*/}

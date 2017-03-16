@@ -13,7 +13,7 @@ var Actions = require('../Actions');
 var Store = require('../Store');
 
 var Clock = require('./Clock');
-var Thermometer = require('./Thermometer');
+//var Thermometer = require('./Thermometer');
 
 var key = require('../keymaster/keymaster.js');
 var classNames = require('classnames');
@@ -119,7 +119,7 @@ var Header = React.createClass({
 
 				<div className='widgets'>
 					<Clock config={this.state.config.clock} flavor='widget' pollPeriod={this.state.pollClock} />
-					<Thermometer config={this.state.config.temperature} flavor='widget' pollPeriod={this.state.pollTemp} />
+					{/*<Thermometer config={this.state.config.temperature} flavor='widget' pollPeriod={this.state.pollTemp} />*/}
 				</div>
 				
 				<div className="buttons">

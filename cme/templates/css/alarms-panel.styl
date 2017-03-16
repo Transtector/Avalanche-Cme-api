@@ -43,14 +43,14 @@
 				right 0
 				bottom 0
 				border 6px solid transparent
-				border-right-color #eee
-				border-bottom-color #eee
+				border-right-color lighten(button-bg-color, 50%)
+				border-bottom-color lighten(button-bg-color, 50%)
 			&:hover
 				cursor pointer
-				border-color #ccc
+				border-color button-bg-color
 				&::after
-					border-right-color #ccc
-					border-bottom-color #ccc
+					border-right-color button-bg-color
+					border-bottom-color button-bg-color
 
 
 	table

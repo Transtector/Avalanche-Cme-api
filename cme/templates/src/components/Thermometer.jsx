@@ -97,7 +97,7 @@ var Thermometer = React.createClass({
 		var display_alarm = utils.formatTemperatureDisplay(this.props.config.alarmTemp, this.props.config.displayUnits, 0);
 
 		return (
-			<InputGroup id="temperature" ref="_InputGroup" onExpand={this._startPoll} onCollapse={this._stopPoll}>
+			<InputGroup title="Temperature" ref="_InputGroup" onExpand={this._startPoll} onCollapse={this._stopPoll}>
 				<div className="input-group-cluster">
 					<label htmlFor="tempGroup">CPU Temperature</label>
 					<div id="tempGroup">

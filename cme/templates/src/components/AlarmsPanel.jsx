@@ -199,11 +199,33 @@ var AlarmsPanel = React.createClass({
 					sensor = channel.sensors[ch_s[1]],
 					index = (i * 5) + (j + 1);
 
+
+				var spec_low = sensor.thresholds.find(function(th){
+					return th.classification == 'ALARM' && th.direction == 'MIN';
+				});
+		
+				if (spec_low)
+					spec_low = spec_low.value;
+				else
+					spec_low = 'n/a';
+
+				var spec_hi = sensor.thresholds.find(function(th){
+					return th.classification == 'ALARM' && th.direction == 'MAX';
+				});
+				if (spec_hi)
+					spec_hi = spec_hi.value;
+				else
+					spec_hi = 'n/a';
+
+
+				sensor.spec_low = spec_low;
+				sensor.spec_hi = spec_hi;
+
 				_pms.push('retrieving...'); // while we wait for results
 
 				// request channel weekly history to populate extremes
 				CmeAPI.sensorHistory(channel.id, sensor.id, 'weekly', this.state.week + 1)
-					.done(function(data){
+					.done(function(data) {
 
 						var MIN = data[3],
 							MAX = data[4];
@@ -215,10 +237,15 @@ var AlarmsPanel = React.createClass({
 							hi_dev = toPercentage(sensor.act_hi, sensor.nominal),
 							max_dev = Math.max(low_dev, hi_dev);
 
-						if (Math.abs(max_dev) < 3)
-							sensor.max_dev = max_dev.toFixed(3) + ' %';
-						else
+						if (Math.abs(max_dev) < 3) {
+							if (Math.abs(max_dev) < 1) {
+								sensor.max_dev = max_dev.toFixed(2) + ' %';
+							} else {
+								sensor.max_dev = max_dev.toFixed(1) + ' %';								
+							}
+						} else {
 							sensor.max_dev = max_dev.toFixed(0) + ' %';
+						}
 
 						// add results back to correct row @ index
 						_pms[index] = sensor;
@@ -250,30 +277,14 @@ var AlarmsPanel = React.createClass({
 		if (pmItem.unit == '%')
 			pmItem.name = 'Phase Imbalance';
 
-		var spec_low = pmItem.thresholds.find(function(th){
-			return th.classification == 'ALARM' && th.direction == 'MIN';
-		});
-		if (spec_low)
-			spec_low = spec_low.value;
-		else
-			spec_low = 'n/a';
-
-		var spec_hi = pmItem.thresholds.find(function(th){
-			return th.classification == 'ALARM' && th.direction == 'MAX';
-		});
-		if (spec_hi)
-			spec_hi = spec_hi.value;
-		else
-			spec_hi = 'n/a';
-
 		return (
 			<tr key={'pm-summary-row_' + i}>
 				<th className='centered'>{pmItem.name}</th>
 				<th>{pmItem.unit}</th>
-				<td>{spec_low}</td>
+				<td>{pmItem.spec_low}</td>
 				<td>{pmItem.act_low}</td>
 				<td>{pmItem.nominal}</td>
-				<td>{spec_hi}</td>
+				<td>{pmItem.spec_hi}</td>
 				<td>{pmItem.act_hi}</td>
 				<td>{pmItem.max_dev}</td>
 			</tr>

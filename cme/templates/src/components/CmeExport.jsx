@@ -89,12 +89,7 @@ function renderSensorHeader(ch, h, title, field) {
 				// and we'll use it to pull the sensor object
 				ch.data[1].map(function(s, i) {
 					var id = s.split('_')[0];
-
-					// now find the matching sensor object
-					var s_obj = ch.sensors.find(function(s){
-						return s.id == id;
-					});
-
+					var s_obj = ch.sensors[id];
 					var v = (field == 'type')
 					? utils.SENSOR_TYPE[s_obj[field]]
 					: s_obj[field];
@@ -114,7 +109,7 @@ function renderSensorDataHeader(ch, h) {
 		<tr>
 			<th>Time</th>
 			{
-				ch.sensors.map(function(s, i) { 
+				Object.values(ch.sensors).map(function(s, i) { 
 					var vals = (h != 'live') ? ['Min', 'Avg', 'Max'] : ['Value'];
 
 					return vals.map(function(a, j) {

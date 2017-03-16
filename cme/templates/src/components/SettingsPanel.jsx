@@ -13,8 +13,8 @@ var Store = require('../Store');
 var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
 
-var ClockConfig = require('./Clock');
-var TempConfig= require('./Thermometer');
+var Clock = require('./Clock');
+var Temp= require('./Thermometer');
 
 var NetConfig = require('./NetConfig');
 var UserConfig = require('./UserConfig');
@@ -66,14 +66,14 @@ var SettingsPanel = React.createClass({
 				
 					<UserConfig />
 
-					<InputGroup id="general">
+					<InputGroup title="General">
 						<TextInput id="general.name" name='name' defaultValue={config.general.name} onBlur={this._requestChange} />
 						<TextInput id="general.description" name='description' defaultValue={config.general.description} onBlur={this._requestChange} />
 						<TextInput id="general.sitecode" name='site code' defaultValue={config.general.sitecode} onBlur={this._requestChange} />
 						<TextInput id="general.location" name='device location' defaultValue={config.general.location} onBlur={this._requestChange} />
 					</InputGroup>
 
-					<InputGroup id="support">
+					<InputGroup title="Support">
 						<TextInput id="support.contact" name='contact' defaultValue={config.support.contact} onBlur={this._requestChange} />
 						<TextInput id="support.email" name='email' defaultValue={config.support.email} onBlur={this._requestChange} />
 						<TextInput id="support.phone"  name='phone' defaultValue={config.support.phone} onBlur={this._requestChange} />
@@ -81,9 +81,9 @@ var SettingsPanel = React.createClass({
 
 					<NetConfig config={config.network} />
 					
-					<ClockConfig config={config.clock} flavor="config" pollPeriod={1000} />
+					<Clock config={config.clock} flavor="config" pollPeriod={1000} />
 					
-					<TempConfig config={config.temperature} flavor="config" pollPeriod={10000} />
+					<Temp config={config.temperature} flavor="config" pollPeriod={10000} />
 
 					{/*  Hidden for now - doesn't really do anything..
 					<InputGroup id="snmp">

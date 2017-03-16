@@ -7,10 +7,18 @@
 error-badge-size = 30px
 icon-small-viewport = '-512 -512 2048 2048'
 
+channel-panel-width = 380px
+channel-panel-height = 245px
+
+plot-header-height = 24px
+plot-footer-height = 24px
+
 .ch-wrapper
 	position relative
 	float left
-
+	.loader
+		margin 90px auto
+		font-size 10px
 
 .ch-header
 	padding 0 20px
@@ -40,8 +48,8 @@ icon-small-viewport = '-512 -512 2048 2048'
 .ch
 	position relative
 	margin 10px
-	width 380px
-	height 245px
+	width channel-panel-width
+	height channel-panel-height
 	overflow hidden
 	color #fff
 	background button-bg-color
@@ -81,7 +89,8 @@ icon-small-viewport = '-512 -512 2048 2048'
 	background-image svg('chevron-down', '-128 -128 1152 1152') // just slightly smaller
 .icon-cross
 	background-image svg('cross', icon-small-viewport)
-
+.icon-trash2
+	background-image svg('trash2')
 
 .ch-error-badge
 	position absolute
@@ -195,77 +204,120 @@ icon-small-viewport = '-512 -512 2048 2048'
 	&.open	
 		z-index 1
 	.plot-wrapper
-		width 100% // height 197px (height now set in line)
+		position absolute
+		top plot-header-height
+		left 0
+		right 0
+		padding-right 8px
+		height channel-panel-height - (plot-header-height + plot-footer-height)
+		background-color #fff
+		z-index 1
+		overflow hidden
+		&.active
+			z-index 2
 	.plot
-		width 100%
+		width 100% 
 		height 100%
 		margin 0
-
+		.flot-x-axis .flot-tick-label:first-child
+			white-space nowrap
+			margin-left -6px
+	.plot.active
+		background-color pink
 
 .ch-plot-header,
-.ch-plot-footer
-	position relative
-	height 24px
+.ch-plot-footer,
+.ch-plot-tools
+	position absolute
+	right 0
 	text-align center
-	background-color button-bg-color
-	> .select-wrapper
-		position relative
+	background-color #fff
+	.select-wrapper
+		position absolute
 		top 3px
+		right 10px
 		display inline-block
 		cursor pointer		
-	> .select-wrapper select
-		position relative
-		padding-right 24px
-		-webkit-appearance none
-		color #fff
-		background-color transparent
-		background-repeat no-repeat
-		background-position-x 100%
-		font-size 80%
-		font-weight bold
-		text-transform uppercase	
-		border 0
-		border-radius 0
-		cursor pointer
-		outline none
-	.btn
+		select
+			position relative
+			padding-right 24px
+			-webkit-appearance none
+			color #fff
+			background-color transparent
+			background-repeat no-repeat
+			background-position-x 100%
+			font-size 80%
+			font-weight bold
+			text-transform uppercase	
+			border 0
+			border-radius 0
+			cursor pointer
+			outline none
+	button
+		position absolute
+		width 24px
+		height 24px
 		font-size 80%
 		font-weight bold
 		text-transform uppercase	
 		line-height 100%
 		color #fff
 		background-color transparent
+	.close
+		left 0
+	.export
+		right 0
+	.reset
+		right 36px
+		background-size 20px 20px
+	.plot-select
+		position relative
 		width auto
-		min-width 24px
-		height 24px
-	.btn.close
-		position absolute
-		left 0
-		padding-left 30px
-		background-position-x 0
-	.btn.export
-		position absolute
-		right 0
-	.btn.trace
-		position absolute
-		padding-left 15px
-		background-color transparent
+		float left
+		padding-left 24px
 		text-transform none
-	.btn.trace.pri
-		left 0
-	.btn.trace.sec
+		&::before
+			content ""
+			position absolute
+			top 4px
+			left 5px
+			width 13px
+			height 13px
+			border 1px solid #fff
+			border-radius 100%
+	.plot-select.active::before
+		background-color #EB942A
+
+.ch-plot-header,
+.ch-plot-footer
+	left 0
+	height plot-footer-height
+	background-color button-bg-color
+.ch-plot-footer
+	bottom 0
+.ch-plot-tools
+	top  50%
+	margin-top -(24px + 12px + 10px)  // 2 buttons + margin + plot x-axis height
+	right -20px
+	border 0 solid lighten(fg-color, 60%)
+	border-width 2px 0 2px 2px
+	border-radius 3px 0 0 3px
+	z-index 2
+	transition right 0.3s ease 0s
+	&:hover
 		right 0
-	.btn.trace > span
-		position absolute
-		top 50%
-		margin-top -3px
-		left 5px
-		width 6px
-		height 6px
-
-
+	button
+		position relative
+		display block
+		margin 6px 4px
+		background-size 24px 24px
 	
-
+.icon-reset
+	background-image svg('reset', '0 0 1000 1000')
+.icon-autoscale
+	background-image svg('autoscale', '0 0 24 24', lighten(fg-color, 60%))
+.icon-thresholds
+	background-image svg('thresholds', '0 0 24 24', lighten(fg-color, 60%))
 
 .ch-error
 	position absolute

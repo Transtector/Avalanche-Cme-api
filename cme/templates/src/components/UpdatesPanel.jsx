@@ -182,7 +182,7 @@ var UpdatesPanel = React.createClass({
 		});
 
 		return (
-			<InputGroup id="updates" 
+			<InputGroup title="Update" 
 				onExpand={this._startPoll} 
 				onCollapse={this._stopPoll}>
 

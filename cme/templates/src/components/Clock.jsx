@@ -229,7 +229,7 @@ var Clock = React.createClass({
 
 
 		return (
-			<InputGroup id="clock" ref="_InputGroup" onExpand={this._startPoll} onCollapse={this._stopPoll}>
+			<InputGroup title="Clock" ref="_InputGroup" onExpand={this._startPoll} onCollapse={this._stopPoll}>
 				<div className="input-group-cluster">
 					<label htmlFor="current">Current</label>
 					<div id="current">
@@ -363,7 +363,7 @@ var Clock = React.createClass({
 				config.zone
 			);
 			
-			date = clock.format("MMM D"); // hardcoded date format (for now?)
+			date = clock.format("MMMM D, YYYY"); // hardcoded date format (for now?)
 
 			timeformat = config.display12HourTime
 				? config.displayTimeFormat12Hour

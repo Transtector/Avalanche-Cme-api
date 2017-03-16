@@ -23,7 +23,7 @@ var NetConfig = React.createClass({
 		}, this);
 
 		return (
-			<InputGroup id="network" ref="_InputGroup">
+			<InputGroup title="Network" ref="_InputGroup">
 				<TextInput id="mac" name="MAC" defaultValue={this.state.mac} />
 
 				<div className="input-group-cluster">

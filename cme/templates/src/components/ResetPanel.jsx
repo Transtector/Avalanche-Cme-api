@@ -29,7 +29,7 @@ var ResetPanel = React.createClass({
 	render: function() {
 
 		return (
-			<InputGroup id="restart">
+			<InputGroup title='Restart' id='settings-restart'>
 
 				<div className='input-group-cluster no-border'>
 

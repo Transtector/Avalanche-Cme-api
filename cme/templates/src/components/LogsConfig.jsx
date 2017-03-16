@@ -67,7 +67,7 @@ var LogsConfig = React.createClass({
 	render: function() {
 
 		return (
-			<InputGroup id="logs" onExpand={this._startPoll} onCollapse={this._stopPoll}>
+			<InputGroup title="System Logs" onExpand={this._startPoll} onCollapse={this._stopPoll}>
 				<ul>
 					{this.state.logs.map(function(log) {
 						return (

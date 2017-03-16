@@ -32,22 +32,13 @@ var ESCAPE_KEY_CODE = 27;
 var FAST_POLL_PERIOD = 1000; // showing current values
 var SLOW_POLL_PERIOD = 5000; // showing historic values
 
-function getSensorThreshold(s, classification, direction) {
-	if (!s || !s.thresholds || s.thresholds.length == 0) return null;
 
-	var th = s.thresholds.find(function(th){
-		return th.classification == classification && th.direction == direction;
-	});
-
-	return th && th.value;
-}
-
-var TRACE_COLORS = {
-	'WARNING': '#ff0',
-	'ALARM': '#f00',
-	'PRI_DATA': '#EB942A',
-	'SEC_DATA': '#2296E0',
-	'FILL': 0.2
+var	PLOT_COLORS = {
+	'WARNING': '#ffd42a',
+	'ALARM': '#ff2222',
+	'DATA': '#eb942a',
+	'GRID': '#cacaca',
+	'FILL': 0.1
 }
 
 var ChannelPanel = React.createClass({
@@ -64,12 +55,16 @@ var ChannelPanel = React.createClass({
 			configOpen: false,
 			activeId: '',
 			polling: true,
+
 			recording: false,
 			alarmsVisible: false,
-			history: '',
-			historyOptions: null,
-			historyVisible: false,
-			historyTraceVisible: [ true, true ]
+
+			history: '', // live, weekly, ... (which history is loaded)
+			historyOptions: null, // list of live, weekly, ... (populates the history selection)
+			historyVisible: false, // are the history plots visible
+			historyPlot: 0, // which sensor history plot is active
+			historyThresholdsVisible: true, // show/hide the threshold lines and shaded areas on the plots
+			historyPlotAutoscale: false // scale plot to display range or autoscale
 		}
 	},
 
@@ -90,6 +85,9 @@ var ChannelPanel = React.createClass({
 		// ch primary/secondary sensor display values
 		var primary = this.state.ch.sensors['s0'];
 		var secondary = this.state.ch.sensors['s1'];
+
+		var ps0Class = classNames('btn', 'plot-select', {'active': this.state.historyPlot == 0 });
+		var ps1Class = classNames('btn', 'plot-select', {'active': this.state.historyPlot == 1, 'hidden': !secondary });
 
 		return (
 			<div className='ch-wrapper'>
@@ -121,7 +119,44 @@ var ChannelPanel = React.createClass({
 						title='Display channel history'
 						onClick={this._toggleHistoryVisibility}>{this._historyDuration()}</button>
 
-					{this._renderHistory(primary, secondary)}
+					<div className={'ch-plot' + (this.state.historyVisible ? ' open' : '')}>
+
+						<div className="ch-plot-header">
+							<button className="btn close icon-cross" title='Close channel history' onClick={this._toggleHistoryVisibility}/>
+							<button className="btn reset icon-trash2" title='Clear channel history' onClick={this._clearHistory}/>
+							<button className="btn export icon-download2" title='Download channel history' onClick={this._exportHistory} />
+						</div>
+
+						{this._renderHistory(primary, 0)}
+
+						{this._renderHistory(secondary, 1)}
+
+						<div className='ch-plot-tools'>
+							{/* <button title='Reset scales' className='btn icon-reset' onClick={this._resetHistoryPlotScale} />*/}
+							<button title='Scale to data or display range' className='btn icon-autoscale' onClick={this._toggleHistoryPlotAutoscale} />
+							<button title='Show/hide alarm thresholds' className='btn icon-thresholds' onClick={this._toggleHistoryPlotThresholds}/>
+						</div>
+
+						<div className="ch-plot-footer">
+							<button className={ps0Class} id="plot_0" onClick={this._setHistoryPlot}>
+								{primary && primary.unit ? primary.unit : ''}
+							</button>
+							<button className={ps1Class} id="plot_1" onClick={this._setHistoryPlot}>
+								{secondary && secondary.unit ? secondary.unit : ''}
+							</button>
+
+							<div className="select-wrapper">
+								<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistory}>
+									{
+										this.state.historyOptions.map(function (ho) {
+											return <option key={ho} value={ho}>{ho}</option>;
+										})
+									}
+								</select>
+							</div>
+						</div>
+
+					</div>
 
 					{this._renderAlarms()}
 
@@ -176,7 +211,7 @@ var ChannelPanel = React.createClass({
 		);
 	},
 
-	_renderHistory: function(primarySensor, secondarySensor) {
+	_renderHistory: function(sensor, plotIndex) {
 
 		// data[0] = [ t_start, t_end, t_step ]
 		// data[1] = [ DS0, DS1, ..., DSN ]; DSx = "sx_stype_sunit" (e.g., "s0_VAC_Vrms")
@@ -187,224 +222,192 @@ var ChannelPanel = React.createClass({
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-		var y1Series, y2Series, traceDisabled = [ false, !secondarySensor ];
 
-		if (this.state.historyVisible && this.state.ch.data && this.state.historyOptions) {
 
-			// get start, stop, and step timestamps
-			var times = this.state.ch.data[0],
-				t_start = times[0] * 1000, 
-				t_end = times[1] * 1000,
-				t_step = times[2] * 1000;
+		var _this = this;
 
-			// threshold values
-			var ALARM_MAX = getSensorThreshold(primarySensor, 'ALARM', 'MAX'),
-				ALARM_MIN = getSensorThreshold(primarySensor, 'ALARM', 'MIN'),
-				WARN_MAX = getSensorThreshold(primarySensor, 'WARNING', 'MAX'),
-				WARN_MIN = getSensorThreshold(primarySensor, 'WARNING', 'MIN');
+		function xRange(ch_time_data) {
 
-			// track current, min and max y-values for y-axes scaling
-			var y1, y2, y1min, y1max, y2min, y2max;
+			return {
+				start: ch_time_data[0] * 1000,
+				end: ch_time_data[1] * 1000,
+				step: ch_time_data[2] * 1000
+			}
+		}
 				
-			y1min = primarySensor.display_range[0],
-			y1max = primarySensor.display_range[1];
+		function yRange(sensor) {
+			if (!sensor) return { min: 0, max: 0 }
+			return {
+				min: sensor.display_range[0],
+				max: sensor.display_range[1]
+			}
+		}
 
-			if (secondarySensor) {
-				y2min = secondarySensor.display_range[0];
-				y2max = secondarySensor.display_range[1];
+		function thresholds(sensor) {
+
+			function getSensorThreshold(s, classification, direction) {
+				if (!_this.state.historyThresholdsVisible || !s || !s.thresholds || s.thresholds.length == 0) return null;
+
+				var th = s.thresholds.find(function(th){
+					return th.classification == classification && th.direction == direction;
+				});
+
+				return th && th.value;
 			}
 
-			// live, daily, weekly, monthly, yearly history setting
-			var history = this.state.history,
-				live = (history === 'live' || this.state.ch.data.length <= 3);
-
-			// additional data traces if not live
-			var MIN, MAX;  
-			if (!live) {
-				MIN = this.state.ch.data[3]; // MIN data from channel
-				MAX = this.state.ch.data[4]; // MAX data from channel
+			return {
+				alarm_max: getSensorThreshold(sensor, 'ALARM', 'MAX'),
+				alarm_min: getSensorThreshold(sensor, 'ALARM', 'MIN'),
+				warn_max: getSensorThreshold(sensor, 'WARNING', 'MAX'),
+				warn_min: getSensorThreshold(sensor, 'WARNING', 'MIN')
 			}
+		}
 
-			// process each trace data point
-			this.state.ch.data[2].forEach(function(sensorDataValues, index, data) {
-				var t = t_start + t_step * index,
-					y1 = sensorDataValues[0],
-					y2 = sensorDataValues[1];
+		function isLive(history) {
 
-				// Intialize the series data arrays
-				if (index == 0) {
-					if (live) {
+			return history === 'live';
+		}
 
-						y1Series = [ 
-							[ [t, ALARM_MAX, y1max ] ],
-							[ [t, ALARM_MIN, y1min ] ],
-							[ [t, WARN_MAX, ALARM_MAX ] ],
-							[ [t, WARN_MIN, ALARM_MIN ] ],
-							[]
-						];
+		function dataSeries(sensor, history, data) {
+			var series = [],
+				traces = [ [], [], [], [], [], [], [] ],
+				xrange = xRange(data[0]),
+				yrange = yRange(sensor),
+				ths = thresholds(sensor),
+				sensor_index = parseInt(sensor.id.slice(1));
 
-						y2Series = [ [] ]; 
+			// assemble live and consolidated data traces
+			data[2].forEach(function(point, i, raw_data) {
 
-					} else {
-						y1Series = [[], [], []]; // MAX, MIN, AVG data
-						y2Series = [[], [], []];
-					}
+				var x = xrange.start + xrange.step * i,
+					y = point[sensor_index], // live or AVERAGE data point if not live
+					ymax = data[3] ? data[3][i][sensor_index] : null,
+					ymin = data[4] ? data[4][i][sensor_index] : null;
 
-				} else if (index == data.length - 1) {
-					// Add last threshold points
-					if (live) {
-						y1Series[0].push([ t, ALARM_MAX, y1max ]);
-						y1Series[1].push([ t, ALARM_MIN, y1min ]);
-						y1Series[2].push([ t, WARN_MAX, ALARM_MAX ]);
-						y1Series[3].push([ t, WARN_MIN, ALARM_MIN ]);
-					}
 
+				// set series first/last threshold points
+				if (i == 0 || i == raw_data.length - 1) {
+					traces[0].push( [x, ths.alarm_max, yrange.max ] ); // alarm max fill up to yrange max
+					traces[1].push( [x, ths.alarm_min, yrange.min ] ); // alarm min fill down to yrange min
+					traces[2].push( [x, ths.warn_max, ths.alarm_max ] ); // warn max fill up to alarm max
+					traces[3].push( [x, ths.warn_min, ths.alarm_min ] ); // warn min fill down to alarm min
 				}
 
-				if (this.state.historyTraceVisible[0]) {
-					if (live) {
-						y1Series[4].push([ t, y1 ]);
+				// push the live/avg and min, max data points
+				if (isLive(history)) {
 
-					} else {
-						// Add the traces in order as AVG, MIN, MAX.
-						// Add a third y-value to the AVG and MAX trace points
-						// to provide fill-to values.
+					traces[4].push([ x, y ]); // live data pointnt
 
-						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
-						y1Series[0].push([ t, MAX[index][0], MIN[index][0] ]);  // MAX point w/MIN fill-to
-						y1Series[1].push([ t, MIN[index][0] ]); // MIN point
-						y1Series[2].push([ t, y1 ]); // AVG point
-					}
+				} else {
 
+					traces[4].push([ x, ymax, ymin ]); // max point fill down to min
+					traces[5].push([ x, ymin ]); // min point (no fill)
+					traces[6].push([ x, y ]); // avg pointnt
 				}
+			});
 
-				if (this.state.historyTraceVisible[1] && !!secondarySensor) {
-					if (live) {
-						y2Series[0].push([ t, y2 ]);
+			// push data traces into flot data series
+			series.push({ data: traces[0], yaxis: 1, color: PLOT_COLORS['ALARM'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			series.push({ data: traces[1], yaxis: 1, color: PLOT_COLORS['ALARM'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			series.push({ data: traces[2], yaxis: 1, color: PLOT_COLORS['WARNING'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			series.push({ data: traces[3], yaxis: 1, color: PLOT_COLORS['WARNING'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			series.push({ data: traces[4], yaxis: 1, color: PLOT_COLORS['DATA'] });
+			series.push({ data: traces[5], yaxis: 1, color: PLOT_COLORS['DATA'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			series.push({ data: traces[6], yaxis: 1, color: PLOT_COLORS['DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
+			series.push({ data: traces[7], yaxis: 1, color: PLOT_COLORS['DATA'], shadowSize: 0 });
 
-					} else {
-						// Add the traces in order as AVG, MIN, MAX.
-						// Add a third y-value to the AVG and MAX trace points
-						// to provide fill-to values.
+			return series;
+		}
 
-						// Push MAX (w/MIN fill-to), then MIN, then AVG traces
-						y2Series[0].push([ t, MAX[index][1], MIN[index][1] ]);  // MAX point w/MIN fill-to
-						y2Series[1].push([ t, MIN[index][1] ]); // MIN point
-						y2Series[2].push([ t, y2 ]); // AVG point
-					}
-				}
-			}, this);
+		function yAxis(sensor) {
+			var yrange = yRange(sensor);
 
 			function tickFormatter(val, axis) {
 				var digits = val > 1 ? (val > 10 ? 1 : 2) : (val < 0.1 ? 1 : 3);
 				return val.toFixed(digits);
 			}
 
-			var y1Axis = { tickFormatter: tickFormatter, min: y1min, max: y1max }, 
-				y2Axis = { position: 'right', tickFormatter: tickFormatter };
+			if (!_this.state.historyPlotAutoscale) {
+				return {
+					tickFormatter: tickFormatter,
+					min: yrange.min,
+					max: yrange.max
+				}
+			}
 
-			//if (live && Math.abs(y1max - y1min) < 0.1)
-			//	y1Axis.autoscaleMargin = 1;
+			return { tickFormatter: tickFormatter }
+		}
 
-			//if (live && Math.abs(y2max - y2min) < 0.1)
-			//	y2Axis.autoscaleMargin = 1;
+		function plotOptions(sensor, history, data) {
+			var ticks = [], tickstep,
+				timeformat,
+				xrange = xRange(data[0]),
+				xaxis = {
+					mode: 'time',
+					timezone: 'browser',
+					min: xrange.start,
+					max: xrange.end
+				};
 
-			y1Axis.show = this.state.historyTraceVisible[0];
-			y2Axis.show = this.state.historyTraceVisible[1] && !!secondarySensor; 
+			switch (history) {
+				case 'weekly':
+					tickstep = 24 * 3600 * 1000; // 1 day
+					timeformat = '%a';
+					break;
 
-			// Disable alternate trace visibility buttons
-			// so user can't turn both off at the same time.
-			traceDisabled = [ !y2Axis.show, !y1Axis.show ];
+				default: // 'live'
+					tickstep = 300 * 1000; // 5 minutes
+					timeformat = '%I:%M:%S %P';
+			}
 
-			// align y2 axis to y1 if it's visible
-			if (y1Axis.show)
-				y2Axis.alignTicksWithAxis = 1;
+			for (var t = xrange.end; t > xrange.start; t = t - tickstep) {
+				ticks.push(t);
+			}
 
-			var plotSeries = [];
-			var plotOptions = {
-				xaxes: [ { 
-					mode: "time",
-					timezone: "browser",
-					min: t_start, max: t_end,
-					ticks: [ t_start, t_end ],
-					timeformat: "%I:%M:%S %P",
-				} ],
-				yaxes: [ y1Axis, y2Axis ]
-			};
+			xaxis.ticks = ticks;
+			xaxis.timeformat = timeformat;
 
-			if (history == 'live') {
-				// push ALARM_MAX, ALARM_MIN, WARN_MAX, WARN_MIN, DATA
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MAX
-				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['ALARM'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // ALARM MIN
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MAX
-				plotSeries.push({ data: y1Series[3], yaxis: 1, color: TRACE_COLORS['WARNING'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 }); // WARN MIN
-				plotSeries.push({ data: y1Series[4], yaxis: 1, color: TRACE_COLORS['PRI_DATA'] }); // DATA
-
-				plotSeries.push({ data: y2Series[0], yaxis: 2 });
-
-			} else {
-				// Add MAX, MIN, and AVG traces for each sensor
-				plotSeries.push({ data: y1Series[0], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
-				plotSeries.push({ data: y1Series[1], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
-				plotSeries.push({ data: y1Series[2], yaxis: 1, color: TRACE_COLORS['PRI_DATA'], shadowSize: 0 });
-
-				plotSeries.push({ data: y2Series[0], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { fill: TRACE_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
-				plotSeries.push({ data: y2Series[1], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
-				plotSeries.push({ data: y2Series[2], yaxis: 2, color: TRACE_COLORS['SEC_DATA'], shadowSize: 0 });
+			return {
+				xaxes: [ xaxis ],
+				yaxes: [ yAxis(sensor) ],
+				grid: {
+					margin: 2,
+					color: PLOT_COLORS['GRID']
+				}
 			}
 		}
 
-		var _this = this;
 		function updatePlot(el) {
-			if (!_this.state.historyVisible || !_this.state.ch.data || !el) return;
+			if (!sensor || !_this.state.historyVisible || !_this.state.ch.data || !el) return;
 
 			// generate the plot here
-			var plot = $.plot($(el), plotSeries, plotOptions);
+			var plot = $.plot($(el), 
+				dataSeries(sensor, _this.state.history, _this.state.ch.data), 
+				plotOptions(sensor, _this.state.history, _this.state.ch.data));
 		}
 
-		// get history plot drop-downs from historyOptions.   These are
-		// ultimately built from the channel's RRA (round-robin archives)
-		// defined in the channel configuration file.
-		var historyOptions = this.state.historyOptions.map(function (ho) {
-
-			return <option key={ho} value={ho}>{ho}</option>;
-		});
+		var cls = classNames('plot-wrapper', { 'active': plotIndex == this.state.historyPlot });
 
 		return (
-			<div className={'ch-plot' + (this.state.historyVisible ? ' open' : '')}>
-
-				<div className="ch-plot-header">
-					<button className="btn close icon-cross" onClick={this._toggleHistoryVisibility}></button>
-					<button className="btn reset" onClick={this._clearHistory}>Clear History</button>
-					<button className="btn export icon-download2" onClick={this._exportHistory} />
-				</div>
-
-				<div className="plot-wrapper" style={{ height: '197px' }}>
-					<div className="plot" ref={updatePlot}></div>
-				</div>
-
-				<div className="ch-plot-footer">
-					<button className="btn trace pri" disabled={traceDisabled[0]} id="trace1" onClick={this._toggleTraceVisibility}>
-						<span style={{background: TRACE_COLORS['PRI_DATA']}}></span>
-						{primarySensor && primarySensor.unit ? primarySensor.unit : ''}
-					</button>
-
-					<div className="select-wrapper">
-						<select className="icon-chevron-down" value={this.state.history} onChange={this._setHistory}>
-							{historyOptions}
-						</select>
-					</div>
-
-					{ !!secondarySensor && (
-						<button className="btn trace sec" disabled={traceDisabled[1]} id="trace2" onClick={this._toggleTraceVisibility}>
-							<span style={{background: TRACE_COLORS['SEC_DATA'] }}></span>
-							{secondarySensor && secondarySensor.unit ? secondarySensor.unit : ''}
-						</button>
-						)
-					}
-				</div>
+			<div className={cls}>
+				<div className='plot' ref={updatePlot}></div>
+				{
+					this.state.ch.data
+						? null
+						: <div className={'loaderWrapper'}><div className='loader'>Loading...</div></div>
+				}
 			</div>
-		);
+		)
+	},
+
+	_toggleHistoryPlotAutoscale: function() {
+
+		this.setState({ historyPlotAutoscale: !this.state.historyPlotAutoscale });
+	},
+
+	_toggleHistoryPlotThresholds: function() {
+
+		this.setState({ historyThresholdsVisible: !this.state.historyThresholdsVisible });
 	},
 
 	_renderAlarms: function() {
@@ -698,15 +701,10 @@ var ChannelPanel = React.createClass({
 		Actions.exportChannel(this.props.id, this.state.history);
 	},
 
-	_toggleTraceVisibility: function (e) {
-
-		var htv = [ !this.state.historyTraceVisible[0], this.state.historyTraceVisible[1] ];
-
-		if (e.target.id != 'trace1') {
-			htv = [ !htv[0], !htv[1] ];
-		}
-
-		this.setState({ historyTraceVisible: htv });
+	_setHistoryPlot: function (e) {
+		// switches between sensor plots
+		var plotIndex = e.target.id.split('_')[1]; 'plot_X'
+		this.setState({ historyPlot: parseInt(plotIndex) });
 	},
 
 	// Making channel object changes just
