@@ -72,10 +72,10 @@ def main(argv=None):
 	app_logger.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
 	app_logger.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
 
-	manage_network(settings['network'])	
+	manage_network(settings)	
 	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
 
-	manage_clock(settings['clock'])
+	manage_clock(settings)
 
 	app_logger.info("Files and Storage")
 	app_logger.info("\tAPPROOT:\t{0}".format(app.root_path))
