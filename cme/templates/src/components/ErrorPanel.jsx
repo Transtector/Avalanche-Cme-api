@@ -66,10 +66,11 @@ var ErrorPanel = React.createClass({
 	},
 
 	_onErrorChange: function() {
+
+		if (!this.state.isLoggedIn) return;
+
 		// filter out error strings that are not unique (appear more than once)
 		var newErrors = Store.getState().errors.filter(function(v, i, A) { return A.map(function(e) { return e.source; }).indexOf(v.source) === i; });
-
-
 
 		var clearingErrors = !newErrors || newErrors.length == 0 && this.state.errors && this.state.errors.length > 0;
 

@@ -172,22 +172,15 @@ var Store = assign({}, EventEmitter.prototype, {
 
 		// explicitly check here for REQUEST action
 		// to reset the _isSubmitting bool
-		if (event && event !== Constants.REQUEST)
+		if (event !== Constants.REQUEST)
 			_isSubmitting = false;
 
-		// Store has updated; in general we want to notify
-		// registered event waiters of the event.  Normally
-		// if valid event and we're logged in: emit event.
-		if (event && _isLoggedIn) {
+		// Emit all events if logged in;  Only emit
+		// SESSION, DEVICE, and ERROR events if not.
+		if (_isLoggedIn || [Constants.SESSION, Constants.DEVICE, Constants.ERROR].indexOf(event) >= 0) {
 			
-			Store.emitChange(event); // normal logged in event notification
-
-		} else if (event && event === Constants.SESSION || event === Constants.DEVICE) {
-
-				Store.emitChange(event); // only notify SESSION or DEVICE events if not logged in
+			Store.emitChange(event);
 		}
-
-
 		return true; // No errors. Needed by promise in Dispatcher.
 	})
 });

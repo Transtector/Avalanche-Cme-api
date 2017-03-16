@@ -14,8 +14,7 @@ var Actions = require('../Actions');
 var Store = require('../Store');
 
 var classNames = require('classnames');
-
-var ENTER_KEY_CODE = 13;
+var key = require('../keymaster/keymaster.js');
 
 var Login = React.createClass({
 
@@ -33,9 +32,18 @@ var Login = React.createClass({
 	componentDidMount: function() {
 		Store.addChangeListener(Constants.SESSION, this._onSessionChange);
 		Store.addChangeListener(Constants.ERROR, this._onErrorChange);
+
+		key('enter', this._login);
+		key.filter = function filter(event){
+ 			var tagName = (event.target || event.srcElement).tagName;
+			return !(tagName == 'SELECT' || tagName == 'TEXTAREA');
+		}
+
 	},
 
 	componentWillUnmount: function() {
+		key.unbind('enter');
+
 		Store.removeChangeListener(Constants.SESSION, this._onSessionChange);
 		Store.removeChangeListener(Constants.ERROR, this._onErrorChange);
 	},
@@ -45,13 +53,14 @@ var Login = React.createClass({
 		if (this.state.isLoggedIn)
 			return null;
 
+		// show login errors for a few seconds
 		if (this.state.errors.length > 0)
 			setTimeout(Actions.clearErrors, 3000);
 		
 		var cn = classNames('login-error', {'isVisible': this.state.errors.length > 0});
 
 		return (
-			<div className="panel" id="login">
+			<div className='panel' id='login'>
 				<div id="welcome">Welcome</div>
 
 				<div id="instructions">
@@ -67,7 +76,6 @@ var Login = React.createClass({
 						id="username"
 						placeholder="Username"
 						onChange={this._onChangeUsername}
-						onKeydown={this._onKeyDown}
 						value={this.state.u}
 						autoFocus={true}
 					/>
@@ -79,7 +87,6 @@ var Login = React.createClass({
 						id="password"
 						placeholder="Password"
 						onChange={this._onChangePassword}
-						onKeyDown={this._onKeyDown}
 						value={this.state.p}
 					/>
 				</div>
@@ -87,7 +94,7 @@ var Login = React.createClass({
 				<button
 					className='btn'
 					disabled={!this.state.isValid}
-					onClick={this._onLogin}>
+					onClick={this._login}>
 					Sign In
 				</button>
 			</div>
@@ -95,10 +102,12 @@ var Login = React.createClass({
 	},
 
 	_onSessionChange: function() {
+
 		this.setState({ isLoggedIn: Store.getState().isLoggedIn })
 	},
 
 	_onErrorChange: function() {
+
 		this.setState({ errors: Store.getState().errors })
 	},
 
@@ -114,15 +123,14 @@ var Login = React.createClass({
 		this.setState({ p: p, isValid: v });
 	},
 
-	_onKeyDown: function(event) {
-		if (event.keyCode === ENTER_KEY_CODE && this.state.isValid) {
-			this._onLogin();
-	    }
-	},
+	_login: function(e) {
 
-	_onLogin: function() {
+		if (!this.state.isValid) return false;
+
 		Actions.clearErrors();
 		Actions.login(this.state.u, this.state.p);
+		e.preventDefault();
+		return false;
 	}
 });
 

@@ -17,7 +17,7 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
-/* track error state */
+/* track error and session state */
 var ERROR = false;
 
 /* jQuery AJAX errors return using this function
@@ -28,9 +28,16 @@ function onError(jqXHR, textStatus, errorThrown) {
 	ERROR = true;
 
 	var code = jqXHR.status;
-	var source = jqXHR.responseText || errorThrown;
 
-	if (!jqXHR || code === 0 || source === '') {
+	// APIError on api calls wraps an object with a 'message' attribute
+	// for the source of the error
+	var source = JSON.parse(jqXHR.responseText).message;
+
+	if (!source) {
+		source = jqXHR.responseText || errorThrown;
+	}
+
+	if (!source || code == 0) {
 		source = 'Device disconnected or not running.'
 	} 
 
@@ -59,6 +66,7 @@ function dispatchRequest(action, silent) {
 
 var Actions = {
 	setDebug: function(d) {
+
 		DEBUG = !!d;
 	},
 
@@ -136,7 +144,7 @@ var Actions = {
 
 		if (arguments.length == 0) {
 
-			if (!dispatchRequest('config')) return;
+			dispatchRequest('config');
 
 			return CmeAPI.config()
 				.done(function(data) {
@@ -148,14 +156,15 @@ var Actions = {
 
 		} else {
 
-			if (!dispatchRequest('login')) return;
+			dispatchRequest('login');
 
 			return CmeAPI.login(u, p)
 				.done(function(data) {
+					AppDispatcher.dispatch({ actionType: Constants.SESSION, data: true });
+
 					dispatchRequest('config');
 					CmeAPI.config(null)
 						.done(function(data) {
-							AppDispatcher.dispatch({ actionType: Constants.SESSION, data: true });
 							AppDispatcher.dispatch({ actionType: Constants.CONFIG, data: data });
 						})
 						.fail(onError);
@@ -326,5 +335,4 @@ var Actions = {
 	}
 };
 
-window.Actions = Actions;
 module.exports = Actions;
