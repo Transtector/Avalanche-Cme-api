@@ -17,7 +17,6 @@ var ThresholdConfig = require('./ThresholdConfig');
 
 var moment = require('moment');
 var classNames = require('classnames');
-var assign = require('object-assign'); 
 
 // flot charting requires global jQuery
 window.jQuery = require('jquery');
@@ -665,7 +664,7 @@ var ChannelPanel = React.createClass({
 
 	_setHistory: function(e) {
 		var _this = this,
-			cleared_ch = assign({}, this.state.ch);
+			cleared_ch = Object.assign({}, this.state.ch);
 
 		cleared_ch.data = null;
 		this.setState({ ch: cleared_ch, history: e.target.value }, function () {
@@ -716,7 +715,7 @@ var ChannelPanel = React.createClass({
 			obj = {};
 		obj[n] = v;
 
-		this.setState(assign({ activeId: e.target.id }, obj));
+		this.setState(Object.assign({ activeId: e.target.id }, obj));
 	},
 
 	// ENTER to persist changes to server

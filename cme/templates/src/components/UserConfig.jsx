@@ -15,8 +15,6 @@ var InputGroup = require('./InputGroup');
 var TextInput = require('./TextInput');
 
 var classNames = require('classnames');
-var assign = require('object-assign'); // ES6 polyfill
-
 
 var UserConfig = React.createClass({
 

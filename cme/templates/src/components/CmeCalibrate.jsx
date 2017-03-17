@@ -26,7 +26,6 @@ var qs = (function(a) {
 })(window.location.search.substr(1).split('&'));
 
 var moment = require('moment');
-var assign = require('object-assign');
 var utils = require('../CmeApiUtils');
 
 function error(e) {
@@ -382,13 +381,13 @@ var CmeCalibrate = React.createClass({
 
 	_deviceChange: function(e) {
 		// e.g., e.target.id = 'host.modelNumber'
-		var device = assign({}, this.state.device),
+		var device = Object.assign({}, this.state.device),
 			group = e.target.id.split('.')[0], // e.g., 'host'
 			item = e.target.id.split('.')[1], // e.g., 'modelNumber'
 			obj = {};
 
 		obj[item] = e.target.value;
-		device[group] = assign({}, this.state.device[group], obj);
+		device[group] = Object.assign({}, this.state.device[group], obj);
 
 		// update device and set new state
 		this.setState({ device: this._validateDevice(device) });

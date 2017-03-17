@@ -15,8 +15,6 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var EventEmitter = require('events').EventEmitter;
 
-var assign = require('object-assign'); // ES6 polyfill
-
 var _device = {};
 var _config = {};
 var _errors = [];
@@ -30,7 +28,7 @@ var _channel_objs = {};
 var _clock;
 var _temperature;
 
-var Store = assign({}, EventEmitter.prototype, {
+var Store = Object.assign({}, EventEmitter.prototype, {
 
 	getState: function() {
 		return {

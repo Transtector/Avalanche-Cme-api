@@ -102,7 +102,7 @@ var Thermometer = React.createClass({
 					<label htmlFor="tempGroup">CPU Temperature</label>
 					<div id="tempGroup">
 						<div id="cpuTemp">
-							<input type="text" disabled='disabled' value={display_temperature} readOonly />
+							<input type="text" disabled='disabled' value={display_temperature} readOnly='true' />
 						</div>
 
 						<div id='status' className={ledClass}>
@@ -140,12 +140,12 @@ var Thermometer = React.createClass({
 
 				<div className="input-group-cluster">
 					<label htmlFor="warningTemp">Warning Temperature</label>
-					<input id="warningTemp" type="text" disabled='disabled' value={display_warning} readOonly />
+					<input id="warningTemp" type="text" disabled='disabled' value={display_warning} readOnly='true' />
 				</div>
 
 				<div className="input-group-cluster">
 					<label htmlFor="alarmTemp">Alarm Temperature</label>
-					<input id="alarmTemp" type="text" disabled='disabled' value={display_alarm} readOonly />
+					<input id="alarmTemp" type="text" disabled='disabled' value={display_alarm} readOnly='true' />
 				</div>
 
 			</InputGroup>

@@ -104,6 +104,31 @@ var SettingsPanel = React.createClass({
 
 					<Updates pollPeriod={5000} />
 
+					<InputGroup title="Legal" id='legal'>
+						<div>
+							<p>The software components comprising the CME system are copyright &copy; 2017 
+							Transtector Systems, Inc.</p>
+
+							<p>Several unmodified software packages and libraries are used in the CME system.</p>
+
+							<ul>
+								<li><a href='https://www.debian.org/legal/licenses/'>Debian GNU/Linux</a> and component packages are released under terms of the common <a href='/legal/debian-linux/LICENSE.txt'>GNU General Public License</a>.</li>
+								<li><a href='http://cherrypy.org/'>CherryPy</a> is distributed under a <a href='/legal/cherrypy/LICENSE.txt'>BSD license</a>.</li>
+								<li><a href='http://flask.pocoo.org/'>Flask</a> is licensed under a three clause <a href='/legal/flask/LICENSE.txt'>BSD license</a>.</li>
+								<li><a href='http://oss.oetiker.ch/rrdtool/'>RRDTool</a> is available under the terms of the <a href='/legal/rrdtool/LICENSE.txt'>GNU General Public License V2 or later</a>.</li>
+								<li><a href='https://facebook.github.io/react/'>React</a> is distributed under the <a href='/legal/react/LICENSE.txt'>BSD license</a>.</li>								
+								<li><a href='https://facebook.github.io/flux/'>Flux</a> is distributed under the <a href='/legal/flux/LICENSE.txt'>BSD license</a>.</li>
+								<li><a href='https://jquery.com/'>jQuery</a> is provided under the <a href='/legal/jquery/LICENSE.txt'>MIT license</a>.</li>
+								<li><a href='http://momentjs.com/'>Moment.js</a> is freely distributable under the terms of the <a href='/legal/moment/LICENSE.txt'>MIT license</a>.</li>
+								<li><a href='https://github.com/YouCanBookMe/react-datetime'>react-datetime</a> is released under the <a href='/legal/react-datetime/LICENSE.md'>MIT license</a>.</li>
+								<li><a href='https://github.com/JedWatson/classnames'>classnames</a> is released under the <a href='/legal/classnames/LICENSE.txt'>MIT license</a>.</li>
+								<li><a href='http://crcmod.sourceforge.net/'>crcmod</a> Python module is released under the <a href='/legal/crcmod/LICENSE.txt'>MIT license</a>.</li>
+								<li><a href='https://github.com/emn178/js-md5'>js-md5</a> project is released under the <a href='/legal/js-md5/LICENSE.txt'>MIT license</a>.</li>
+								<li><a href='https://github.com/doceme/py-spidev'>spidev</a> Python project is licensed under the <a href='/legal/spidev/LICENSE.md'>GNU General Public License V2</a>.</li>
+							</ul>
+						</div>
+					</InputGroup>
+
 					<ResetPanel />
 
 				</div>

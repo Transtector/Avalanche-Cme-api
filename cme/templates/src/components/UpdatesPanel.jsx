@@ -18,7 +18,6 @@ var DropTarget = require('./DropTarget');
 
 var moment = require('moment');
 var classNames = require('classnames');
-var assign = require('object-assign'); // ES6 polyfill
 
 var UpdatesPanel = React.createClass({
 
@@ -142,7 +141,7 @@ var UpdatesPanel = React.createClass({
             					{/* Browsers that support HTML5 progress element will ignore the html
             						inside `progress` element. Whereas older browsers will ignore the
             						`progress` element and instead render the html inside it. */}
-            					<div class="progress-bar">
+            					<div className="progress-bar">
                 					<span style={{ width: progressVal + '%' }}>{progressVal}%</span>
             					</div>
         					</progress>

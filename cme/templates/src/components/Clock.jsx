@@ -42,8 +42,6 @@ var moment = require('moment');
 var Datetime = require('react-datetime');
 
 var classNames = require('classnames');
-var assign = require('object-assign'); // ES6 polyfill
-
 var utils = require('../CmeApiUtils');
 
 var NtpStatus = React.createClass({
@@ -119,7 +117,7 @@ var configPropToState = function (config) {
 
 	if (!config) return;
 
-	var state = assign({}, config);
+	var state = Object.assign({}, config);
 
 	// add a serversCSV for editing the NTP servers
 	// in the clock configuration
@@ -440,12 +438,12 @@ var Clock = React.createClass({
 
 	_requestServersChange: function(e) {
 
-		this.setState({ config: assign(this.state.config, { serversCSV: e.target.value }) });
+		this.setState({ config: Object.assign(this.state.config, { serversCSV: e.target.value }) });
 	},
 
 	_requestZoneChange: function(z) {
 
-		this.setState({ config: assign(this.state.config, { zone: z }) });
+		this.setState({ config: Object.assign(this.state.config, { zone: z }) });
 	},
 
 	_requestDateChange: function(m) {
@@ -477,12 +475,12 @@ var Clock = React.createClass({
 				break;
 		}
 
-		this.setState({ config: assign(this.state.config, { displayRelativeTo: td }) });
+		this.setState({ config: Object.assign(this.state.config, { displayRelativeTo: td }) });
 	},
 
 	_requestDisplay12HourChange: function(e) {
 
-		this.setState({ config: assign(this.state.config, { display12HourTime: e.target.checked }) });
+		this.setState({ config: Object.assign(this.state.config, { display12HourTime: e.target.checked }) });
 	},
 
 	_requestNtpChange: function(event) {
@@ -492,7 +490,7 @@ var Clock = React.createClass({
 		// and reset Ntp servers and status to current config
 		this.setState({ 
 			current: ntp ? this.state.current : moment.utc(),
-			config: assign(this.state.config, {
+			config: Object.assign(this.state.config, {
 				ntp: ntp,
 				status: ntp ? this.state.config.status : []
 			})},

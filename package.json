@@ -16,26 +16,25 @@
     "url": "git@10.252.64.224:Avalanche/Cme.git"
   },
   "devDependencies": {
-    "babel-preset-react": "^6.1.18",
-    "babelify": "^7.2.0",
-    "browserify": "^13.0.0",
-    "gulp": "^3.9.1",
+    "babel-preset-react": "^6.0",
+    "babelify": "^7.3",
+    "browserify": "^14.1",
+    "gulp": "^3.9",
     "gulp-streamify": "^1.0.2",
-    "gulp-stylus": "^2.1.0",
-    "gulp-uglify": "^1.5.1",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.6.1"
+    "gulp-stylus": "^2.6",
+    "gulp-uglify": "^2.1",
+    "vinyl-source-stream": "^1.1",
+    "watchify": "^3.9"
   },
   "dependencies": {
-    "classnames": "^2.2.1",
-    "flux": "^2.1.1",
-    "jquery": "^2.1.4",
-    "js-md5": "^0.4.1",
-    "keymirror": "^0.1.1",
-    "moment": "^2.10.6",
-    "object-assign": "^4.0.1",
-    "react": "^15.0.1",
-    "react-datetime": "^2.0.1",
-    "react-dom": "^15.0.1"
+    "react": "^15.4",
+    "react-dom": "^15.4",
+    "flux": "^3.1",
+    "jquery": "^3.2",
+    "moment": "^2.17",
+    "classnames": "^2.2",
+    "js-md5": "^0.4",
+    "keymirror": "^0.1",
+    "react-datetime": "^2.8"
   }
 }

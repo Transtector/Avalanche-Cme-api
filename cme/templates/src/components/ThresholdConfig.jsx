@@ -9,7 +9,6 @@
 var React = require('react');
 
 var classNames = require('classnames');
-var assign = require('object-assign'); // ES6 polyfill
 
 var ENTER_KEY_CODE = 13;
 var ESCAPE_KEY_CODE = 27;
@@ -76,7 +75,7 @@ var ThresholdConfig = React.createClass({
 
 		this._initial = ths; // save a copy of the initial threshold values
 
-		var state = assign({ 
+		var state = Object.assign({ 
 			display_range: display_range,
 			nominal: nominal,  // holds a nominal value for percentage thresholds
 			percent: !!nominal, // use percentage thresholds if nominal is a nonzero value
@@ -258,7 +257,7 @@ var ThresholdConfig = React.createClass({
 		if (n === 'nominal') {
 			obj[n] = v;
 		} else {
-			obj[n] = assign({}, this.state[n]);
+			obj[n] = Object.assign({}, this.state[n]);
 			obj[n].value = this.state.percent ? toAbsolute(v, this.state.nominal) : v;
 		}
 		this.setState(obj);

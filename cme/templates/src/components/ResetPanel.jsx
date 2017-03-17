@@ -14,7 +14,6 @@ var Actions = require('../Actions');
 var InputGroup = require('./InputGroup');
 
 var classNames = require('classnames');
-var assign = require('object-assign'); // ES6 polyfill
 
 var ResetPanel = React.createClass({
 
