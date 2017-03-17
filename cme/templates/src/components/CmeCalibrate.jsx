@@ -36,6 +36,7 @@ function error(e) {
 
 function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 
+
 var CmeCalibrate = React.createClass({
 
 	_cache: {
@@ -73,6 +74,9 @@ var CmeCalibrate = React.createClass({
 								.done(function(ch_cfg){
 									ch_cfg['id'] = ch;
 									_this._cache.channels.push(ch_cfg);
+									_this._cache.channels.sort(function(a, b) {
+										return parseInt(a.id.slice(2)) - parseInt(b.id.slice(2));
+									});
 									_this.setState({ channels: _this._validateChannels(_this._cache.channels) });
 								})
 								.fail(error);
@@ -87,15 +91,9 @@ var CmeCalibrate = React.createClass({
 		if (!this.state.device)
 			return <div className='loaderWrapper'><div className='loader'>Loading...</div></div>;
 
-		var changesPending = false;
+		var changesPending = this._checkDeviceChanged();
 
-		if (JSON.stringify(this._cache.device) != JSON.stringify(this.state.device)) {
-			changesPending = true;
-		}
-
-		if (JSON.stringify(this._cache.channels) != JSON.stringify(this.state.channels)){
-			changesPending = true;
-		}
+		changesPending |= this._checkChannelsChanged();
 
 		var disableSubmit = !changesPending || this._anyInvalid(this.state.device) || this._anyInvalid(this.state.channels);
 
@@ -224,11 +222,17 @@ var CmeCalibrate = React.createClass({
 
 		return (
 			<div key={ch.id} className="tab">
-				<input type="radio" id={'tab-' + index} name='tab-group-1' checked={this.state.activeChTabIndex == index} onChange={this._activateTab} />
-				<label className="tab-label" htmlFor={'tab-' + index}>{ch.id}</label>
+				<input type="radio" id={'tab-1-' + index} name='tab-group-1' checked={this.state.activeChTabIndex == index} onChange={this._activateTab} />
+				<label className="tab-label" htmlFor={'tab-1-' + index}>{ch.id}</label>
 
-				<div class="tab-panel">
+				<div className="tab-panel">
 					<div className="tab-content">
+
+						{/*<div className="lineitem">
+							<label htmlFor="ch_id">Channel</label>
+							<input type="text"  id="ch_id" name="ch_id" value={ch.id} readOnly="true" />
+						</div>*/}
+					
 						<div className="lineitem">
 							<label htmlFor="bus_type">Bus Type</label>
 							<input type="text"  id="bus_type" name="bus_type" value={ch.bus_type} readOnly="true" />
@@ -250,7 +254,7 @@ var CmeCalibrate = React.createClass({
 						<h4>Sensors</h4>
 
 						{
-							ch.sensors.map(function (s, i) {
+							Object.values(ch.sensors).map(function (s, i) {
 
 								var prefix = ch.id + '.' + s.id;
 
@@ -286,20 +290,19 @@ var CmeCalibrate = React.createClass({
 										<div className="lineitem">
 											<label htmlFor={prefix + ".threshold"}>Threshold</label>
 											<input type="text"  id={prefix + ".threshold"} name={prefix + ".threshold"} 
-												className={s.threshold_invalid ? 'error' : ''}
+												className={s.threshold_invalid ? 'error' : ''} readOnly={s.type == 'PIB'}
 												value={s.threshold} onChange={this._channelChange} />
 										</div>
 										<div className="lineitem">
 											<label htmlFor={prefix + ".scale"}>Scale</label>
 											<input type="text"  id={prefix + ".scale"} name={prefix + ".scale"} 
-												className={s.scale_invalid ? 'error' : ''}
+												className={s.scale_invalid ? 'error' : ''}  readOnly={s.type == 'PIB'}
 												value={s.scale} onChange={this._channelChange} />
 										</div>
 
 									</div>
 								)
 							}, this)
-
 						}
 					</div>
 				</div>
@@ -307,9 +310,54 @@ var CmeCalibrate = React.createClass({
 		)
 	},
 
+	_checkDeviceChanged: function() {
+		return JSON.stringify(this._cache.device) != JSON.stringify(this.state.device);
+	},
+
+	_checkChannelsChanged: function() {
+		return this.state.channels.some(function(ch) {
+			var changes = false,
+				changed = [];
+
+			
+			var cached_ch = this._cache.channels.find(function(cch) {
+				return ch.id == cch.id;
+			});
+			
+			if (!cached_ch) return true;
+
+			// Channel attributes to check
+			changes = ['bus_index', 'bus_type', 'device_index', 'device_type'].some(function(attr) {
+				return ch[attr] != cached_ch[attr];
+			});
+
+			changes |= Object.values(ch.sensors).some(function(s) {
+				var cached_s = Object.values(cached_ch.sensors).find(function(cs){
+					return s.id == cs.id;
+				});
+
+				if (!cached_s) return true;
+
+				return ['type', 'units', 'scale', 'threshold', 'range', 'register'].some(function(attr) {
+					if (attr == 'range') {
+						return [0, 1].some(function(r){
+							return s[attr][r] != cached_s[attr][r];
+						});
+					}
+
+					if (s[attr] != cached_s[attr])
+						changed.push(s.id + ':' + attr);
+					return s[attr] != cached_s[attr];
+				});
+			});
+
+			return changes;
+		}, this);
+	},
+
 	_activateTab: function(e) {
 
-		this.setState({ activeChTabIndex: parseInt(e.target.id.split('-')[1]) });
+		this.setState({ activeChTabIndex: parseInt(e.target.id.split('-')[2]) });
 	},
 
 	_activateDevTab: function(e) {
@@ -351,7 +399,7 @@ var CmeCalibrate = React.createClass({
 			chId = e.target.id.split('.')[0], // ch0
 			sId = e.target.id.split('.')[1], // s0
 			a = e.target.id.split('.')[2], // range, threshold, scale
-			v = isNumeric(e.target.value) ? parseFloat(e.target.value) : e.target.value;
+			v = e.target.value;
 
 		channels = this.state.channels.map(function(ch) {
 			var newCh = $.extend(true, {}, ch);
@@ -398,7 +446,7 @@ var CmeCalibrate = React.createClass({
 			var newCh = $.extend(true, {}, ch);
 
 			newCh.sensors = [];
-			newCh.sensors = ch.sensors.map(function (s) {
+			newCh.sensors = Object.values(ch.sensors).map(function (s) {
 				var newS = $.extend(true, {}, s);
 
 				if ((!newS.range || newS.range.length !== 2 || !isNumeric(newS.range[0]) || !isNumeric(newS.range[1])) ||
@@ -409,12 +457,12 @@ var CmeCalibrate = React.createClass({
 				else
 					delete newS['range_invalid'];
 
-				if (!isNumeric(newS.threshold))
+				if (!isNumeric(newS.threshold) && newS.type != 'PIB')
 					newS['threshold_invalid'] = true;
 				else
 					delete newS['threshold_invalid'];
 
-				if (!isNumeric(newS.scale))
+				if (!isNumeric(newS.scale) && newS.type != 'PIB')
 					newS['scale_invalid'] = true;
 				else
 					delete newS['scale_invalid'];
