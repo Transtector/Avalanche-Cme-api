@@ -1265,7 +1265,7 @@ header .buttons button.active {
   width: 11.1%;
   vertical-align: middle;
   text-align: center;
-  border: 0px solid #ccc;
+  border: 0px solid #f00;
 }
 .th-config tbody td {
   height: 11px;
@@ -1316,10 +1316,15 @@ header .buttons button.active {
   font-size: 90%;
   font-style: italic;
 }
+.th-config td.th-percentage {
+  font-size: 90%;
+}
 .th-config .r {
+  border-right-color: #ccc;
   border-right-width: 1px;
 }
 .th-config .b {
+  border-bottom-color: #ccc;
   border-bottom-width: 1px;
 }
 .th-config .percent {
@@ -1332,11 +1337,6 @@ header .buttons button.active {
 }
 .th-config .subunit {
   font-size: 12px;
-}
-.th-config .th-percent {
-  padding-left: 40%;
-  padding-top: 2px;
-  font-size: 90%;
 }
 /*
  * https://github.com/arqex/react-datetime

@@ -134,112 +134,207 @@ var ThresholdConfig = React.createClass({
 
 		var unit = this.props.sensor.unit && this.props.sensor.unit.substr(0, 1).toUpperCase();
 		var subunit = this.props.sensor.unit && this.props.sensor.unit.length > 1 ? this.props.sensor.unit.substr(1).toUpperCase() : '';
-
-		// thresholds are % of nominal value
-		var nominal = this.state.nominal;
-		var percent = this.state.percent;
-		var active = this.state.active;
-
-		var _this = this;
-
-		function renderValue(value) {
-			if (value == null) return ''; // coerce works for undefined as well...
-
-			if (percent && isNumeric(value) && isNumeric(nominal)) {
-				value = toPercentage(value, nominal);
-			}
-
-			return isNumeric(value) ? parseFloat(value).toFixed(0) : value;
-		}
-
-		function renderClass(id, value) {
-			return classNames({
-				'active': id === active,
-				'error': value && !isNumeric(value)
-			}); 
-		}
-
-		function renderInput(threshold) {
-			var obj = _this.state[threshold];
-			return (
-				<td className='input' colSpan='2' rowSpan='2'>
-					<input type='text' id={obj.id} name={threshold} disabled={true}
-						className={renderClass(obj.id, obj.value)}
-						value={renderValue(obj.value)}
-						onChange={_this._requestChange}
-						onKeyDown={_this._onKeyDown}
-						onBlur={_this._onBlur} />
-					<span className={percent ? 'percent' : 'hidden'}>%</span>
-				</td>
-			);
-		}
-
-		var cls = classNames({
-			'th-config': true,
-			'single': this.props.single
-		})
+		var cls = classNames('th-config', { 'single': this.props.single });
 
 		return (
 			<div className={cls}>
 				<table>
-					<thead>
-						<tr className='range'>
-							<td></td>
-							<td colSpan='2'>
-								<input type='text' id='range-min' name='range-min' 
-									value={r.min} disabled='disabled'/>
-							</td>
-							<td className='nominal' colSpan='3'>
-								<input type='text' id='nominal' name='nominal' disabled={true}
-									value={nominal} className={renderClass('nominal', nominal)}
-									onChange={this._requestChange} onKeyDown={this._onKeyDown} onBlur={this._onBlur} />
-								<label htmlFor='nominal'>{unit}<span>{subunit.toLowerCase()}</span></label>
-							</td>
-							
-							<td colSpan='2'>
-								<input type='text' id='range-max' name='range-max' 
-									value={r.max} disabled='disabled'/>
-							</td>
-							<td></td>
-						</tr>
-						<tr className='gauge'>
-							<td></td><td></td>
-							<td className='alarm'></td>
-							<td className='warning'></td>
-							<td className='nominal'></td>
-							<td className='warning'></td>
-							<td className='alarm'></td>
-							<td></td><td></td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							{renderInput('alarm_min')}
-							<td className='b r'></td>
-							<td className='r'></td><td className='r'></td><td className='r'></td>
-							<td className='b'></td>
-							{renderInput('alarm_max')}
-						</tr>
-						<tr><td></td><td className='r'></td><td className='r'></td><td></td><td></td></tr>
-						<tr>
-							<td></td>
-							{renderInput('warning_min')}
-							<td className='b r'></td>
-							<td className='r'></td>
-							<td className='b'></td>
-							{renderInput('warning_max')}
-							<td></td>
-						</tr>
-						<tr><td></td><td></td><td></td><td></td><td></td></tr>
-					</tbody>
+
+					{this._renderThead(r, unit, subunit)}
+
+					{this._renderTbody(r)}
+
 				</table>
-				<div className='th-percent'>
-					<label><input type='checkbox' id='percent' name='percent' title='Show percentages or absolute values'
-							checked={this.state.percent} disabled={nominal == 0} onChange={this._togglePercent} />Show percentages</label>
-					
-				</div>
 			</div>
 		);
+	},
+
+	_renderThead: function(range, unit, subunit) {
+
+		var cls = classNames({
+			'active': 'nominal' == this.state.active,
+			'error': this.state.nominal && !isNumeric(this.state.nominal)
+		}); 
+
+		var left = this.state.nominal > range.min; // show left-hand, lower thresholds
+		var right = this.state.nominal < range.max; // show right-hand, upper thresholds
+
+		function renderGaugeRow() {
+			if (left && right) {
+				return (
+					<tr className='gauge'>
+						<td></td>
+						<td></td>
+						<td className='alarm'></td>
+						<td className='warning'></td>
+						<td className='nominal'></td>
+						<td className='warning'></td>
+						<td className='alarm'></td>
+						<td></td>
+						<td></td>
+					</tr>
+				)
+			}
+
+			if (right) {
+				return (
+					<tr className='gauge'>
+						<td></td>
+
+						<td className='nominal'></td>
+						<td className='nominal'></td>
+						<td className='nominal'></td>
+
+						<td className='warning'></td>
+						<td className='warning'></td>
+
+						<td className='alarm'></td>
+						<td className='alarm'></td>
+
+						<td></td>
+					</tr>
+				)
+			}
+
+			return (
+				<tr className='gauge'>
+					<td></td>
+
+					<td className='alarm'></td>
+					<td className='alarm'></td>
+					
+					<td className='warning'></td>
+					<td className='warning'></td>
+
+					<td className='nominal'></td>
+					<td className='nominal'></td>
+					<td className='nominal'></td>
+
+					<td></td>
+				</tr>
+			)
+		}
+
+		return (
+			<thead>
+				<tr className='range'>
+
+					<td colSpan='3'>
+						<input type='text' id='range-min' name='range-min' 
+							value={range.min} disabled='disabled'/>
+					</td>
+
+					<td className='nominal' colSpan='3'>
+						{	(this.state.nominal != range.min && this.state.nominal != range.max)
+							? <input type='text' id='nominal' name='nominal' disabled={true}
+								value={this.state.nominal} className={cls}
+								onChange={this._requestChange} onKeyDown={this._onKeyDown} onBlur={this._onBlur} />
+							: null
+						}
+						<label htmlFor='nominal'>{unit}<span>{subunit.toLowerCase()}</span></label>
+					</td>
+					
+					<td colSpan='3'>
+						<input type='text' id='range-max' name='range-max' 
+							value={range.max} disabled='disabled'/>
+					</td>
+
+				</tr>
+				
+				{renderGaugeRow()}
+				
+			</thead>
+		)
+	},
+
+	_renderTbody: function(range) {
+
+		var left = this.state.nominal > range.min; // show left-hand, lower thresholds
+		var right = this.state.nominal < range.max; // show right-hand, upper thresholds
+
+		return (
+			<tbody>
+				<tr>
+					{ left
+						? this._renderInput('alarm_min', range.min)
+						: <td colSpan='2' rowSpan='2'></td>
+					}
+					<td className={left ? 'b r' : ''}></td>
+					<td className='r'></td>
+					<td className={left ? 'r' : ''}></td>
+					<td className={right ? 'r' : ''}></td>
+					<td className={right ? 'b' : ''}></td>
+					{ right
+						? this._renderInput('alarm_max', range.max)
+						: <td colSpan='2' rowSpan='2'></td>
+					}
+				</tr>
+				
+				<tr>
+					<td></td>
+					<td className='r'></td>
+					<td className={left && right  ? 'r': ''}></td>
+					<td></td>
+					<td></td>
+				</tr>
+
+				<tr>
+					<td></td>
+					{ left
+						? this._renderInput('warning_min', range.min)
+						: <td colSpan='2'></td>
+					}
+					<td className={left && right ? 'b r' : 'r'}></td>
+					<td className={left && right ? 'r' : 'b'}></td>
+					<td className={right ? 'b' : ''}></td>
+					{ right
+						? this._renderInput('warning_max', range.max)
+						: <td colSpan='2' rowSpan='2'></td>
+					}
+					<td></td>
+				</tr>
+				<tr><td colSpan='9'></td></tr>
+				<tr><td colSpan='9' className='th-percentage'>
+					{	(this.state.nominal)
+						? <label><input type='checkbox' id='percent' name='percent' title='Show percentages or absolute values'
+									checked={this.state.percent} onChange={this._togglePercent} />Show percentages</label>
+						: null
+					}
+					</td>
+				</tr>
+			</tbody>
+		)
+	},
+
+	_renderInput: function (threshold, range_value) {
+
+		var obj = this.state[threshold];
+		var cls = classNames({
+			'active': obj.id == this.state.active,
+			'error': obj.value && !isNumeric(obj.value)
+		}); 
+
+		return (
+			<td className='input' colSpan='2' rowSpan='2'>
+				<input type='text' id={obj.id} name={threshold} disabled={true}
+					className={cls}
+					value={this._renderValue(obj.value)}
+					onChange={this._requestChange}
+					onKeyDown={this._onKeyDown}
+					onBlur={this._onBlur} />
+				<span className={this.state.percent ? 'percent' : 'hidden'}>%</span>
+			</td>
+		);
+	},
+
+	_renderValue: function(value) {
+		if (value == null) return ''; // coerce works for undefined as well...
+
+		if (this.state.percent && isNumeric(value) && isNumeric(this.state.nominal)) {
+			value = toPercentage(value, this.state.nominal);
+		}
+
+		return isNumeric(value) ? parseFloat(value).toFixed(0) : value;
 	},
 
 	// Change requests just stay local (in state) until
