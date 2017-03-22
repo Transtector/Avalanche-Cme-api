@@ -234,20 +234,22 @@ var CmeAPI = {
 		});
 	},
 
-	channel: function(ch_id, ch_config, ch_history, ch_alarms) {
-		var ch_index = parseInt(ch_id.slice(2)),
-			method = (ch_config && !ch_history) ? 'POST' : 'GET',
-			payload = (ch_config && !ch_history) ? JSON.stringify(ch_config) : null,
+	channel: function(id, config, history, alarms) {
+		var ch_index = parseInt(id.slice(2)),
+			method = (config && !history) ? 'POST' : 'GET',
+			payload = (config && !history) ? JSON.stringify(config) : null,
 			url = API.channel + ch_index,
 			qs = [];
 
 		// add query string to get history
 		if (method == 'GET') {
-			if (ch_history) {
-				qs.push('h=' + ch_history);
+			
+			if (history) {
+				qs.push($.param(history));
 			}
-			if (ch_alarms) {
-				qs.push('a=1');
+
+			if (alarms) {
+				qs.push($.param({a: 1}));
 			}
 
 			if (qs.length > 0)
@@ -263,17 +265,20 @@ var CmeAPI = {
 		});
 	},
 
-	channelHistory: function(ch_id, history, start_block) {
+	channelHistory: function(id, history) {
+		var url = API.channel + parseInt(id.slice(2)) + '/history/';
+		url += encodeURIComponent(history.h) + '?s=' + encodeURIComponent(history.s) + '&e=' + encodeURIComponent(history.e);
+
 		return $.ajax({
-			url: API.channel + parseInt(ch_id.slice(2)) + '/history/' + history + '?s=' + start_block,
+			url:  url,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});
 	},
 
-	channelConfig: function(ch_id) {
+	channelConfig: function(id) {
 		return $.ajax({
-			url: API.channel + parseInt(ch_id.slice(2)) + '/config',
+			url: API.channel + parseInt(id.slice(2)) + '/config',
 			data: null,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
@@ -291,9 +296,12 @@ var CmeAPI = {
 		});
 	},
 
-	sensorHistory: function(ch_id, sensor_id, history, start_block) {
+	sensorHistory: function(ch_id, sensor_id, history) {
+		var url = API.channel + parseInt(ch_id.slice(2)) + '/sensors/' + parseInt(sensor_id.slice(1)) + '/history/';
+		url += encodeURIComponent(history.h) + '?s=' + encodeURIComponent(history.s) + '&e=' + encodeURIComponent(history.e);
+
 		return $.ajax({
-			url: API.channel + parseInt(ch_id.slice(2)) + '/sensors/' + parseInt(sensor_id.slice(1)) + '/history/' + history + '?s=' + start_block,
+			url:  url,
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});

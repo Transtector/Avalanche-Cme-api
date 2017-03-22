@@ -17,6 +17,8 @@ var AppDispatcher = require('./AppDispatcher');
 var Constants = require('./Constants');
 var CmeAPI = require('./CmeAPI');
 
+var $ = require('jquery');
+
 /* track error and session state */
 var ERROR = false;
 
@@ -27,14 +29,15 @@ function onError(jqXHR, textStatus, errorThrown) {
 
 	ERROR = true;
 
-	var code = jqXHR.status;
+	var code = jqXHR.status,
+		source;
 
 	// APIError on api calls wraps an object with a 'message' attribute
 	// for the source of the error
-	var source = JSON.parse(jqXHR.responseText).message;
-
-	if (!source) {
-		source = jqXHR.responseText || errorThrown;
+	try {
+		source = JSON.parse(jqXHR.responseText).message;
+	} catch (e) {
+		source =  jqXHR.responseText || errorThrown;
 	}
 
 	if (!source || code == 0) {
@@ -293,31 +296,31 @@ var Actions = {
 			.fail(onError);
 	},
 
-	channel: function(ch_id, ch_config, ch_history, ch_alarms) {
-		if (!dispatchRequest('reading ' + ch_id + ' (' + JSON.stringify(ch_config) + ', ' + ch_history + ')')) return;
+	channel: function(id, config, history, alarms) {
+		if (!dispatchRequest('reading ' + id + ' (' + JSON.stringify(config) + ', ' + history + ', ' + alarms + ')')) return;
 
-		CmeAPI.channel(ch_id, ch_config, ch_history, ch_alarms)
+		CmeAPI.channel(id, config, history, alarms)
 			.done(function(data) {
 				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 			})
 			.fail(onError);
 	},
 
-	deleteChannel: function(ch_id) {
-		if (!dispatchRequest('clearing ' + ch_id + ' history')) return;
+	deleteChannel: function(id) {
+		if (!dispatchRequest('clearing ' + id + ' history')) return;
 
-		CmeAPI.deleteChannel(ch_id)
+		CmeAPI.deleteChannel(id)
 			.done(function(data) {
 				AppDispatcher.dispatch({ actionType: Constants.CHANNEL, data: data });
 			})
 			.fail(onError);
 	},
 
-	exportChannel: function(ch_id, ch_history) {
+	exportChannel: function(id, history) {
 
 		// open a new window (tab) to the CME export page
 		// and add ch_id and ch_history to the query string
-		var url = 'export.html?c=' + encodeURIComponent(ch_id) + '&h=' + encodeURIComponent(ch_history);
+		var url = 'export.html?c=' + encodeURIComponent(id) + '&' + $.param(history);
 		window.open(url, '_blank');
 	},
 
