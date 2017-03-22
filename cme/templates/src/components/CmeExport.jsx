@@ -164,10 +164,13 @@ var CmeExport = React.createClass({
 
 	getInitialState: function () {
 		var ch_id = qs ? qs['c'] || qs['C'] : null,
-			history = qs ? qs['h'] || qs['H'] : null;
+			history = Object.assign({}, qs);
 
 		ch_id = ch_id ? ch_id.toLowerCase() : null;
-		history = history ? history.toLowerCase() : null;
+
+		// remove channel id from history object
+		delete history['c'];
+		delete history['C'];
 
 		return {
 			id: ch_id, // channel id, e.g., 'ch0'
@@ -240,7 +243,7 @@ var CmeExport = React.createClass({
 
 			points = data && (data[2].length),
 
-			spanMultiplier = (this.state.history != 'live') ? 3 : 1,
+			spanMultiplier = (this.state.history.h != 'live') ? 3 : 1,
 
 			colSpan = data ? (spanMultiplier * data[1].length) : 0;
 
@@ -249,7 +252,7 @@ var CmeExport = React.createClass({
 
 		return (
 			<div className="export">
-				<h2 className='title'>{capitalize(this.state.id)} {capitalize(this.state.history)} History</h2>
+				<h2 className='title'>{capitalize(this.state.id)} {capitalize(this.state.history.h)} History</h2>
 				<button className="btn" onClick={this._toggleInstructions}>?</button>
 
 				<table>
@@ -260,12 +263,12 @@ var CmeExport = React.createClass({
 						<tr><th>Step</th><td colSpan={colSpan}><span>{step}</span><span>{step_pretty}</span></td></tr>
 						<tr><th>Duration</th><td colSpan={colSpan}><span>{duration}</span><span>{duration_pretty}</span></td></tr>
 						<tr><th>Points</th><td colSpan={colSpan}>{points}</td></tr>
-						{renderSensorHeader(this.state.ch, this.state.history, 'Sensor', 'name')}
-						{renderSensorHeader(this.state.ch, this.state.history, 'Type', 'type')}
-						{renderSensorHeader(this.state.ch, this.state.history, 'Units', 'unit')}
-						{renderSensorDataHeader(this.state.ch, this.state.history)}
+						{renderSensorHeader(this.state.ch, this.state.history.h, 'Sensor', 'name')}
+						{renderSensorHeader(this.state.ch, this.state.history.h, 'Type', 'type')}
+						{renderSensorHeader(this.state.ch, this.state.history.h, 'Units', 'unit')}
+						{renderSensorDataHeader(this.state.ch, this.state.history.h)}
 					</thead>
-					{renderSensorDataBody(this.state.ch, this.state.history, this._config)}
+					{renderSensorDataBody(this.state.ch, this.state.history.h, this._config)}
 				</table>
 
 				<div className={(this.state.instructionsVisible ? '' : 'hidden') + ' instructions'}>
