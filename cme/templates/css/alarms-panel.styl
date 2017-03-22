@@ -31,13 +31,19 @@
 				margin 0 1em
 				font-style normal
 				//text-decoration underline
-		.content-header h2 span
+		.content-header h2 button
 			position relative
 			margin-left 1em
 			padding 0 30px
-			border 0 solid #eee
+			font inherit
+			color fg-color
+			border 0 solid transparent
 			border-bottom-width 1px
-			&::after
+			background-color transparent
+			outline none
+			&:not(:disabled)
+				border-color lighten(button-bg-color, 50%)
+			&:not(:disabled)::after
 				position absolute
 				content ""
 				right 0
@@ -45,7 +51,7 @@
 				border 6px solid transparent
 				border-right-color lighten(button-bg-color, 50%)
 				border-bottom-color lighten(button-bg-color, 50%)
-			&:hover
+			&:not(:disabled):hover
 				cursor pointer
 				border-color button-bg-color
 				&::after

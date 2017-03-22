@@ -86,7 +86,9 @@ plot-footer-height = 24px
 .icon-chevron-right
 	background-image svg('chevron-right', icon-small-viewport)
 .icon-chevron-down
-	background-image svg('chevron-down', '-128 -128 1152 1152') // just slightly smaller
+	background-size 20px 20px
+	background-position-y center
+	background-image svg('chevron-down', '0 0 1152 1152') // just slightly smaller
 .icon-cross
 	background-image svg('cross', icon-small-viewport)
 .icon-trash2
@@ -235,14 +237,14 @@ plot-footer-height = 24px
 	background-color #fff
 	.select-wrapper
 		position absolute
-		top 3px
+		top 2px
 		right 10px
 		display inline-block
 		cursor pointer		
 		select
+			-webkit-appearance none
 			position relative
 			padding-right 24px
-			-webkit-appearance none
 			color #fff
 			background-color transparent
 			background-repeat no-repeat
@@ -251,9 +253,15 @@ plot-footer-height = 24px
 			font-weight bold
 			text-transform uppercase	
 			border 0
-			border-radius 0
 			cursor pointer
 			outline none
+			option
+				background-color #cbe9f1
+				color #666
+				font-weight bold
+		select::-ms-expand
+			display none
+			
 	button
 		position absolute
 		width 24px

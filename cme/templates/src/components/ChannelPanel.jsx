@@ -40,6 +40,15 @@ var	PLOT_COLORS = {
 	'FILL': 0.1
 }
 
+var HISTORY_START = {
+	'live': 15, // 15 minute through now
+	'daily': 1, // 1 day through now
+	'weekly': 7, //  7 days through now
+	'monthly': 31, // 31 days through now
+	'yearly': 365 // 365 days through now
+}
+
+
 var ChannelPanel = React.createClass({
 	_pollTimeout: null,
 	_pollPeriod: FAST_POLL_PERIOD,
@@ -215,8 +224,6 @@ var ChannelPanel = React.createClass({
 
 		// flot takes data in [ [x, y] ] series arrays, so we'll generate a time, x, for every y value in data[2]
 		// and we only have room for 2 sensor values for the channel (primary, secondary), so we can simplify.
-
-
 		var _this = this;
 
 		function xRange(ch_time_data) {
@@ -287,15 +294,12 @@ var ChannelPanel = React.createClass({
 				}
 
 				// push the live/avg and min, max data points
-				if (isLive(history)) {
+				traces[4].push([ x, y ]); // live data or average data point
 
-					traces[4].push([ x, y ]); // live data pointnt
+				if (!isLive(history)) {
 
-				} else {
-
-					traces[4].push([ x, ymax, ymin ]); // max point fill down to min
-					traces[5].push([ x, ymin ]); // min point (no fill)
-					traces[6].push([ x, y ]); // avg pointnt
+					traces[5].push([ x, ymax, ymin ]); // max point fill down to min
+					traces[6].push([ x, ymin ]); // min point (no fill)
 				}
 			});
 
@@ -307,7 +311,6 @@ var ChannelPanel = React.createClass({
 			series.push({ data: traces[4], yaxis: 1, color: PLOT_COLORS['DATA'] });
 			series.push({ data: traces[5], yaxis: 1, color: PLOT_COLORS['DATA'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
 			series.push({ data: traces[6], yaxis: 1, color: PLOT_COLORS['DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
-			series.push({ data: traces[7], yaxis: 1, color: PLOT_COLORS['DATA'], shadowSize: 0 });
 
 			return series;
 		}
@@ -585,12 +588,27 @@ var ChannelPanel = React.createClass({
 
 	_startPoll: function() {
 		var _this = this,
-			h = this.state.historyVisible ? this.state.history : null;
-		
+			history = null;
+
+
+		if (this.state.historyVisible) {
+
+			// TODO: check out the history available, and pin
+			// the start blocks below to what's actually available.
+			// Don't show items on the history selector if there's
+			// not at least one point in that history RRA.
+			history = {
+				h: this.state.history,
+				s: HISTORY_START[this.state.history],
+				e: 0
+			}
+		}
+
 		this._pollTime = moment().valueOf();
 
 		this.setState({ chRequest: true }, function() {
-			Actions.channel(_this.props.id, null, h, _this.state.alarmsVisible);
+
+			Actions.channel(_this.props.id, null, history);
 		});
 	},
 
@@ -696,7 +714,13 @@ var ChannelPanel = React.createClass({
 
 	_exportHistory: function() {
 
-		Actions.exportChannel(this.props.id, this.state.history);
+		var history = {
+			h: this.state.history,
+			s: HISTORY_START[this.state.history],
+			e: 0
+		}
+
+		Actions.exportChannel(this.props.id, history);
 	},
 
 	_setHistoryPlot: function (e) {

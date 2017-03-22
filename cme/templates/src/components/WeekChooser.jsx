@@ -95,7 +95,7 @@ var WeekChooser = React.createClass({
 
 		return (
 			<li key={'week_' + wi.i}>
-				<label forHmtl={'w_' + wi.i}>
+				<label htmlFor={'w_' + wi.i}>
 					<input type='radio' id={'w_' + wi.i} name='week' value={wi.w}
 						onChange={this._onSelectWeek}
 						checked={this.state.selectedWeek == wi.w} />

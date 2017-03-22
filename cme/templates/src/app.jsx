@@ -4,6 +4,10 @@
  *
  * Entry point for the CME (core monitoring engine) web application.
  */
+'use strict';
+
+// Global polyfill/shims
+require('core-js/shim');
 
 var React = require('react');
 var ReactDOM = require('react-dom');
