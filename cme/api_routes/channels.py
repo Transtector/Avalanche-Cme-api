@@ -11,6 +11,9 @@ from .Models import ChannelManager
 ch_mgr = ChannelManager()
 
 
+HISTORY = ['live', 'daily', 'weekly', 'monthly', 'yearly']
+
+
 def get_request_param(key):
 	''' Searches the request args (i.e., query string of the request URL)
 		for parameters named by key.  Parameters can have a couple of
@@ -138,14 +141,14 @@ def channel(ch_index):
 			except:
 				s = 1
 
-			b = request.args.get('b')
+			e = request.args.get('e')
 			try:
-				b = int(b) if b else 1
+				e = int(e) if e else 0
 			except:
-				b = 1
+				e = 0
 
-			if h in ['live', 'daily', 'weekly', 'monthly', 'yearly']:
-				ch.load_history(h, s, b)
+			if h in HISTORY:
+				ch.load_history(h, s, e)
 			else:
 				ch.clear_history()
 
@@ -176,7 +179,7 @@ def channel_history(ch_index, history):
 
 	# TODO: look at channel RRA config to see if history is okay
 	h = history.lower()
-	if h not in ['live', 'weekly']:
+	if h not in HISTORY:
 		raise APIError('Channel data {0} history not collected'.format(h), 400)
 
 	if request.method == 'DELETE':
@@ -190,13 +193,13 @@ def channel_history(ch_index, history):
 		except:
 			s = 1
 
-		b = request.args.get('b')
+		e = request.args.get('e')
 		try:
-			b = int(b) if b else 1
+			e = int(e) if e else 0
 		except:
-			b = 1
+			e = 0
 
-		ch.load_history(h, s, b)
+		ch.load_history(h, s, e)
 	
 	return json_response(ch.data)
 
@@ -311,7 +314,7 @@ def sensor_history(ch_index, s_index, history):
 
 	# TODO: look at channel RRA config to see if history is okay
 	h = history.lower()
-	if h not in ['live', 'weekly']:
+	if h not in HISTORY:
 		raise APIError('Channel data {0} history not collected'.format(h), 400)
 
 
@@ -321,13 +324,13 @@ def sensor_history(ch_index, s_index, history):
 	except:
 		s = 1
 
-	b = request.args.get('b')
+	e = request.args.get('e')
 	try:
-		b = int(b) if b else 1
+		e = int(e) if e else 0
 	except:
-		b = 1
+		e = 0
 
-	ch.load_history(h, s, b)
+	ch.load_history(h, s, e)
 
 	# ch.data has all sensors, so pluck indicated sensor data
 	try:

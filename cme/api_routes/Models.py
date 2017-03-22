@@ -206,48 +206,50 @@ class Channel():
 		return self
 
 
-	def load_history(self, resolution='live', start=1, blocks=1):
+	def load_history(self, resolution='live', start=1, end=0):
+
+		history = resolution.lower()
 
 		start_blocks_back = start if start >= 1 else 1
 		s = -1 * start_blocks_back
 
-		blocks_to_retrieve = blocks if (blocks >=1 and blocks <= start) else 1
-		e = -1 * blocks_to_retrieve if blocks != start else 0
+		# end must be greater than start but less than or equal to zero
+		end_blocks_back = end if end > s else s + 1
+		end_blocks_back = end_blocks_back if end_blocks_back <= 0 else 0
+		e = -1 * end_blocks_back if end_blocks_back else 0
 
-		for case in switch(resolution.lower()):
+		if (history == 'live'):
+			s = str(s) + 'm' # live history in blocks of minutes
+			e = str(e) + 'm' if e else 'now'
+		else:
+			s = str(s) + 'd' # other history in blocks of days
+			e = str(e) + 'd' if e else 'now'
+
+		# pick block data point resolution
+		for case in switch(history):
 			if case('daily'):
-				s = str(s) + 'd' # 1 day
-				e = str(e) + 'd' if e else 'now'
 				r = '5m' # at 5 minute resolution
 				break
 
 			if case('weekly'):
-				s = str(s * 7) + 'd' # '-7d' = last week
-				e = str(e * 7) + 'd' if e else 'now'
 				r = '30m' # at 30 min resolution
 				break
 
 			if case('monthly'):
-				s = str(s * 31) + 'd' # last month (31 days)
-				e = str(e * 31) + 'd' if e else 'now'
 				r = '2h' # 2 hour resolution
 				break
 
 			if case('yearly'):
-				s = str(s * 365) + 'd' # last year (365 days)
-				e = str(e * 365) + 'd' if e else 'now'
 				r = '1d' # 1 day resolution
 				break
 
 			if case(): # live
-				resolution = 'live'
-				s = '-15m' # last 15 minutes
-				e = 'now'
+				history = 'live'
 				r = '1' # at 1 second resolution
 
 		# Use average, minimum, and maximum consolidation functions (CFS)
 		# for any history resolution other than "live".
-		CFS = ['AVERAGE', 'MIN', 'MAX'] if resolution.lower() != 'live' else ['LAST']
+		CFS = ['AVERAGE', 'MIN', 'MAX'] if history != 'live' else ['LAST']
 
 		# this call will write to self.data (or self.error)
 		self._rrdfetch(CFS, s, e, r)

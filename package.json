@@ -16,6 +16,7 @@
     "url": "git@10.252.64.224:Avalanche/Cme.git"
   },
   "devDependencies": {
+    "babel-plugin-transform-object-assign": "^6.22.0",
     "babel-preset-react": "^6.0",
     "babelify": "^7.3",
     "browserify": "^14.1",
