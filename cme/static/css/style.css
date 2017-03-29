@@ -2012,6 +2012,12 @@ li.input-group-cluster > .btn:disabled {
 .panel#alarms .power-summary .channel-row th {
   padding-top: 1.8em;
 }
+.panel#alarms .alarm-detail {
+  margin-bottom: 1.5em;
+}
+.panel#alarms .alarm-detail th {
+  width: 25%;
+}
 .panel#alarms .copyright {
   position: absolute;
   left: 0.5in;

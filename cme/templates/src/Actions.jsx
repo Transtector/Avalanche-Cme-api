@@ -128,7 +128,7 @@ var Actions = {
 	restart: function(recovery_mode, factory_reset) {
 		if (!dispatchRequest('restarting device')) return;
 
-		CmeAPI.restart()
+		CmeAPI.restart(recovery_mode, factory_reset)
 			.fail(onError)
 			.always(Actions.logout);
 	},

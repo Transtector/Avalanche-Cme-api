@@ -71,8 +71,7 @@ var AlarmsPanel = React.createClass({
 
 			powerMonitoringSummary: [],
 			alarmSummary: [],
-
-			alarms: false
+			alarms: []
 		}
 	},
 
@@ -93,13 +92,13 @@ var AlarmsPanel = React.createClass({
 		}, this);
 
 		// trigger the power monitoring summary build
-		this._powerMonitoringSummary();
+		this._updatePowerMonitoring();
 
 		// load the available weeks to enable the week chooser
-		this._updateChannelWeeks();
+		this._updateHistoryWeeks();
 
-		// load alarms for the week and build summary
-		this._alarmSummary();
+		// load alarms for the week
+		this._updateAlarms();
 	},
 
 	componentWillUnmount: function() {
@@ -151,6 +150,7 @@ var AlarmsPanel = React.createClass({
 
 		return (
 			<div className="panel" id="alarms">
+
 				<div className="panel-header">
 					<div className="title">
 						Alarms
@@ -215,7 +215,7 @@ var AlarmsPanel = React.createClass({
 								<th>Sags</th>
 								<th>Swells</th>
 								<th>Voltage<br />Imbalances</th>
-								<th>Average Event Duration</th>
+								<th>Average<br />Event Duration</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -223,12 +223,9 @@ var AlarmsPanel = React.createClass({
 						</tbody>
 					</table>
 
-					<h2>Alarm Event Details</h2>
-					<table>
-						<tbody>
-							<tr><th>TBD</th></tr>
-						</tbody>
-					</table>
+					<h2>Alarm Details</h2>
+					{this.state.alarms.map(this._renderAlarmDetailTable)}
+
 
 					<div className='copyright'>
 						<div>Core Monitoring Engine</div>
@@ -248,7 +245,7 @@ var AlarmsPanel = React.createClass({
 			}, siteInfo);
 	},
 
-	_powerMonitoringSummary: function() {
+	_updatePowerMonitoring: function() {
 		
 		var _this = this,
 			_pms = [];
@@ -423,7 +420,7 @@ var AlarmsPanel = React.createClass({
 		}, this);
 	},
 
-	_updateChannelWeeks: function() {
+	_updateHistoryWeeks: function() {
 		
 		if (!this._channelsReady()) return;
 
@@ -482,13 +479,15 @@ var AlarmsPanel = React.createClass({
 		this.setState({ weeks: weeks, historyStart: historyStart });
 	},
 
-	_alarmSummary: function() {
+	_updateAlarms: function() {
 		var _this = this,
-			_as = [];
+			_as = [],
+			_alarms = [];
 
 		if (!this._channelsReady()) return;		
 
 		ALARM_GROUPS.forEach(function(ag) {
+			
 			var alarmSummaryItem = { 
 				name: ag.name, 
 				outages: 0, 
@@ -500,23 +499,52 @@ var AlarmsPanel = React.createClass({
 
 			_as.push(alarmSummaryItem);
 
-			ag.channels.forEach(function(ch) {
-				var _this = this;
+			CmeAPI.alarms({c: ag.channels.join(','), s: null, e: null})
+				.done(function(group_alarms) {
 
-				// hit CmeAPI for channel alarms;  Process and
-				// add summary info to this.state.alarmSummary
-				setTimeout(function() { 
-					console.log('Updating alarms from ' + ch + ' response.');
+					var duration = 0,
+						alarms_with_end = 0;
 
-					alarmSummaryItem.outages += parseInt(10 * Math.random());
-					alarmSummaryItem.sags += parseInt(10 * Math.random());
-					alarmSummaryItem.swells += parseInt(10 * Math.random());
-					alarmSummaryItem.imbalances += parseInt(10 * Math.random());
+					//console.log("ALARMS received: " + group_alarms);
 
-					_this.setState({ alarmSummary: _as });
-				}, 1000);
+					group_alarms.forEach(function(a) {
 
-			}, this);
+						switch(a.type.toUpperCase()) {
+							case 'OUTAGE':
+								alarmSummaryItem.outages = alarmSummaryItem.outages + 1;
+								break;
+
+							case 'SWELL':
+								alarmSummaryItem.swells = alarmSummaryItem.swells + 1;
+								break;
+
+							case 'SAG':
+								alarmSummaryItem.sags = alarmSummaryItem.sags + 1;
+								break;
+
+							case 'IMBALANCE':
+								alarmSummaryItem.imbalances = alarmSummaryItem.imbalances + 1;
+								break;
+
+							default:
+								alarmSummaryItem.outages = alarmSummaryItem.outages + 1;
+								break;
+						}
+
+						if (a.end) {
+							alarms_with_end += 1;
+							duration += a.end - a.start;
+						}
+
+						_alarms.push(Object.assign({ group: ag.name }, a));
+					});
+
+					if (alarms_with_end) {
+						alarmSummaryItem.avg_duration = duration / alarms_with_end;
+					}
+
+					_this.setState({ alarmSummary: _as, alarms: _alarms });
+				});
 		}, this);
 	},
 
@@ -529,8 +557,25 @@ var AlarmsPanel = React.createClass({
 				<td>{alarmSummary.sags ? alarmSummary.sags : '--'}</td>
 				<td>{alarmSummary.swells ? alarmSummary.swells : '--'}</td>
 				<td>{alarmSummary.imbalances ? alarmSummary.imbalances : '--'}</td>
-				<td>{alarmSummary.avg_duration ? alarmSummary.avg_duration : '--'}</td>
+				<td>{alarmSummary.avg_duration ? moment.duration(alarmSummary.avg_duration).humanize() : '--'}</td>
 			</tr>
+		);
+	},
+
+	_renderAlarmDetailTable: function(alarm, i) {
+
+		var dateFormat = 'ddd, MMMM Do h:mm a',
+			duration = alarm.end ? moment.duration(alarm.end - alarm.start).humanize() : '--'
+
+		return (
+			<table key={'alarm-detail-table_' + i} className='alarm-detail'>
+				<tbody>
+					<tr><th>Group</th><td>{alarm.group}</td></tr>
+					<tr><th>Type</th><td>{alarm.type}</td></tr>
+					<tr><th>Time</th><td>{moment(alarm.start).format(dateFormat)}</td></tr>
+					<tr><th>Duration</th><td>{duration}</td></tr>
+				</tbody>
+			</table>
 		);
 	},
 
@@ -559,9 +604,9 @@ var AlarmsPanel = React.createClass({
 	_onChannelChange: function() {
 		// update the state channels and kick off power monitoring summary.
 		this.setState({ channels: Store.getState().channel_objs }, function() {
-			this._powerMonitoringSummary();
-			this._updateChannelWeeks();
-			this._alarmSummary();
+			this._updatePowerMonitoring();
+			this._updateHistoryWeeks();
+			this._updateAlarms();
 		});
 	}
 });
