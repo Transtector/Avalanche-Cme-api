@@ -1,6 +1,7 @@
-import os, glob, fcntl, tempfile, json, uuid, re
+import os, glob, fcntl, tempfile, json, uuid, re, time, threading, random
 
 import rrdtool
+import sqlite3
 
 from . import Config
 from ..common import is_a_docker
@@ -18,7 +19,205 @@ CHDIR = Config.PATHS.CHDIR
 RRDCACHED = Config.RRD.RRDCACHED
 
 
-class ChannelManager:
+# Alarms database
+ALARMS = Config.PATHS.ALARMS_DB
+
+
+class Singleton(type):
+	_instances = {}
+	def __call__(cls, *args, **kwargs):
+		if cls not in cls._instances:
+			cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+		return cls._instances[cls]
+
+
+class LockableCursor:
+	def __init__(self, cursor):
+		self.cursor = cursor
+		self.lock = threading.Lock()
+
+	def execute(self, arg0, arg1=None):
+		self.lock.acquire()
+
+		try:
+			print("EXECUTE: {}".format(arg1 if arg1 else arg0))
+
+			self.cursor.execute(arg1 if arg1 else arg0)
+
+			if arg1:
+				if arg0 == 'all':
+					result = self.cursor.fetchall()
+				elif arg0 == 'one':
+					result = self.cursor.fetchone()
+
+		except Exception as e:
+			raise e
+
+		finally:
+			self.lock.release()
+			if arg1:
+				return result
+
+
+class AlarmManager(metaclass=Singleton):
+
+	_connection = None
+	_cursor = None
+
+	def __init__(self):
+
+		def dictFactory(cursor, row):
+			aDict = {}
+			for iField, field, in enumerate(cursor.description):
+				aDict[field[0]] = row[iField]
+			return aDict
+
+		if not self._connection:
+			self._connection = sqlite3.connect(ALARMS, check_same_thread = False)
+			self._connection.row_factory = dictFactory
+			self._connection.text_factory = str
+			self._cursor = LockableCursor(self._connection.cursor())
+
+			# Create the alarms table if it's not already there
+			# Use columns:
+			#	start (INT) - start time of alarm in Unix timestamp (milliseconds)
+			#	end (INT) - end time of of alarm (if any) in Unix timestamp (milliseconds)
+			#	source_channel (TEXT) - channel id of the alarm trigger source (e.g., 'ch0')
+			#	source_sensor (TEXT) - sensor id of the alarm trigger source (e.g., 's0')
+			#	type (TEXT) - classification string for the type of alarm (e.g., 'SAG')
+			#	data (BLOB) - data that can be stored with the alarm
+			self._cursor.execute('''CREATE TABLE IF NOT EXISTS alarms 
+				(id INTEGER PRIMARY KEY, start INT, end INT, channel TEXT, sensor TEXT, type TEXT, data BLOB)''')
+
+
+	def __del__(self):
+		self._connection.close()
+
+
+	def _insert_fake_alarms(self):
+
+		alarms = []
+		for c in range(0, 8):
+
+			#for i in range(0, 1):
+
+			end = time.time() # end is now()
+
+			# start randomly some days * hours * seconds before now
+			start = end - random.randint(0, 5) * random.randint(1, 24) * random.randint(1, 3599)
+
+			a = {
+				"start": int(round(start * 1000)),
+				"end": int(round(end * 1000)),
+				"channel": 'ch' + str(c),
+				"sensor": 's0',
+				"type": "FAKE",
+				"data": str(c) + "_" # + str(i)
+			}
+
+			alarms.append(a)
+			insert = "INSERT INTO alarms(start, end, channel, sensor, type, data) VALUES('{}', '{}', '{}', '{}', '{}', '{}')".format(a['start'], a['end'], a['channel'], a['sensor'], a['type'], a['data'])
+			self._cursor.execute(insert)
+		
+		self._connection.commit()
+		return alarms
+
+
+	def _clear_fake_alarms(self):
+		self._cursor.execute("DELETE FROM alarms WHERE type='FAKE'")
+		self._connection.commit()
+		return None
+
+	
+	def load_alarms(self, channels=None, start=None, end=None, type=None):
+
+		conditions = []
+
+		if channels and channels != '*':
+			channel_match = [ "channel='{}'".format(ch) for ch in channels ]
+			channel_match = " OR ".join(channel_match)
+			conditions.append("({})".format(channel_match))
+
+		if not start:
+			start = 0
+
+		conditions.append("start >= {}".format(start))
+
+		if not end:
+			end = int(round(time.time() * 1000)) # end now
+
+		conditions.append("end <= {}".format(end))
+
+		if type:
+			conditions.append("type = '{}'".format(type))
+
+		query = "SELECT * FROM alarms WHERE " + " AND ".join(conditions) + " ORDER BY start DESC"
+
+		alarms = []
+		for alarm in self._cursor.execute('all', query):
+			alarms.append(Alarm(alarm))
+
+		return alarms
+
+
+	def clear_alarms(self, channels=None, start=None, end=None, type=None):
+
+		# delete all
+		if (not channels or channels == '*') and not start and not end:
+			self._cursor.execute("DELETE FROM alarms")
+			self._connection.commit()
+			return None
+
+		# else delete identified channel alarms between start and end
+		conditions = []
+
+		if channels and channels != '*':
+			channel_match = [ "channel='{}'".format(ch) for ch in channels ]
+			channel_match = " OR ".join(channel_match)
+			conditions.append("({})".format(channel_match))
+
+		if not start:
+			start = 0
+
+		conditions.append("start >= {}".format(start))
+
+		if not end:
+			end = int(round(time.time() * 1000)) # end now
+
+		conditions.append("end <= {}".format(end))
+
+		if type:
+			conditions.append("type = '{}'".format(type))
+
+		query = "DELETE FROM alarms WHERE " + " AND ".join(conditions)
+		self._cursor.execute(query)
+		self._connection.commit()
+		return None
+
+
+	def load_ch_alarms(self, ch, start=None, end=None, type=None):
+		''' Load alarms for identified channel for period between start
+			and end timestamps.
+		'''
+		if not ch:
+			return
+
+		ch.alarms = self.load_alarms([ ch.id ], start, end, type)
+
+
+	def clear_ch_alarms(self, ch, start=None, end=None, type=None):
+		''' Clears the channel alarms for the identified channel
+		'''
+		if not ch: 
+			return
+
+		ch.alarms = self.clear_alarms([ ch.id ], start, end, type)
+
+
+
+
+
+class ChannelManager(metaclass=Singleton):
 
 	def __init__(self):
 		''' The ChannelManager uses a hybrid approach between the 'rrdcached' daemon process 
@@ -69,19 +268,6 @@ class ChannelManager:
 
 		# create or overwrite any existing chX.rrd.reset file
 		open(os.path.join(CHDIR, ch_rrd_reset), 'w').close()
-
-
-	def clear_channel_alarms(self, ch_id):
-		''' Clears the channel alarms for the identified channel
-			by setting the 'chX.alarms.reset' signal file.
-		'''
-		if not ch_id in self.channels:
-			return
-
-		ch_alarms_reset = ch_id + '.alarms.reset'
-
-		# create or overwrite any existing chX.rrd.reset file
-		open(os.path.join(CHDIR, ch_alarms_reset), 'w').close()
 
 
 	def get_channel(self, ch_id):
@@ -182,7 +368,6 @@ class Channel():
 		self.load_config()
 
 
-
 	### PUBLIC METHODS
 
 	def update(self):
@@ -258,26 +443,6 @@ class Channel():
 	def clear_history(self):
 
 		self.data = None
-
-
-	def clear_alarms(self):
-
-		self.alarms = None
-
-
-	def load_alarms(self):
-		self.alarms = None
-
-		ch_alarms_file = os.path.join(CHDIR, self.id + '_alarms.json')
-
-		# just return if channel alarms are being reset
-		if os.path.isfile(os.path.join(CHDIR, self.id + '.alarms.reset')):
-			return
-
-		# read alarms from file
-		if os.path.isfile(ch_alarms_file):
-			with open(ch_alarms_file, 'r') as f:
-				self.alarms = json.load(f)
 
 
 	def load_config(self):
@@ -532,7 +697,6 @@ class Channel():
 
 
 
-
 class Sensor():
 	''' Sensor objects provide read-only values depending on sensor type.
 
@@ -653,4 +817,31 @@ class Threshold():
 		self.direction = direction
 		self.classification = classification
 
+
+
+class Alarm():
+	''' Alarm object holds information about alarms processed by the hardware.
+	'''
+	def __init__(self, alarm=None):
+
+		if not alarm:
+			self.id = 1
+			self.start = int(round(time.time() * 1000))
+			self.end = None
+			self.channel = 'ch0'
+			self.sensor = 's0'
+			self.type = 'UNKNOWN'
+			self.data = []
+
+		else:
+			self.id = alarm['id']
+			self.start = alarm['start']
+			self.end = alarm['end']
+			self.channel = alarm['channel']
+			self.sensor = alarm['sensor']
+			self.type = alarm['type']
+			self.data = alarm['data']
+
+	def __repr__(self):
+		return "Alarm[{}]:({}, {}, {}, {}, {}, {})".format(self.id, self.start, self.end, self.channel, self.sensor, self.type, self.data)
 

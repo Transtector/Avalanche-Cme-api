@@ -6,9 +6,7 @@ import subprocess, json
 from . import router, request, path_parse, json_response, APIError, require_auth, Config
 
 from ..common.Switch import switch
-from .Models import ChannelManager
-
-ch_mgr = ChannelManager()
+from .Models import ChannelManager, AlarmManager
 
 
 HISTORY = ['live', 'daily', 'weekly', 'monthly', 'yearly']
@@ -55,6 +53,10 @@ def status(ch_index=-1):
 		or all channels if ch_index < 0 (the default).
 	'''	
 
+
+	ch_mgr = ChannelManager()
+
+
 	# get list of available channels
 	channels = ch_mgr.channels # [ 'ch0', ..., 'chN' ]
 
@@ -70,7 +72,7 @@ def status(ch_index=-1):
 @router.route('/channels/')
 @require_auth
 def channels_list():
-	return json_response({ 'channels': ch_mgr.channels })
+	return json_response({ 'channels': ChannelManager().channels })
 
 
 # CME channels request - actual channel objects returned
@@ -104,6 +106,8 @@ def channel(ch_index):
 
 	if not ch:
 		raise APIError('Channel not found', 404)
+
+	ch_mgr = ChannelManager()
 
 	# parse out the item name (last element of request path)
 	segments = path_parse(request.path)
@@ -156,9 +160,9 @@ def channel(ch_index):
 			a = a.lower() if a else None
 
 			if a in ['true', '1']:
-				ch.load_alarms()
+				ch.alarms = AlarmManager().load_ch_alarms(ch, )
 			else:
-				ch.clear_alarms()
+				ch.alarms = None
 
 
 	# return either full channel or the item requested
@@ -182,6 +186,8 @@ def channel_history(ch_index, history):
 	if h not in HISTORY:
 		raise APIError('Channel data {0} history not collected'.format(h), 400)
 
+	ch_mgr = ChannelManager()
+
 	if request.method == 'DELETE':
 		ch.clear_history()
 		ch_mgr.clear_channel_history(ch.id)
@@ -204,7 +210,6 @@ def channel_history(ch_index, history):
 	return json_response(ch.data)
 
 
-	
 
 # CME channel configuration (hardware)
 # Returns 404 (resource not found) if not RECOVERY MODE 
@@ -217,6 +222,8 @@ def ch_config(ch_index):
 
 	if not Config.RECOVERY.RECOVERY_MODE:
 		raise APIError('Not Found', 404)
+
+	ch_mgr = ChannelManager()
 
 	# retrieve the desired channel configuration
 	ch = ch_mgr.get_channel('ch' + str(ch_index))
@@ -240,12 +247,25 @@ def ch_alarms(ch_index):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
+	alarm_mgr = AlarmManager()
+
 	if request.method == 'DELETE':
-		ch.clear_alarms()
-		ch_mgr.clear_channel_alarms(ch.id)
+		alarm_mgr.clear_ch_alarms(ch)
 
 	else:
-		ch.load_alarms()
+		s = request.args.get('s')
+		try:
+			s = int(s) if s else 1
+		except:
+			s = 1
+
+		e = request.args.get('e')
+		try:
+			e = int(e) if e else 0
+		except:
+			e = 0
+
+		alarm_mgr.load_ch_alarms(ch, s, e)
 
 	return json_response({ ch.id + '.alarms': ch.alarms })
 
