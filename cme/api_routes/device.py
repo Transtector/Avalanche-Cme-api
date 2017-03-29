@@ -308,8 +308,8 @@ def device_restart():
 		If not recovery_mode, then any pending updates will be installed
 		and attempted to use after the reboot.
 	'''
-	recovery_mode = request.args.get('recovery_mode', False)
-	factory_reset = request.args.get('factory_reset', False)
+	recovery_mode = request.args.get('recovery_mode', 'false').lower() in ['true', '1']
+	factory_reset = request.args.get('factory_reset', 'false').lower() in ['true', '1']
 
 	logger = logging.getLogger('cme')
 	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset, Config.PATHS.SETTINGS, Config.PATHS.RECOVERY_FILE, logger))
