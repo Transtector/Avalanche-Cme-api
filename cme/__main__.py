@@ -32,7 +32,7 @@ def main(argv=None):
 	try:
 		opts, args = getopt.getopt(argv, "", ["rrdcached="])
 	except getopt.GetoptError:
-		print("Invalid command line arguments are ignored")
+		app_logger.info("Invalid command line arguments are ignored")
 		opts = []
 		args = []
 
