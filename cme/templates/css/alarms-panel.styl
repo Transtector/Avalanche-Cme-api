@@ -58,8 +58,7 @@
 					border-right-color button-bg-color
 					border-bottom-color button-bg-color
 
-
-	table
+	.panel-content > table
 		width 100%
 		border-collapse collapse
 		th, td
@@ -72,23 +71,102 @@
 		td, th:not(:first-child)
 			text-align center
 		tbody th
-			padding 0.4em 1.4em
+			padding 0.4em 20px
 		.centered
 			text-align center
-
-
-	.site-info th
+		
+	table.site-info th
 		width 40%
 		
-	.power-summary .channel-row
-		font-style italic
-		th
-			padding-top 1.8em
+	table.power-summary
+		 .channel-row
+			font-style italic
+			th
+				padding-top 1.8em
 
-	.alarm-detail
-		margin-bottom 1.5em
-		th
-			width 25%
+	table.alarm-detail
+		margin-bottom 2.5em
+		border 1px solid #eee
+		.alarm-group
+			font-size 120%
+		th, td
+			border-width 0 0 1px 0 !important
+		td.plots
+			padding 20px 0 10px 0
+			.plot-wrapper
+				position relative
+				padding 0 40px
+			.plot
+				height 4in
+				.flot-text::before
+					content ''
+					position absolute
+					right 35px
+					bottom 0
+					width 2px
+					height 18px
+					background-color #aaa
+				.flot-text::after
+					content ''
+					position absolute
+					right 31px
+					bottom 18px
+					width 0
+					height 0
+					border 5px solid transparent
+					border-bottom-color #aaa
+			.x-axis-label
+				position relative
+				> span
+					position absolute
+					right 0
+				
+			.y-axis-label
+				position absolute
+				top 43%
+				width 200px
+				&.left
+					left 20px
+					margin-left -100px
+					transform rotate(-90deg)
+				&.right
+					right 20px
+					margin-right -100px
+					transform rotate(90deg)
+			.legend
+				width 90%
+				margin 0 auto
+				border 1px solid #ddd
+				td
+					position relative
+					border 0
+				td::before
+					content ''
+					position absolute
+					width 10px
+					height 10px
+					top 50%
+					margin-top -6px
+					margin-left -15px
+					border 1px solid #ddd
+				.ph-A, .ph-B, .ph-C
+					padding-left 20px
+					text-align left
+				.ph-A::before
+					background-color #ff0000
+				.ph-B::before
+					background-color #00ff00
+				.ph-C::before
+					background-color #0000ff
+				.pib
+					text-align right
+				.pib::before
+					background-color #ffd42a
+				
+	h2.alarm-detail
+		border-top 3px solid #eee
+		padding-top 1.6em
+				
 
 	.copyright
 		position absolute

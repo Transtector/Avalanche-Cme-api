@@ -15,13 +15,21 @@ var Store = require('../Store');
 var WeekChooser = require('./WeekChooser');
 
 var CmeAPI = require('../CmeAPI');
-var $ = require('jquery');
 
+// flot charting requires global jQuery
+window.jQuery = require('jquery');
+var $ = window.jQuery;
+
+// Date/time/duration calculations and formatting
 var moment = require('moment');
+require('moment-duration-format');
+
 var classNames = require('classnames');
 
 // application-level key press handler
 var key = require('../keymaster/keymaster.js');
+
+var flot = require('../Flot/jquery.flot');
 
 function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 
@@ -53,6 +61,16 @@ var ALARM_GROUPS = [ {
 		channels: ['ch4', 'ch5', 'ch6', 'ch7'] 
 	}
 ]
+
+
+var	PLOT_COLORS = {
+	'VA': '#ff0000',
+	'VB': '#00ff00',
+	'VC': '#0000ff',
+	'PIB': '#ffd42a',
+	'GRID': '#cacaca',
+	'FILL': 0.1
+}
 
 var AlarmsPanel = React.createClass({
 
@@ -91,14 +109,22 @@ var AlarmsPanel = React.createClass({
 			}
 		}, this);
 
-		// trigger the power monitoring summary build
-		this._updatePowerMonitoring();
 
-		// load the available weeks to enable the week chooser
-		this._updateHistoryWeeks();
+		// CLEAR/LOAD a batch of FAKE Alarms
+		var _this = this;
+		CmeAPI.fakeAlarms()
+			.done(function() {
 
-		// load alarms for the week
-		this._updateAlarms();
+				// trigger the power monitoring summary build
+				_this._updatePowerMonitoring();
+
+				// load the available weeks to enable the week chooser
+				_this._updateHistoryWeeks();
+
+				// load alarms for the week
+				_this._updateAlarms();
+			});
+
 	},
 
 	componentWillUnmount: function() {
@@ -223,7 +249,7 @@ var AlarmsPanel = React.createClass({
 						</tbody>
 					</table>
 
-					<h2>Alarm Details</h2>
+					<h2 className='alarm-detail'>Alarm Details</h2>
 					{this.state.alarms.map(this._renderAlarmDetailTable)}
 
 
@@ -402,7 +428,7 @@ var AlarmsPanel = React.createClass({
 		return (
 			<tr key={'pm-summary-row_' + i}>
 				<th className='centered'>{pmItem.name}</th>
-				<th>{pmItem.unit}</th>
+				<td>{pmItem.unit}</td>
 				<td>{pmItem.spec_low}</td>
 				<td>{pmItem.act_low}</td>
 				<td>{pmItem.nominal}</td>
@@ -564,19 +590,124 @@ var AlarmsPanel = React.createClass({
 
 	_renderAlarmDetailTable: function(alarm, i) {
 
-		var dateFormat = 'ddd, MMMM Do h:mm a',
-			duration = alarm.end ? moment.duration(alarm.end - alarm.start).humanize() : '--'
+		var dateFormat = 'ddd, MMM D h:mm:ss.SSS a',
+			duration = alarm.end_ms ? moment.duration(alarm.end_ms - alarm.start_ms) : null;
 
 		return (
 			<table key={'alarm-detail-table_' + i} className='alarm-detail'>
 				<tbody>
-					<tr><th>Group</th><td>{alarm.group}</td></tr>
-					<tr><th>Type</th><td>{alarm.type}</td></tr>
-					<tr><th>Time</th><td>{moment(alarm.start).format(dateFormat)}</td></tr>
-					<tr><th>Duration</th><td>{duration}</td></tr>
+					<tr>
+						<th className='alarm-group' colSpan='4'>{alarm.group}</th>
+					</tr>
+					<tr>
+						<th>Trigger</th><td>{alarm.channel + ' ' + alarm.sensor}</td>
+						<th>Type</th><td>{alarm.type}</td>
+					</tr>
+					<tr>
+						<th>Start</th><td>{moment(alarm.start_ms).format(dateFormat)}</td>
+						<th>End</th><td>{alarm.end_ms ? moment(alarm.end_ms).format(dateFormat) : '--'}</td>
+					</tr>
+					<tr>
+						<th>Duration</th><td>{duration ? duration.format('h:mm:ss.SSS') + ' (' + duration.humanize() + ')' : '--'}</td>
+						<td colSpan='2'></td>
+					</tr>
+					<tr><td className='plots' colSpan='4'>{this._renderAlarmPlots(alarm)}</td></tr>
 				</tbody>
 			</table>
 		);
+	},
+
+	_renderAlarmPlots: function(alarm) {
+		var _this = this;
+				
+		function dataSeries(a) {
+			var series = [],
+				traces = [ [], [], [], [] ],
+
+				N = a.data.ch0.s0.length,
+
+				start = -N * a.step_ms,
+				step = a.step_ms;
+
+			// assemble live and consolidated data traces
+			alarm.data['ch0']['s0'].forEach(function(y, i) {
+
+				var t = 1000 * (start + step * i);
+
+				traces[0].push([ t, alarm.data['ch3']['s0'][i] ]);
+
+				traces[1].push([ t, y ]);
+				traces[2].push([ t, alarm.data['ch1']['s0'][i] ]);
+				traces[3].push([ t, alarm.data['ch2']['s0'][i] ]);
+			});
+
+			// push data traces into flot data series
+			series.push({ data: traces[0], yaxis: 2, color: PLOT_COLORS['PIB'], lines: { lineWidth: 1 }, shadowSize: 0 });
+			series.push({ data: traces[1], yaxis: 1, color: PLOT_COLORS['VA'] });
+			series.push({ data: traces[2], yaxis: 1, color: PLOT_COLORS['VB'] });
+			series.push({ data: traces[3], yaxis: 1, color: PLOT_COLORS['VC'] });
+
+			//series.push({ data: traces[3], yaxis: 1, color: PLOT_COLORS['WARNING'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			//series.push({ data: traces[4], yaxis: 1, color: PLOT_COLORS['DATA'] });
+			//series.push({ data: traces[5], yaxis: 1, color: PLOT_COLORS['DATA'], lines: { fill: PLOT_COLORS['FILL'], lineWidth: 1, zero: false }, shadowSize: 0 });
+			//series.push({ data: traces[6], yaxis: 1, color: PLOT_COLORS['DATA'], lines: { lineWidth: 1 }, shadowSize: 0 });
+
+			return series;
+		}
+		
+		function plotOptions(data) {
+
+			return {
+				yaxes: [ {}, { 
+					alignTicksWithAxis: 1,
+					position: 'right'
+				}],
+				grid: {
+					margin: 2,
+					backgroundColor: { colors: [ "#fff", "#eee" ] },
+					color: PLOT_COLORS['GRID']
+				}
+			}
+		}
+
+		function updatePlot(el) {
+			if (!alarm || !alarm.data || !el) return;
+
+			// generate the plot here
+			var plot = $.plot($(el), dataSeries(alarm), plotOptions());
+		}
+
+		function renderLegend() {
+			return (
+				<table className='legend'><tbody>
+					<tr>
+						<td className='ph-A'>Va</td>
+						<td className='ph-B'>Vb</td>
+						<td className='ph-C'>Vc</td>
+						<td className='pib'>Phs. Imb.</td>
+					</tr>
+				</tbody></table>
+			);
+		}
+
+		var cls = classNames('plot-wrapper', { 'active': false });
+
+		return (
+			<div className={cls}>
+				{renderLegend()}
+
+				<div className='plot' ref={updatePlot}></div>
+
+				<div className='x-axis-label'>Time To Alarm (ms) <span>{moment(alarm.start_ms).format("h:mm:ss.SSS a")}</span></div>
+				<div className='y-axis-label left'>Phase Voltage (V)</div>
+				<div className='y-axis-label right'>Phase Imbalance (%)</div>
+				{
+					alarm.data
+						? null
+						: <div className={'loaderWrapper'}><div className='loader'>Loading...</div></div>
+				}
+			</div>
+		)
 	},
 
 	_showWeekChooser: function() {

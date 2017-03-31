@@ -1,4 +1,4 @@
-import os, glob, fcntl, tempfile, json, uuid, re, time, threading, random
+import os, glob, fcntl, tempfile, json, uuid, re, time, threading, random, math
 
 import rrdtool
 import sqlite3
@@ -40,7 +40,10 @@ class LockableCursor:
 		self.lock.acquire()
 
 		try:
-			print("EXECUTE: {}".format(arg1 if arg1 else arg0))
+			#print("{}".format(arg1 if arg1 else arg0))
+			
+			if arg1:
+				result = []
 
 			self.cursor.execute(arg1 if arg1 else arg0)
 
@@ -85,38 +88,114 @@ class AlarmManager(metaclass=Singleton):
 			#	source_channel (TEXT) - channel id of the alarm trigger source (e.g., 'ch0')
 			#	source_sensor (TEXT) - sensor id of the alarm trigger source (e.g., 's0')
 			#	type (TEXT) - classification string for the type of alarm (e.g., 'SAG')
-			#	data (BLOB) - data that can be stored with the alarm
+			#	data (TEXT) - waveform data in JSON object string that can be stored with the alarm
 			self._cursor.execute('''CREATE TABLE IF NOT EXISTS alarms 
-				(id INTEGER PRIMARY KEY, start INT, end INT, channel TEXT, sensor TEXT, type TEXT, data BLOB)''')
+				(id INTEGER PRIMARY KEY, channel TEXT, sensor TEXT, type TEXT, start_ms INT, end_ms INT, step_ms INT, data TEXT)''')
 
 
 	def __del__(self):
+
 		self._connection.close()
 
 
-	def _insert_fake_alarms(self):
+	def _insert_fake_alarms(self, count=1):
 
 		alarms = []
-		for c in range(0, 8):
 
-			#for i in range(0, 1):
+		for c in range(0, count):
 
-			end = time.time() # end is now()
+			# start randomly some days * hours * milliseconds before now
+			start_ms = int(round(time.time() * 1000)) - random.randint(0, 2) * random.randint(1, 23) * random.randint(0, 3599999)
 
-			# start randomly some days * hours * seconds before now
-			start = end - random.randint(0, 5) * random.randint(1, 24) * random.randint(1, 3599)
+			# end 1 - 5 minutes after start
+			end_ms = start_ms + random.randint(1, 4) * 60 * 1000 + random.randint(0, 59) * 1000 + random.randint(0, 999)
 
+			# generate fake waveform data for the alarms
+			sample_rate = 7.8125 * 1000 # 7.8125 kHz
+			sample_period = 50 * 0.001 # 50 ms
+			samples = math.ceil(sample_rate * sample_period)
+
+			# Generates the format [ [ t0, Va, Vb, Vc, PI ], [t1, Va, Vb, Vc, PI ], ... [tN, Va, Vb, Vc, PI ] ]
+			def gen_fake_phases(amplitude_rms, frequency_hz):
+
+				def sin(amp_rms, t_seconds, phi_degrees):
+
+					return amp_rms * math.sqrt(2) * math.sin(2 * math.pi * frequency_hz * t_seconds / sample_rate + math.radians(phi_degrees))
+
+				def pib(phA, phB, phC):
+					phAVG = ( phA + phB + phC ) / 3
+					phMAX = max([ abs(phAVG - phA), abs(phAVG - phB), abs(phAVG - phC) ])
+
+					if phAVG:
+						return 100 * ( phMAX / phAVG )
+					else:
+						return 0
+
+				result = []
+				for t in range(0, samples):
+					sample_time = t / sample_rate
+
+					PHA_AMP = amplitude_rms + 0.05 * amplitude_rms * (0.5 - random.random())
+					PHB_AMP = amplitude_rms + 0.05 * amplitude_rms * (0.5 - random.random())
+					PHC_AMP = amplitude_rms + 0.05 * amplitude_rms * (0.5 - random.random())
+
+					PHA = sin(PHA_AMP, t, 0)
+					PHB = sin(PHB_AMP, t, 120)
+					PHC = sin(PHC_AMP, t, 240)
+					PIB = pib(PHA_AMP, PHB_AMP, PHC_AMP)
+
+					result.append([ sample_time, PHA, PHB, PHC, PIB ])
+
+				return result
+
+			input_voltages_and_PI = gen_fake_phases(208, 60)
+			output_voltages_and_PI = gen_fake_phases(480, 60)
+			output_currents = gen_fake_phases(90, 60)
+
+			# Which channel will trigger? (don't include the current channels which use s1)
+			alarm_ch = "ch" + str(random.randint(0, 8))
+
+			# Slice the generated data to individual channel/sensors
 			a = {
-				"start": int(round(start * 1000)),
-				"end": int(round(end * 1000)),
-				"channel": 'ch' + str(c),
-				"sensor": 's0',
+				"channel": alarm_ch,
+				"sensor": "s0",
 				"type": "FAKE",
-				"data": str(c) + "_" # + str(i)
+				"start_ms": start_ms,
+				"end_ms": end_ms,
+				"step_ms": 1 / sample_rate,
+				"data": {
+					"ch0": {
+						"s0": [ V[1] for V in input_voltages_and_PI ]
+					},
+					"ch1": {
+						"s0": [ V[2] for V in input_voltages_and_PI ]
+					},
+					"ch2": {
+						"s0": [ V[3] for V in input_voltages_and_PI ]
+					},
+					"ch3": {
+						"s0": [ V[4] for V in input_voltages_and_PI ]
+					},
+					"ch4": {
+						"s0": [ V[1] for V in output_voltages_and_PI ],
+						"s1": [ V[1] for V in output_currents ] 
+					},
+					"ch5": {
+						"s0": [ V[2] for V in output_voltages_and_PI ],
+						"s1": [ V[2] for V in output_currents ]
+					},
+					"ch6": {
+						"s0": [ V[3] for V in output_voltages_and_PI ],
+						"s1": [ V[3] for V in output_currents ]
+					},
+					"ch7": {
+						"s0": [ V[4] for V in output_voltages_and_PI ] 
+					}
+				}
 			}
 
 			alarms.append(a)
-			insert = "INSERT INTO alarms(start, end, channel, sensor, type, data) VALUES('{}', '{}', '{}', '{}', '{}', '{}')".format(a['start'], a['end'], a['channel'], a['sensor'], a['type'], a['data'])
+			insert = "INSERT INTO alarms(channel, sensor, type, start_ms, end_ms, step_ms, data) VALUES('{}', '{}', '{}', {}, {}, {}, '{}')".format(a['channel'], a['sensor'], a['type'], a['start_ms'], a['end_ms'], a['step_ms'], json.dumps(a['data']))
 			self._cursor.execute(insert)
 		
 		self._connection.commit()
@@ -135,23 +214,22 @@ class AlarmManager(metaclass=Singleton):
 
 		if channels and channels != '*':
 			channel_match = [ "channel='{}'".format(ch) for ch in channels ]
-			channel_match = " OR ".join(channel_match)
-			conditions.append("({})".format(channel_match))
+			conditions.append("({})".format(" OR ".join(channel_match)))
 
 		if not start:
 			start = 0
 
-		conditions.append("start >= {}".format(start))
+		conditions.append("start_ms >= {}".format(start))
 
 		if not end:
 			end = int(round(time.time() * 1000)) # end now
 
-		conditions.append("end <= {}".format(end))
+		conditions.append("end_ms <= {}".format(end))
 
 		if type:
 			conditions.append("type = '{}'".format(type))
 
-		query = "SELECT * FROM alarms WHERE " + " AND ".join(conditions) + " ORDER BY start DESC"
+		query = "SELECT * FROM alarms WHERE " + " AND ".join(conditions) + " ORDER BY start_ms DESC"
 
 		alarms = []
 		for alarm in self._cursor.execute('all', query):
@@ -164,7 +242,7 @@ class AlarmManager(metaclass=Singleton):
 
 		# delete all
 		if (not channels or channels == '*') and not start and not end:
-			self._cursor.execute("DELETE FROM alarms")
+			self._cursor.execute('DELETE FROM alarms')
 			self._connection.commit()
 			return None
 
@@ -173,18 +251,17 @@ class AlarmManager(metaclass=Singleton):
 
 		if channels and channels != '*':
 			channel_match = [ "channel='{}'".format(ch) for ch in channels ]
-			channel_match = " OR ".join(channel_match)
-			conditions.append("({})".format(channel_match))
+			conditions.append("({})".format(" OR ".join(channel_match)))
 
 		if not start:
 			start = 0
 
-		conditions.append("start >= {}".format(start))
+		conditions.append("start_ms >= {}".format(start))
 
 		if not end:
 			end = int(round(time.time() * 1000)) # end now
 
-		conditions.append("end <= {}".format(end))
+		conditions.append("end_ms <= {}".format(end))
 
 		if type:
 			conditions.append("type = '{}'".format(type))
@@ -826,22 +903,24 @@ class Alarm():
 
 		if not alarm:
 			self.id = 1
-			self.start = int(round(time.time() * 1000))
-			self.end = None
 			self.channel = 'ch0'
 			self.sensor = 's0'
 			self.type = 'UNKNOWN'
-			self.data = []
+			self.start_ms = int(round(time.time() * 1000))
+			self.end_ms = None
+			self.step_ms = 0.128
+			self.data = None
 
 		else:
 			self.id = alarm['id']
-			self.start = alarm['start']
-			self.end = alarm['end']
 			self.channel = alarm['channel']
 			self.sensor = alarm['sensor']
 			self.type = alarm['type']
-			self.data = alarm['data']
+			self.start_ms = alarm['start_ms']
+			self.end_ms = alarm['end_ms']
+			self.step_ms = alarm['step_ms']
+			self.data = json.loads(alarm['data'])
 
 	def __repr__(self):
-		return "Alarm[{}]:({}, {}, {}, {}, {}, {})".format(self.id, self.start, self.end, self.channel, self.sensor, self.type, self.data)
+		return "Alarm[{}]:({}, {}, {}, {}, {}, {}, data[{}])".format(self.id, self.channel, self.sensor, self.type, self.start_ms, self.end_ms, self.step_ms, len(self.data['ch0']['s0']) if self.data else 0)
 

@@ -30,6 +30,8 @@ var API = {
 	logs: API_ROOT + 'logs/',
 	channels: API_ROOT + 'channels/',
 	channel: API_ROOT + 'ch/'
+	channel: 		API_ROOT + 'ch/',
+	alarms: 		API_ROOT + 'alarms/'
 }
 
 // Use Store to get the CME config object
@@ -98,7 +100,7 @@ var CmeAPI = {
 	restart: function(recovery_mode, factory_reset) {
 		return $.ajax({
 			url: API.restart,
-			data: JSON.stringify({ recovery_mode: recovery_mode, factory_reset: factory_reset }),
+			data: { recovery_mode: !!recovery_mode, factory_reset: !!factory_reset },
 			dataType: 'json'
 		});
 	},
@@ -267,7 +269,23 @@ var CmeAPI = {
 
 	channelHistory: function(id, history) {
 		var url = API.channel + parseInt(id.slice(2)) + '/history/';
-		url += encodeURIComponent(history.h) + '?s=' + encodeURIComponent(history.s) + '&e=' + encodeURIComponent(history.e);
+		
+		url += encodeURIComponent(history.h);
+		url += '?s=' + encodeURIComponent(history.s);
+		url += '&e=' + encodeURIComponent(history.e);
+
+		return $.ajax({
+			url:  url,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
+
+	channelAlarms: function(id, alarms) {
+		var url = API.channel + parseInt(id.slice(2)) + '/alarms/';
+
+		url += '?s=' + encodeURIComponent(alarms.s);
+		url += '&e=' + encodeURIComponent(alarms.e);
 
 		return $.ajax({
 			url:  url,
@@ -302,6 +320,29 @@ var CmeAPI = {
 
 		return $.ajax({
 			url:  url,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
+
+	alarms: function(alarms) {
+		var url = API.alarms;
+
+		if (alarms.c || alarms.s || alarms.e){
+			url += '?' + $.param(alarms);
+		}
+
+		return $.ajax({
+			url:  url,
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
+
+	fakeAlarms: function() {
+		
+		return $.ajax({
+			url:  API.alarms + 'fake',
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});

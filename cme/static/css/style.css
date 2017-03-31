@@ -1978,45 +1978,153 @@ li.input-group-cluster > .btn:disabled {
   border-right-color: #3ea4e1;
   border-bottom-color: #3ea4e1;
 }
-.panel#alarms table {
+.panel#alarms .panel-content > table {
   width: 100%;
   border-collapse: collapse;
 }
-.panel#alarms table th,
-.panel#alarms table td {
+.panel#alarms .panel-content > table th,
+.panel#alarms .panel-content > table td {
   border: 1px solid #eee;
   padding: 0.2em 0.8em;
 }
-.panel#alarms table th {
+.panel#alarms .panel-content > table th {
   text-align: left;
 }
-.panel#alarms table thead th {
+.panel#alarms .panel-content > table thead th {
   vertical-align: bottom;
 }
-.panel#alarms table td,
-.panel#alarms table th:not(:first-child) {
+.panel#alarms .panel-content > table td,
+.panel#alarms .panel-content > table th:not(:first-child) {
   text-align: center;
 }
-.panel#alarms table tbody th {
-  padding: 0.4em 1.4em;
+.panel#alarms .panel-content > table tbody th {
+  padding: 0.4em 20px;
 }
-.panel#alarms table .centered {
+.panel#alarms .panel-content > table .centered {
   text-align: center;
 }
-.panel#alarms .site-info th {
+.panel#alarms table.site-info th {
   width: 40%;
 }
-.panel#alarms .power-summary .channel-row {
+.panel#alarms table.power-summary .channel-row {
   font-style: italic;
 }
-.panel#alarms .power-summary .channel-row th {
+.panel#alarms table.power-summary .channel-row th {
   padding-top: 1.8em;
 }
-.panel#alarms .alarm-detail {
-  margin-bottom: 1.5em;
+.panel#alarms table.alarm-detail {
+  margin-bottom: 2.5em;
+  border: 1px solid #eee;
 }
-.panel#alarms .alarm-detail th {
-  width: 25%;
+.panel#alarms table.alarm-detail .alarm-group {
+  font-size: 120%;
+}
+.panel#alarms table.alarm-detail th,
+.panel#alarms table.alarm-detail td {
+  border-width: 0 0 1px 0 !important;
+}
+.panel#alarms table.alarm-detail td.plots {
+  padding: 20px 0 10px 0;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper {
+  position: relative;
+  padding: 0 40px;
+}
+.panel#alarms table.alarm-detail td.plots .plot {
+  height: 4in;
+}
+.panel#alarms table.alarm-detail td.plots .plot .flot-text::before {
+  content: '';
+  position: absolute;
+  right: 35px;
+  bottom: 0;
+  width: 2px;
+  height: 18px;
+  background-color: #aaa;
+}
+.panel#alarms table.alarm-detail td.plots .plot .flot-text::after {
+  content: '';
+  position: absolute;
+  right: 31px;
+  bottom: 18px;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-bottom-color: #aaa;
+}
+.panel#alarms table.alarm-detail td.plots .x-axis-label {
+  position: relative;
+}
+.panel#alarms table.alarm-detail td.plots .x-axis-label > span {
+  position: absolute;
+  right: 0;
+}
+.panel#alarms table.alarm-detail td.plots .y-axis-label {
+  position: absolute;
+  top: 43%;
+  width: 200px;
+}
+.panel#alarms table.alarm-detail td.plots .y-axis-label.left {
+  left: 20px;
+  margin-left: -100px;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
+.panel#alarms table.alarm-detail td.plots .y-axis-label.right {
+  right: 20px;
+  margin-right: -100px;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+.panel#alarms table.alarm-detail td.plots .legend {
+  width: 90%;
+  margin: 0 auto;
+  border: 1px solid #ddd;
+}
+.panel#alarms table.alarm-detail td.plots .legend td {
+  position: relative;
+  border: 0;
+}
+.panel#alarms table.alarm-detail td.plots .legend td::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  margin-top: -6px;
+  margin-left: -15px;
+  border: 1px solid #ddd;
+}
+.panel#alarms table.alarm-detail td.plots .legend .ph-A,
+.panel#alarms table.alarm-detail td.plots .legend .ph-B,
+.panel#alarms table.alarm-detail td.plots .legend .ph-C {
+  padding-left: 20px;
+  text-align: left;
+}
+.panel#alarms table.alarm-detail td.plots .legend .ph-A::before {
+  background-color: #f00;
+}
+.panel#alarms table.alarm-detail td.plots .legend .ph-B::before {
+  background-color: #0f0;
+}
+.panel#alarms table.alarm-detail td.plots .legend .ph-C::before {
+  background-color: #00f;
+}
+.panel#alarms table.alarm-detail td.plots .legend .pib {
+  text-align: right;
+}
+.panel#alarms table.alarm-detail td.plots .legend .pib::before {
+  background-color: #ffd42a;
+}
+.panel#alarms h2.alarm-detail {
+  border-top: 3px solid #eee;
+  padding-top: 1.6em;
 }
 .panel#alarms .copyright {
   position: absolute;
