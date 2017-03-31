@@ -46,6 +46,6 @@ def fake_alarms():
 	alarm_mgr._clear_fake_alarms()
 	alarm_mgr._insert_fake_alarms()
 
-	return json_response(None)
+	return json_response("Fake alarms generated!")
 
 

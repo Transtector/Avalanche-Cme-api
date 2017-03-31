@@ -113,7 +113,9 @@ var AlarmsPanel = React.createClass({
 		// CLEAR/LOAD a batch of FAKE Alarms
 		var _this = this;
 		CmeAPI.fakeAlarms()
-			.done(function() {
+			.done(function(data) {
+
+				alert(data);
 
 				// trigger the power monitoring summary build
 				_this._updatePowerMonitoring();
