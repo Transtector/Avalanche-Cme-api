@@ -2024,14 +2024,81 @@ li.input-group-cluster > .btn:disabled {
   border-width: 0 0 1px 0 !important;
 }
 .panel#alarms table.alarm-detail td.plots {
-  padding: 20px 0 10px 0;
+  position: relative;
+  padding: 0;
+  height: 4.75in;
+  vertical-align: top;
+}
+.panel#alarms table.alarm-detail td.plots .plot-tabs {
+  margin: 10px 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.panel#alarms table.alarm-detail td.plots .plot-tabs li {
+  position: relative;
+  display: inline-block;
+}
+.panel#alarms table.alarm-detail td.plots .plot-tabs button {
+  padding: 2px 2px 2px 20px;
+  margin-right: 10px;
+  font-size: 100%;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+}
+.panel#alarms table.alarm-detail td.plots .plot-tabs button::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 10px;
+  height: 10px;
+  background-color: rgba(0,0,0,0.3);
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+}
+.panel#alarms table.alarm-detail td.plots .plot-tabs li.active button::before {
+  background-color: #000;
+}
+.panel#alarms table.alarm-detail td.plots .plot-tab-content {
+  position: absolute;
+  top: 0;
+  margin-top: 40px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0 40px;
+  overflow: hidden;
 }
 .panel#alarms table.alarm-detail td.plots .plot-wrapper {
-  position: relative;
-  padding: 0 40px;
+  position: absolute;
+  left: 40px;
+  top: 30px;
+  right: 40px;
+  bottom: 30px;
+  -webkit-transition: left 0.3s ease 0s;
+  -moz-transition: left 0.3s ease 0s;
+  -ms-transition: left 0.3s ease 0s;
+  -o-transition: left 0.3s ease 0s;
+  transition: left 0.3s ease 0s;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.start {
+  left: -100%;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.end {
+  left: 100%;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.start.active,
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.end.active {
+  left: 40px;
 }
 .panel#alarms table.alarm-detail td.plots .plot {
-  height: 4in;
+  width: 686px;
+  height: 100%;
 }
 .panel#alarms table.alarm-detail td.plots .plot .flot-text::before {
   content: '';
@@ -2052,12 +2119,34 @@ li.input-group-cluster > .btn:disabled {
   border: 5px solid transparent;
   border-bottom-color: #aaa;
 }
+.panel#alarms table.alarm-detail td.plots .plot .flot-x-axis .flot-tick-label:first-child {
+  display: none;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.single-axis .plot {
+  width: 660px;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.single-axis .plot .flot-text::before {
+  right: 7px;
+}
+.panel#alarms table.alarm-detail td.plots .plot-wrapper.single-axis .plot .flot-text::after {
+  right: 3px;
+}
 .panel#alarms table.alarm-detail td.plots .x-axis-label {
-  position: relative;
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 5px;
 }
 .panel#alarms table.alarm-detail td.plots .x-axis-label > span {
+  display: none;
+}
+.panel#alarms table.alarm-detail td.plots .x-axis-label > span.active {
+  display: inline;
   position: absolute;
   right: 0;
+}
+.panel#alarms table.alarm-detail td.plots .x-axis-label .strong {
+  font-weight: bold;
 }
 .panel#alarms table.alarm-detail td.plots .y-axis-label {
   position: absolute;
@@ -2121,6 +2210,30 @@ li.input-group-cluster > .btn:disabled {
 }
 .panel#alarms table.alarm-detail td.plots .legend .pib::before {
   background-color: #ffd42a;
+}
+.panel#alarms table.alarm-detail td.plots .carousel-handle {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 60px;
+}
+.panel#alarms table.alarm-detail td.plots .carousel-handle button {
+  margin: 0 2px;
+  padding: 0;
+  width: 8px;
+  height: 8px;
+  background-color: rgba(0,0,0,0.3);
+  border: 0;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+  cursor: pointer;
+  outline: 0;
+}
+.panel#alarms table.alarm-detail td.plots .carousel-handle button.active {
+  background-color: #000;
 }
 .panel#alarms h2.alarm-detail {
   border-top: 3px solid #eee;

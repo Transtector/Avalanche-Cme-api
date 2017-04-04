@@ -92,12 +92,62 @@
 		th, td
 			border-width 0 0 1px 0 !important
 		td.plots
-			padding 20px 0 10px 0
-			.plot-wrapper
-				position relative
+			position relative
+			padding 0
+			height 4.75in // size for 4" plot below
+			vertical-align top
+			.plot-tabs
+				margin 10px 0 0 10px
+				padding 0
+				list-style none
+				li
+					position relative
+					display inline-block
+				button					
+					padding 2px 2px 2px 20px
+					margin-right 10px
+					font-size 100%
+					background-color transparent
+					border 0
+					outline 0
+					cursor pointer
+					&::before
+						content ""
+						position absolute
+						top 5px
+						left 5px
+						width 10px
+						height 10px
+						background-color rgba(0,0,0,0.3)
+						border-radius 100%
+				li.active button::before
+					background-color #000
+			.plot-tab-content
+				position absolute
+				top 0
+				margin-top 40px // room for tabs
+				right 0
+				bottom 0
+				left 0
 				padding 0 40px
+				overflow hidden
+			.plot-wrapper
+				position absolute
+				left 40px
+				top 30px
+				right 40px
+				bottom 30px
+				transition left 0.3s ease 0s
+			.plot-wrapper.start
+				left -100%
+			.plot-wrapper.end
+				left 100%
+			.plot-wrapper.start.active,
+			.plot-wrapper.end.active
+				left 40px
 			.plot
-				height 4in
+				width 686px // hack: should be width 100%, but flot plots too soon...
+				height 100%
 				.flot-text::before
 					content ''
 					position absolute
@@ -115,12 +165,27 @@
 					height 0
 					border 5px solid transparent
 					border-bottom-color #aaa
+				.flot-x-axis .flot-tick-label:first-child
+					display none
+			.plot-wrapper.single-axis .plot
+				width 660px
+				.flot-text::before
+					right 7px
+				.flot-text::after
+					right 3px
 			.x-axis-label
-				position relative
+				position absolute
+				left 40px
+				right 40px
+				bottom 5px
 				> span
+					display none
+				> span.active
+					display inline
 					position absolute
 					right 0
-				
+				.strong
+					font-weight bold
 			.y-axis-label
 				position absolute
 				top 43%
@@ -162,6 +227,24 @@
 					text-align right
 				.pib::before
 					background-color #ffd42a
+			.carousel-handle
+				position absolute
+				left 40px
+				right 40px
+				bottom 60px
+				button
+					margin 0 2px
+					padding 0
+					width 8px
+					height 8px
+					background-color rgba(0,0,0,0.3)
+					border 0
+					border-radius 100%
+					cursor pointer
+					outline 0
+				button.active
+					background-color black
+					
 				
 	h2.alarm-detail
 		border-top 3px solid #eee

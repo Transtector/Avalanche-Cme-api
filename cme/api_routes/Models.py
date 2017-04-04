@@ -148,9 +148,14 @@ class AlarmManager(metaclass=Singleton):
 
 				return result
 
-			input_voltages_and_PI = gen_fake_phases(208, 60)
-			output_voltages_and_PI = gen_fake_phases(480, 60)
-			output_currents = gen_fake_phases(90, 60)
+			input_voltages_and_PI_START = gen_fake_phases(208, 60)
+			input_voltages_and_PI_END = gen_fake_phases(208, 60)
+
+			output_voltages_and_PI_START = gen_fake_phases(480, 60)
+			output_voltages_and_PI_END = gen_fake_phases(480, 60)
+			
+			output_currents_START = gen_fake_phases(90, 60)
+			output_currents_END = gen_fake_phases(90, 60)
 
 			# Which channel will trigger? (don't include the current channels which use s1)
 			alarm_ch = "ch" + str(random.randint(0, 8))
@@ -165,31 +170,31 @@ class AlarmManager(metaclass=Singleton):
 				"step_ms": 1 / sample_rate,
 				"data": {
 					"ch0": {
-						"s0": [ V[1] for V in input_voltages_and_PI ]
+						"s0": [ V[1] for V in input_voltages_and_PI_START ] + [ V[1] for V in input_voltages_and_PI_END ]
 					},
 					"ch1": {
-						"s0": [ V[2] for V in input_voltages_and_PI ]
+						"s0": [ V[2] for V in input_voltages_and_PI_START ] + [ V[2] for V in input_voltages_and_PI_END ]
 					},
 					"ch2": {
-						"s0": [ V[3] for V in input_voltages_and_PI ]
+						"s0": [ V[3] for V in input_voltages_and_PI_START ] + [ V[3] for V in input_voltages_and_PI_END ]
 					},
 					"ch3": {
-						"s0": [ V[4] for V in input_voltages_and_PI ]
+						"s0": [ V[4] for V in input_voltages_and_PI_START ] + [ V[4] for V in input_voltages_and_PI_END ]
 					},
 					"ch4": {
-						"s0": [ V[1] for V in output_voltages_and_PI ],
-						"s1": [ V[1] for V in output_currents ] 
+						"s0": [ V[1] for V in output_voltages_and_PI_START ] + [ V[1] for V in output_voltages_and_PI_END ],
+						"s1": [ V[1] for V in output_currents_START ] + [ V[1] for V in output_currents_END ]
 					},
 					"ch5": {
-						"s0": [ V[2] for V in output_voltages_and_PI ],
-						"s1": [ V[2] for V in output_currents ]
+						"s0": [ V[2] for V in output_voltages_and_PI_START ] + [ V[2] for V in output_voltages_and_PI_END ],
+						"s1": [ V[2] for V in output_currents_START ] + [ V[2] for V in output_currents_END ]
 					},
 					"ch6": {
-						"s0": [ V[3] for V in output_voltages_and_PI ],
-						"s1": [ V[3] for V in output_currents ]
+						"s0": [ V[3] for V in output_voltages_and_PI_START ] + [ V[3] for V in output_voltages_and_PI_END ],
+						"s1": [ V[3] for V in output_currents_START ] + [ V[3] for V in output_currents_END ]
 					},
 					"ch7": {
-						"s0": [ V[4] for V in output_voltages_and_PI ] 
+						"s0": [ V[4] for V in output_voltages_and_PI_START ] + [ V[4] for V in output_voltages_and_PI_END ] 
 					}
 				}
 			}
