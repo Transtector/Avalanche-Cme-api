@@ -151,8 +151,8 @@ class AlarmManager(metaclass=Singleton):
 			input_voltages_and_PI_START = gen_fake_phases(208, 60)
 			input_voltages_and_PI_END = gen_fake_phases(208, 60)
 
-			output_voltages_and_PI_START = gen_fake_phases(480, 60)
-			output_voltages_and_PI_END = gen_fake_phases(480, 60)
+			output_voltages_and_PI_START = gen_fake_phases(277, 60)
+			output_voltages_and_PI_END = gen_fake_phases(277, 60)
 			
 			output_currents_START = gen_fake_phases(90, 60)
 			output_currents_END = gen_fake_phases(90, 60)
