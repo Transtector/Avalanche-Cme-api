@@ -89,7 +89,8 @@ var AlarmsPanel = React.createClass({
 
 			powerMonitoringSummary: [],
 			alarmSummary: [],
-			alarms: []
+			alarms: [],
+			loading: true
 		}
 	},
 
@@ -115,7 +116,7 @@ var AlarmsPanel = React.createClass({
 		CmeAPI.fakeAlarms()
 			.done(function(data) {
 
-				alert(data);
+				//alert(data);
 
 				// trigger the power monitoring summary build
 				_this._updatePowerMonitoring();
@@ -251,8 +252,7 @@ var AlarmsPanel = React.createClass({
 					</table>
 
 					<h2 className='alarm-detail'>Alarm Details</h2>
-					{this.state.alarms.map(this._renderAlarmDetailTable)}
-
+					{this._renderAlarmDetailTables()}
 
 					<div className='copyright'>
 						<div>Core Monitoring Engine</div>
@@ -526,6 +526,8 @@ var AlarmsPanel = React.createClass({
 
 			_as.push(alarmSummaryItem);
 
+			this.setState({ alarmSummary: _as });
+
 			CmeAPI.alarms({c: ag.channels.join(','), s: null, e: null})
 				.done(function(group_alarms) {
 
@@ -572,7 +574,7 @@ var AlarmsPanel = React.createClass({
 						alarmSummaryItem.avg_duration = duration / alarms_with_end;
 					}
 
-					_this.setState({ alarmSummary: _as, alarms: _alarms });
+					_this.setState({ alarmSummary: _as, alarms: _alarms, loading: false });
 				});
 		}, this);
 	},
@@ -591,61 +593,68 @@ var AlarmsPanel = React.createClass({
 		);
 	},
 
-	_renderAlarmDetailTable: function(alarm, i) {
+	_renderAlarmDetailTables: function() {
 
-		var _this = this,
+		if (this.state.loading) {
+			return <table className='alarm-detail'><tbody><tr><td className='loader'><div className='loaderWrapper'><div className='loader'>Loading...</div></div></td></tr></tbody></table>;
+		}
+
+		return this.state.alarms.map(function(alarm, i) { 
+
+			var _this = this,
 			dateFormat = 'ddd, MMM D h:mm:ss.SSS a',
 			duration = alarm.end_ms ? moment.duration(alarm.end_ms - alarm.start_ms) : null,
 			trigger = this.state.channels[alarm.channel];
 
-		function setPlotTab(e) {
-			var new_alarms = _this.state.alarms.slice();
+			function setPlotTab(e) {
+				var new_alarms = _this.state.alarms.slice();
 
-			new_alarms[i].tab = parseInt(e.target.id.split('_')[1]);
-			_this.setState({ alarms: new_alarms });
-		}
+				new_alarms[i].tab = parseInt(e.target.id.split('_')[1]);
+				_this.setState({ alarms: new_alarms });
+			}
 
-		var tabClass_0 = classNames({ active: alarm.tab == 0 });
-		var tabClass_1 = classNames({ active: alarm.tab == 1 });
-		var tabClass_2 = classNames({ active: alarm.tab == 2 });
+			var tabClass_0 = classNames({ active: alarm.tab == 0 });
+			var tabClass_1 = classNames({ active: alarm.tab == 1 });
+			var tabClass_2 = classNames({ active: alarm.tab == 2 });
 
-		return (
-			<table key={'alarm-detail-table_' + i} className='alarm-detail'>
-				<tbody>
-					<tr>
-						<th className='alarm-group' colSpan='4'>{alarm.group}</th>
-					</tr>
-					<tr>
-						<th>Trigger</th><td>{trigger.name + ', ' + trigger.sensors[alarm.sensor].name + ' (' + alarm.channel + ')'}</td>
-						<th>Type</th><td>{alarm.type}</td>
-					</tr>
-					<tr>
-						<th>Start</th><td>{moment(alarm.start_ms).format(dateFormat)}</td>
-						<th>End</th><td>{alarm.end_ms ? moment(alarm.end_ms).format(dateFormat) : '--'}</td>
-					</tr>
-					<tr>
-						<th>Duration</th><td>{duration ? duration.format('h:mm:ss.SSS') + ' (~' + duration.humanize() + ')' : '--'}</td>
-						<td colSpan='2'></td>
-					</tr>
-					<tr>
-						<td className='plots' colSpan='4'>
-							<ul className='plot-tabs'>
-								<li className={tabClass_0}>
-									<button id='tab_0' onClick={setPlotTab}>Source/Utility Voltage</button>
-								</li>
-								<li className={tabClass_1}>
-									<button id='tab_1' onClick={setPlotTab}>Power Conditioner Voltage</button>
-								</li>
-								<li className={tabClass_2}>
-									<button id='tab_2' onClick={setPlotTab}>Power Conditioner Current</button>
-								</li>
-							</ul>
-							{this._renderAlarmPlots(alarm, i)}
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		);
+			return (
+				<table key={'alarm-detail-table_' + i} className='alarm-detail'>
+					<tbody>
+						<tr>
+							<th className='alarm-group' colSpan='4'>{alarm.group}</th>
+						</tr>
+						<tr>
+							<th>Trigger</th><td>{trigger.name + ', ' + trigger.sensors[alarm.sensor].name + ' (' + alarm.channel + ')'}</td>
+							<th>Type</th><td>{alarm.type}</td>
+						</tr>
+						<tr>
+							<th>Start</th><td>{moment(alarm.start_ms).format(dateFormat)}</td>
+							<th>End</th><td>{alarm.end_ms ? moment(alarm.end_ms).format(dateFormat) : '--'}</td>
+						</tr>
+						<tr>
+							<th>Duration</th><td>{duration ? duration.format('h:mm:ss.SSS') + ' (~' + duration.humanize() + ')' : '--'}</td>
+							<td colSpan='2'></td>
+						</tr>
+						<tr>
+							<td className='plots' colSpan='4'>
+								<ul className='plot-tabs'>
+									<li className={tabClass_0}>
+										<button id='tab_0' onClick={setPlotTab}>Source/Utility Voltage</button>
+									</li>
+									<li className={tabClass_1}>
+										<button id='tab_1' onClick={setPlotTab}>Power Conditioner Voltage</button>
+									</li>
+									<li className={tabClass_2}>
+										<button id='tab_2' onClick={setPlotTab}>Power Conditioner Current</button>
+									</li>
+								</ul>
+								{this._renderAlarmPlots(alarm, i)}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			);
+		}, this);
 	},
 
 	_renderAlarmPlots: function(alarm, i) {
@@ -826,12 +835,6 @@ var AlarmsPanel = React.createClass({
 				</div>
 				
 				{ alarm.tab !== 2 ? <div className='y-axis-label right'>Phase Imbalance (%)</div> : null }
-
-				{
-					alarm.data
-						? null
-						: <div className={'loaderWrapper'}><div className='loader'>Loading...</div></div>
-				}
 			</div>
 		)
 	},
