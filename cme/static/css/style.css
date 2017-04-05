@@ -2023,7 +2023,7 @@ li.input-group-cluster > .btn:disabled {
 .panel#alarms table.alarm-detail td {
   border-width: 0 0 1px 0 !important;
 }
-.panel#alarms table.alarm-detail td.loader {
+.panel#alarms table.alarm-detail > td.loader {
   position: relative;
   height: 220px;
 }
@@ -2032,6 +2032,16 @@ li.input-group-cluster > .btn:disabled {
   padding: 0;
   height: 4.75in;
   vertical-align: top;
+}
+.panel#alarms table.alarm-detail td.plots .loaderWrapper {
+  left: 80px;
+  top: 80px;
+  right: 80px;
+  bottom: 60px;
+}
+.panel#alarms table.alarm-detail td.plots .loader {
+  margin: auto;
+  top: 50%;
 }
 .panel#alarms table.alarm-detail td.plots .plot-tabs {
   margin: 10px 0 0 10px;

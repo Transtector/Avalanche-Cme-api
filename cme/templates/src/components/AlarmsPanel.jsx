@@ -597,7 +597,13 @@ var AlarmsPanel = React.createClass({
 	_renderAlarmDetailTables: function() {
 
 		if (this.state.loading) {
-			return <table className='alarm-detail'><tbody><tr><td className='loader'><div className='loaderWrapper'><div className='loader'>Loading...</div></div></td></tr></tbody></table>;
+			return (
+				<table className='alarm-detail'><tbody><tr>
+					<td className='loader'>
+						<div className='loaderWrapper'><div className='loader'>Loading...</div></div>
+					</td>
+				</tr></tbody></table>
+			);
 		}
 
 		return this.state.alarms.map(function(alarm, i) { 
@@ -638,6 +644,7 @@ var AlarmsPanel = React.createClass({
 						</tr>
 						<tr>
 							<td className='plots' colSpan='4'>
+								<div className='loaderWrapper'><div className='loader'>Loading...</div></div>
 								<ul className='plot-tabs'>
 									<li className={tabClass_0}>
 										<button id='tab_0' onClick={setPlotTab}>Source/Utility Voltage</button>
