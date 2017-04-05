@@ -111,18 +111,18 @@ var AlarmsPanel = React.createClass({
 		}, this);
 
 
+		// trigger the power monitoring summary build
+		this._updatePowerMonitoring();
+
+		// load the available weeks to enable the week chooser
+		this._updateHistoryWeeks();
+
 		// CLEAR/LOAD a batch of FAKE Alarms
 		var _this = this;
 		CmeAPI.fakeAlarms()
 			.done(function(data) {
 
 				//alert(data);
-
-				// trigger the power monitoring summary build
-				_this._updatePowerMonitoring();
-
-				// load the available weeks to enable the week chooser
-				_this._updateHistoryWeeks();
 
 				// load alarms for the week
 				_this._updateAlarms();
@@ -871,5 +871,4 @@ var AlarmsPanel = React.createClass({
 	}
 });
 
-window.moment = moment;
 module.exports = AlarmsPanel;
