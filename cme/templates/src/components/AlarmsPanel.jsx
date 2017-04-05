@@ -599,7 +599,7 @@ var AlarmsPanel = React.createClass({
 		if (this.state.loading) {
 			return (
 				<table className='alarm-detail'><tbody><tr>
-					<td className='loader'>
+					<td className='main-loader'>
 						<div className='loaderWrapper'><div className='loader'>Loading...</div></div>
 					</td>
 				</tr></tbody></table>

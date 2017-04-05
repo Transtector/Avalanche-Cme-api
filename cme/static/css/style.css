@@ -2023,7 +2023,7 @@ li.input-group-cluster > .btn:disabled {
 .panel#alarms table.alarm-detail td {
   border-width: 0 0 1px 0 !important;
 }
-.panel#alarms table.alarm-detail > td.loader {
+.panel#alarms table.alarm-detail td.main-loader {
   position: relative;
   height: 220px;
 }
