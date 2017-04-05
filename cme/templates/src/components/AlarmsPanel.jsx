@@ -173,8 +173,9 @@ var AlarmsPanel = React.createClass({
 				: moment();
 
 		// dateCode: YYYYMMDD
-		var cmeOrHost = this.state.device.host || this.state.device.cme;
-		var dateCode = moment(cmeOrHost.dateCode).format('MMM D YYYY');
+		var cme = this.state.device.cme;
+		var host = this.state.device.host;
+		var dateCode = moment(host.dateCode || cme.dateCode).format('MMM D YYYY');
 
 		return (
 			<div className="panel" id="alarms">
