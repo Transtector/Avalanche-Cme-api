@@ -105,10 +105,11 @@ class AlarmManager(metaclass=Singleton):
 		for c in range(0, count):
 
 			# start randomly some days * hours * milliseconds before now
-			start_ms = int(round(time.time() * 1000)) - random.randint(0, 2) * random.randint(1, 23) * random.randint(0, 3599999)
+			start_ms = int(round(time.time() * 1000)) - random.randint(1, 2) * random.randint(1, 23) * random.randint(1, 3599999)
 
-			# end 1 - 5 minutes after start
+			# end 1 - 5 minutes after start, but no greater than now
 			end_ms = start_ms + random.randint(1, 4) * 60 * 1000 + random.randint(0, 59) * 1000 + random.randint(0, 999)
+			end_ms = min(time.time() * 1000, end_ms)
 
 			# generate fake waveform data for the alarms
 			sample_rate = 7.8125 * 1000 # 7.8125 kHz
@@ -204,7 +205,7 @@ class AlarmManager(metaclass=Singleton):
 			self._cursor.execute(insert)
 		
 		self._connection.commit()
-		return alarms
+		return len(alarms)
 
 
 	def _clear_fake_alarms(self):
@@ -239,6 +240,9 @@ class AlarmManager(metaclass=Singleton):
 		alarms = []
 		for alarm in self._cursor.execute('all', query):
 			alarms.append(Alarm(alarm))
+
+
+		#print("\n\t*** LOAD_ALARMS QUERY FOUND {} ALARMS! ***\n".format(len(alarms)))
 
 		return alarms
 
