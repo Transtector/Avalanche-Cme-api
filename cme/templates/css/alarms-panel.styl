@@ -100,10 +100,7 @@
 			height 4.75in // size for 4" plot below
 			vertical-align top
 			.loaderWrapper
-				left 80px
-				top 80px
-				right 80px
-				bottom 60px				
+				background-color rgba(0,0,0,0.3)
 			.loader
 				margin auto
 				top 50%
@@ -159,25 +156,23 @@
 			.plot
 				width 686px // hack: should be width 100%, but flot plots too soon...
 				height 100%
-				.flot-text::before
-					content ''
-					position absolute
-					right 35px
-					bottom 0
-					width 2px
-					height 18px
-					background-color #aaa
-				.flot-text::after
-					content ''
-					position absolute
-					right 31px
-					bottom 18px
-					width 0
-					height 0
-					border 5px solid transparent
-					border-bottom-color #aaa
 				.flot-x-axis .flot-tick-label:first-child
-					display none
+					&::before, &::after
+						content ''
+						position absolute
+						right 2px
+						bottom -10px
+						width 2px
+						height 10px
+						background-color #aaa
+					&::after
+						width 0
+						height 0
+						left -2px
+						bottom -2px
+						background-color transparent
+						border 5px solid transparent
+						border-bottom-color #aaa
 			.plot-wrapper.single-axis .plot
 				width 660px
 				.flot-text::before

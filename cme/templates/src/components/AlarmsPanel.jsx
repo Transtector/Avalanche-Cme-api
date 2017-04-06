@@ -43,26 +43,31 @@ function toPercentage(value, nominal) {
 // These channels must be available to process this report
 var CHANNELS = ['ch0', 'ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6', 'ch7'];
 
-// These are grouped according to channel, sensor for 
+// These are grouped according to channel and sensor for 
 // processing the Power Monitoring Summary.
-var CHANNEL_GROUPS = [
-	[ ['ch0', 's0'], ['ch1', 's0'], ['ch2', 's0'], ['ch3', 's0'] ],
-	[ ['ch4', 's0'], ['ch5', 's0'], ['ch6', 's0'], ['ch7', 's0'] ],
-	[ ['ch4', 's1'], ['ch5', 's1'], ['ch6', 's1'] ]
-]
+var PM_GROUPS = [{
+	name: 'Source/Utility Voltage',
+	channels: [ 'ch0', 'ch1', 'ch2', 'ch3' ],
+	sensors: ['s0', 's0', 's0', 's0']
+},{
+	name: 'Power Conditioner Voltage',
+	channels: [ 'ch4', 'ch5', 'ch6', 'ch7' ],
+	sensors: ['s0', 's0', 's0', 's0']
+},{
+	name: 'Power Conditioner Current',
+	channels: [ 'ch4', 'ch5', 'ch6' ],
+	sensors: ['s1', 's1', 's1']
+}]
 
 // These are grouped according to channels processed for the
 // Alarms Summary.
-var ALARM_GROUPS = [ {
-		name: 'Source/Utility',
-		channels: ['ch0', 'ch1', 'ch2', 'ch3']
-	},{
-		name: 'Power Conditioner', 
-		channels: ['ch4', 'ch5', 'ch6', 'ch7'] 
-	}
-]
-
-
+var ALARM_GROUPS = [{
+	name: 'Source/Utility',
+	channels: ['ch0', 'ch1', 'ch2', 'ch3']
+},{
+	name: 'Power Conditioner', 
+	channels: ['ch4', 'ch5', 'ch6', 'ch7'] 
+}]
 
 var AlarmsPanel = React.createClass({
 
@@ -81,11 +86,15 @@ var AlarmsPanel = React.createClass({
 
 			powerMonitoringSummary: [],
 			alarmSummary: [],
-			alarms: []
+			alarms: [],
+
+			cause: 'INIT'
 		}
 	},
 
 	componentDidMount: function() {
+
+		var channels_already_loaded = true;
 
 		Store.addChangeListener(Constants.CONFIG, this._onStoreChange);
 		Store.addChangeListener(Constants.DEVICE, this._onStoreChange);
@@ -97,27 +106,29 @@ var AlarmsPanel = React.createClass({
 
 			// if not found - fire a request
 			if (!this.state.channels[chId]) {
+				channels_already_loaded = false;
 				Actions.channel(chId, null, null); // this will update the Store.channel_objs
 			}
 		}, this);
 
+		// generate some fake alarms
+		CmeAPI.fakeAlarms().done(function(data) { console.log(data); });
 
-		// trigger the power monitoring summary build
-		this._updatePowerMonitoring();
+		// If we're mounting and have NOT had to request any
+		// channels (because they were already loaded in the store)
+		// then we'll trigger the initial updates here.  Otherwise,
+		// the channel change(s) will trigger the updates.
+		if (channels_already_loaded) {
 
-		// load the available weeks to enable the week chooser
-		this._updateHistoryWeeks();
+			// trigger the power monitoring summary build
+			this._requestPowerMonitoring();
 
-		// CLEAR/LOAD a batch of FAKE Alarms
-		var _this = this;
-		CmeAPI.fakeAlarms()
-			.done(function(data) {
+			// load the available weeks to enable the week chooser
+			this._updateHistoryWeeks();
 
-				//alert(data);
-
-				// load alarms for the week
-				_this._updateAlarms();
-			});
+			// read the weekly alarms
+			this._requestAlarms();
+		}
 	},
 
 	componentWillUnmount: function() {
@@ -131,6 +142,8 @@ var AlarmsPanel = React.createClass({
 	},
 
 	render: function() {
+
+		if (!this._channelsReady()) return null;
 
 		if (!Object.keys(this.state.config).length || !Object.keys(this.state.device).length) return null;
 
@@ -161,12 +174,14 @@ var AlarmsPanel = React.createClass({
 			// week, then endDate is right now.
 			endDate = this.state.week != this.state.weeks[0] 
 				? moment(startDate).endOf('week') 
-				: moment();
+				: moment(),
 
-		// dateCode: YYYYMMDD
-		var cme = this.state.device.cme;
-		var host = this.state.device.host;
-		var dateCode = moment(host.dateCode || cme.dateCode).format('MMM D YYYY');
+			// dateCode: YYYYMMDD
+			cme = this.state.device.cme,
+			host = this.state.device.host,
+			dateCode = moment(host.dateCode || cme.dateCode).format('MMM D YYYY');
+
+		//console.log("Render Alarms Panel (because " + this.state.cause + "): " + this.state.alarms.length + " alarms.");
 
 		return (
 			<div className="panel" id="alarms">
@@ -247,7 +262,7 @@ var AlarmsPanel = React.createClass({
 					{
 						this.state.alarms.map(function(a, i) {
 							return (
-								<AlarmDetailTable key={i} alarm={a} trigger={this.state.channels[a.channel]} />
+								<AlarmDetailTable key={'alarm_detail_' + i} alarm={a} trigger={this.state.channels[a.channel]} />
 							);
 						}, this)
 					}
@@ -270,7 +285,7 @@ var AlarmsPanel = React.createClass({
 			}, siteInfo);
 	},
 
-	_updatePowerMonitoring: function() {
+	_requestPowerMonitoring: function() {
 		
 		var _this = this,
 			_pms = [];
@@ -279,22 +294,26 @@ var AlarmsPanel = React.createClass({
 
 		// console.log('Processing power monitoring summary...');
 
-		CHANNEL_GROUPS.forEach(function(chg, i) {
+		PM_GROUPS.forEach(function(group, group_index) {
 
 			var NA = '--',
-				desc = (i == 0) ? 'Source/Utility' : 'Power Conditioner';
+				desc = group.name,
+				channel_0 = this.state.channels[group.channels[0]];
 
-			if (!this.state.channels[chg[0][0]]) return;
-
-			desc += ' ' + this.state.channels[chg[0][0]].description.split('P')[0];
+			if (group_index < 2) {
+				desc += ' ' + channel_0.description.split('P')[0];
+			}
 
 			_pms.push(desc);  // channel group description
 
-			chg.forEach(function(ch_s, j) {
-				var channel = this.state.channels[ch_s[0]],
-					sensor = channel.sensors[ch_s[1]],
-					index = (i * 5) + (j + 1);
+			group.channels.forEach(function(ch, channel_index) {
+				var channel = this.state.channels[ch],
+					sensor = channel.sensors[group.sensors[channel_index]],
 
+					// Channel index is calculated thusly because there are 3
+					// groups of 5 rows, and rows 1, 2, 3, and 4 are the 
+					// channel results with row 0 as the group title.
+					index = (group_index * 5) + (channel_index + 1);
 
 				var spec_low = sensor.thresholds.find(function(th){
 					return th.classification == 'ALARM' && th.direction == 'MIN';
@@ -312,7 +331,6 @@ var AlarmsPanel = React.createClass({
 					spec_hi = spec_hi.value.toFixed(1);
 				else
 					spec_hi = NA;
-
 
 				sensor.spec_low = spec_low;
 				sensor.spec_hi = spec_hi;
@@ -405,7 +423,12 @@ var AlarmsPanel = React.createClass({
 						// add results back to correct row @ index
 						_pms[index] = sensor;
 
-						_this.setState({ powerMonitoringSummary: _pms });				
+						// update initially (index == 0) and after the last
+						// sensor history has been retrieved (index == 13).
+						if (index == 1 || index == 13) {
+							// update state for each channel group
+							_this._updatePowerMonitoring(_pms, 'PMS_' + index)
+						}
 					});
 			}, this);
 		}, this);
@@ -501,10 +524,10 @@ var AlarmsPanel = React.createClass({
 			weeks.push(-i);
 		}
 
-		this.setState({ weeks: weeks, historyStart: historyStart });
+		this.setState({ weeks: weeks, historyStart: historyStart, cause: 'WEEKS' });
 	},
 
-	_updateAlarms: function() {
+	_requestAlarms: function() {
 		var _this = this,
 			_as = [],
 			_alarms = [];
@@ -524,8 +547,7 @@ var AlarmsPanel = React.createClass({
 
 			_as.push(alarmSummaryItem);
 
-			// set state to show report build in-progress
-			this.setState({ alarmSummary: _as, alarms: [] });
+			console.log("Requesting alarms for ALARM GROUP " + i);
 
 			CmeAPI.alarms({c: ag.channels.join(','), s: null, e: null})
 				.done(function(group_alarms) {
@@ -533,7 +555,7 @@ var AlarmsPanel = React.createClass({
 					var duration = 0,
 						alarms_with_end = 0;
 
-					//console.log("ALARMS received: " + group_alarms);
+					console.log('GROUP[' + i + '] received '+ group_alarms.length + ' alarms.');
 
 					group_alarms.forEach(function(a) {
 
@@ -573,9 +595,8 @@ var AlarmsPanel = React.createClass({
 						alarmSummaryItem.avg_duration = duration / alarms_with_end;
 					}
 
-					if (i == ALARM_GROUPS.length - 1) {
-						// update state after all alarm group queries have responded
-						_this.setState({ alarmSummary: _as, alarms: _alarms });
+					if (i == 0 || i == ALARM_GROUPS.length - 1) {
+						_this._updateAlarms(_as, _alarms, 'ASS_' + i);
 					}
 				});
 		}, this);
@@ -613,17 +634,28 @@ var AlarmsPanel = React.createClass({
 		var store = Store.getState();
 		this.setState({ 
 			config: store.config,
-			device: store.device
+			device: store.device,
+			cause: 'STORE'
 		});
 	},
 
 	_onChannelChange: function() {
 		// update the state channels and kick off power monitoring summary.
-		this.setState({ channels: Store.getState().channel_objs }, function() {
-			this._updatePowerMonitoring();
+		this.setState({ channels: Store.getState().channel_objs, cause: 'CHANS' }, function() {
+			this._requestPowerMonitoring();
 			this._updateHistoryWeeks();
-			this._updateAlarms();
+			this._requestAlarms();
 		});
+	},
+
+	_updatePowerMonitoring: function(summary, cause) {
+
+		this.setState({ powerMonitoringSummary: summary, cause: cause });
+	},
+
+	_updateAlarms: function(summary, alarms, cause) {
+		// update state after all alarm group queries have responded
+		this.setState({ alarmSummary: summary, alarms: alarms, cause: cause });
 	}
 });
 

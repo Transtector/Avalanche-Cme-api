@@ -2034,10 +2034,7 @@ li.input-group-cluster > .btn:disabled {
   vertical-align: top;
 }
 .panel#alarms table.alarm-detail td.plots .loaderWrapper {
-  left: 80px;
-  top: 80px;
-  right: 80px;
-  bottom: 60px;
+  background-color: rgba(0,0,0,0.3);
 }
 .panel#alarms table.alarm-detail td.plots .loader {
   margin: auto;
@@ -2114,27 +2111,24 @@ li.input-group-cluster > .btn:disabled {
   width: 686px;
   height: 100%;
 }
-.panel#alarms table.alarm-detail td.plots .plot .flot-text::before {
+.panel#alarms table.alarm-detail td.plots .plot .flot-x-axis .flot-tick-label:first-child::before,
+.panel#alarms table.alarm-detail td.plots .plot .flot-x-axis .flot-tick-label:first-child::after {
   content: '';
   position: absolute;
-  right: 35px;
-  bottom: 0;
+  right: 2px;
+  bottom: -10px;
   width: 2px;
-  height: 18px;
+  height: 10px;
   background-color: #aaa;
 }
-.panel#alarms table.alarm-detail td.plots .plot .flot-text::after {
-  content: '';
-  position: absolute;
-  right: 31px;
-  bottom: 18px;
+.panel#alarms table.alarm-detail td.plots .plot .flot-x-axis .flot-tick-label:first-child::after {
   width: 0;
   height: 0;
+  left: -2px;
+  bottom: -2px;
+  background-color: transparent;
   border: 5px solid transparent;
   border-bottom-color: #aaa;
-}
-.panel#alarms table.alarm-detail td.plots .plot .flot-x-axis .flot-tick-label:first-child {
-  display: none;
 }
 .panel#alarms table.alarm-detail td.plots .plot-wrapper.single-axis .plot {
   width: 660px;
