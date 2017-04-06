@@ -12,6 +12,8 @@ var Constants = require('../Constants');
 var Actions = require('../Actions');
 var Store = require('../Store');
 
+var AlarmDetailTable = require('./AlarmDetailTable');
+
 var WeekChooser = require('./WeekChooser');
 
 var CmeAPI = require('../CmeAPI');
@@ -28,8 +30,6 @@ var classNames = require('classnames');
 
 // application-level key press handler
 var key = require('../keymaster/keymaster.js');
-
-var flot = require('../Flot/jquery.flot');
 
 function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
 
@@ -63,14 +63,6 @@ var ALARM_GROUPS = [ {
 ]
 
 
-var	PLOT_COLORS = {
-	'VA': '#ff0000',
-	'VB': '#00ff00',
-	'VC': '#0000ff',
-	'PIB': '#ffd42a',
-	'GRID': '#cacaca',
-	'FILL': 0.1
-}
 
 var AlarmsPanel = React.createClass({
 
@@ -89,8 +81,7 @@ var AlarmsPanel = React.createClass({
 
 			powerMonitoringSummary: [],
 			alarmSummary: [],
-			alarms: [],
-			loading: true
+			alarms: []
 		}
 	},
 
@@ -253,7 +244,13 @@ var AlarmsPanel = React.createClass({
 					</table>
 
 					<h2 className='alarm-detail'>Alarm Details</h2>
-					{this._renderAlarmDetailTables()}
+					{
+						this.state.alarms.map(function(a, i) {
+							return (
+								<AlarmDetailTable key={i} alarm={a} trigger={this.state.channels[a.channel]} />
+							);
+						}, this)
+					}
 
 					<div className='copyright'>
 						<div>Core Monitoring Engine</div>
@@ -514,7 +511,7 @@ var AlarmsPanel = React.createClass({
 
 		if (!this._channelsReady()) return;		
 
-		ALARM_GROUPS.forEach(function(ag) {
+		ALARM_GROUPS.forEach(function(ag, i) {
 			
 			var alarmSummaryItem = { 
 				name: ag.name, 
@@ -527,7 +524,8 @@ var AlarmsPanel = React.createClass({
 
 			_as.push(alarmSummaryItem);
 
-			this.setState({ alarmSummary: _as });
+			// set state to show report build in-progress
+			this.setState({ alarmSummary: _as, alarms: [] });
 
 			CmeAPI.alarms({c: ag.channels.join(','), s: null, e: null})
 				.done(function(group_alarms) {
@@ -568,14 +566,17 @@ var AlarmsPanel = React.createClass({
 
 						// push alarm to state and add "ag.name" as the alarm group name
 						// along with the active tab (0) and zone (0)
-						_alarms.push(Object.assign({ group: ag.name, tab: 0, zone: 0 }, a));
+						_alarms.push(Object.assign({ group: ag.name }, a));
 					});
 
 					if (alarms_with_end) {
 						alarmSummaryItem.avg_duration = duration / alarms_with_end;
 					}
 
-					_this.setState({ alarmSummary: _as, alarms: _alarms, loading: false });
+					if (i == ALARM_GROUPS.length - 1) {
+						// update state after all alarm group queries have responded
+						_this.setState({ alarmSummary: _as, alarms: _alarms });
+					}
 				});
 		}, this);
 	},
@@ -592,259 +593,6 @@ var AlarmsPanel = React.createClass({
 				<td>{alarmSummary.avg_duration ? moment.duration(alarmSummary.avg_duration).humanize() : '--'}</td>
 			</tr>
 		);
-	},
-
-	_renderAlarmDetailTables: function() {
-
-		if (this.state.loading) {
-			return (
-				<table className='alarm-detail'><tbody><tr>
-					<td className='main-loader'>
-						<div className='loaderWrapper'><div className='loader'>Loading...</div></div>
-					</td>
-				</tr></tbody></table>
-			);
-		}
-
-		return this.state.alarms.map(function(alarm, i) { 
-
-			var _this = this,
-			dateFormat = 'ddd, MMM D h:mm:ss.SSS a',
-			duration = alarm.end_ms ? moment.duration(alarm.end_ms - alarm.start_ms) : null,
-			trigger = this.state.channels[alarm.channel];
-
-			function setPlotTab(e) {
-				var new_alarms = _this.state.alarms.slice();
-
-				new_alarms[i].tab = parseInt(e.target.id.split('_')[1]);
-				_this.setState({ alarms: new_alarms });
-			}
-
-			var tabClass_0 = classNames({ active: alarm.tab == 0 });
-			var tabClass_1 = classNames({ active: alarm.tab == 1 });
-			var tabClass_2 = classNames({ active: alarm.tab == 2 });
-
-			return (
-				<table key={'alarm-detail-table_' + i} className='alarm-detail'>
-					<tbody>
-						<tr>
-							<th className='alarm-group' colSpan='4'>{alarm.group}</th>
-						</tr>
-						<tr>
-							<th>Trigger</th><td>{trigger.name + ', ' + trigger.sensors[alarm.sensor].name + ' (' + alarm.channel + ')'}</td>
-							<th>Type</th><td>{alarm.type}</td>
-						</tr>
-						<tr>
-							<th>Start</th><td>{moment(alarm.start_ms).format(dateFormat)}</td>
-							<th>End</th><td>{alarm.end_ms ? moment(alarm.end_ms).format(dateFormat) : '--'}</td>
-						</tr>
-						<tr>
-							<th>Duration</th><td>{duration ? duration.format('h:mm:ss.SSS') + ' (~' + duration.humanize() + ')' : '--'}</td>
-							<td colSpan='2'></td>
-						</tr>
-						<tr>
-							<td className='plots' colSpan='4'>
-								<div className='loaderWrapper'><div className='loader'>Loading...</div></div>
-								<ul className='plot-tabs'>
-									<li className={tabClass_0}>
-										<button id='tab_0' onClick={setPlotTab}>Source/Utility Voltage</button>
-									</li>
-									<li className={tabClass_1}>
-										<button id='tab_1' onClick={setPlotTab}>Power Conditioner Voltage</button>
-									</li>
-									<li className={tabClass_2}>
-										<button id='tab_2' onClick={setPlotTab}>Power Conditioner Current</button>
-									</li>
-								</ul>
-								{this._renderAlarmPlots(alarm, i)}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			);
-		}, this);
-	},
-
-	_renderAlarmPlots: function(alarm, i) {
-		var _this = this;
-				
-		function dataSeries(a, end) {
-			var series = [],
-				traces = [ [], [], [], [] ],
-
-				N = a.data.ch0.s0.length, // 2X data points if start/end both included in alarm data
-
-				step = a.step_ms, // time between points
-
-				start_time = (a.end_ms) // if there is an end_ms to the event
-					? -(N/2 - 1) * a.step_ms // just use half the data points
-					: -(N - 1) * a.step_ms, // else use all points
-
-				index_end = (a.end_ms)
-					? N/2
-					: N;
-
-			// assemble live and consolidated data traces
-			for (var i = 0; i < index_end; i++) {
-
-				var t = 1000 * (start_time + step * i),
-					index = (a.end_ms && end) ? i + N/2 : i;
-
-				// put phase imbalance trace first, so it renders under the phase traces
-				switch (a.tab) {
-
-					case 1: // Load Voltages & PI
-						traces[0].push([ t, alarm.data['ch7']['s0'][index] ]); // phase imbalance
-						traces[1].push([ t, alarm.data['ch4']['s0'][index] ]); // phase A
-						traces[2].push([ t, alarm.data['ch5']['s0'][index] ]); // phase B
-						traces[3].push([ t, alarm.data['ch6']['s0'][index] ]); // phase C
-						break;
-
-					case 2: // Load Currents (no PI)
-						traces[0].push([ t, alarm.data['ch4']['s1'][index] ]); // phase A
-						traces[1].push([ t, alarm.data['ch5']['s1'][index] ]); // phase B
-						traces[2].push([ t, alarm.data['ch6']['s1'][index] ]); // phase C
-						break;
-
-					default: // Source Voltages & PI
-						traces[0].push([ t, alarm.data['ch3']['s0'][index] ]); // phase imbalance
-						traces[1].push([ t, alarm.data['ch0']['s0'][index] ]); // phase A
-						traces[2].push([ t, alarm.data['ch1']['s0'][index] ]); // phase B
-						traces[3].push([ t, alarm.data['ch2']['s0'][index] ]); // phase C
-				}
-			}
-
-			// push data traces into flot data series
-			if (a.tab != 2) {
-				series.push({ data: traces[0], yaxis: 2, color: PLOT_COLORS['PIB'], lines: { lineWidth: 1 }, shadowSize: 0 });
-				series.push({ data: traces[1], yaxis: 1, color: PLOT_COLORS['VA'] });
-				series.push({ data: traces[2], yaxis: 1, color: PLOT_COLORS['VB'] });
-				series.push({ data: traces[3], yaxis: 1, color: PLOT_COLORS['VC'] });
-			} else {
-				series.push({ data: traces[0], yaxis: 1, color: PLOT_COLORS['VA'] });
-				series.push({ data: traces[1], yaxis: 1, color: PLOT_COLORS['VB'] });
-				series.push({ data: traces[2], yaxis: 1, color: PLOT_COLORS['VC'] });				
-			}
-
-			return series;
-		}
-		
-		function plotOptions() {
-
-			return {
-				yaxes: [ {}, { 
-					alignTicksWithAxis: 1,
-					position: 'right'
-				}],
-				grid: {
-					margin: 2,
-					backgroundColor: { colors: [ "#fff", "#eee" ] },
-					color: PLOT_COLORS['GRID']
-				}
-			}
-		}
-
-		function updatePlot(el) {
-			if (!alarm || !alarm.data || !el) return;
-
-			// generate the plot here
-			var plot = $.plot($(el), dataSeries(alarm, el.className.match(/end/i)), plotOptions());
-		}
-
-		function renderLegend(tab) {
-			var traceA, traceB, traceC, traceD;
-
-			switch (tab) {
-
-				case 1: // Power Conditioner Voltages - WYE connected
-					traceA = 'Va';
-					traceB = 'Vb';
-					traceC = 'Vc';
-					traceD = 'Phs. Imb.';
-					break;
-
-				case 2: // Power Conditioner Currents (no Phase Imbalance)
-					traceA = 'Ia';
-					traceB = 'Ib';
-					traceC = 'Ic';
-					break;
-
-				default: // Source/Utility Voltages - DELTA connected
-					traceA = 'Vab';
-					traceB = 'Vbc';
-					traceC = 'Vca';
-					traceD = 'Phs. Imb.';
-			}
-
-
-			return (
-				<table className='legend'><tbody>
-					<tr>
-						<td className='ph-A'>{traceA}</td>
-						<td className='ph-B'>{traceB}</td>
-						<td className='ph-C'>{traceC}</td>
-						{ traceD ? <td className='pib'>{traceD}</td> : null }
-					</tr>
-				</tbody></table>
-			);
-		}
-
-		function setPlotZone() {
-			var new_alarms = _this.state.alarms.slice(),
-				alarm_index = new_alarms.indexOf(alarm);
-				
-			if (alarm_index >= 0) {
-				new_alarms[alarm_index].zone = alarm.zone ? 0 : 1;
-				_this.setState({ alarms: new_alarms });
-			} else {
-				alert("Hey something bad just happened.");
-			}
-		}
-
-		var plotWrapperClass_start = classNames('plot-wrapper start', { 'active': alarm.zone == 0, 'single-axis': alarm.tab == 2 });
-		var plotWrapperClass_end = classNames('plot-wrapper end', { 'active': alarm.zone == 1, 'single-axis': alarm.tab == 2 });
-
-		var carousel_start = classNames({ 'active': alarm.zone == 0 });
-		var carousel_end = classNames({ 'active': alarm.zone == 1 });
-
-		return (
-			<div className='plot-tab-content'>
-
-				{renderLegend(alarm.tab)}
-
-				<div className={plotWrapperClass_start}>
-					<div className='plot start' ref={updatePlot}></div>
-				</div>
-
-				<div className={plotWrapperClass_end}>
-					<div className='plot end' ref={updatePlot}></div>
-				</div>
-
-				<div className='carousel-handle'>
-					<button title='Show event start' className={carousel_start} onClick={setPlotZone}/>
-					<button title='Show event end' className={carousel_end} onClick={setPlotZone} />
-				</div>
-
-				<div className='x-axis-label'>Time To Alarm (ms) 
-					
-					<span className={carousel_start}>
-						<span className='strong'>Alarm Start: </span>
-						<span> {moment(alarm.start_ms).format("h:mm:ss.SSS a")}</span>
-					</span>
-
-					<span className={carousel_end}>
-						<span className='strong'>Alarm End: </span>
-						<span>{moment(alarm.end_ms).format("h:mm:ss.SSS a")}</span>
-					</span>
-				</div>
-				
-				<div className='y-axis-label left'>
-					{ alarm.tab !== 2 ? 'Phase Voltage (V)' : 'Phase Current (A)' }
-				</div>
-				
-				{ alarm.tab !== 2 ? <div className='y-axis-label right'>Phase Imbalance (%)</div> : null }
-			</div>
-		)
 	},
 
 	_showWeekChooser: function() {
