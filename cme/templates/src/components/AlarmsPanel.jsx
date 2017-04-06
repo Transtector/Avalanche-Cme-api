@@ -94,39 +94,32 @@ var AlarmsPanel = React.createClass({
 
 	componentDidMount: function() {
 
-		var channels_already_loaded = true;
+		// generate some fake alarms
+		CmeAPI.fakeAlarms().done(function(data) { console.log(data); });
 
 		Store.addChangeListener(Constants.CONFIG, this._onStoreChange);
 		Store.addChangeListener(Constants.DEVICE, this._onStoreChange);
 
-		CHANNELS.forEach(function(chId) {
+		// make sure all required channels are loaded into the Store
 
-			// listen for changes to the channel
-			Store.addChangeListener(Constants.CHANNEL + chId.toUpperCase(), this._onChannelChange);
+		if (!this._channelsLoaded(this.state.channels)) {
 
-			// if not found - fire a request
-			if (!this.state.channels[chId]) {
-				channels_already_loaded = false;
-				Actions.channel(chId, null, null); // this will update the Store.channel_objs
-			}
-		}, this);
+			// Load missing channels into Store
+			CHANNELS.forEach(function(chId) {
 
-		// generate some fake alarms
-		CmeAPI.fakeAlarms().done(function(data) { console.log(data); });
+				// if not found - add a listener and fire a request to load the channel
+				if (!this.state.channels[chId]) {
+					// listen for changes to the channel
+					Store.addChangeListener(Constants.CHANNEL + chId.toUpperCase(), this._onChannelLoaded);
 
-		// If we're mounting and have NOT had to request any
-		// channels (because they were already loaded in the store)
-		// then we'll trigger the initial updates here.  Otherwise,
-		// the channel change(s) will trigger the updates.
-		if (channels_already_loaded) {
+					Actions.channel(chId, null, null); // this will update the Store.channel_objs
+				}
+			}, this);
 
-			// trigger the power monitoring summary build
+		} else {
+			// Fire these requests off
 			this._requestPowerMonitoring();
-
-			// load the available weeks to enable the week chooser
-			this._updateHistoryWeeks();
-
-			// read the weekly alarms
+			this._requestHistory();
 			this._requestAlarms();
 		}
 	},
@@ -142,8 +135,6 @@ var AlarmsPanel = React.createClass({
 	},
 
 	render: function() {
-
-		if (!this._channelsReady()) return null;
 
 		if (!Object.keys(this.state.config).length || !Object.keys(this.state.device).length) return null;
 
@@ -279,18 +270,17 @@ var AlarmsPanel = React.createClass({
 		);
 	},
 
-	_renderSiteInfoRows: function(siteInfo) {
-		return Object.keys(siteInfo).map(function (k, i) {
-				return (<tr key={'site-info-row_' + i}><th>{k}</th><td>{this[k]}</td></tr>);
-			}, siteInfo);
+	_channelsLoaded: function(channels) {
+		// confirm all required channels are present, otherwise, return null
+		return CHANNELS.every(function(chId) {
+			return !!channels[chId];
+		}, this);
 	},
 
 	_requestPowerMonitoring: function() {
 		
 		var _this = this,
 			_pms = [];
-
-		if (!this._channelsReady()) return;
 
 		// console.log('Processing power monitoring summary...');
 
@@ -434,43 +424,7 @@ var AlarmsPanel = React.createClass({
 		}, this);
 	},
 
-	_renderPowerMonitoringRow: function(pmItem, i) {
-
-		// If pmItem is a string render as a full-width label for the "channel group"
-		if (typeof pmItem == 'string') {
-			return (
-				<tr key={'pm-summary-row_' + i} className='channel-row'><th colSpan='8'>{pmItem}</th></tr>
-			)
-		}
-
-		// Informational Items (plucked from sensor/threshold fields)
-		if (pmItem.unit == '%')
-			pmItem.name = 'Phase Imbalance';
-
-		return (
-			<tr key={'pm-summary-row_' + i}>
-				<th className='centered'>{pmItem.name}</th>
-				<td>{pmItem.unit}</td>
-				<td>{pmItem.spec_low}</td>
-				<td>{pmItem.act_low}</td>
-				<td>{pmItem.nominal}</td>
-				<td>{pmItem.spec_hi}</td>
-				<td>{pmItem.act_hi}</td>
-				<td>{pmItem.max_dev}</td>
-			</tr>
-		);
-	},
-
-	_channelsReady: function() {
-		// confirm all required channels are present, otherwise, return null
-		return CHANNELS.every(function(chId) {
-			return !!this.state.channels[chId];
-		}, this);
-	},
-
-	_updateHistoryWeeks: function() {
-		
-		if (!this._channelsReady()) return;
+	_requestHistory: function() {
 
 		// All channels available here - get all channels' first_update timestamp
 		var historyStart = Object.values(this.state.channels).map(function(ch){
@@ -524,15 +478,13 @@ var AlarmsPanel = React.createClass({
 			weeks.push(-i);
 		}
 
-		this.setState({ weeks: weeks, historyStart: historyStart, cause: 'WEEKS' });
+		this._updateHistory(weeks, historyStart, 'WEEKS');
 	},
 
 	_requestAlarms: function() {
 		var _this = this,
 			_as = [],
 			_alarms = [];
-
-		if (!this._channelsReady()) return;		
 
 		ALARM_GROUPS.forEach(function(ag, i) {
 			
@@ -602,6 +554,39 @@ var AlarmsPanel = React.createClass({
 		}, this);
 	},
 
+	_renderSiteInfoRows: function(siteInfo) {
+		return Object.keys(siteInfo).map(function (k, i) {
+				return (<tr key={'site-info-row_' + i}><th>{k}</th><td>{this[k]}</td></tr>);
+			}, siteInfo);
+	},
+
+	_renderPowerMonitoringRow: function(pmItem, i) {
+
+		// If pmItem is a string render as a full-width label for the "channel group"
+		if (typeof pmItem == 'string') {
+			return (
+				<tr key={'pm-summary-row_' + i} className='channel-row'><th colSpan='8'>{pmItem}</th></tr>
+			)
+		}
+
+		// Informational Items (plucked from sensor/threshold fields)
+		if (pmItem.unit == '%')
+			pmItem.name = 'Phase Imbalance';
+
+		return (
+			<tr key={'pm-summary-row_' + i}>
+				<th className='centered'>{pmItem.name}</th>
+				<td>{pmItem.unit}</td>
+				<td>{pmItem.spec_low}</td>
+				<td>{pmItem.act_low}</td>
+				<td>{pmItem.nominal}</td>
+				<td>{pmItem.spec_hi}</td>
+				<td>{pmItem.act_hi}</td>
+				<td>{pmItem.max_dev}</td>
+			</tr>
+		);
+	},
+
 	_renderAlarmSummaryRow: function(alarmSummary, i) {
 
 		return (
@@ -639,18 +624,27 @@ var AlarmsPanel = React.createClass({
 		});
 	},
 
-	_onChannelChange: function() {
-		// update the state channels and kick off power monitoring summary.
-		this.setState({ channels: Store.getState().channel_objs, cause: 'CHANS' }, function() {
-			this._requestPowerMonitoring();
-			this._updateHistoryWeeks();
-			this._requestAlarms();
-		});
+	_onChannelLoaded: function() {
+		// Only set the state if we've got all the channels
+		var channels = Store.getState().channel_objs;
+
+		if (this._channelsLoaded(channels)) {
+			this.setState({ channels: channels, cause: 'CHANS' }, function() { 
+				this._requestPowerMonitoring();
+				this._requestHistory();
+				this._requestAlarms();
+			});
+		}
 	},
 
 	_updatePowerMonitoring: function(summary, cause) {
 
 		this.setState({ powerMonitoringSummary: summary, cause: cause });
+	},
+
+	_updateHistory: function(weeks, start, cause) {
+
+		this.setState({ weeks: weeks, historyStart: start, cause: cause });
 	},
 
 	_updateAlarms: function(summary, alarms, cause) {
