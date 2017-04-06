@@ -159,7 +159,7 @@ class AlarmManager(metaclass=Singleton):
 			output_currents_END = gen_fake_phases(90, 60)
 
 			# Which channel will trigger? (don't include the current channels which use s1)
-			alarm_ch = "ch" + str(random.randint(0, 8))
+			alarm_ch = "ch" + str(random.randint(0, 7))
 
 			# Slice the generated data to individual channel/sensors
 			a = {
