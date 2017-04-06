@@ -339,10 +339,20 @@ var CmeAPI = {
 		});
 	},
 
-	fakeAlarms: function() {
+	insertFakeAlarms: function() {
 		
 		return $.ajax({
 			url:  API.alarms + 'fake',
+			method: 'POST',
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8'
+		});
+	},
+
+	clearFakeAlarms: function() {
+		return $.ajax({
+			url:  API.alarms + 'fake',
+			method: 'DELETE',
 			dataType: 'json',
 			contentType: 'application/json; charset=UTF-8'
 		});

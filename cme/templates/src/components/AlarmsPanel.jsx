@@ -95,7 +95,10 @@ var AlarmsPanel = React.createClass({
 	componentDidMount: function() {
 
 		// generate some fake alarms
-		CmeAPI.fakeAlarms().done(function(data) { console.log(data); });
+		CmeAPI.clearFakeAlarms().done(function(msg) {
+			console.log(msg);
+			CmeAPI.insertFakeAlarms().done(function(data) { console.log(data); });
+		});
 
 		Store.addChangeListener(Constants.CONFIG, this._onStoreChange);
 		Store.addChangeListener(Constants.DEVICE, this._onStoreChange);

@@ -38,14 +38,19 @@ def alarms():
 	return json_response(alarm_mgr.load_alarms(c, s, e))
 
 
-@router.route('/alarms/fake', methods=['GET'])
+@router.route('/alarms/fake', methods=['GET', 'DELETE', 'POST'])
 @require_auth
 def fake_alarms():
 
 	alarm_mgr = AlarmManager()
-	alarm_mgr._clear_fake_alarms()
-	fake_alarms_count = alarm_mgr._insert_fake_alarms()
 
-	return json_response("{} fake alarms generated".format(fake_alarms_count))
+	if request.method == 'DELETE':
+		alarm_mgr._clear_fake_alarms()
+		return json_response("All fake alarms cleared")
 
+	if request.method == 'POST':
+		count = request.args.get('count', 1)
+		fake_alarms_count = alarm_mgr._insert_fake_alarms(count)
+		return json_response("{} fake alarms generated".format(fake_alarms_count))
 
+	return json_response(alarm_mgr.load_alarms(None, None, None, 'FAKE'))
