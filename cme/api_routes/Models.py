@@ -23,12 +23,14 @@ RRDCACHED = Config.RRD.RRDCACHED
 ALARMS = Config.PATHS.ALARMS_DB
 
 
+
 class Singleton(type):
 	_instances = {}
 	def __call__(cls, *args, **kwargs):
 		if cls not in cls._instances:
 			cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
 		return cls._instances[cls]
+
 
 
 class LockableCursor:
@@ -60,6 +62,19 @@ class LockableCursor:
 			self.lock.release()
 			if arg1:
 				return result
+
+	def executemany(self, arg0, arg1):
+		self.lock.acquire()
+
+		try:
+			self.cursor.executemany(arg0, arg1)
+
+		except Exception as e:
+			raise end_blocks_back
+
+		finally:
+			self.lock.release()
+
 
 
 class AlarmManager(metaclass=Singleton):
@@ -200,12 +215,12 @@ class AlarmManager(metaclass=Singleton):
 				}
 			}
 
-			alarms.append(a)
-			insert = "INSERT INTO alarms(channel, sensor, type, start_ms, end_ms, step_ms, data) VALUES('{}', '{}', '{}', {}, {}, {}, '{}')".format(a['channel'], a['sensor'], a['type'], a['start_ms'], a['end_ms'], a['step_ms'], json.dumps(a['data']))
-			self._cursor.execute(insert)
-		
+			# Make the alarm a tuple of the fields
+			alarms.append( (a['channel'], a['sensor'], a['type'], a['start_ms'], a['end_ms'], a['step_ms'], json.dumps(a['data'])) )
+
+		self._cursor.executemany('INSERT INTO alarms(channel, sensor, type, start_ms, end_ms, step_ms, data) VALUES(?, ?, ?, ?, ?, ?, ?)', alarms)
 		self._connection.commit()
-		return len(alarms)
+		return count
 
 
 	def _clear_fake_alarms(self):
@@ -298,8 +313,6 @@ class AlarmManager(metaclass=Singleton):
 			return
 
 		ch.alarms = self.clear_alarms([ ch.id ], start, end, type)
-
-
 
 
 
