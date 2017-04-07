@@ -95,39 +95,44 @@ var AlarmsPanel = React.createClass({
 
 	componentDidMount: function() {
 
-		// generate some fake alarms
-		CmeAPI.clearFakeAlarms().done(function(msg) {
-			console.log(msg);
-			CmeAPI.insertFakeAlarms().done(function(data) { console.log(data); });
-		});
-
 		Store.addChangeListener(Constants.CONFIG, this._onStoreChange);
 		Store.addChangeListener(Constants.DEVICE, this._onStoreChange);
 
-		// make sure all required channels are loaded into the Store
+		// generate some fake alarms
+		var _this = this;
 
-		if (!this._channelsLoaded(this.state.channels)) {
+		CmeAPI.clearFakeAlarms().done(function(msg) {
+			console.log(msg);
+			CmeAPI.insertFakeAlarms().done(function(data) { 
+				console.log(data); 
 
-			// Load missing channels into Store
-			CHANNELS.forEach(function(chId) {
+				// make sure all required channels are loaded into the Store
+				if (!_this._channelsLoaded(_this.state.channels)) {
 
-				// if not found - add a listener and fire a request to load the channel
-				if (!this.state.channels[chId]) {
-					// listen for changes to the channel
-					CHANNELS_LOADING.push(chId);
+					// Load missing channels into Store
+					CHANNELS.forEach(function(chId) {
+
+						// if not found - add a listener and fire a request to load the channel
+						if (!this.state.channels[chId]) {
+							// listen for changes to the channel
+							CHANNELS_LOADING.push(chId);
+
+							Store.addChangeListener(Constants.CHANNEL + chId.toUpperCase(), this._onChannelLoaded);
+
+							Actions.channel(chId, null, null); // this will update the Store.channel_objs
+						}
+					}, _this);
+
+				} else {
 					
-					Store.addChangeListener(Constants.CHANNEL + chId.toUpperCase(), this._onChannelLoaded);
-
-					Actions.channel(chId, null, null); // this will update the Store.channel_objs
+					// Fire these requests off
+					_this._requestPowerMonitoring();
+					_this._requestHistory();
+					_this._requestAlarms();
 				}
-			}, this);
 
-		} else {
-			// Fire these requests off
-			this._requestPowerMonitoring();
-			this._requestHistory();
-			this._requestAlarms();
-		}
+			});
+		});
 	},
 
 	componentWillUnmount: function() {
