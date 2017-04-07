@@ -42,6 +42,7 @@ function toPercentage(value, nominal) {
 
 // These channels must be available to process this report
 var CHANNELS = ['ch0', 'ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6', 'ch7'];
+var CHANNELS_LOADING = []; // add listeners here to remove after channel loads
 
 // These are grouped according to channel and sensor for 
 // processing the Power Monitoring Summary.
@@ -113,6 +114,8 @@ var AlarmsPanel = React.createClass({
 				// if not found - add a listener and fire a request to load the channel
 				if (!this.state.channels[chId]) {
 					// listen for changes to the channel
+					CHANNELS_LOADING.push(chId);
+					
 					Store.addChangeListener(Constants.CHANNEL + chId.toUpperCase(), this._onChannelLoaded);
 
 					Actions.channel(chId, null, null); // this will update the Store.channel_objs
@@ -129,7 +132,7 @@ var AlarmsPanel = React.createClass({
 
 	componentWillUnmount: function() {
 
-		CHANNELS.forEach(function(chId) {
+		CHANNELS_LOADING.forEach(function(chId) {
 			Store.removeChangeListener(Constants.CHANNEL + chId.toUpperCase(), this._onChannelChange);
 		}, this);
 
