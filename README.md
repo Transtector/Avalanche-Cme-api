@@ -1,4 +1,4 @@
-Cme
+Cme-api
 ==============
 
 Core monitoring engine (CME) API package.  This package is used to provide the http-based API layer
@@ -18,7 +18,7 @@ Stand-Alone Development
 
 * Python 3.5+
 
-Clone the Cme project repository to a development machine.  Generally this package should run
+Clone the Cme-api project repository to a development machine.  Generally this package should run
 on nearly any machine with Python 3.5 installed.  Note that you
 must either add an SSH public key to your GitLab profile from the development machine, or copy an
 existing SSH public key to the development machine in order to use `git` to clone the project.

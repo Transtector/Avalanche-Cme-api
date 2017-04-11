@@ -1,3 +1,1 @@
 include VERSION
-include cme/templates/*.html
-recursive-include cme/static *

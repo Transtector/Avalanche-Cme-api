@@ -6,13 +6,13 @@ with open(os.path.join(os.getcwd(), 'VERSION')) as f:
 	version = f.readline().strip()
 
 setup (
-	name					= "cme",
+	name					= "cme-api",
 	version					= version,
-	description 			= "CME API with built-in web UI",
-	packages				= ['cme', 'cme.api_routes', 'cme.ui_routes', 'cme.common'],
+	description 			= "CME Application Programming Interface (API)",
+	packages				= ['cmeapi', 'cmeapi.api_routes', 'cmeapi.common'],
 	include_package_data	= True,
 	zip_safe				= False,
-	install_requires		= ["CherryPy", "Paste", "Flask", "rrdtool<=0.1.4" ],
-	entry_points			= {'console_scripts': ['cme = cme.__main__:main'] }
+	install_requires		= ["CherryPy", "Paste", "Flask", "rrdtool==0.1.4" ],
+	entry_points			= {'console_scripts': ['cmeapi = cmeapi.__main__:main'] }
 )
 

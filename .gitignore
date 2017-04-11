@@ -1,16 +1,10 @@
-cme_venv
-settings.json
+cmeapi_venv
 __pycache__
 *.pyc
 ._*
 
 # built wheels
 wheelhouse/
-
-# Client code that gets built
-#cme/static/css
-#cme/static/src
-
 
 # Mac/Windows OS Junk
 Thumbs.db
@@ -19,7 +13,3 @@ Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
 .AppleDouble
-log
-node_modules
-bower_components
-recovery.txt
