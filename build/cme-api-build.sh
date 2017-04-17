@@ -4,13 +4,16 @@
 # that can be downloaded to a CME device and installed to provide
 # the recovery mode operation.
 
-SRC=$(pwd)/Cme  # project source code
+CME_API_PN=1500-005
+
+SRC=$(pwd)  # project source code
 SRCDIST=$(pwd)/srcdist # source copied here for building
 DIST=$(pwd)/dist # built code ends up here
 
 # Read the VERSION file to use in the created archive name
 VERSION=$(<${SRC}/VERSION)
-ARCHIVE=1510-000-v$VERSION-SWARE-CME_RECOVERY.tgz
+
+PACKAGE=${CME_API_PN}-v$VERSION-SWARE-CME_API.tgz
 
 # Point PIP env paths to wheelhouse
 export WHEELHOUSE=${DIST}/wheelhouse
@@ -25,13 +28,13 @@ mkdir -p ${WHEELHOUSE} # PIP stores the built wheels here
 # Note: this is to avoid wheel adding a bunch of files and
 # directories that are not needed in the distribution.
 pushd ${SRCDIST}
-cp -R ${SRC}/cme/ .
+cp -R ${SRC}/cmeapi/ .
 cp ${SRC}/VERSION .
 cp ${SRC}/setup.py .
 cp ${SRC}/MANIFEST.in .
 
 # Activate the Cme venv
-source ${SRC}/cme_venv/bin/activate
+source ${SRC}/cmeapi_venv/bin/activate
 
 # Generate the wheels for the application.
 # These will show up in WHEELHOUSE
@@ -44,7 +47,7 @@ rm -rf ${SRCDIST} # done w/srcdist
 # Now generate the archive of the wheels
 pushd ${DIST}
 
-tar -czvf ../${ARCHIVE} .
+tar -czvf ../${PACKAGE} .
 
 # Done with the built distribution
 popd

@@ -48,7 +48,7 @@ VOLUME /application
 # and .git for example).
 ENTRYPOINT mkdir /srcdist; \
 	cd /srcdist; \
-	cp -R /application/cme .; \
+	cp -R /application/cmeapi .; \
 	cp /application/setup.py .; \
 	cp /application/VERSION .; \
 	cp /application/MANIFEST.in .; \ 

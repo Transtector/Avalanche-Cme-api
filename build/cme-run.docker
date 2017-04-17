@@ -49,7 +49,7 @@ COPY VERSION VERSION
 COPY wheelhouse wheelhouse/
 
 # Install cme app using pip and built wheels
-RUN pip install --no-index -f wheelhouse cme
+RUN pip install --no-index -f wheelhouse cmeapi
 RUN rm -rf wheelhouse/
 
-CMD ["cme"]
+CMD ["cmeapi"]
