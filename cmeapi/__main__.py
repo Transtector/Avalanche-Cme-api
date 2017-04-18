@@ -57,12 +57,10 @@ def main(argv=None):
 	from .common.IpUtils import manage_network
 	from .common.ClockUtils import manage_clock
 
-	# import ui, api routes
-	#from . import ui_routes
+	# import api routes
 	from . import api_routes
 
 	# register route blueprints
-	#app.register_blueprint(ui_routes.router)
 	app.register_blueprint(api_routes.router)
 	
 	app_logger.info("Avalanche (Cme-api) is rumbling...")
@@ -84,7 +82,9 @@ def main(argv=None):
 	app_logger.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
 	app_logger.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
 
-	# Serve static content
+	# Serve static content;  If we're running in RECOVERY MODE, the 
+	# web application is served from normal file system else it gets mounted
+	# from the cme-web docker image and shared at the same location.
 	cherrypy.tree.mount(None, '/', {'/' : {
 		'tools.staticdir.dir': Config.PATHS.WEB_ROOT,
 		'tools.staticdir.on': True,
