@@ -304,14 +304,17 @@ def device_restart():
 		factory_reset - this will remove the current settings.json file which
 			essentially resets the CME configuration to factory defaults
 
+		power_off - halt the system by removing power (after a short delay)
+
 		If not recovery_mode, then any pending updates will be installed
 		and attempted to use after the reboot.
 	'''
 	recovery_mode = request.args.get('recovery_mode', 'false').lower() in ['true', '1']
 	factory_reset = request.args.get('factory_reset', 'false').lower() in ['true', '1']
+	power_off = request.args.get('power_off', 'false').lower() in ['true', '1']
 
 	logger = logging.getLogger('cme')
-	t = threading.Thread(target=restart, args=(5, recovery_mode, factory_reset, Config.PATHS.SETTINGS, Config.PATHS.RECOVERY_FILE, logger))
+	t = threading.Thread(target=restart, args=(power_off, recovery_mode, factory_reset, logger))
 	t.setDaemon(True)
 	t.start()
 
