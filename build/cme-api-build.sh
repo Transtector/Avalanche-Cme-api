@@ -33,11 +33,11 @@ cp ${SRC}/VERSION .
 cp ${SRC}/setup.py .
 cp ${SRC}/MANIFEST.in .
 
-# Activate the Cme venv
+# Activate the Cme-api venv
 source ${SRC}/cmeapi_venv/bin/activate
 
 # Generate the wheels for the application.
-# These will show up in WHEELHOUSE
+# These will show up in WHEELHOUSE folder.
 pip wheel .
 
 popd

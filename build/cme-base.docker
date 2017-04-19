@@ -23,7 +23,7 @@ COPY ref.bashrc .bashrc
 # package repository and upgrade pip. Clear the cache when we're done.
 RUN echo -e "http://dl-cdn.alpinelinux.org/alpine/v3.5/main\n" > /etc/apk/repositories
 RUN apk update && apk upgrade; exit 0 && apk fix
-RUN	apk --update add bash python3 rrdtool && \
+RUN	apk --update add bash python3 rrdtool curl && \
 	rm /var/cache/apk/* && \
 	ln -s /usr/bin/python3.5 /usr/bin/python && \
 	ln -s /usr/bin/pip3.5 /usr/bin/pip && \

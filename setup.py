@@ -6,7 +6,7 @@ with open(os.path.join(os.getcwd(), 'VERSION')) as f:
 	version = f.readline().strip()
 
 setup (
-	name					= "cme-api",
+	name					= "cmeapi",
 	version					= version,
 	description 			= "CME Application Programming Interface (API)",
 	packages				= ['cmeapi', 'cmeapi.api_routes', 'cmeapi.common'],
