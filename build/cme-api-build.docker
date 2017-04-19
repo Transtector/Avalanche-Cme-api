@@ -5,10 +5,19 @@
 # used to make a set of wheels which can be bundled into a
 # clean docker image used to run the cme application.
 #
+# This docker MUST be built from the top-level project folder:
+#
+# E.g., in ~/Cme-api/
+#
+#	$ docker build -t cme-api-build -f build/cme-api-build.docker .
+#
 # Running this image builds the application.  You must map
 # the project root folder to the container /app volume.
 #
-#	$ docker run --rm -v "<APP_ROOT>":/app <this_image>
+#	$ docker run --rm -v "<APP_ROOT>":/app cme-api-build
+#
+# The docker has created the CME_API_BIN.tgz binary package
+# used to build the application layer docker.
 
 # Uses the cme-base image
 FROM cme-base
