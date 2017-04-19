@@ -42,7 +42,7 @@ FROM cme-base
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 
 # Add the application binaries
-ADD CME_API_BIN.tgz
+ADD CME_API_BIN.tgz .
 
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cmeapi
