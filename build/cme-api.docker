@@ -1,7 +1,7 @@
-# This docker is used to run the cme application API layer.
+# This docker is used as the Cme-api application layer.
 #
-# Requires the cme binary Python wheels are built into
-# /wheelhouse folder in the dockerfile context.
+# The docker requires the CME_API_BIN.tgz package which
+# is built using the cme-api-build docker.
 #
 # Note:  In order to support calling system commands
 # like 'shutdown', 'ntpq', 'reboot', etc, this docker
@@ -22,10 +22,10 @@
 # has access to required system resources:
 #
 #	$ docker run \
-#		--rm \
 #		--net=host \
 #		--privileged \
-#		--name cme \
+#		--name cme-api \
+#		--volumes-from cme-web \
 #		-v /data:/data \
 #		-v /etc/network:/etc/network \
 #		-v /etc/ntp.conf:/etc/ntp.conf \
@@ -33,20 +33,16 @@
 #		-v /tmp/cmehostinput:/tmp/cmehostinput \
 #		-v /tmp/cmehostoutput:/tmp/cmehostoutput \
 #		-v /media/usb:/media/usb \
-#		[<private_docker_registry>:5000/]cme
+#		[<private_docker_registry>:5000/]cmeapi
 #
-# Note: Build this docker from the top-level source
-# directory which should have the package's built
-# wheels in a wheelhouse folder.
 
 # Uses our cme-base docker image
 FROM cme-base
 
 MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
 
-# Application wheels should be built into wheelhouse folder
-COPY VERSION VERSION
-COPY wheelhouse wheelhouse/
+# Add the application binaries
+ADD CME_API_BIN.tgz
 
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cmeapi
