@@ -70,7 +70,7 @@ class LockableCursor:
 			self.cursor.executemany(arg0, arg1)
 
 		except Exception as e:
-			raise end_blocks_back
+			raise e
 
 		finally:
 			self.lock.release()
