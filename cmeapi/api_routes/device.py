@@ -126,7 +126,7 @@ def device_updates():
 
 		GET: returns result object with current updates status:
 	     	updates: {
-				pending: false
+				pending: [ < image filenames ready for update > ]
 				usb: [ < image filenames found on usb storage > ],
 				web: [ < image urls found on web site > ],
 				uploads: [ < image filenames found in uploads folder > ]
@@ -134,18 +134,17 @@ def device_updates():
 
 	     DELETE: removes a pending update (NOP if no pending update)
 
-	     POST: uploads a update image file which will replace any current uploaded image
+	     POST: uploads a update image file which may overwrite current uploaded images
 
 	     PUT: move the indentified update to pending status (move file into pending update location)
 	'''
 
 	# result object
 	result = { 
-		'pending': False,  
+		'pending': [],  
 		# Cme software image files can be placed in a special location to make them 'pending' updates.
 		# The update location is checked after every Cme restart, and if a valid image is found it
-		# will be used.  The 'pending' item will be either False or the image file name if one is
-		# found.
+		# will be used.
 
 		'usb': [],
 		# Software images may be placed on external (USB) drive.  Any matching Cme images found
@@ -156,10 +155,9 @@ def device_updates():
 		# image base filenames in the 'web' item list.
 
 		'uploads': []
-		# Finally, users may upload Cme software images they might have on their device.  Only
-		# one software image at a time may be uploaded, so new uploads will replace any current
-		# one (for now at least, in order to minimize disk usage).  The 'uploads' item will
-		# hold any base filename found.
+		# Finally, users may upload Cme software images they might have on their client.  Only
+		# one software image at a time may be uploaded, so uploads overwrite previous uploads
+		# of the same filename.  The 'uploads' result will list all uploaded files.
 	}
 
 	# read configurable items into local variables
@@ -171,23 +169,18 @@ def device_updates():
 
 	logger = logging.getLogger('cme')
 
-	# find pending updates (should be only one or none)
+	# find pending updates for DELETE
 	pending_files = glob.glob(os.path.join(update_dir, update_glob))
-
-	if len(pending_files) > 0:
-		result['pending'] = os.path.basename(pending_files[0])
-		pending = True
-	else:
-		pending = False
-
-	if pending and request.method == 'DELETE':
-		os.remove(pending_files[0])
-		logger.info("Update `{0}` was removed.".format(os.path.basename(pending_files[0])))
-		result['pending'] = False
+	
+	if request.method == 'DELETE':
+		for file in pending_files:
+			os.remove(file)
+			logger.info("Update `{0}` was removed.".format(os.path.basename(file)))
 
 	
 	# from USB drive
-	result['usb'] = [os.path.basename(path) for path in glob.glob(os.path.join(usb_dir, update_glob))]
+	usb_files = glob.glob(os.path.join(usb_dir, update_glob))
+	result['usb'] = [ os.path.basename(p) for p in usb_files ]
 
 	# from web (our distribution URL)
 	# TODO: get official web repo for Cme updates set up
@@ -223,20 +216,8 @@ def device_updates():
 			
 			filename = secure_filename(file.filename)
 			path = os.path.join(upload_dir, filename)
-
-			# clear UPLOAD_FOLDER before saving any new files
-			# as these images can be big, and we've only got
-			# so much space
-			for old_file in os.listdir(upload_dir):
-				old_path = os.path.join(upload_dir, old_file)
-				try:
-					if os.path.isfile(old_path):
-						os.unlink(old_path)
-				except:
-					logger.error("Failed to clear uploads folder")
-
 			file.save(path)
-			logger.info("File uploaded: {0}".format(path))
+			logger.info("File uploaded: {0}".format(os.path.basename(path)))
 
 		else:
 			logger.error("File upload failed: {0}".format(file.filename))
@@ -281,12 +262,14 @@ def device_updates():
 			logger.error("Failed to install {0}::{1}".format(source, name))
 		else:
 			logger.info("Update installed: {0}::{1}".format(source, name))
-			result['pending'] = name
 
 
 	# refresh the uploads listing after installs (PUT) because
 	# any uploaded files are moved (not copied) on install
-	result['uploads'] = [os.path.basename(path) for path in glob.glob(os.path.join(upload_dir, update_glob))]
+	result['uploads'] = [ os.path.basename(p) for p in glob.glob(os.path.join(upload_dir, update_glob)) ]
+
+	# refresh pending updates - may have been DELETED or PUT
+	result['pending'] = [ os.path.basename(p) for p in glob.glob(os.path.join(update_dir, update_glob)) ]
 
 	return json_response({ 'updates': result })
 
