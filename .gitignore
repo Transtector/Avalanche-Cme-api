@@ -2,6 +2,7 @@ cmeapi_venv
 __pycache__
 *.pyc
 ._*
+*.tgz
 
 # built wheels
 wheelhouse/
