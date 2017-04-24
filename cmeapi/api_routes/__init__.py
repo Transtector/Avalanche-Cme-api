@@ -112,6 +112,6 @@ def allowed_file(filename):
 			filename.rsplit('.', 1)[1].lower() in [x.lower() for x in Config.UPDATES.ALLOWED_EXTENSIONS]
 
 
-from . import (login, logout, user, channels, alarms, status, config, device, logs,
+from . import (root, channels, alarms, config, device, logs,
 			   general, temperature, clock, http, network, snmp)
 
