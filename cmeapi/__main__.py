@@ -11,17 +11,13 @@ from paste.translogger import TransLogger
 from .common import Config
 settings = Config.USER_SETTINGS
 
-# Set up server and application logging
-from .Logging import Server_Logger, App_Logger
-
 # Flask is the wsgi application that sits
 # behind the CherryPy server
 from . import app
 app.config.from_object(Config.FLASK)
 
-# set up the application layer logging
-app_logger = App_Logger(app.logger, Config)
-server_logger = Server_Logger(Config)
+# Set up server and application logging
+from .Logging import Access_Logger, Api_Logger
 
 def main(argv=None):
 
@@ -29,10 +25,13 @@ def main(argv=None):
 	if argv is None:
 		argv = sys.argv[1:]
 
+	# set up the application layer logging
+	api_logger = Api_Logger(Config)
+
 	try:
 		opts, args = getopt.getopt(argv, "", ["rrdcached="])
 	except getopt.GetoptError:
-		app_logger.info("Invalid command line arguments are ignored")
+		api_logger.info("Invalid command line arguments are ignored")
 		opts = []
 		args = []
 
@@ -57,30 +56,30 @@ def main(argv=None):
 	from .common.IpUtils import manage_network
 	from .common.ClockUtils import manage_clock
 
-	# import api routes
+	# api routes
 	from . import api_routes
 
 	# register route blueprints
 	app.register_blueprint(api_routes.router)
 	
-	app_logger.info("Avalanche (Cme-api) is rumbling...")
-	app_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY.RECOVERY_MODE else 'NO'))
-	app_logger.info("\tVERSION:\t{0}".format(Config.INFO.VERSION))
-	app_logger.info("\tDEBUG:\t\t{0}".format(Config.INFO.DEBUG))
-	app_logger.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
-	app_logger.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
+	api_logger.info("Avalanche (Cme-api) is rumbling...")
+	api_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY.RECOVERY_MODE else 'NO'))
+	api_logger.info("\tVERSION:\t{0}".format(Config.INFO.VERSION))
+	api_logger.info("\tDEBUG:\t\t{0}".format(Config.INFO.DEBUG))
+	api_logger.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
+	api_logger.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
 
 	manage_network(settings)	
-	app_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
+	api_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
 
 	manage_clock(settings)
 
-	app_logger.info("Files and Storage")
-	app_logger.info("\tAPPROOT:\t{0}".format(app.root_path))
-	app_logger.info("\tSTATIC:\t\t{0}".format(app.static_folder))
-	app_logger.info("\tTEMPLATE:\t\t{0}".format(app.template_folder))
-	app_logger.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
-	app_logger.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
+	api_logger.info("Files and Storage")
+	api_logger.info("\tAPPROOT:\t{0}".format(app.root_path))
+	api_logger.info("\tSTATIC:\t\t{0}".format(app.static_folder))
+	api_logger.info("\tTEMPLATE:\t\t{0}".format(app.template_folder))
+	api_logger.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
+	api_logger.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
 
 	# Serve static content;  If we're running in RECOVERY MODE, the 
 	# web application is served from normal file system else it gets mounted
@@ -92,8 +91,11 @@ def main(argv=None):
 		'tools.staticfile.filename': 'favicon.ico'
 	}})
 
+	# Set up a screen logger if DEBUG
+	cherrypy.log.screen = Config.INFO.DEBUG
+
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
-	cherrypy.tree.graft(TransLogger(app, logger=server_logger), '/api')
+	cherrypy.tree.graft(TransLogger(app, logger=Access_Logger(Config)), '/api')
 
 	# unsubscribe default server
 	cherrypy.server.unsubscribe()
@@ -128,10 +130,10 @@ if __name__ == "__main__":
 		main()
 
 	except KeyboardInterrupt:
-		app_logger.info("Avalanche (Cme-api) shutdown requested ... exiting")
+		api_logger.info("Avalanche (Cme-api) shutdown requested ... exiting")
 
 	except Exception as e:
-		app_logger.info("Avalanche (Cme-api) has STOPPED on exception {0}".format(e))
+		api_logger.info("Avalanche (Cme-api) has STOPPED on exception {0}".format(e))
 
 		# re-raise to print stack trace here (useful for debugging the problem)
 		raise

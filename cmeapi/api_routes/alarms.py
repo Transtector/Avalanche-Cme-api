@@ -38,8 +38,8 @@ def alarms():
 	return json_response(alarm_mgr.load_alarms(c, s, e))
 
 
-#@router.route('/alarms/fake', methods=['GET', 'DELETE', 'POST'])
-#@require_auth
+@router.route('/alarms/fake', methods=['GET', 'DELETE', 'POST'])
+@require_auth
 def fake_alarms():
 
 	alarm_mgr = AlarmManager()

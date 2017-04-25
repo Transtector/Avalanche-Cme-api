@@ -12,7 +12,7 @@ def bool_arg(name, request):
 	key = request.args.get(name)
 	return str(key).lower() in [ '1', 'true', 't', 'yes', 'y' ]
 
-@router.route('/logs/', methods=['GET'])
+@router.route('/logs/')
 @router.route('/logs/<filename>')
 @require_auth
 def logs(filename=None):
