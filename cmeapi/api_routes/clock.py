@@ -1,8 +1,7 @@
 # CME clock configuration routes
 import os
 
-from . import router, settings, request, path_parse, json_response, APIError, require_auth
-from .status import timestamp
+from . import router, settings, request, path_parse, json_response, APIError, require_auth, timestamp
 from ..common.ClockUtils import refresh_time, manage_clock, set_clock
 
 

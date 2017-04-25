@@ -17,6 +17,12 @@ settings = Config.USER_SETTINGS
 router = Blueprint('apiroutes', __name__)
 
 
+def timestamp():
+	''' Raw function to get current CME date/time in UTC and ISO 8601 format.
+	'''
+	return datetime.utcnow().isoformat() + 'Z'
+
+
 # API Error class wraps 
 class APIError(Exception):
 	status_code = 400

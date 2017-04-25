@@ -1,7 +1,7 @@
 # root level CME API
 
 from datetime import datetime, timezone
-from . import router, request, Response, json_response, APIError, require_auth, settings, Config
+from . import router, request, Response, json_response, APIError, require_auth, settings, Config, timestamp
 
 
 @router.route('/login')
@@ -54,17 +54,6 @@ def user():
 	settings['__passhash'] = p or settings['__passhash']
 
 	return json_response(None)
-
-
-
-
-
-
-
-def timestamp():
-	''' Raw function to get current CME date/time in UTC and ISO 8601 format.
-	'''
-	return datetime.utcnow().isoformat() + 'Z'
 
 
 @router.route('/')
