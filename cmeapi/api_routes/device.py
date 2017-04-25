@@ -167,7 +167,7 @@ def device_updates():
 	update_glob = Config.UPDATES.UPDATE_GLOB
 	pub_url = Config.UPDATES.PUBLIC_UPDATES_URL
 
-	logger = logging.getLogger('cme')
+	logger = logging.getLogger(__name__)
 
 	# find pending updates for DELETE
 	pending_files = glob.glob(os.path.join(update_dir, update_glob))
@@ -296,7 +296,7 @@ def device_restart():
 	factory_reset = request.args.get('factory_reset', 'false').lower() in ['true', '1']
 	power_off = request.args.get('power_off', 'false').lower() in ['true', '1']
 
-	logger = logging.getLogger('cme')
+	logger = logging.getLogger(__name__)
 	t = threading.Thread(target=restart, args=(power_off, recovery_mode, factory_reset, logger))
 	t.setDaemon(True)
 	t.start()

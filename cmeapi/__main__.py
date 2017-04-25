@@ -16,17 +16,17 @@ settings = Config.USER_SETTINGS
 from . import app
 app.config.from_object(Config.FLASK)
 
-# Set up server and application logging
+# Set up access and api logging
 from .Logging import Access_Logger, Api_Logger
+
+# set up the api layer logging
+api_logger = Api_Logger(app.logger_name, Config)
 
 def main(argv=None):
 
 	# parse command-line options
 	if argv is None:
 		argv = sys.argv[1:]
-
-	# set up the application layer logging
-	api_logger = Api_Logger(Config)
 
 	try:
 		opts, args = getopt.getopt(argv, "", ["rrdcached="])
@@ -63,23 +63,28 @@ def main(argv=None):
 	app.register_blueprint(api_routes.router)
 	
 	api_logger.info("Avalanche (Cme-api) is rumbling...")
+
 	api_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY.RECOVERY_MODE else 'NO'))
 	api_logger.info("\tVERSION:\t{0}".format(Config.INFO.VERSION))
 	api_logger.info("\tDEBUG:\t\t{0}".format(Config.INFO.DEBUG))
 	api_logger.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
+	api_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
 	api_logger.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
 
-	manage_network(settings)	
-	api_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
-
-	manage_clock(settings)
-
 	api_logger.info("Files and Storage")
-	api_logger.info("\tAPPROOT:\t{0}".format(app.root_path))
-	api_logger.info("\tSTATIC:\t\t{0}".format(app.static_folder))
-	api_logger.info("\tTEMPLATE:\t\t{0}".format(app.template_folder))
+
+	api_logger.info("\tAPIROOT:\t{0}".format(Config.PATHS.APPROOT))
+	api_logger.info("\tLOGDIR: \t{0}".format(Config.PATHS.LOGDIR))
+	api_logger.info("\tWEBROOT:\t\t{0}".format(Config.PATHS.WEB_ROOT))
 	api_logger.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
 	api_logger.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
+
+	# setup network and clock - these will log messages
+	manage_network(settings)	
+	manage_clock(settings)
+
+	# Some global Cherry py settings
+	cherrypy.config.update({'engine.autoreload.on': False, 'log.screen': Config.INFO.DEBUG })
 
 	# Serve static content;  If we're running in RECOVERY MODE, the 
 	# web application is served from normal file system else it gets mounted
@@ -90,9 +95,6 @@ def main(argv=None):
 		'tools.staticdir.index': 'index.html',
 		'tools.staticfile.filename': 'favicon.ico'
 	}})
-
-	# Set up a screen logger if DEBUG
-	cherrypy.log.screen = Config.INFO.DEBUG
 
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
 	cherrypy.tree.graft(TransLogger(app, logger=Access_Logger(Config)), '/api')

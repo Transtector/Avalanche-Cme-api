@@ -1,9 +1,6 @@
 
 import logging, logging.handlers
 
-#from . import app
-
-
 def Access_Logger(Config):
 
 	# Make a new RotatingFileHandler for the CherryPy error (server) log.
@@ -35,12 +32,11 @@ def Access_Logger(Config):
 
 	return access_logger
 
-def Api_Logger(Config):
+def Api_Logger(api_logger_name, Config):
 
-	# get Flask application logger (see __init__.py)
-	api_logger = logging.getLogger(__name__) #app.logger
+	api_logger = logging.getLogger(api_logger_name) # TODO: this goes away with Flask top-level Flask app logger
 
-	# by default logs to screen only if DEBUG set
+	# use same formatting
 	formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)s] %(message)s',
 								   datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -53,16 +49,16 @@ def Api_Logger(Config):
 											mode='w',
 											maxBytes=10 * 1024,
 											backupCount=1)
-	# increase level if DEBUG set
-	if Config.INFO.DEBUG:
-		fh.setLevel(logging.DEBUG)
-	else:
-		fh.setLevel(logging.INFO)
 
-	# use same formatting for file
 	fh.setFormatter(formatter)
 
 	api_logger.addHandler(fh)
+
+	# increase level if DEBUG set
+	if Config.INFO.DEBUG:
+		api_logger.setLevel(logging.DEBUG)
+	else:
+		api_logger.setLevel(logging.INFO)
 
 	return api_logger
 
