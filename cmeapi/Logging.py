@@ -34,12 +34,15 @@ def Access_Logger(Config):
 
 def Api_Logger(Config):
 
+	# get Flask application logger (see __init__.py)
+	api_logger = logging.getLogger('cme-api')
+
 	# by default logs to screen only if DEBUG set
 	formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)s] %(message)s',
 								   datefmt='%Y-%m-%d %H:%M:%S')
 
 	# set format in default Flask logging StreamHandler for console (DEBUG) output
-	for h in logger.handlers:
+	for h in api_logger.handlers:
 		h.setFormatter(formatter)
 
 	# always send api log to file, but reset file after restarts
@@ -56,7 +59,6 @@ def Api_Logger(Config):
 	# use same formatting for file
 	fh.setFormatter(formatter)
 
-	api_logger = logging.getLogger('cme-api')
 	api_logger.addHandler(fh)
 
 	return api_logger
