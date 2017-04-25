@@ -1,7 +1,7 @@
 
 import logging, logging.handlers
 
-from . import app
+#from . import app
 
 
 def Access_Logger(Config):
@@ -38,7 +38,7 @@ def Access_Logger(Config):
 def Api_Logger(Config):
 
 	# get Flask application logger (see __init__.py)
-	api_logger = app.logger
+	api_logger = logging.getLogger(__name__) #app.logger
 
 	# by default logs to screen only if DEBUG set
 	formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)s] %(message)s',
