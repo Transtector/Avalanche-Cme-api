@@ -1,6 +1,9 @@
 
 import logging, logging.handlers
 
+from . import app
+
+
 def Access_Logger(Config):
 
 	# Make a new RotatingFileHandler for the CherryPy error (server) log.
@@ -35,7 +38,7 @@ def Access_Logger(Config):
 def Api_Logger(Config):
 
 	# get Flask application logger (see __init__.py)
-	api_logger = logging.getLogger('cme-api')
+	api_logger = app.logger
 
 	# by default logs to screen only if DEBUG set
 	formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)s] %(message)s',
