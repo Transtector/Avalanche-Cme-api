@@ -207,7 +207,7 @@ def channel_history(ch_index, history):
 
 		ch.load_history(h, s, e)
 	
-	return json_response(ch.data)
+	return json_response({ ch.id + '.data': ch.data })
 
 
 
@@ -241,7 +241,10 @@ def ch_config(ch_index):
 @router.route('/ch/<int:ch_index>/alarms/', methods=['GET', 'DELETE'])
 @require_auth
 def ch_alarms(ch_index):
-	# retrieve the desired channel configuration	
+	# retrieve the desired channel configuration
+
+	ch_mgr = ChannelManager()
+
 	ch = ch_mgr.get_channel('ch' + str(ch_index))
 
 	if not ch:
@@ -369,7 +372,7 @@ def sensor_history(ch_index, s_index, history):
 		data.append([ v[sensor_index] for v in ch.data[3] ]) # data (MIN if not "live")
 		data.append([ v[sensor_index] for v in ch.data[4] ]) # data (MAX if not "live")
 
-	return json_response(data)
+	return json_response({ ch.id + ':' + sensor.id + '.data': data })
 
 
 # CME sensor thresholds request
