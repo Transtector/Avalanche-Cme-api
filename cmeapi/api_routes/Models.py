@@ -127,7 +127,7 @@ class AlarmManager(metaclass=Singleton):
 			end_ms = min(time.time() * 1000, end_ms)
 
 			# generate fake waveform data for the alarms
-			sample_rate = 7.8125 * 1000 # 7.8125 kHz
+			sample_rate = (7.8125 / 4) * 1000 # 7.8125 kHz
 			sample_period = 50 * 0.001 # 50 ms
 			samples = math.ceil(sample_rate * sample_period)
 
