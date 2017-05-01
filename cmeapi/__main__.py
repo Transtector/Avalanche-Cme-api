@@ -11,6 +11,8 @@ from paste.translogger import TransLogger
 from .common import Config
 settings = Config.USER_SETTINGS
 
+Config.INFO.DEBUG = False # turn off debugging for API layer
+
 # Flask is the wsgi application that sits
 # behind the CherryPy server
 from . import app
