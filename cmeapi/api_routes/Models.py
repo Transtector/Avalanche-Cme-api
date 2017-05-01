@@ -639,6 +639,38 @@ class Channel():
 
 		return result
 
+	def set_hw_config(self, s_cfgs):
+		''' s_cfgs is json sensor configurations:
+			{
+				s0: { _config: { range: , register, threshold, type, units, scale }},
+				s1: ...
+			}
+		'''
+		if os.path.isfile(self._configpath):
+			with open(self._configpath, 'r') as f:
+				ch_cfg = json.load(f)
+
+		for sensorId, sensorObj in ch_cfg['sensors'].items():
+			sensor_cfg = sensorObj['_config']
+
+			for sensor_cfg_key, value in s_cfgs[sensorId].items():
+				sensor_cfg[sensor_cfg_key] = value
+
+		with LockedOpen(self._configpath, 'a') as f:
+			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self._configpath), delete=False) as tf:
+				json.dump(ch_cfg, tf, indent="\t")
+				tempname = tf.name
+			try:
+				os.chmod(tempname, 0o666) # set rw for u, g, o
+				os.replace(tempname, self._configpath) # atomic on Linux
+			except OSError:
+				os.remove(tempname)
+
+			# set the file last modified time
+			self._configmod = os.stat(self._configpath).st_mtime
+
+		return self.get_hw_config()
+
 
 	### CHANNEL PROPERTIES (when set, these properties save the underlying __dict__ to disk)
 

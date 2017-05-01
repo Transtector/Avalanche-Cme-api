@@ -231,8 +231,11 @@ def ch_config(ch_index):
 	if not ch:
 		raise APIError('Channel not found', 404)
 
-	# pull the _config item from the channel and each of its sensors
-	response = ch.get_hw_config()
+	if request.method == 'POST':
+		response = ch.set_hw_config(request.get_json())
+
+	else:
+		response = ch.get_hw_config()
 
 	return json_response(response)
 
