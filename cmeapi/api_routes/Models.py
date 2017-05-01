@@ -766,7 +766,7 @@ class Channel():
 		if not self.rrd or not os.path.isfile(os.path.join(CHDIR, self.rrd)):
 			# If the rrd is not found, it may be getting recreated
 			# or it may be a different one, try to get it...
-			self.rrd = _get_channel_rrd()
+			self.rrd = self._get_channel_rrd()
 
 		if not self.rrd:
 			return None
