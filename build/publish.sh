@@ -51,7 +51,7 @@ echo "    Stage 2.  Building and publishing docker package: ${DOCKER_PKG} ..."
 echo "        a) Building docker image binaries ..."
 echo
 
-docker run --rm -v ${SRC}:/root/${APP} cme-build /root/${APP}/build/build.sh .docker
+docker run --rm -v ${SRC}:/root/app cme-build "build/build.sh .docker"
 
 echo
 echo "    ... done building docker image binaries."
