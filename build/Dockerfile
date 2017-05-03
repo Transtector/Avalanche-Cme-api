@@ -48,4 +48,4 @@ ADD 1500-005-v$version-SWARE-CME_API.docker.tgz .
 RUN pip install --no-index -f wheelhouse cmeapi
 RUN rm -rf wheelhouse/
 
-CMD ["/bin/bash"]
+CMD ["cmeapi"]
