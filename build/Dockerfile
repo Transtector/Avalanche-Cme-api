@@ -1,8 +1,5 @@
 # This docker is used as the Cme-api application layer.
 #
-# The docker requires the CME_API_BIN.tgz package which
-# is built using the cme-api-build docker.
-#
 # Note:  In order to support calling system commands
 # like 'shutdown', 'ntpq', 'reboot', etc, this docker
 # requires a script to be running on the docker HOST
