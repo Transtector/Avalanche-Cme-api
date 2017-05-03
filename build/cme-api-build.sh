@@ -13,7 +13,7 @@ DIST=$(pwd)/dist # built code ends up here
 # Read the VERSION file to use in the created archive name
 VERSION=$(<${SRC}/VERSION)
 
-PACKAGE=${CME_API_PN}-v${VERSION}-SWARE-CME_API.tgz
+PACKAGE=${CME_API_PN}-v${VERSION}-SWARE-CME_API$1.tgz
 
 # Point PIP env paths to wheelhouse
 export WHEELHOUSE=${DIST}/wheelhouse

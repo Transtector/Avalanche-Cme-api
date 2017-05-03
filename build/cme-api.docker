@@ -39,13 +39,16 @@
 # Uses our cme-base docker image
 FROM cme-base
 
-MAINTAINER James Brunner <james.brunner@smithsmicrowave.com>
+LABEL maintainer "James Brunner <james.brunner@smithsmicrowave.com>"
 
-# Add the application binaries
-ADD CME_API_BIN.tgz .
+# Pass the VERSION at docker build (docker build --build-arg version=1.0.0-99)
+ARG version
+
+# Add the application binaries - these must have been built for the cme-base docker!
+ADD 1500-005-v$version-SWARE-CME_API.docker.tgz .
 
 # Install cme app using pip and built wheels
 RUN pip install --no-index -f wheelhouse cmeapi
 RUN rm -rf wheelhouse/
 
-CMD ["cmeapi"]
+CMD ["/bin/bash"]
