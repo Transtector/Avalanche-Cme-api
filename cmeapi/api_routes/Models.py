@@ -654,7 +654,11 @@ class Channel():
 			sensor_cfg = sensorObj['_config']
 
 			for sensor_cfg_key, value in s_cfgs[sensorId].items():
-				sensor_cfg[sensor_cfg_key] = value
+				try:
+					sensor_cfg[sensor_cfg_key] = float(value)
+				except ValueError:
+					sensor_cfg[sensor_cfg_key] = value
+
 
 		with LockedOpen(self._configpath, 'a') as f:
 			with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(self._configpath), delete=False) as tf:
