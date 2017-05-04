@@ -655,8 +655,11 @@ class Channel():
 
 			for sensor_cfg_key, value in s_cfgs[sensorId].items():
 				try:
-					sensor_cfg[sensor_cfg_key] = float(value)
-				except ValueError:
+					if type(value) == list:
+						sensor_cfg[sensor_cfg_key] = [ float(v) for v in value ]
+					else:
+						sensor_cfg[sensor_cfg_key] = float(value)
+				except:
 					sensor_cfg[sensor_cfg_key] = value
 
 
