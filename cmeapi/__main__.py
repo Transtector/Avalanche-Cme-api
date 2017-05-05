@@ -1,5 +1,5 @@
 # cme application main entry
-import sys, getopt, rrdtool
+import os, sys, getopt, rrdtool
 
 # CherryPy is the wsgi application server
 # and we use the TransLogger from Paste to
