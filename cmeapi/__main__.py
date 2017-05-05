@@ -8,10 +8,8 @@ import cherrypy
 from paste.translogger import TransLogger
 
 # cme configuration file
-from .common import Config
+from .common import Config, Logging
 settings = Config.USER_SETTINGS
-
-Config.INFO.DEBUG = False # turn off debugging for API layer
 
 # Flask is the wsgi application that sits
 # behind the CherryPy server
@@ -19,40 +17,52 @@ from . import app
 app.config.from_object(Config.FLASK)
 
 # Set up access and api logging
-from .Logging import Access_Logger, Api_Logger
-
+#from .Logging import Access_Logger, Api_Logger
 # set up the api layer logging
-api_logger = Api_Logger(app.logger_name, Config)
+#api_logger = Api_Logger(app.logger_name, Config)
+API_LOGGER=None
 
 def main(argv=None):
 
+	# Set up API logging - use Flask app logger since it's at the root
+	CONSOLE_LOGGING = False
+
+	global API_LOGGER
+	API_LOGGER = Logging.GetLogger(app.logger_name, {
+		'REMOVE_PREVIOUS': False,
+		'PATH': os.path.join(Config.PATHS.LOGDIR, 'cme-api.log'),
+		'SIZE': (1024 * 10),
+		'COUNT': 1,
+		'FORMAT': '%(asctime)s %(levelname)-8s [%(name)s] %(message)s',
+		'DATE': '%Y-%m-%d %H:%M:%S',
+		'LEVEL': 'DEBUG',
+		'CONSOLE': CONSOLE_LOGGING
+	})
+
+	# CherryPy for logging requests - don't supply formatting
+	# this is handled by the Paste Translogger.
+	ACCESS_LOGGER = Logging.GetLogger('access', {
+		'REMOVE_PREVIOUS': False,
+		'PATH': os.path.join(Config.PATHS.LOGDIR, 'access.log'),
+		'SIZE': (1024 * 1024 * 10),
+		'COUNT': 2,
+		'LEVEL': 'INFO',
+		'CONSOLE': CONSOLE_LOGGING
+	})
+
+	# CherryPy for logging server errors (e.g., status=500)
+	SERVER_LOGGER = Logging.GetLogger('server', {
+		'REMOVE_PREVIOUS': False,
+		'PATH': os.path.join(Config.PATHS.LOGDIR, 'server.log'),
+		'SIZE': (1024 * 10),
+		'COUNT': 1,
+		'FORMAT': cherrypy._cplogging.logfmt,
+		'LEVEL': 'ERROR',
+		'CONSOLE': False # CherryPy screen logging handled in call below
+	})
+
+
 	# parse command-line options
-	if argv is None:
-		argv = sys.argv[1:]
-
-	try:
-		opts, args = getopt.getopt(argv, "", ["rrdcached="])
-	except getopt.GetoptError:
-		api_logger.info("Invalid command line arguments are ignored")
-		opts = []
-		args = []
-
-	for opt, arg in opts:
-		# override the Config.RRD.RRDCACHED
-		if opt == '--rrdcached':
-			Config.RRD.RRDCACHED = arg
-
-
-	# Now that RRDCACHED is set up, try to read the "test.rrd" channel
-	# If no problems, then things are fine and we can move on.  If not,
-	# we still want to allow the cme layer to run, so we set the address
-	# to flag it to downstream code so they may bypass rrdcached calls.
-	if Config.RRD.RRDCACHED:
-		try:
-			rrdtool.info('test.rrd', '-d', Config.RRD.RRDCACHED)
-		except rrdtool.OperationalError:
-			Config.RRD.RRDCACHED = 'FAILED'
-
 
 	# network and ntp/clock status
 	from .common.IpUtils import manage_network
@@ -64,29 +74,30 @@ def main(argv=None):
 	# register route blueprints
 	app.register_blueprint(api_routes.router)
 	
-	api_logger.info("Avalanche (Cme-api) is rumbling...")
+	API_LOGGER.info("Avalanche (Cme-api) is rumbling...")
 
-	api_logger.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY.RECOVERY_MODE else 'NO'))
-	api_logger.info("\tVERSION:\t{0}".format(Config.INFO.VERSION))
-	api_logger.info("\tDEBUG:\t\t{0}".format(Config.INFO.DEBUG))
-	api_logger.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
-	api_logger.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
-	api_logger.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
+	API_LOGGER.info("\tRECOVERY:\t{0}".format('YES' if Config.RECOVERY.RECOVERY_MODE else 'NO'))
+	API_LOGGER.info("\tVERSION:\t{0}".format(Config.INFO.VERSION))
+	API_LOGGER.info("\tDEBUG:\t\t{0}".format(Config.INFO.DEBUG))
+	API_LOGGER.info("\tHOSTNAME:\t{0}".format(Config.INFO.HOSTNAME))
+	API_LOGGER.info("\tSERVER_PORT:\t{0}".format(Config.API.SERVER_PORT))
+	API_LOGGER.info("\tPLATFORM:\t{0}".format(Config.INFO.SYSTEM))
 
-	api_logger.info("Files and Storage")
+	API_LOGGER.info("Files and Storage")
 
-	api_logger.info("\tAPIROOT:\t{0}".format(Config.PATHS.APPROOT))
-	api_logger.info("\tLOGDIR: \t{0}".format(Config.PATHS.LOGDIR))
-	api_logger.info("\tWEBROOT:\t\t{0}".format(Config.PATHS.WEB_ROOT))
-	api_logger.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
-	api_logger.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
+	API_LOGGER.info("\tAPIROOT:\t{0}".format(Config.PATHS.APPROOT))
+	API_LOGGER.info("\tLOGDIR: \t{0}".format(Config.PATHS.LOGDIR))
+	API_LOGGER.info("\tWEBROOT:\t\t{0}".format(Config.PATHS.WEB_ROOT))
+	API_LOGGER.info("\tUPLOADS:\t{0}".format(Config.PATHS.UPLOADS))
+	API_LOGGER.info("\tRRDCACHED:\t{0}".format(Config.RRD.RRDCACHED))
 
 	# setup network and clock - these will log messages
 	manage_network(settings)	
 	manage_clock(settings)
 
 	# Some global Cherry py settings
-	cherrypy.config.update({'engine.autoreload.on': False, 'log.screen': Config.INFO.DEBUG })
+	cherrypy.config.update({'engine.autoreload.on': False, 'log.screen': CONSOLE_LOGGING })
+	cherrypy.log.error_log.addHandler(SERVER_LOGGER.handlers[0])
 
 	# Serve static content;  If we're running in RECOVERY MODE, the 
 	# web application is served from normal file system else it gets mounted
@@ -99,7 +110,7 @@ def main(argv=None):
 	}})
 
 	# Wrap our Cme (Flask) wsgi-app in the TransLogger and graft to CherryPy
-	cherrypy.tree.graft(TransLogger(app, logger=Access_Logger(Config)), '/api')
+	cherrypy.tree.graft(TransLogger(app, logger=ACCESS_LOGGER), '/api')
 
 	# unsubscribe default server
 	cherrypy.server.unsubscribe()
@@ -129,18 +140,13 @@ def main(argv=None):
 	cherrypy.engine.block()
 
 if __name__ == "__main__":
-	
+
 	try:
 		main()
 
 	except KeyboardInterrupt:
-		api_logger.info("Avalanche (Cme-api) shutdown requested ... exiting")
+		API_LOGGER.info("Avalanche (Cme-api) shutdown requested ... exiting")
 
 	except Exception as e:
-		api_logger.info("Avalanche (Cme-api) has STOPPED on exception {0}".format(e))
-
-		# re-raise to print stack trace here (useful for debugging the problem)
-		raise
-
-	sys.exit(0)
+		API_LOGGER.info("Avalanche (Cme-api) has STOPPED on exception {0}".format(e))
 
