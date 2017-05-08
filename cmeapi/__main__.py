@@ -24,10 +24,20 @@ API_LOGGER=None
 
 def main(argv=None):
 
-	# Set up API logging - use Flask app logger since it's at the root
-	CONSOLE_LOGGING = False
+	# command-line arguments - if no arguments passed in to main()
+	# check for command line arguments coming from sys.argv.
+	if not argv:
+		argv = sys.argv[1:] # ignore sys.argv[0] - name of script
+
+	# parse command line arguments
+
+	# Console logging is OFF by default, as when the program is run
+	# under the service layer all the console logs end up in /var/log/syslog.
+	# However, either pass in the '--console' flag when running the 
+	CONSOLE_LOGGING = '--console' in argv
 
 	global API_LOGGER
+	# Set up API logging - use Flask app logger since it's at the root
 	API_LOGGER = Logging.GetLogger(app.logger_name, {
 		'REMOVE_PREVIOUS': False,
 		'PATH': os.path.join(Config.PATHS.LOGDIR, 'cme-api.log'),
