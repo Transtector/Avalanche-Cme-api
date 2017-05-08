@@ -149,4 +149,4 @@ if __name__ == "__main__":
 
 	except Exception as e:
 		API_LOGGER.info("Avalanche (Cme-api) has STOPPED on exception {0}".format(e))
-
+		raise
