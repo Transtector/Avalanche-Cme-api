@@ -49,6 +49,27 @@ def device_read_only_settings():
 
 	return json_response({ item: res })
 
+@router.route('/device/versions/')
+def device_version():
+	# Cme-init is responsible for maintaining the /data/VERSIONS file
+
+	# give Recovery Mode, App Mode versions (if available)
+	versions = {
+		'Cme-init': ['--', '--' ],
+		'Cme-api': ['--', '--'],
+		'Cme-hw': ['--', '--'],
+		'Cme-web': ['--', '--']
+	}
+
+	try:
+		with open(os.path.join(Config.PATHS.USERDATA, 'VERSIONS')) as f:
+			versions = json.load(f)
+	except Exception as e:
+		pass
+
+	return json_response({ 'versions': versions })
+
+
 
 @router.route('/device/', methods=['POST'])
 @require_auth
