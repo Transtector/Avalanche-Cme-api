@@ -11,7 +11,8 @@ from ..Auth import require_auth, Serializer
 
 from ..common.UriParse import path_parse
 from ..common import Config
-settings = Config.API.USER_SETTINGS
+
+from ..Settings import USER_SETTINGS as settings
 
 # the api router is a Flask 'Blueprint'
 router = Blueprint('apiroutes', __name__)
