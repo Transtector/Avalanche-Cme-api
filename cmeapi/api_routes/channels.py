@@ -211,17 +211,10 @@ def channel_history(ch_index, history):
 
 
 
-# CME channel configuration (hardware)
-# Returns 404 (resource not found) if not RECOVERY MODE 
-# (i.e., running at base OS, not within a Docker container).
-# Generally config is READ-ONLY unless CALIBRATION_CODE is
-# supplied in the query string with POSTED channel config data.
+# CME channel configuration (used in hardware calibration)
 @router.route('/ch/<int:ch_index>/config', methods=['GET', 'POST'])
 @require_auth
 def ch_config(ch_index):
-
-	if not Config.RECOVERY.RECOVERY_MODE:
-		raise APIError('Not Found', 404)
 
 	ch_mgr = ChannelManager()
 
