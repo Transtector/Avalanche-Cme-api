@@ -107,7 +107,11 @@ def main(argv=None):
 	manage_clock(settings)
 
 	# Some global Cherry py settings
-	cherrypy.config.update({'engine.autoreload.on': False, 'log.screen': CONSOLE_LOGGING })
+	cherrypy.config.update({
+		'engine.autoreload.on': False, 
+		'log.screen': CONSOLE_LOGGING,
+		'log.error_file': os.path.join(Config.PATHS.LOGDIR, 'server.log')
+	})
 	cherrypy.log.error_log.addHandler(SERVER_LOGGER.handlers[0])
 
 	# Serve static content;  If we're running in RECOVERY MODE, the 
