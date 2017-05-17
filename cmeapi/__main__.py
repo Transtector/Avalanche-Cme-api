@@ -9,7 +9,7 @@ from paste.translogger import TransLogger
 
 # cme configuration file
 from .common import Config, Logging
-settings = Config.USER_SETTINGS
+settings = Config.API.USER_SETTINGS
 
 # Flask is the wsgi application that sits
 # behind the CherryPy server

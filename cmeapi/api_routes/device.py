@@ -79,9 +79,9 @@ def device_write():
 		created, the API layer will prevent further updates.
 	'''
 	
-	# updating device only works in RECOVERY mode
-	if not Config.RECOVERY.RECOVERY_MODE:
-		raise APIError('Not Found', 404)
+	# updating device only works if NOT recovery mode
+	if Config.RECOVERY.RECOVERY_MODE:
+		raise APIError('Calibration not supported in recovery mode', 400)
 
 	currentDevice = settings['__device']
 	currentCme = currentDevice['cme']
@@ -131,9 +131,6 @@ def device_write():
 
 	# return unfiltered device data
 	device = settings['__device']
-
-	# add back the 'recovery' flag (should be True)
-	device.setdefault('recovery', Config.RECOVERY.RECOVERY_MODE)
 
 	# return updated device as stored in settings
 	return json_response(device)
