@@ -109,7 +109,7 @@ def device_write():
 	# Rewrite the firmware and productName from the
 	# currentCme - clients aren't allowed to update these.
 	newCme['firmware'] = Config.INFO.VERSION
-	newCme['productName'] = currentCme.productName
+	newCme['productName'] = currentCme['productName']
 
 	# We can now update the Config.INFO.DEVICE w/new Cme and Host data
 	Config.INFO.DEVICE = {
