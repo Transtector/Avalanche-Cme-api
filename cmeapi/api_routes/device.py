@@ -104,7 +104,7 @@ def device_write():
 		raise APIError('CME device data is read-only', 400)
 
 	newCme = objectAssign(requestedCme, currentCme)
-	newHost = bjectAssign(requestedHost, currentHost)
+	newHost = objectAssign(requestedHost, currentHost)
 
 	# Rewrite the firmware and productName from the
 	# currentCme - clients aren't allowed to update these.
