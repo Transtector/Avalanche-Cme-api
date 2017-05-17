@@ -103,13 +103,13 @@ def device_write():
 	if requestedCme is not None and not unlocked:
 		raise APIError('CME device data is read-only', 400)
 
-	keys = ['serialNumber', 'modelNumber', 'dateCode']
-	newCme = parseRequestObject(keys, requestedCme, currentCme)
-	newHost = parseRequestObject(keys, requestedHost, currentHost)
+	newCme = objectAssign(requestedCme, currentCme)
+	newHost = bjectAssign(requestedHost, currentHost)
 
-	# CME device data also carries the API version in the 'firmware' key
-	# and we have to add it here.
-	newCme.setdefault('firmware', Config.INFO.VERSION)
+	# Rewrite the firmware and productName from the
+	# currentCme - clients aren't allowed to update these.
+	newCme['firmware'] = Config.INFO.VERSION
+	newCme['productName'] = currentCme.productName
 
 	# We can now update the Config.INFO.DEVICE w/new Cme and Host data
 	Config.INFO.DEVICE = {
@@ -353,7 +353,7 @@ def upload_file():
 # END DEBUGGING
 
 
-def parseRequestObject(keys, reqObj, defObj):
+def objectAssign(reqObj, defObj):
 	''' Creates a new empty object and for each key in keys pulls associated
 		value from reqObj.  Uses default value from defObj (or None) if key
 		is not found in reqObj (or defObj)
@@ -363,7 +363,7 @@ def parseRequestObject(keys, reqObj, defObj):
 		
 	obj = {}
 
-	for k in keys:
+	for k in defObj.keys():
 		obj.setdefault(k, reqObj.get(k, defObj.get(k)))
 
 	return obj
