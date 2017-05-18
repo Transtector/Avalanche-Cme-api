@@ -13,25 +13,21 @@ def clock_config():
 
 		curclock = settings['clock']
 
-		curclock['zone'] = newclock['zone']
-		curclock['ntp'] = newclock['ntp']
-		curclock['servers'] = newclock['servers']
-		curclock['displayRelativeTo'] = newclock['displayRelativeTo']
-		curclock['display12HourTime'] = newclock['display12HourTime']
-		curclock['displayDateFormat'] = newclock['displayDateFormat']
-		curclock['displayTimeFormat24Hour'] = newclock['displayTimeFormat24Hour']
-		curclock['displayTimeFormat12Hour'] = newclock['displayTimeFormat12Hour']
+		for k in curclock.keys():
+			if not k == 'current':
+				curclock[k] = newclock.get(k, curclock[k])
 
 		settings['clock'] = curclock
 
 		# if they've also sent a 'current' key, set the
 		# clock to that value (but don't save it in settings)
-		try:
+		if newclock.get('current'):
 			set_clock(newclock['current'])
-		except:
-			pass
-		manage_clock(settings['clock'])
 
+		# update the clock with new settings
+		manage_clock(settings)
+
+	# refresh the current time w/new settings
 	refresh_time(settings['clock'])
 	return json_response({'clock': settings['clock']})
 	
@@ -72,6 +68,6 @@ def clock_display():
 		clock[item] = request.get_json()[item]
 		settings['clock'] = clock
 		
-		manage_clock(settings['clock'])
+		manage_clock(settings)
 
 	return json_response({ item: settings['clock'][item] })
